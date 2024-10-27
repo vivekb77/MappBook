@@ -9,8 +9,6 @@ import { useEffect, useState } from 'react';
 export default function Home() {
   const [searchedPlace, setSearchedPlaceDetails] = useState<any>([]);
 
-
-
   return (
     <div className="min-h-screen p-5 bg-gray-50">
       <SearchedPlaceDetailsContext.Provider value={{ searchedPlace, setSearchedPlaceDetails }}>

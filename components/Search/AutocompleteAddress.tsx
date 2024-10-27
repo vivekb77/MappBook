@@ -7,8 +7,8 @@ function AutocompleteAddress() {
 
     const [source, setSource] = useState<any>()
     const [sourceChange, setSourceChange] = useState<any>(false)
-    const [selectedAddressName, setSelectedAddressName] = useState()
-    const [selectedAddressFull, setSelectedAddressFull] = useState()
+    const [selectedAddressName, setSelectedAddressName] = useState<any>([])
+    const [selectedAddressFull, setSelectedAddressFull] = useState<any>([])
     const { searchedPlace, setSearchedPlaceDetails } = useContext(SearchedPlaceDetailsContext);
     const [addressList, setAddressList] = useState<any>([]);
 
@@ -43,6 +43,11 @@ function AutocompleteAddress() {
     //call retrieve endpoint to get details of the address selected by user
 
     const onSearchedAddressClick = async (item: any) => {
+      
+      //displays the address on UI
+      setSelectedAddressName(item.name);
+      setSelectedAddressFull(item.full_address);
+      
         setAddressList([]);
         setSourceChange(false)
 
@@ -67,9 +72,7 @@ function AutocompleteAddress() {
 
         //clear the search field
         setSource('');
-        //display name and address on UI
-        setSelectedAddressName(searchedPlace.name);
-        setSelectedAddressFull(searchedPlace.full_address);
+
     }
 
     return (
