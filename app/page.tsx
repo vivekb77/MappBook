@@ -2,19 +2,18 @@
 
 import SearchPlace from '@/components/Search/SearchAndAddPlace'
 import MapboxMap from '@/components/Map/MapBoxMap'
-import { SourceCordiContext } from '@/context/SourceCordiContext';
+import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react';
 export default function Home() {
-  const [soruceCordinates, setSourceCordinates] = useState<any>([]);
-  const [destinationCordinates, setDestinationCordinates] = useState<any>([]);
-  const [directionData, setDirectionData] = useState<any>([]);
+  const [searchedPlace, setSearchedPlaceDetails] = useState<any>([]);
+
 
 
   return (
     <div className="min-h-screen p-5 bg-gray-50">
-      <SourceCordiContext.Provider value={{ soruceCordinates, setSourceCordinates }}>
+      <SearchedPlaceDetailsContext.Provider value={{ searchedPlace, setSearchedPlaceDetails }}>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-0 p-0 h-screen">
 
@@ -32,7 +31,7 @@ export default function Home() {
         </div>
 
 
-      </SourceCordiContext.Provider>
+      </SearchedPlaceDetailsContext.Provider>
     </div>
   );
 

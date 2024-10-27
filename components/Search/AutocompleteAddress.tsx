@@ -1,4 +1,4 @@
-import { SourceCordiContext } from '@/context/SourceCordiContext'
+import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext'
 import React, { useContext, useEffect, useState } from 'react'
 
 const session_token = '5ccce4a4-ab0a-4a7c-943d-580e55542363' //generate dynamically later
@@ -9,7 +9,7 @@ function AutocompleteAddress() {
     const [sourceChange, setSourceChange] = useState<any>(false)
     const [selectedAddressName, setSelectedAddressName] = useState()
     const [selectedAddressFull, setSelectedAddressFull] = useState()
-    const { soruceCordinates, setSourceCordinates } = useContext(SourceCordiContext);
+    const { searchedPlace, setSearchedPlaceDetails } = useContext(SearchedPlaceDetailsContext);
     const [addressList, setAddressList] = useState<any>([]);
 
 
@@ -36,14 +36,13 @@ function AutocompleteAddress() {
         });
 
         const result = await res.json();
-        console.log(`Search results list is ${JSON.stringify(result)}`);
         setAddressList(result)
 
     }
 
     //call retrieve endpoint to get details of the address selected by user
 
-    const onSourceAddressClick = async (item: any) => {
+    const onSearchedAddressClick = async (item: any) => {
         setAddressList([]);
         setSourceChange(false)
 
@@ -53,74 +52,30 @@ function AutocompleteAddress() {
 
         const result = await res.json();
 
-        setSourceCordinates({
-            lng: result.features[0].geometry.coordinates[0],
-            lat: result.features[0].geometry.coordinates[1],
+        setSearchedPlaceDetails({
+            longitude: result.features[0].geometry.coordinates[0],
+            latitude: result.features[0].geometry.coordinates[1],
+            mapboxId: result.features[0].properties.mapbox_id,
+            name: result.features[0].properties.name,
+            address: result.features[0].properties.full_address,
+            country: result.features[0].properties.context.country.name,
+            countryCode: result.features[0].properties.context.country.country_code,
+            language: result.features[0].properties.language,
+            poiCategory: result.features[0].properties.poi_category,
+            maki: result.features[0].properties.maki,
         })
 
         //clear the search field
         setSource('');
-        setSelectedAddressName(result.features[0].properties.name);
-        setSelectedAddressFull(result.features[0].properties.full_address);
-
-        // console.log("Cordinates are -- "+ JSON.stringify(result));
-        console.log(`Selected address Long-${result.features[0].geometry.coordinates[0]} Lat-${result.features[0].geometry.coordinates[1]} MapboxId-${result.features[0].properties.mapbox_id} Address-${result.features[0].properties.full_address} Country-${result.features[0].properties.context.country.name} Code-${result.features[0].properties.context.country.country_code} Lang-${result.features[0].properties.language} POI-${result.features[0].properties.poi_category} Maki-${result.features[0].properties.maki}`);
+        //display name and address on UI
+        setSelectedAddressName(searchedPlace.name);
+        setSelectedAddressFull(searchedPlace.full_address);
     }
-
-
-
-    // return (
-    //     <div className=''>
-    //         <div className='relative'>
-    //             {/* <label className='text-gray-400 text-[13px]'>What Place?</label> */}
-    //             <input type="text"
-    //                 id="searchField"
-    //                 className='bg-black p-1 
-    //             border-[1px] w-full 
-    //             rounded-md outline-none
-    //             focus:border-green-300 text-[25px]'
-    //                 value={source}
-    //                 onChange={(e) => {
-    //                     setSource(e.target.value);
-    //                     setSourceChange(true)
-    //                 }}
-    //             />
-
-    //             <div className="flex flex-col">
-    //                 <label className="text-gray-900 text-[20px]" id="addressNameLabel">
-    //                     {selectedAddressName}
-    //                 </label>
-    //                 <label className="text-gray-700 text-[15px]" id="addressFullLabel">
-    //                     {selectedAddressFull}
-    //                 </label>
-    //             </div>
-
-
-    //             {addressList?.suggestions && sourceChange ?
-    //                 <div className='shadow-md p-1 rounded-md
-    //         absolute w-full bg-black z-20'>
-    //                     {addressList?.suggestions.map((item: any, index: number) => (
-    //                         <div className=' hover:bg-red-700 cursor-pointer rounded-md transition-colors duration-200 p-2' onClick={() => { onSourceAddressClick(item) }}>
-    //                             <h2 className='text-gray-300 text-lg font-medium p-1' key={index}>
-    //                                 {item.name}
-    //                             </h2>
-    //                             <h4 className='text-gray-400 text-sm font-light p-1' key={`sub-${index}`}>
-    //                                 Additional Info
-    //                             </h4>
-    //                         </div>
-    //                     ))}
-    //                 </div> : null}
-    //         </div>
-
-    //     </div>
-    // )
 
     return (
         <div className="">
           <div className="relative w-full max-w-md">
-            {/* Input Label */}
-            {/* <label className="text-gray-500 text-sm mb-1 block">What Place?</label> */}
-            
+
             {/* Search Input */}
             <input 
               type="text"
@@ -152,7 +107,7 @@ function AutocompleteAddress() {
                   <div 
                     key={index}
                     className="p-3 hover:bg-green-100 cursor-pointer rounded-md transition-colors duration-200"
-                    onClick={() => { onSourceAddressClick(item) }}
+                    onClick={() => { onSearchedAddressClick(item) }}
                   >
                     <h2 className="text-gray-800 text-md font-medium">
                       {item.name}

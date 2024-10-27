@@ -1,23 +1,23 @@
 
-import { SourceCordiContext } from '@/context/SourceCordiContext';
+import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import React, { useContext } from 'react'
 import { Map, Marker } from 'react-map-gl'
 
 function Markers() {
 
 
-  const { soruceCordinates, setSourceCordinates }
-    = useContext(SourceCordiContext);
+  const { searchedPlace, setSearchedPlaceDetails }
+    = useContext(SearchedPlaceDetailsContext);
 
 
   return (
     <div>
-      {soruceCordinates.length != 0 ? <Marker
-        longitude={soruceCordinates?.lng}
-        latitude={soruceCordinates?.lat}
+      {searchedPlace.length != 0 ? <Marker
+        longitude={searchedPlace?.longitude}
+        latitude={searchedPlace?.latitude}
         anchor="bottom" >
         <img src="./pin.png"
-          className='w-15 h-15'
+          className='w-10 h-10'
         />
       </Marker> : null}
 

@@ -2,26 +2,26 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { Map, Marker } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Markers from "./Markers";
-import { SourceCordiContext } from "@/context/SourceCordiContext";
+import { SearchedPlaceDetailsContext } from "@/context/SearchedPlaceDetailsContext";
 
 function MapboxMap() {
   const mapRef = useRef<any>();
-  const { soruceCordinates, setsoruceCordinates } = useContext(SourceCordiContext);
+  const { searchedPlace, setsoruceCordinates } = useContext(SearchedPlaceDetailsContext);
 
 
   //Use to Fly to Source Marker Location
 
   useEffect(() => {
-    if (soruceCordinates) {
+    if (searchedPlace) {
       mapRef.current?.flyTo({
-        center: [soruceCordinates.lng, soruceCordinates.lat],
+        center: [searchedPlace.longitude, searchedPlace.latitude],
         duration: 2000, // Adjusted duration for smoother transition
       zoom: 14, // Adjust the zoom level as needed
       curve: 1.5, // Increase curve for a more dynamic flight path
       easing: (t: number) => t * (2 - t), // Easing function for a more natural flight
       });
     }
-  }, [soruceCordinates]);
+  }, [searchedPlace]);
 
   return (
     <div className="p-5 bg-gray-50 min-h-screen flex flex-col items-center">
