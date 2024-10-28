@@ -8,9 +8,6 @@ function MarkAllPlaces() {
     const userPlaces = allUserPlacesContext?.userPlaces || [];
     const setAllUserPlaces = allUserPlacesContext?.setAllUserPlaces || (() => { });
 
-
-    console.log("Marking all places " + userPlaces)
-
     return (
         <div>
             {userPlaces && userPlaces.length > 0 ? (
