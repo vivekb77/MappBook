@@ -1,6 +1,6 @@
 "use client"
 
-import SearchPlace from '@/components/Search/SearchAndAddPlace'
+import AddPlace from '@/components/Search/AddPlace'
 import MapboxMap from '@/components/Map/MapBoxMap'
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
@@ -25,7 +25,7 @@ export default function Home() {
           {/* Search Place Component */}
           <div className="rounded-lg bg-white h-full">
             <h3 className="text-xl font-semibold mb-3">Search for a Place</h3>
-            <SearchPlace />
+            <AddPlace />
           </div>
 
         </div>

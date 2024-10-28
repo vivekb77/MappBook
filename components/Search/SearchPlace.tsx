@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react'
 
 const session_token = '5ccce4a4-ab0a-4a7c-943d-580e55542363' //generate dynamically later
 const MAPBOX_RETRIVE_URL = 'https://api.mapbox.com/search/searchbox/v1/retrieve/'
-function AutocompleteAddress() {
+function SearchPlace() {
 
     const [source, setSource] = useState<any>()
     const [sourceChange, setSourceChange] = useState<any>(false)
@@ -128,4 +128,4 @@ function AutocompleteAddress() {
       
 }
 
-export default AutocompleteAddress
+export default SearchPlace

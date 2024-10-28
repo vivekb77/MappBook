@@ -1,12 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
-import AutocompleteAddress from './AutocompleteAddress'
+import SearchPlace from './SearchPlace'
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '../supabase';
-import MarkAllPlaces from "../Map/MarkAllPlaces";
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 
-function SearchPlace() {
+function AddPlace() {
 
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -125,7 +124,7 @@ function SearchPlace() {
       <div className="border border-gray-300 bg-white p-6 rounded-lg shadow-sm">
 
         {/* Autocomplete Address */}
-        <AutocompleteAddress />
+        <SearchPlace />
 
         {/* Add Place Button */}
 
@@ -174,4 +173,4 @@ function SearchPlace() {
   );
 }
 
-export default SearchPlace
+export default AddPlace
