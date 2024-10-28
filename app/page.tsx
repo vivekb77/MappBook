@@ -24,7 +24,7 @@ export default function Home() {
 
           {/* Search Place Component */}
           <div className="rounded-lg bg-white h-full">
-            <h3 className="text-xl font-semibold mb-3">Search for a Place</h3>
+            <h3 className="text-xl font-semibold mb-3"></h3>
             <AddPlace />
           </div>
 

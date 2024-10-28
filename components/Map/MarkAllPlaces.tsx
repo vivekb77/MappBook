@@ -223,7 +223,7 @@ function MarkAllPlaces() {
             onClick={() => handleMarkerClick(place)}
           >
             <img
-              src={place.visitedorwanttovisit === "visited" ? "/location.png" : "/pin.png"}
+              src={place.visitedorwanttovisit === "visited" ? "/visited.png" : "/wanttovisit.png"}
               className="w-10 h-10"
               alt={`Marker for ${place.place_name}`}
             />

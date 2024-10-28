@@ -4,7 +4,7 @@ import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsConte
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '../supabase';
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
-import Head from 'next/head';
+
 
 function AddPlace() {
 
@@ -12,9 +12,7 @@ function AddPlace() {
   const [errorMessage, setErrorMessage] = useState('');
   const [visitStatus, setVisitStatus] = useState('visited');
   const [enableAddPlaceButton, setEnableAddPlaceButton] = useState(false);
-  const [countVisitedPlaces, setCountVisitedPlaces] = useState(0);
-  const [countWantToVisitPlaces, setCountWantToVisitPlaces] = useState(0);
-  const [countVisitedCountries, setCountVisitedCountries] = useState(0);
+
   const { isLoaded, isSignedIn, user } = useUser();
   const [clerkUserId, setClerkUserId] = useState<string | null>(null);
 
@@ -38,7 +36,6 @@ function AddPlace() {
   useEffect(() => {
     if (isLoaded && isSignedIn && user?.id) {
       setClerkUserId(user.id);
-      fetchPlaceCounts(user.id);
     }
   }, [isLoaded, isSignedIn, user]);
 
@@ -46,59 +43,13 @@ function AddPlace() {
     return null;
   }
 
-  async function fetchPlaceCounts(userId: string) {
-    try {
-      //get visited places count
-      const { count: visitedCount, error: visitedError } = await supabase
-        .from('Mappbook_User_Places')
-        .select('*', { count: 'exact', head: true }) // head: true fetches count without data
-        .eq('clerk_user_id', userId)
-        .eq('visitedorwanttovisit', 'visited');
-
-      if (visitedError) {
-        console.error("Error fetching visited count:", visitedError);
-      } else {
-        setCountVisitedPlaces(visitedCount || 0);
-      }
-
-      //get want to visit places count
-      const { count: wantToVisitCount, error: wantToVisitError } = await supabase
-        .from('Mappbook_User_Places')
-        .select('*', { count: 'exact', head: true })
-        .eq('clerk_user_id', userId)
-        .eq('visitedorwanttovisit', 'wanttovisit');
-
-      if (wantToVisitError) {
-        console.error("Error fetching want to visit count:", wantToVisitError);
-      } else {
-        setCountWantToVisitPlaces(wantToVisitCount || 0);
-      }
-
-      //get visited countries count
-      const { data, error } = await supabase
-        .from('Mappbook_User_Places')
-        .select('place_country_code')
-        .eq('clerk_user_id', userId)
-        .eq('visitedorwanttovisit', 'visited');
-
-      if (error) {
-        console.error("Error fetching countries:", error);
-        return;
-      }
-      const uniqueCountryCounts = new Set(data.map(place => place.place_country_code)).size;
-      setCountVisitedCountries(uniqueCountryCounts || 0);
-
-    } catch (err) {
-      console.error("Error fetching visited count:", err);
-    }
-  }
 
 
   const onAddPlaceButtonClick = async () => {
     const isSuccess = await addPlaceDetails();
     if (isSuccess) {
       setSuccessMessage('Your place added successfully!');
-      fetchPlaceCounts(user.id); //increment the count of places
+
       setTimeout(() => {
         setSuccessMessage('');
       }, 3000);
@@ -228,27 +179,6 @@ function AddPlace() {
         </div>
 
 
-        {(countVisitedPlaces && countWantToVisitPlaces) && (
-          <div className="bg-green-50 shadow-md rounded-lg mt-4 py-2 p-1 mb-4">
-            <div className="text-green-600 text-center font-semibold text-lg">
-              {countVisitedPlaces && (
-                <p>
-                  <i className="fas fa-check-circle"></i> You have visited <span className="font-bold">{countVisitedPlaces}</span> places.
-                </p>
-              )}
-              {countWantToVisitPlaces && (
-                <p className="mt-2">
-                  <i className="fas fa-globe"></i> Want to visit <span className="font-bold">{countWantToVisitPlaces}</span> places.
-                </p>
-              )}
-              {countVisitedCountries && (
-                <p className="mt-2">
-                  <i className="fas fa-globe-americas"></i> You have visited <span className="font-bold">{countVisitedCountries}</span> countries.
-                </p>
-              )}
-            </div>
-          </div>
-        )}
 
 
 
