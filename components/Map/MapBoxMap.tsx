@@ -43,6 +43,9 @@ function MapboxMap() {
           // style={{ width: "100%", height:"calc(100vh - 400px)" }} // done by h-[60vh] md:h-[100vh] in main div //adjust 300 for height on mobile devices
 
           mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
+          // mapStyle="mapbox://styles/mapbox/light-v11"
+          // mapStyle= "mapbox://styles/mapbox/dark-v11"
+          // mapStyle="mapbox://styles/newsexpressnz/cm2oewdbb002p01pwb1epbr8l"
         >
           <MarkAllPlaces />
           <MarkSearchedPlace />
