@@ -1,7 +1,7 @@
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 import { useUser } from '@clerk/nextjs';
-import React, { useContext, useEffect } from 'react';
-import { Map, Marker } from 'react-map-gl';
+import React, { useContext, useEffect, useState } from 'react';
+import { Map, Marker, Popup } from 'react-map-gl';
 import { supabase } from '../supabase';
 
 function MarkAllPlaces() {
@@ -38,6 +38,29 @@ function MarkAllPlaces() {
         }
     }
 
+    // to show pop up on click on place
+    type Place = {
+        place_name: string;
+        place_full_address: string;
+        place_longitude: number;
+        place_latitude: number;
+        place_country: string;
+        visitedorwanttovisit: string;
+    };
+
+    const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+
+    const handleMarkerClick = (place: Place) => {
+        setSelectedPlace(place);
+    };
+
+    const handleMapClick = () => {
+        // Close the popup if clicked outside
+        if (selectedPlace) {
+            setSelectedPlace(null);
+        }
+    };
+
     return (
         <div>
             {userPlaces && userPlaces.length > 0 ? (
@@ -46,9 +69,45 @@ function MarkAllPlaces() {
                         key={place.id} // Ensure each Marker has a unique key
                         longitude={place.place_longitude}
                         latitude={place.place_latitude}
-                        anchor="bottom"
+                        anchor="top"
                     >
-                        <img src="./pin.png" className="w-10 h-10" alt="Marker" />
+                        <div className="relative flex flex-col items-center" onClick={() => handleMarkerClick(place)}>
+                            <img
+                                src={place.visitedorwanttovisit === "visited" ? "./location.png" : "./pin.png"}
+                                className="w-10 h-10"
+                                alt="Marker"
+                            />
+                            <span
+                                className={`mt-1 text-xs font-semibold px-2 py-1 rounded-md shadow-md ${place.visitedorwanttovisit === "visited"
+                                        ? "text-gray-700 bg-green-200"     // Style for "visited"
+                                        : "text-gray-700 bg-blue-200"      // Style for "want to visit"
+                                    }`}
+                            >
+                                {place.place_name}
+                            </span>
+                        </div>
+
+                        {selectedPlace && (
+                            <Popup
+                                longitude={selectedPlace.place_longitude}
+                                latitude={selectedPlace.place_latitude}
+                                anchor="bottom"
+                                onClose={() => setSelectedPlace(null)}
+                                closeOnClick={false} // Keeps popup open when clicking inside
+                                closeButton={true}   // Close button in the popup
+                            >
+                                <div className="p-2 text-gray-800">
+                                    <h3 className="font-bold text-lg">{selectedPlace.place_name}</h3>
+                                    <p className="text-sm">{selectedPlace.place_full_address}</p>
+                                    <p className="text-xs text-gray-600">
+                                        Country: {selectedPlace.place_country}
+                                    </p>
+                                    <p className="text-xs text-gray-600">
+                                        Status: {selectedPlace.visitedorwanttovisit === "visited" ? "Visited" : "Want to Visit"}
+                                    </p>
+                                </div>
+                            </Popup>
+                        )}
                     </Marker>
                 ))
             ) : (

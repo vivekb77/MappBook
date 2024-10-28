@@ -4,6 +4,7 @@ import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsConte
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '../supabase';
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
+import Head from 'next/head';
 
 function AddPlace() {
 
@@ -14,21 +15,11 @@ function AddPlace() {
   const [countVisitedPlaces, setCountVisitedPlaces] = useState(0);
   const [countWantToVisitPlaces, setCountWantToVisitPlaces] = useState(0);
   const [countVisitedCountries, setCountVisitedCountries] = useState(0);
-
+  const { isLoaded, isSignedIn, user } = useUser();
+  const [clerkUserId, setClerkUserId] = useState<string | null>(null);
 
   const { searchedPlace, setPlaceToAdd }
     = useContext(SearchedPlaceDetailsContext);
-
-  const allUserPlacesContext = useContext(AllUserPlacesContext);
-  const [userPlaces, setAllUserPlaces] = allUserPlacesContext
-    ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
-    : [[], () => { }];
-
-  //get user data from clerk
-  const { isLoaded, isSignedIn, user } = useUser()
-  if (!isLoaded || !isSignedIn) {
-    return null
-  }
 
   //Enable disable Add palce button based on search action
   useEffect(() => {
@@ -39,14 +30,21 @@ function AddPlace() {
     }
   }, [searchedPlace]);
 
-  //get user visited and want to visit countries count
+  const allUserPlacesContext = useContext(AllUserPlacesContext);
+  const [userPlaces, setAllUserPlaces] = allUserPlacesContext
+    ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
+    : [[], () => { }];
+
   useEffect(() => {
     if (isLoaded && isSignedIn && user?.id) {
+      setClerkUserId(user.id);
       fetchPlaceCounts(user.id);
     }
   }, [isLoaded, isSignedIn, user]);
 
-  let clerkUserId = user.id;
+  if (!isLoaded || !isSignedIn) {
+    return null;
+  }
 
   async function fetchPlaceCounts(userId: string) {
     try {
@@ -100,6 +98,7 @@ function AddPlace() {
     const isSuccess = await addPlaceDetails();
     if (isSuccess) {
       setSuccessMessage('Your place added successfully!');
+      fetchPlaceCounts(user.id); //increment the count of places
       setTimeout(() => {
         setSuccessMessage('');
       }, 3000);
@@ -168,8 +167,14 @@ function AddPlace() {
   }
 
   return (
+
     <div className="p-5 max-w-md mx-auto bg-gray-50 rounded-lg shadow-md">
-      {/* Title */}
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        />
+      </head>
       <h4 className="text-sm font-semibold text-gray-800 text-center mb-4">
         Welcome {user.fullName}
       </h4>
@@ -188,13 +193,13 @@ function AddPlace() {
 
           <div className="flex justify-center my-4">
             <button
-              className={`px-4 py-2 rounded-l-md ${visitStatus === 'visited' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+              className={`px-4 py-1 rounded-l-md ${visitStatus === 'visited' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-800'}`}
               onClick={() => setVisitStatus('visited')} disabled={!enableAddPlaceButton}
             >
               Visited
             </button>
             <button
-              className={`px-4 py-2 rounded-r-md ${visitStatus === 'wanttovisit' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+              className={`px-4 py-1 rounded-r-md ${visitStatus === 'wanttovisit' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-800'}`}
               onClick={() => setVisitStatus('wanttovisit')} disabled={!enableAddPlaceButton}
             >
               Want to Visit
@@ -202,7 +207,7 @@ function AddPlace() {
           </div>
 
           <button
-            className={`w-full py-3 mt-4 rounded-md font-semibold text-lg 
+            className={`w-full py-3 mt-3 rounded-md font-semibold text-lg 
                 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 
                 ${enableAddPlaceButton ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}
               `}
@@ -222,16 +227,30 @@ function AddPlace() {
           )}
         </div>
 
-        {countVisitedPlaces && countWantToVisitPlaces && (
-          <div className="text-green-600 text-center my-2">
-            {`You have visited ${countVisitedPlaces} places and want to visit ${countWantToVisitPlaces} places`}
+
+        {(countVisitedPlaces && countWantToVisitPlaces) && (
+          <div className="bg-green-50 shadow-md rounded-lg mt-4 py-2 p-1 mb-4">
+            <div className="text-green-600 text-center font-semibold text-lg">
+              {countVisitedPlaces && (
+                <p>
+                  <i className="fas fa-check-circle"></i> You have visited <span className="font-bold">{countVisitedPlaces}</span> places.
+                </p>
+              )}
+              {countWantToVisitPlaces && (
+                <p className="mt-2">
+                  <i className="fas fa-globe"></i> Want to visit <span className="font-bold">{countWantToVisitPlaces}</span> places.
+                </p>
+              )}
+              {countVisitedCountries && (
+                <p className="mt-2">
+                  <i className="fas fa-globe-americas"></i> You have visited <span className="font-bold">{countVisitedCountries}</span> countries.
+                </p>
+              )}
+            </div>
           </div>
         )}
-        {countVisitedCountries && (
-          <div className="text-green-600 text-center my-2">
-            {`You have visited ${countVisitedCountries} Countries`}
-          </div>
-        )}
+
+
 
 
       </div>
