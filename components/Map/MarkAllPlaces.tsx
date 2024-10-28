@@ -26,7 +26,8 @@ function MarkAllPlaces() {
             const { data, error } = await supabase
                 .from('Mappbook_User_Places')
                 .select('id, clerk_user_id, place_name, place_full_address, place_longitude, place_latitude, place_country, place_country_code, visitedorwanttovisit')
-                .eq('clerk_user_id', userId);
+                .eq('clerk_user_id', userId)
+                .eq('isRemoved', false);
 
             if (error) {
                 console.error("Error fetching places:", error);
@@ -40,6 +41,7 @@ function MarkAllPlaces() {
 
     // to show pop up on click on place
     type Place = {
+        id: string;
         place_name: string;
         place_full_address: string;
         place_longitude: number;
@@ -54,12 +56,55 @@ function MarkAllPlaces() {
         setSelectedPlace(place);
     };
 
-    const handleMapClick = () => {
-        // Close the popup if clicked outside
-        if (selectedPlace) {
-            setSelectedPlace(null);
+
+    async function markAsVisited(id: string): Promise<void> {
+        try {
+            // Update the place to mark it as visited
+            const { error } = await supabase
+                .from('Mappbook_User_Places')
+                .update({ visitedorwanttovisit: "visited" })
+                .eq('id', id);
+    
+            if (error) {
+                console.error("Error marking as visited:", error);
+                // Optionally, display an error message to the user
+            } else {
+                // Update local state
+                setAllUserPlaces((prevPlaces) => 
+                    prevPlaces.map((place) => 
+                        place.id === id ? { ...place, visitedorwanttovisit: "visited" } : place
+                    )
+                );
+                setSelectedPlace((prev) => (prev ? { ...prev, visitedorwanttovisit: "visited" } : prev));
+            }
+        } catch (err) {
+            console.error("Unexpected error:", err);
+            // Optionally, display an error message to the user
         }
     };
+    
+    async function removePlace(id: string): Promise<void> {
+        try {
+            // Remove the place from the database
+            const { error } = await supabase
+                .from('Mappbook_User_Places')
+                .update({ isRemoved: true })
+                .eq('id', id);
+    
+            if (error) {
+                console.error("Error removing place:", error);
+                // Optionally, display an error message to the user
+            } else {
+                // Remove from local state
+                setAllUserPlaces((prevPlaces) => prevPlaces.filter((place) => place.id !== id));
+                setSelectedPlace(null); // Close the popup after removing
+            }
+        } catch (err) {
+            console.error("Unexpected error:", err);
+            // Optionally, display an error message to the user
+        }
+    };
+    
 
     return (
         <div>
@@ -88,25 +133,43 @@ function MarkAllPlaces() {
                         </div>
 
                         {selectedPlace && (
-                            <Popup
-                                longitude={selectedPlace.place_longitude}
-                                latitude={selectedPlace.place_latitude}
-                                anchor="bottom"
-                                onClose={() => setSelectedPlace(null)}
-                                closeOnClick={false} // Keeps popup open when clicking inside
-                                closeButton={true}   // Close button in the popup
-                            >
-                                <div className="p-2 text-gray-800">
-                                    <h3 className="font-bold text-lg">{selectedPlace.place_name}</h3>
-                                    <p className="text-sm">{selectedPlace.place_full_address}</p>
-                                    <p className="text-xs text-gray-600">
-                                        Country: {selectedPlace.place_country}
-                                    </p>
-                                    <p className="text-xs text-gray-600">
-                                        Status: {selectedPlace.visitedorwanttovisit === "visited" ? "Visited" : "Want to Visit"}
-                                    </p>
-                                </div>
-                            </Popup>
+                           <Popup
+                           longitude={selectedPlace.place_longitude}
+                           latitude={selectedPlace.place_latitude}
+                           anchor="bottom"
+                           onClose={() => setSelectedPlace(null)}
+                           closeOnClick={false} // Keeps popup open when clicking inside
+                           closeButton={true}   // Close button in the popup
+                       >
+                           <div className="p-2 text-gray-800">
+                               <h3 className="font-bold text-lg">{selectedPlace.place_name}</h3>
+                               <p className="text-sm">{selectedPlace.place_full_address}</p>
+                               <p className="text-xs text-gray-600">
+                                   Country: {selectedPlace.place_country}
+                               </p>
+                               <p className="text-xs text-gray-600">
+                                   Status: {selectedPlace.visitedorwanttovisit === "visited" ? "Visited" : "Want to Visit"}
+                               </p>
+                               
+                               <div className="flex justify-between mt-3">
+                                   {selectedPlace.visitedorwanttovisit === "wanttovisit" && (
+                                       <button
+                                           className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded-md mr-3"
+                                           onClick={() => markAsVisited(selectedPlace.id)}
+                                       >
+                                           Mark Visited
+                                       </button>
+                                   )}
+                                   <button
+                                       className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded-md"
+                                       onClick={() => removePlace(selectedPlace.id)}
+                                   >
+                                       Remove
+                                   </button>
+                               </div>
+                           </div>
+                       </Popup>
+                       
                         )}
                     </Marker>
                 ))
