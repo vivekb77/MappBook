@@ -11,18 +11,13 @@ function AddPlace() {
   const [errorMessage, setErrorMessage] = useState('');
   const [visitStatus, setVisitStatus] = useState('visited');
   const [enableAddPlaceButton, setEnableAddPlaceButton] = useState(false);
+  const [countVisitedPlaces, setCountVisitedPlaces] = useState(0);
+  const [countWantToVisitPlaces, setCountWantToVisitPlaces] = useState(0);
+  const [countVisitedCountries, setCountVisitedCountries] = useState(0);
+
 
   const { searchedPlace, setPlaceToAdd }
     = useContext(SearchedPlaceDetailsContext);
-
-  useEffect(() => {
-    if (searchedPlace && Object.keys(searchedPlace).length > 0) {
-      setEnableAddPlaceButton(true); // Enable if searchedPlace has valid data
-    } else {
-      setEnableAddPlaceButton(false); // Disable if searchedPlace is empty or invalid
-    }
-  }, [searchedPlace]);
-
 
   const allUserPlacesContext = useContext(AllUserPlacesContext);
   const [userPlaces, setAllUserPlaces] = allUserPlacesContext
@@ -35,11 +30,74 @@ function AddPlace() {
     return null
   }
 
+  //Enable disable Add palce button based on search action
+  useEffect(() => {
+    if (searchedPlace && Object.keys(searchedPlace).length > 0) {
+      setEnableAddPlaceButton(true); // Enable if searchedPlace has valid data
+    } else {
+      setEnableAddPlaceButton(false); // Disable if searchedPlace is empty or invalid
+    }
+  }, [searchedPlace]);
+
+  //get user visited and want to visit countries count
+  useEffect(() => {
+    if (isLoaded && isSignedIn && user?.id) {
+      fetchPlaceCounts(user.id);
+    }
+  }, [isLoaded, isSignedIn, user]);
+
   let clerkUserId = user.id;
+
+  async function fetchPlaceCounts(userId: string) {
+    try {
+      //get visited places count
+      const { count: visitedCount, error: visitedError } = await supabase
+        .from('Mappbook_User_Places')
+        .select('*', { count: 'exact', head: true }) // head: true fetches count without data
+        .eq('clerk_user_id', userId)
+        .eq('visitedorwanttovisit', 'visited');
+
+      if (visitedError) {
+        console.error("Error fetching visited count:", visitedError);
+      } else {
+        setCountVisitedPlaces(visitedCount || 0);
+      }
+
+      //get want to visit places count
+      const { count: wantToVisitCount, error: wantToVisitError } = await supabase
+        .from('Mappbook_User_Places')
+        .select('*', { count: 'exact', head: true })
+        .eq('clerk_user_id', userId)
+        .eq('visitedorwanttovisit', 'wanttovisit');
+
+      if (wantToVisitError) {
+        console.error("Error fetching want to visit count:", wantToVisitError);
+      } else {
+        setCountWantToVisitPlaces(wantToVisitCount || 0);
+      }
+
+      //get visited countries count
+      const { data, error } = await supabase
+        .from('Mappbook_User_Places')
+        .select('place_country_code')
+        .eq('clerk_user_id', userId)
+        .eq('visitedorwanttovisit', 'visited');
+
+      if (error) {
+        console.error("Error fetching countries:", error);
+        return;
+      }
+      const uniqueCountryCounts = new Set(data.map(place => place.place_country_code)).size;
+      setCountVisitedCountries(uniqueCountryCounts || 0);
+
+    } catch (err) {
+      console.error("Error fetching visited count:", err);
+    }
+  }
+
 
   const onAddPlaceButtonClick = async () => {
     const isSuccess = await addPlaceDetails();
-
     if (isSuccess) {
       setSuccessMessage('Your place added successfully!');
       setTimeout(() => {
@@ -116,18 +174,15 @@ function AddPlace() {
         Welcome {user.fullName}
       </h4>
 
-      <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-        Search and Add a Place
-      </h2>
+
 
       {/* Main Container */}
       <div className="border border-gray-300 bg-white p-6 rounded-lg shadow-sm">
+        <h3 className="text-xl font-semibold text-gray-800 text-center mb-4">
+          Search and Add a Place
+        </h3>
 
-        {/* Autocomplete Address */}
         <SearchPlace />
-
-        {/* Add Place Button */}
-
 
         <div>
 
@@ -166,6 +221,17 @@ function AddPlace() {
             </div>
           )}
         </div>
+
+        {countVisitedPlaces && countWantToVisitPlaces && (
+          <div className="text-green-600 text-center my-2">
+            {`You have visited ${countVisitedPlaces} places and want to visit ${countWantToVisitPlaces} places`}
+          </div>
+        )}
+        {countVisitedCountries && (
+          <div className="text-green-600 text-center my-2">
+            {`You have visited ${countVisitedCountries} Countries`}
+          </div>
+        )}
 
 
       </div>
