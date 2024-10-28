@@ -3,7 +3,7 @@ import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsConte
 import React, { useContext } from 'react'
 import { Map, Marker } from 'react-map-gl'
 
-function Markers() {
+function MarkSearchedPlace() {
 
 
   const { searchedPlace, setSearchedPlaceDetails }
@@ -25,4 +25,4 @@ function Markers() {
   )
 }
 
-export default Markers
+export default MarkSearchedPlace

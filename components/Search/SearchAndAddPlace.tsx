@@ -2,34 +2,42 @@ import React, { useContext } from 'react'
 import AutocompleteAddress from './AutocompleteAddress'
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { useUser } from '@clerk/nextjs';
- 
-
-
+import { supabase } from '../supabase';
+import MarkAllPlaces from "../Map/MarkAllPlaces";
 
 function SearchPlace() {
 
   const { searchedPlace, setPlaceToAdd }
     = useContext(SearchedPlaceDetailsContext);
-   
-   //get user data from clerk
-    const { isLoaded, isSignedIn, user } = useUser()
-    if (!isLoaded || !isSignedIn) {
-      return null
-    } 
+
+  //get user data from clerk
+  const { isLoaded, isSignedIn, user } = useUser()
+  if (!isLoaded || !isSignedIn) {
+    return null
+  }
+
+  let clerkUserId = user.id;
 
   const onAddPlaceButtonClick = async () => {
-    console.log(`${searchedPlace.longitude} 
-        ${searchedPlace.latitude}
-         ${searchedPlace.name} 
-         ${searchedPlace.address} 
-         ${searchedPlace.country}
-          ${searchedPlace.countryCode} 
-          ${searchedPlace.language} 
-          ${searchedPlace.poiCategory} 
-          ${user.id}`)
+    addPlaceDetails();
+  }
 
-
-
+  async function addPlaceDetails() {
+    await supabase
+      .from('Mappbook_User_Places')
+      .insert({
+        clerk_user_id: clerkUserId,
+        place_name: searchedPlace.name,
+        place_full_address: searchedPlace.address,
+        place_longitude: searchedPlace.longitude,
+        place_latitude: searchedPlace.latitude,
+        place_country: searchedPlace.country,
+        place_country_code: searchedPlace.countryCode,
+        place_language: searchedPlace.language,
+        place_poi_category: searchedPlace.poiCategory,
+        visitedorwanttovisit: "visited",
+        notes: "I fucking love this place"
+      })
   }
 
   return (
@@ -56,11 +64,10 @@ function SearchPlace() {
           onClick={() => { onAddPlaceButtonClick() }}>
           Add Place to Map
         </button>
-
+        
       </div>
     </div>
   );
-
 }
 
 export default SearchPlace
