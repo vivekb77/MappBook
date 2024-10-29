@@ -1,10 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
-import { useUser } from '@clerk/nextjs';
+import { useClerk, useUser } from '@clerk/nextjs';
 import { supabase } from '../supabase';
 import SearchPlace from './SearchPlace';
 import { MapPin, Navigation } from 'lucide-react';
+import { logout } from '../utils/auth';
+// import { useUser } from '@/context/UserContext';
+
+
+  // const { user } = useUser();
+  
+  // if (!user) return <div>Loading...</div>;
+  
+  // return <div>Welcome, {user.display_name}!</div>;
 
 // Types remain the same
 interface PlaceDetails {
@@ -52,7 +61,7 @@ const AddPlace = () => {
   const allUserPlacesContext = useContext(AllUserPlacesContext);
   const [userPlaces, setAllUserPlaces] = allUserPlacesContext
     ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
-    : [[], () => {}];
+    : [[], () => { }];
 
   // Effects and functions remain the same
   useEffect(() => {
@@ -79,10 +88,10 @@ const AddPlace = () => {
 
   const onAddPlaceButtonClick = async () => {
     if (!searchedPlace || !clerkUserId) return;
-    
+
     setIsSubmitting(true);
     const isSuccess = await addPlaceDetails();
-    
+
     if (isSuccess) {
       setSuccessMessage('Place added successfully! 🎉');
       resetForm();
@@ -137,7 +146,7 @@ const AddPlace = () => {
           place_poi_category: data[0].place_poi_category,
           visitedorwanttovisit: data[0].visitedorwanttovisit,
         };
-        
+
         setAllUserPlaces(prevPlaces => [...(prevPlaces || []), newPlace]);
         return true;
       }
@@ -152,130 +161,137 @@ const AddPlace = () => {
     return null;
   }
 
+  const handleLogout = async () => {
+    const { success, error } = await logout();
+    if (!success) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <div className="bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-xl shadow-lg border border-pink-100/50 backdrop-blur-sm">
-    {/* Logo Header */}
-    <div className="p-4 text-center border-b border-pink-100/50 bg-white/50">
-      <div className="flex items-center justify-center gap-2 mb-1">
-        <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+      {/* Logo Header */}
+      <div className="p-4 text-center border-b border-pink-100/50 bg-white/50">
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
           rounded-xl p-2 shadow-md transform -rotate-3">
-          {/* <Map className="w-5 h-5 text-white" /> */}
-        </div>
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+            {/* <Map className="w-5 h-5 text-white" /> */}
+          </div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
           text-transparent bg-clip-text transform rotate-1">
-          MappBook
-        </h1>
+            MappBook
+          </h1>
+        </div>
+        <p className="text-xs font-medium text-purple-400">
+          Share Your World ✨ Track Your Adventures 🌎
+        </p>
       </div>
-      <p className="text-xs font-medium text-purple-400">
-        Share Your World ✨ Track Your Adventures 🌎
-      </p>
-    </div>
 
-    {/* User Header */}
-    <div className="p-4 border-b border-pink-100/50 bg-white/30">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 
+      {/* User Header */}
+      <div className="p-4 border-b border-pink-100/50 bg-white/30">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 
           text-white flex items-center justify-center font-medium shadow-inner">
-          {user.firstName?.[0] || user.fullName?.[0]}
-        </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-gray-700">
-            {user.fullName}
-          </span>
-          <span className="text-xs text-purple-500 font-medium">
-            Travel Creator ✈️
-          </span>
+            {user.firstName?.[0] || user.fullName?.[0]}
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-gray-700">
+              {user.fullName}
+            </span>
+            <span className="text-xs text-purple-500 font-medium">
+              Travel Creator ✈️
+            </span>
+          </div>
         </div>
       </div>
-    </div>
 
-    {/* Search Container */}
-    <div className="p-6 space-y-6">
-      {/* Search Component Wrapper */}
-      <div className="bg-white/80 rounded-xl p-2 shadow-sm border border-pink-100">
-        <SearchPlace />
-      </div>
+      {/* Search Container */}
+      <div className="p-6 space-y-6">
+        {/* Search Component Wrapper */}
+        <div className="bg-white/80 rounded-xl p-2 shadow-sm border border-pink-100">
+          <SearchPlace />
+        </div>
 
-      {/* Visit Status Toggle */}
-      <div className="flex gap-3">
-        <button
-          className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300
+        {/* Visit Status Toggle */}
+        <div className="flex gap-3">
+          <button
+            className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300
             flex items-center justify-center gap-2 font-medium
             ${visitStatus === 'visited'
-              ? 'bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-lg scale-105'
-              : 'bg-white/80 text-gray-600 border border-pink-100 hover:bg-pink-50'
-            }
+                ? 'bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-lg scale-105'
+                : 'bg-white/80 text-gray-600 border border-pink-100 hover:bg-pink-50'
+              }
             disabled:opacity-50 disabled:cursor-not-allowed transform`}
-          onClick={() => setVisitStatus('visited')}
-          disabled={!enableAddPlaceButton}
-        >
-          <MapPin className="w-4 h-4" />
-          <span>Been Here</span>
-        </button>
-        <button
-          className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300
+            onClick={() => setVisitStatus('visited')}
+            disabled={!enableAddPlaceButton}
+          >
+            <MapPin className="w-4 h-4" />
+            <span>Been Here</span>
+          </button>
+          <button
+            className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300
             flex items-center justify-center gap-2 font-medium
             ${visitStatus === 'wanttovisit'
-              ? 'bg-gradient-to-r from-purple-400 to-blue-400 text-white shadow-lg scale-105'
-              : 'bg-white/80 text-gray-600 border border-pink-100 hover:bg-purple-50'
-            }
+                ? 'bg-gradient-to-r from-purple-400 to-blue-400 text-white shadow-lg scale-105'
+                : 'bg-white/80 text-gray-600 border border-pink-100 hover:bg-purple-50'
+              }
             disabled:opacity-50 disabled:cursor-not-allowed transform`}
-          onClick={() => setVisitStatus('wanttovisit')}
-          disabled={!enableAddPlaceButton}
-        >
-          <Navigation className="w-4 h-4" />
-          <span>Bucket List</span>
-        </button>
-      </div>
+            onClick={() => setVisitStatus('wanttovisit')}
+            disabled={!enableAddPlaceButton}
+          >
+            <Navigation className="w-4 h-4" />
+            <span>Bucket List</span>
+          </button>
+        </div>
 
-      {/* Add Button */}
-      <button
-        className={`w-full py-3.5 px-4 rounded-xl font-medium text-base
+        {/* Add Button */}
+        <button
+          className={`w-full py-3.5 px-4 rounded-xl font-medium text-base
           transition-all duration-300 
           flex items-center justify-center gap-2 transform
           ${enableAddPlaceButton
-            ? 'bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 text-white shadow-lg hover:scale-[1.02]'
-            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
-        onClick={onAddPlaceButtonClick}
-        disabled={!enableAddPlaceButton || isSubmitting}
-      >
-        {isSubmitting ? (
-          <>
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span>Adding to Your Map...</span>
-          </>
-        ) : (
-          <>
-            <MapPin className="w-5 h-5" />
-            <span>Pin This Location 📍</span>
-          </>
-        )}
-      </button>
+              ? 'bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 text-white shadow-lg hover:scale-[1.02]'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          onClick={onAddPlaceButtonClick}
+          disabled={!enableAddPlaceButton || isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Adding to Your Map...</span>
+            </>
+          ) : (
+            <>
+              <MapPin className="w-5 h-5" />
+              <span>Pin This Location 📍</span>
+            </>
+          )}
+        </button>
 
-      {/* Messages */}
-      {successMessage && (
-        <div className="p-4 rounded-xl bg-gradient-to-r from-green-50 to-blue-50 text-green-600 
+        {/* Messages */}
+        {successMessage && (
+          <div className="p-4 rounded-xl bg-gradient-to-r from-green-50 to-blue-50 text-green-600 
           flex items-center justify-center gap-2 border border-green-100 shadow-sm">
-          <span className="text-xl">🎉</span>
-          <span className="font-medium">{successMessage}</span>
-        </div>
-      )}
+            <span className="text-xl">🎉</span>
+            <span className="font-medium">{successMessage}</span>
+          </div>
+        )}
 
-      {errorMessage && (
-        <div className="p-4 rounded-xl bg-gradient-to-r from-pink-50 to-red-50 text-red-500 
+        {errorMessage && (
+          <div className="p-4 rounded-xl bg-gradient-to-r from-pink-50 to-red-50 text-red-500 
           flex items-center justify-center gap-2 border border-pink-100 shadow-sm">
-          <span className="text-xl">💫</span>
-          <span className="font-medium">{errorMessage}</span>
-        </div>
-      )}
+            <span className="text-xl">💫</span>
+            <span className="font-medium">{errorMessage}</span>
+          </div>
+        )}
 
-      {/* Engagement Hint */}
-      <div className="text-center text-xs font-medium text-purple-400">
-      Show the world where you have been 📸
+        {/* Engagement Hint */}
+        <div className="text-center text-xs font-medium text-purple-400">
+          Show the world where you have been 📸
+        </div>
+
       </div>
-      
-    </div>
       {/* New Bottom Section with Divider */}
       <div className="px-6 pb-6">
         {/* Decorative Divider */}
@@ -290,12 +306,12 @@ const AddPlace = () => {
           </div>
         </div>
 
-        
+
 
         {/* CTA Buttons Container */}
         <div className="space-y-3">
-            {/* Share Button */}
-            <button
+          {/* Share Button */}
+          <button
             // onClick={handleShare}
             className="w-full py-3 px-4 rounded-xl font-medium
               bg-white/80 border border-pink-100 text-gray-700
@@ -322,7 +338,7 @@ const AddPlace = () => {
             </span>
           </button>
 
-        
+
 
           {/* Pro Features Preview */}
           <div className="text-center mt-4">
@@ -335,34 +351,34 @@ const AddPlace = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-8 pt-4 border-t border-pink-100/50">
-        <div className="flex items-center justify-center gap-4 text-xs">
-          <button 
-            // onClick={onLogout}
-            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
-          >
-            Logout
-          </button>
-          <span className="text-gray-300">•</span>
-          <a 
-            href="/terms" 
-            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
-          >
-            Terms
-          </a>
-          <span className="text-gray-300">•</span>
-          <a 
-            href="/privacy" 
-            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
-          >
-            Privacy
-          </a>
+          <div className="flex items-center justify-center gap-4 text-xs">
+            <button
+              onClick={handleLogout}
+              className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+            >
+              Logout
+            </button>
+            <span className="text-gray-300">•</span>
+            <a
+              href="/terms"
+              className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+            >
+              Terms
+            </a>
+            <span className="text-gray-300">•</span>
+            <a
+              href="/privacy"
+              className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+            >
+              Privacy
+            </a>
+          </div>
         </div>
       </div>
-      </div>
-    
-  </div>
+
+    </div>
   );
 };
 

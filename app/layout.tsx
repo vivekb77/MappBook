@@ -1,3 +1,4 @@
+// app/layout.tsx
 import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import type { Metadata } from 'next';
@@ -18,16 +19,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <UserProvider>
-        <UserCheck>
-          <html lang="en">
-            <body className={outfit.className}>
+    <html lang="en">
+      <body className={outfit.className}>
+        <ClerkProvider>
+          <UserProvider>
+            <UserCheck>
               {children}
-            </body>
-          </html>
-        </UserCheck>
-      </UserProvider>
-    </ClerkProvider>
+            </UserCheck>
+          </UserProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

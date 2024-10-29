@@ -26,14 +26,13 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
         }
 
         if (!existingUser) {
+          // console.log("New user "+clerkUser.fullName)
           const { data: newUser, error: createError } = await supabase
             .from('MappBook_Users')
             .insert([
               {
                 clerk_user_id: userId,
-                display_name: clerkUser.firstName && clerkUser.lastName 
-                  ? `${clerkUser.firstName} ${clerkUser.lastName}`
-                  : clerkUser.username || 'Anonymous User',
+                display_name: clerkUser.fullName,
               },
             ])
             .select()
@@ -45,8 +44,10 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
           }
 
           setUser(newUser);
+          // console.log("New user created" + JSON.stringify(clerkUser))
         } else {
           setUser(existingUser);
+          // console.log("Existing user " + JSON.stringify(clerkUser))
         }
       } catch (error) {
         console.error('Error in checkAndCreateUser:', error);
