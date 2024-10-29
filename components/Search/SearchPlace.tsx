@@ -55,10 +55,16 @@ const SearchPlace = () => {
   const MAPBOX_RETRIEVE_URL = 'https://api.mapbox.com/search/searchbox/v1/retrieve/';
   const DEBOUNCE_DELAY = 1000;
   const FREE_TIER_LIMIT = 25;
+  const PREMIUM_TIER_LIMIT = 500;
 
   // Check if user is logged in and can search
   const isLoggedIn = !!user;
-  const canSearch = isLoggedIn && (user.is_premium_user || allPlacesCount < FREE_TIER_LIMIT);
+  // const canSearch = isLoggedIn && (user.is_premium_user || allPlacesCount < FREE_TIER_LIMIT);
+  const canSearch = isLoggedIn && (
+    (user.is_premium_user && allPlacesCount < PREMIUM_TIER_LIMIT) || 
+    (!user.is_premium_user && allPlacesCount < FREE_TIER_LIMIT)
+  );
+  
   console.log("Is the user premium " + user?.is_premium_user +" " +allPlacesCount)
   // Fetch suggestions when search query changes
   useEffect(() => {

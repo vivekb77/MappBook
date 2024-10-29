@@ -4,7 +4,7 @@ import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 import { useClerk, useUser } from '@clerk/nextjs';
 import { supabase } from '../supabase';
 import SearchPlace from './SearchPlace';
-import { MapPin, Navigation } from 'lucide-react';
+import { BarChart, MapPin, Navigation } from 'lucide-react';
 import { logout } from '../utils/auth';
 
 // Types remain the same
@@ -43,7 +43,8 @@ const AddPlace = () => {
   const [visitStatus, setVisitStatus] = useState<VisitStatus>('visited');
   const [enableAddPlaceButton, setEnableAddPlaceButton] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
+  const [totalMapViews, setTotalMapViews] = useState(0);
   const { isLoaded, isSignedIn, user } = useUser();
   const [clerkUserId, setClerkUserId] = useState<string | null>(null);
 
@@ -77,6 +78,31 @@ const AddPlace = () => {
       setSearchedPlaceDetails({} as PlaceDetails);
     }
   };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from('MappBook_Users')
+          .select('is_premium_user,total_map_views')
+          .eq('clerk_user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user data:', error);
+          return;
+        }
+
+        if (data) {
+          setIsPremiumUser(data.is_premium_user);
+          setTotalMapViews(data.total_map_views);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
+
 
   const onAddPlaceButtonClick = async () => {
     if (!searchedPlace || !clerkUserId) return;
@@ -179,22 +205,39 @@ const AddPlace = () => {
         </p>
       </div>
 
-      {/* User Header */}
+      {/* Modified User Header with Stats Button */}
       <div className="p-4 border-b border-pink-100/50 bg-white/30">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 
-          text-white flex items-center justify-center font-medium shadow-inner">
-            {user.firstName?.[0] || user.fullName?.[0]}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 
+            text-white flex items-center justify-center font-medium shadow-inner">
+              {user.firstName?.[0] || user.fullName?.[0]}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-gray-700">
+                {user.fullName}
+              </span>
+              <span className="text-xs text-purple-500 font-medium">
+                {isPremiumUser ? '✨ Premium Travel Creator' : 'Travel Creator'} ✈️
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-gray-700">
-              {user.fullName}
-            </span>
-            <span className="text-xs text-purple-500 font-medium">
-              Travel Creator ✈️
-            </span>
-          </div>
+          <button
+            className="p-2 rounded-xl bg-white/80 text-purple-500 hover:bg-purple-50 
+      transition-colors duration-300"
+          >
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-2">
+                <BarChart className="w-4 h-4" />
+                <span className="text-sm font-medium">Stats - {totalMapViews} Map Views</span>
+              </div>
+              {!isPremiumUser && (
+                <span className="text-[10px] text-purple-400/80 italic">✨ Premium feature</span>
+              )}
+            </div>
+          </button>
         </div>
+
       </div>
 
       {/* Search Container */}
@@ -205,6 +248,7 @@ const AddPlace = () => {
         </div>
 
         {/* Visit Status Toggle */}
+
         <div className="flex gap-3">
           <button
             className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300
@@ -313,21 +357,29 @@ const AddPlace = () => {
             {/* <Share2 className="w-5 h-5 text-purple-400" /> */}
             <span>Share Your Map</span>
           </button>
-          {/* Pro Button */}
+
+
+          {/* Premium Button */}
           <button
-            className="w-full py-3 px-4 rounded-xl font-medium
-              bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 
-              text-white shadow-lg transform transition-all duration-300
-              hover:scale-[1.02] hover:shadow-xl
-              flex items-center justify-center gap-2 relative
-              overflow-hidden group"
+            disabled={isPremiumUser}
+            className={`w-full py-3 px-4 rounded-xl font-medium
+            ${isPremiumUser
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 text-white shadow-lg hover:scale-[1.02]'
+              }
+            transform transition-all duration-300
+            flex items-center justify-center gap-2 relative
+            overflow-hidden group`}
           >
             <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
-            {/* <Sparkles className="w-5 h-5" /> */}
-            <span className="font-semibold">Upgrade to Pro</span>
-            <span className="bg-white/30 text-xs py-0.5 px-2 rounded-full ml-2">
-              50% OFF
+            <span className="font-semibold">
+              {isPremiumUser ? 'Premium Active' : 'Upgrade to Premium'}
             </span>
+            {!isPremiumUser && (
+              <span className="bg-white/30 text-xs py-0.5 px-2 rounded-full ml-2">
+                50% OFF
+              </span>
+            )}
           </button>
 
 
