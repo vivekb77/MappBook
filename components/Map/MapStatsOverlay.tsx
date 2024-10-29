@@ -1,13 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { supabase } from '../supabase';
 import { useUser } from '@clerk/nextjs';
+import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 
 interface StatBoxProps {
   count?: number;
   label: string;
   color: string;
 }
+interface Place {
+  id: string;
+  clerk_user_id: string;
+  place_name: string;
+  place_full_address: string;
+  place_longitude: number;
+  place_latitude: number;
+  place_country: string;
+  place_country_code: string;
+  visitedorwanttovisit: 'visited' | 'wanttovisit';
+  isRemoved?: boolean;
+}
 
+interface AllUserPlacesContextType {
+  userPlaces: Place[];
+  setAllUserPlaces: React.Dispatch<React.SetStateAction<Place[]>>;
+}
 const StatBox: React.FC<StatBoxProps> = ({ 
   count = 0, 
   label, 
@@ -29,6 +46,12 @@ const MapStatsOverlay: React.FC = () => {
   const [countVisitedCountries, setCountVisitedCountries] = useState<number>(0);
   const { isLoaded, isSignedIn, user } = useUser();
 
+  const allUserPlacesContext = useContext<AllUserPlacesContextType | null>(AllUserPlacesContext);
+  const [userPlaces, setAllUserPlaces] = allUserPlacesContext
+    ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
+    : [[] as Place[], () => {}];
+
+
   const fetchPlaceCounts = async (userId: string) => {
     try {
       // Get visited places count
@@ -36,6 +59,7 @@ const MapStatsOverlay: React.FC = () => {
         .from('Mappbook_User_Places')
         .select('*', { count: 'exact', head: true })
         .eq('clerk_user_id', userId)
+        .eq('isRemoved', false)
         .eq('visitedorwanttovisit', 'visited');
 
       if (visitedError) {
@@ -49,6 +73,7 @@ const MapStatsOverlay: React.FC = () => {
         .from('Mappbook_User_Places')
         .select('*', { count: 'exact', head: true })
         .eq('clerk_user_id', userId)
+        .eq('isRemoved', false)
         .eq('visitedorwanttovisit', 'wanttovisit');
 
       if (wantToVisitError) {
@@ -62,6 +87,7 @@ const MapStatsOverlay: React.FC = () => {
         .from('Mappbook_User_Places')
         .select('place_country_code')
         .eq('clerk_user_id', userId)
+        .eq('isRemoved', false)
         .eq('visitedorwanttovisit', 'visited');
 
       if (error) {
@@ -82,7 +108,7 @@ const MapStatsOverlay: React.FC = () => {
     if (isSignedIn && user?.id && process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN) {
       fetchPlaceCounts(user.id);
     }
-  }, [isLoaded, isSignedIn, user]);
+  }, [isLoaded, isSignedIn, user, userPlaces]); // Added places as a dependency
 
   if (!isLoaded || !isSignedIn) {
     return null;
@@ -93,7 +119,7 @@ const MapStatsOverlay: React.FC = () => {
       <div className="flex gap-4">
         <StatBox 
           count={countVisitedPlaces}
-          label="Places Visited" 
+          label="Visited" 
           color="text-green-600"
         />
         <StatBox 
