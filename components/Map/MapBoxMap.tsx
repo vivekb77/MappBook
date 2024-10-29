@@ -8,15 +8,12 @@ import MarkAllPlaces from "./MarkAllPlaces";
 import MapStatsOverlay from "./MapStatsOverlay";
 import { SearchedPlaceDetailsContext } from "@/context/SearchedPlaceDetailsContext";
 
-
-
 // Types
 interface MapboxMapProps {
   className?: string;
   defaultStyle?: "satellite" | "light" | "dark" | "custom";
 }
 
-// Using a partial ViewState for our internal state management
 interface MapViewState {
   longitude: number;
   latitude: number;
@@ -29,6 +26,24 @@ interface MapViewState {
     left: number;
     right: number;
   };
+}
+
+interface PlaceDetails {
+  longitude: number;
+  latitude: number;
+  mapboxId: string;
+  name: string;
+  address: string;
+  country: string;
+  countryCode: string;
+  language: string;
+  poiCategory?: string;
+  maki?: string;
+}
+
+interface SearchedPlaceContextType {
+  searchedPlace?: PlaceDetails;
+  setSearchedPlaceDetails: (details: PlaceDetails) => void;
 }
 
 const MAP_STYLES = {
@@ -55,12 +70,24 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
 
-  const { searchedPlace, setsoruceCordinates } = useContext(SearchedPlaceDetailsContext);
-
-  // Memoize the map style to prevent unnecessary rerenders
+  const { searchedPlace } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
   const mapStyle = useMemo(() => MAP_STYLES[defaultStyle], [defaultStyle]);
 
-  // Handle map loading and errors
+  // Validate coordinates
+  const isValidCoordinates = (place: PlaceDetails | undefined): place is PlaceDetails => {
+    if (!place) return false;
+    
+    return (
+      typeof place.latitude === 'number' && 
+      typeof place.longitude === 'number' &&
+      !isNaN(place.latitude) && 
+      !isNaN(place.longitude) &&
+      Object.keys(place).length > 0 &&
+      place.latitude !== 0 && 
+      place.longitude !== 0
+    );
+  };
+
   const handleMapLoad = () => {
     setIsLoading(false);
   };
@@ -72,21 +99,20 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
   // Fly to searched place with enhanced animation
   useEffect(() => {
-    if (searchedPlace && mapRef.current) {
+    if (isValidCoordinates(searchedPlace) && mapRef.current) {
       const { longitude, latitude } = searchedPlace;
 
       mapRef.current.flyTo({
         center: [longitude, latitude],
         duration: 2000,
         zoom: 14,
-        pitch: 45, // Add some tilt for a more dynamic view
+        pitch: 45,
         bearing: 0,
         curve: 1.5,
         easing: (t: number) => t * (2 - t),
         essential: true,
       });
 
-      // Update view state after animation
       setViewState(prev => ({
         ...prev,
         longitude,
@@ -98,13 +124,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
   }, [searchedPlace]);
 
-  // Handle click events on the map
   const handleMapClick = (event: MapLayerMouseEvent) => {
     const { lngLat } = event;
-    setsoruceCordinates?.(lngLat);
+    // Handle map click if needed
   };
 
-  // Handle view state changes
   const handleViewStateChange = (evt: { viewState: ViewState }) => {
     const { longitude, latitude, zoom, pitch, bearing } = evt.viewState;
     setViewState({
@@ -115,8 +139,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       bearing,
     });
   };
-
-
 
   return (
     <div className={`p-5 bg-gray-50 min-h-screen flex flex-col items-center ${className}`}>
@@ -141,7 +163,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
             ref={mapRef}
             mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
             initialViewState={DEFAULT_VIEW_STATE}
-            {...viewState} // Spread the view state directly
+            {...viewState}
             onMove={handleViewStateChange}
             onClick={handleMapClick}
             onLoad={handleMapLoad}
@@ -162,7 +184,3 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 };
 
 export default React.memo(MapboxMap);
-
-function setClerkUserId(id: string) {
-  throw new Error("Function not implemented.");
-}
