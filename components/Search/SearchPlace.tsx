@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { useUser } from '@/context/UserContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { MapStatsContext } from '@/context/MapStatsContext';
 
 // Types
 interface Suggestion {
@@ -34,6 +35,7 @@ interface SearchedPlaceContextType {
 
 const SearchPlace = () => {
   const { user, setUser } = useUser();
+  const { allPlacesCount } = useContext(MapStatsContext);
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,12 +54,12 @@ const SearchPlace = () => {
   const SESSION_TOKEN = '5ccce4a4-ab0a-4a7c-943d-580e55542363';
   const MAPBOX_RETRIEVE_URL = 'https://api.mapbox.com/search/searchbox/v1/retrieve/';
   const DEBOUNCE_DELAY = 1000;
+  const FREE_TIER_LIMIT = 25;
 
-  // Check if user is logged in and premium
+  // Check if user is logged in and can search
   const isLoggedIn = !!user;
-  const canSearch = isLoggedIn && user.is_premium_user;
-  console.log("Is the user premium " + user?.is_premium_user)
-
+  const canSearch = isLoggedIn && (user.is_premium_user || allPlacesCount < FREE_TIER_LIMIT);
+  console.log("Is the user premium " + user?.is_premium_user +" " +allPlacesCount)
   // Fetch suggestions when search query changes
   useEffect(() => {
     if (!canSearch) return;
@@ -85,7 +87,8 @@ const SearchPlace = () => {
 
   // Fetch address suggestions from API
   const fetchAddressSuggestions = async (query: string): Promise<Suggestion[]> => {
-    console.log("isSearching...")
+    
+    console.log("Searching...")
     const response = await fetch(`/api/search-address?q=${encodeURIComponent(query)}`, {
       headers: { "Content-Type": "application/json" }
     });
@@ -141,7 +144,7 @@ const SearchPlace = () => {
 
   const getInputPlaceholder = () => {
     if (!isLoggedIn) return "Please log in to search";
-    if (!user.is_premium_user) return "Premium feature only";
+    if (!canSearch) return `Upgrade to Premium to add more than ${FREE_TIER_LIMIT} places`;
     return "Search for a place...";
   };
 
@@ -162,10 +165,13 @@ const SearchPlace = () => {
         </Alert>
       )}
 
-      {!canSearch && (
+      {isLoggedIn && !user.is_premium_user && (
         <Alert className="mb-4">
           <AlertDescription>
-            You can only add 25 places. Upgrade to Pro to add Unlimited places and to share you place map with others.
+            {allPlacesCount >= FREE_TIER_LIMIT 
+              ? `You've reached the limit of ${FREE_TIER_LIMIT} places. Upgrade to Premium to add unlimited places and share your place map with others.`
+              : `You can add up to ${FREE_TIER_LIMIT} places. Upgrade to Premium to add unlimited places and share your place map with others.`
+            }
           </AlertDescription>
         </Alert>
       )}

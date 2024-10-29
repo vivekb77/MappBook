@@ -55,13 +55,13 @@ const MAP_STYLES = {
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -114.370789,
   latitude: 46.342303,
-  zoom: 0.7, // Slightly zoomed in initial state
+  zoom: 0.8, // Slightly zoomed in initial state
   pitch: 25, //controls slanting
   bearing: 0,
 };
 
 const ROTATION_VIEW_STATE = {
-  zoom: 0.7, // More zoomed out during rotation
+  zoom: 0.9, // More zoomed out during rotation
   pitch: 25,
   latitude: 20, // Slightly tilted view for better globe perspective
 };
@@ -197,7 +197,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   return (
-    <div className={`relative w-full h-full ${className}`}>
+    <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
       {isLoading && (
         <div className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10">
           <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
