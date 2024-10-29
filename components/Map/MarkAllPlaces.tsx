@@ -96,14 +96,14 @@ function MarkAllPlaces() {
       'fill-color': [
         'case',
         ['get', 'isVisited'],
-        'rgba(10, 100, 233, 0.8)',  // Light green for visited countries
-        'rgba(200, 200, 200, 0.1)'  // Very light gray for unvisited countries
+        'rgba(79, 70, 229, 1)',  //  visited countries
+        'rgba(200, 200, 200, 0.1)'  //  unvisited countries
       ],
       'fill-outline-color': [
         'case',
         ['get', 'isVisited'],
-        'rgba(0, 0, 73, 1)',  // Darker green for visited country borders
-        'rgba(100, 100, 100, 0.2)'  // Gray for unvisited country borders
+        'rgba(7, 4, 77, 1)',  // visited country borders
+        'rgba(100, 100, 100, 0.2)'  // unvisited country borders
       ]
     }
   };

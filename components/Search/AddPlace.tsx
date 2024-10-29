@@ -329,7 +329,7 @@ const AddPlace = () => {
             <div className="text-xs font-medium text-purple-400 flex items-center justify-center gap-2">
               <span>✨ Unlimited Places</span>
               <span>•</span>
-              <span>🎨 Sharing to all</span>
+              <span>🎨 Sharing your Map</span>
               <span>•</span>
               <span>📊 Stats</span>
             </div>

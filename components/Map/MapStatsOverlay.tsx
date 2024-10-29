@@ -134,14 +134,14 @@ const MapStatsOverlay: React.FC = () => {
         <StatBox 
           count={countVisitedPlaces}
           label="Places Visited" 
-          color="text-emerald-600"
-          icon={<MapPin className="w-6 h-6 text-emerald-600" />}
+          color="text-blue-600"
+          icon={<MapPin className="w-6 h-6 text-blue-600" />}
         />
         <StatBox 
           count={countWantToVisitPlaces}
           label="Want to Visit" 
-          color="text-blue-600"
-          icon={<Plane className="w-6 h-6 text-blue-600" />}
+          color="text-red-600"
+          icon={<Plane className="w-6 h-6 text-red-600" />}
         />
         <StatBox 
           count={countVisitedCountries}
