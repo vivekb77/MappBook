@@ -2,13 +2,12 @@ import React, { useContext, useEffect, useRef, useState, useMemo } from "react";
 import { Map, MapRef, MapLayerMouseEvent, ViewState } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, RotateCcw } from "lucide-react";
 import MarkSearchedPlace from "./MarkSearchedPlace";
 import MarkAllPlaces from "./MarkAllPlaces";
 import MapStatsOverlay from "./MapStatsOverlay";
 import { SearchedPlaceDetailsContext } from "@/context/SearchedPlaceDetailsContext";
 
-// Types remain the same
 interface MapboxMapProps {
   className?: string;
   defaultStyle?: "satellite" | "light" | "dark" | "custom";
@@ -56,9 +55,15 @@ const MAP_STYLES = {
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -114.370789,
   latitude: 46.342303,
-  zoom: 1,
-  pitch: 0,
+  zoom: 0.7, // Slightly zoomed in initial state
+  pitch: 25, //controls slanting
   bearing: 0,
+};
+
+const ROTATION_VIEW_STATE = {
+  zoom: 0.7, // More zoomed out during rotation
+  pitch: 25,
+  latitude: 20, // Slightly tilted view for better globe perspective
 };
 
 const MapboxMap: React.FC<MapboxMapProps> = ({
@@ -69,12 +74,13 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
+  const [isRotating, setIsRotating] = useState(true);
+  const animationRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
 
   const { searchedPlace } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
   const mapStyle = useMemo(() => MAP_STYLES[defaultStyle], [defaultStyle]);
 
-
-  
   const isValidCoordinates = (place: PlaceDetails | undefined): place is PlaceDetails => {
     if (!place) return false;
     
@@ -89,8 +95,58 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     );
   };
 
+  // Initialize rotation with zoom out effect
+  const startRotation = () => {
+    setIsRotating(true);
+    if (mapRef.current) {
+      mapRef.current.flyTo({
+        ...ROTATION_VIEW_STATE,
+        duration: 2000,
+        essential: true,
+      });
+    }
+  };
+
+  // Globe rotation animation
+  useEffect(() => {
+    const animate = (timestamp: number) => {
+      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      const progress = (timestamp - startTimeRef.current) / 30000; // Complete rotation every 30 seconds
+
+      if (isRotating) {
+        setViewState(prev => ({
+          ...prev,
+          ...ROTATION_VIEW_STATE,
+          longitude: (progress * 360) % 360 - 180,
+        }));
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    if (isRotating && !isValidCoordinates(searchedPlace)) {
+      startTimeRef.current = null;
+      animationRef.current = requestAnimationFrame(animate);
+    }
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isRotating, searchedPlace]);
+
   const handleMapLoad = () => {
     setIsLoading(false);
+    if (mapRef.current) {
+      const map = mapRef.current.getMap();
+      map.setFog({
+        'horizon-blend': 0.2,
+        'color': '#ffffff',
+        'high-color': '#245bde',
+        'space-color': '#000000',
+        'star-intensity': 0.6
+      });
+    }
   };
 
   const handleMapError = (e: any) => {
@@ -100,6 +156,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
   useEffect(() => {
     if (isValidCoordinates(searchedPlace) && mapRef.current) {
+      setIsRotating(false);
       const { longitude, latitude } = searchedPlace;
 
       mapRef.current.flyTo({
@@ -124,9 +181,8 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
   }, [searchedPlace]);
 
-  const handleMapClick = (event: MapLayerMouseEvent) => {
-    const { lngLat } = event;
-    // Handle map click if needed
+  const handleMapInteraction = () => {
+    setIsRotating(false);
   };
 
   const handleViewStateChange = (evt: { viewState: ViewState }) => {
@@ -162,10 +218,13 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         initialViewState={DEFAULT_VIEW_STATE}
         {...viewState}
         onMove={handleViewStateChange}
-        onClick={handleMapClick}
+        onClick={handleMapInteraction}
+        onDrag={handleMapInteraction}
+        onWheel={handleMapInteraction}
         onLoad={handleMapLoad}
         onError={handleMapError}
         mapStyle={mapStyle}
+        // projection="globe"
         reuseMaps
         attributionControl={false}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
@@ -175,6 +234,16 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         <MapStatsOverlay />
         <MarkSearchedPlace />
       </Map>
+
+      {!isRotating && !isValidCoordinates(searchedPlace) && (
+        <button
+          onClick={startRotation}
+          className="absolute bottom-4 right-4 p-2 bg-white/80 hover:bg-white shadow-md rounded-full transition-colors"
+          title="Resume rotation"
+        >
+          <RotateCcw className="w-5 h-5 text-gray-700" />
+        </button>
+      )}
     </div>
   );
 };
