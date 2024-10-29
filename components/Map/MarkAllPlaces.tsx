@@ -4,6 +4,7 @@ import React, { useContext, useEffect, useState, useCallback, useMemo } from 're
 import { Map, Marker, Popup, Source, Layer, FillLayer } from 'react-map-gl';
 import type { GeoJSON } from 'geojson';
 import { supabase } from '../supabase';
+import './PopupStyles.css'; 
 
 interface Place {
   id: string;
@@ -231,8 +232,8 @@ function MarkAllPlaces() {
               className={`
                 mt-1 text-xs font-semibold px-2 py-1 rounded-md shadow-md
                 ${place.visitedorwanttovisit === "visited"
-                  ? "text-gray-700 bg-green-200 hover:bg-green-300"
-                  : "text-gray-700 bg-blue-200 hover:bg-blue-300"}
+                  ? "text-gray-000 bg-blue-400 hover:bg-blue-500"
+                  : "text-gray-000 bg-red-400 hover:bg-red-500"}
                 transition-colors duration-200
               `}
             >
@@ -248,7 +249,8 @@ function MarkAllPlaces() {
            onClose={() => setSelectedPlace(null)}
            closeOnClick={false}
            closeButton={true}
-           className="rounded-lg shadow-lg"
+           closeOnMove={true}
+           className="rounded-lg shadow-lg custom-popup"
          >
            <div className="p-4 max-w-xs">
              {/* Header */}
@@ -260,7 +262,7 @@ function MarkAllPlaces() {
                  {selectedPlace.place_full_address}
                </p>
              </div>
-         
+     
              {/* Info Section */}
              <div className="space-y-2 mb-4">
                <div className="flex items-center text-gray-600">
@@ -281,7 +283,7 @@ function MarkAllPlaces() {
                    {selectedPlace.place_country}
                  </span>
                </div>
-         
+     
                <div className="flex items-center">
                  <div
                    className={`
@@ -321,7 +323,7 @@ function MarkAllPlaces() {
                  </div>
                </div>
              </div>
-         
+     
              {/* Action Buttons */}
              <div className="flex gap-2 pt-2 border-t border-gray-200">
                {selectedPlace.visitedorwanttovisit === "wanttovisit" && (
