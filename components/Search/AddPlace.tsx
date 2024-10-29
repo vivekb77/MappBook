@@ -210,7 +210,7 @@ const AddPlace = () => {
           disabled={!enableAddPlaceButton}
         >
           <MapPin className="w-4 h-4" />
-          <span>Been Here ✨</span>
+          <span>Been Here</span>
         </button>
         <button
           className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300
@@ -224,7 +224,7 @@ const AddPlace = () => {
           disabled={!enableAddPlaceButton}
         >
           <Navigation className="w-4 h-4" />
-          <span>Bucket List 🌟</span>
+          <span>Bucket List</span>
         </button>
       </div>
 
@@ -290,8 +290,21 @@ const AddPlace = () => {
           </div>
         </div>
 
+        
+
         {/* CTA Buttons Container */}
         <div className="space-y-3">
+            {/* Share Button */}
+            <button
+            // onClick={handleShare}
+            className="w-full py-3 px-4 rounded-xl font-medium
+              bg-white/80 border border-pink-100 text-gray-700
+              hover:bg-white hover:shadow-md transform transition-all duration-300
+              flex items-center justify-center gap-2"
+          >
+            {/* <Share2 className="w-5 h-5 text-purple-400" /> */}
+            <span>Share Your Map</span>
+          </button>
           {/* Pro Button */}
           <button
             className="w-full py-3 px-4 rounded-xl font-medium
@@ -309,17 +322,7 @@ const AddPlace = () => {
             </span>
           </button>
 
-          {/* Share Button */}
-          <button
-            // onClick={handleShare}
-            className="w-full py-3 px-4 rounded-xl font-medium
-              bg-white/80 border border-pink-100 text-gray-700
-              hover:bg-white hover:shadow-md transform transition-all duration-300
-              flex items-center justify-center gap-2"
-          >
-            {/* <Share2 className="w-5 h-5 text-purple-400" /> */}
-            <span>Share Your Map</span>
-          </button>
+        
 
           {/* Pro Features Preview */}
           <div className="text-center mt-4">
@@ -332,6 +335,31 @@ const AddPlace = () => {
             </div>
           </div>
         </div>
+        
+        <div className="mt-8 pt-4 border-t border-pink-100/50">
+        <div className="flex items-center justify-center gap-4 text-xs">
+          <button 
+            // onClick={onLogout}
+            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+          >
+            Logout
+          </button>
+          <span className="text-gray-300">•</span>
+          <a 
+            href="/terms" 
+            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+          >
+            Terms
+          </a>
+          <span className="text-gray-300">•</span>
+          <a 
+            href="/privacy" 
+            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+          >
+            Privacy
+          </a>
+        </div>
+      </div>
       </div>
     
   </div>

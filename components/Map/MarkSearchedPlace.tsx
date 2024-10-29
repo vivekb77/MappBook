@@ -90,13 +90,13 @@ const MarkSearchedPlace = () => {
             <span className="text-sm font-medium text-gray-800 whitespace-nowrap">
               {searchedPlace.name}
             </span>
-            <div className="absolute inset-x-0 -bottom-1 h-2 bg-gradient-to-t from-white/50 to-transparent" />
+            <div className="absolute inset-x-0 font-bold text-xl text-gray-800 mb-1" />
           </div>
 
           {/* Ripple Effect */}
-          <div className="absolute -inset-4 pointer-events-none">
-            <div className="absolute inset-0 border-2 border-green-500 rounded-full opacity-50 animate-ping" />
-          </div>
+          {/* <div className="absolute -inset-2 pointer-events-none">
+            <div className="absolute inset-0 border-1 border-green-500 rounded-full opacity-50 animate-ping" />
+          </div> */}
         </div>
       </Marker>
     </div>
