@@ -8,7 +8,7 @@ import MarkAllPlaces from "./MarkAllPlaces";
 import MapStatsOverlay from "./MapStatsOverlay";
 import { SearchedPlaceDetailsContext } from "@/context/SearchedPlaceDetailsContext";
 
-// Types
+// Types remain the same
 interface MapboxMapProps {
   className?: string;
   defaultStyle?: "satellite" | "light" | "dark" | "custom";
@@ -73,7 +73,8 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const { searchedPlace } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
   const mapStyle = useMemo(() => MAP_STYLES[defaultStyle], [defaultStyle]);
 
-  // Validate coordinates
+
+  
   const isValidCoordinates = (place: PlaceDetails | undefined): place is PlaceDetails => {
     if (!place) return false;
     
@@ -97,7 +98,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     setIsLoading(false);
   };
 
-  // Fly to searched place with enhanced animation
   useEffect(() => {
     if (isValidCoordinates(searchedPlace) && mapRef.current) {
       const { longitude, latitude } = searchedPlace;
@@ -141,44 +141,40 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   return (
-    <div className={`p-5 bg-gray-50 min-h-screen flex flex-col items-center ${className}`}>
-      <div className="w-full max-w-4xl rounded-lg shadow-lg overflow-hidden relative">
-        {/* Loading Overlay */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          </div>
-        )}
+    <div className={`relative w-full h-full ${className}`}>
+      {isLoading && (
+        <div className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        </div>
+      )}
 
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive" className="mb-4">
+      {error && (
+        <div className="absolute top-10 left-4 right-4 z-1">
+          <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
-        )}
-
-        {/* Map Container */}
-        <div className="h-[50vh] md:h-[80vh]">
-          <Map
-            ref={mapRef}
-            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
-            initialViewState={DEFAULT_VIEW_STATE}
-            {...viewState}
-            onMove={handleViewStateChange}
-            onClick={handleMapClick}
-            onLoad={handleMapLoad}
-            onError={handleMapError}
-            mapStyle={mapStyle}
-            reuseMaps
-            attributionControl={false}
-            terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
-          >
-            <MarkAllPlaces />
-            <MapStatsOverlay />
-            <MarkSearchedPlace />
-          </Map>
         </div>
-      </div>
+      )}
+
+      <Map
+        ref={mapRef}
+        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+        initialViewState={DEFAULT_VIEW_STATE}
+        {...viewState}
+        onMove={handleViewStateChange}
+        onClick={handleMapClick}
+        onLoad={handleMapLoad}
+        onError={handleMapError}
+        mapStyle={mapStyle}
+        reuseMaps
+        attributionControl={false}
+        terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <MarkAllPlaces />
+        <MapStatsOverlay />
+        <MarkSearchedPlace />
+      </Map>
     </div>
   );
 };

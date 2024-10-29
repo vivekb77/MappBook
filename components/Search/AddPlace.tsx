@@ -4,8 +4,9 @@ import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '../supabase';
 import SearchPlace from './SearchPlace';
+import { MapPin, Navigation } from 'lucide-react';
 
-// Types
+// Types remain the same
 interface PlaceDetails {
   mapboxId: string;
   name: string;
@@ -35,18 +36,16 @@ interface UserPlace {
 type VisitStatus = 'visited' | 'wanttovisit';
 
 const AddPlace = () => {
-  // State
+  // State management remains the same
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [visitStatus, setVisitStatus] = useState<VisitStatus>('visited');
   const [enableAddPlaceButton, setEnableAddPlaceButton] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Auth
   const { isLoaded, isSignedIn, user } = useUser();
   const [clerkUserId, setClerkUserId] = useState<string | null>(null);
 
-  // Context
   const searchedPlaceContext = useContext(SearchedPlaceDetailsContext);
   const { searchedPlace, setSearchedPlaceDetails } = searchedPlaceContext || {};
 
@@ -55,7 +54,7 @@ const AddPlace = () => {
     ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
     : [[], () => {}];
 
-  // Effects
+  // Effects and functions remain the same
   useEffect(() => {
     if (isLoaded && isSignedIn && user?.id) {
       setClerkUserId(user.id);
@@ -73,7 +72,6 @@ const AddPlace = () => {
   const resetForm = () => {
     setVisitStatus('visited');
     setEnableAddPlaceButton(false);
-    // Clear the searched place by setting an empty object
     if (setSearchedPlaceDetails) {
       setSearchedPlaceDetails({} as PlaceDetails);
     }
@@ -86,21 +84,18 @@ const AddPlace = () => {
     const isSuccess = await addPlaceDetails();
     
     if (isSuccess) {
-      setSuccessMessage('Your place added successfully!');
-      resetForm(); // Reset form on success
-      setTimeout(() => {
-        setSuccessMessage('');
-      }, 3000);
+      setSuccessMessage('Place added successfully! 🎉');
+      resetForm();
+      setTimeout(() => setSuccessMessage(''), 3000);
     } else {
-      setErrorMessage('Failed to add!');
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 3000);
+      setErrorMessage('Failed to add place. Please try again.');
+      setTimeout(() => setErrorMessage(''), 3000);
     }
     setIsSubmitting(false);
   };
 
   const addPlaceDetails = async () => {
+    // Implementation remains the same
     if (!searchedPlace || !clerkUserId) return false;
 
     const newlySearchedPlace = {
@@ -158,93 +153,188 @@ const AddPlace = () => {
   }
 
   return (
-    <div className="p-5 max-w-md mx-auto bg-gray-50 rounded-lg shadow-md">
-      {/* Welcome Header */}
-      <h4 className="text-sm font-semibold text-gray-800 text-center mb-4">
-        Welcome {user.fullName}
-      </h4>
+    <div className="bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-xl shadow-lg border border-pink-100/50 backdrop-blur-sm">
+    {/* Logo Header */}
+    <div className="p-4 text-center border-b border-pink-100/50 bg-white/50">
+      <div className="flex items-center justify-center gap-2 mb-1">
+        <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+          rounded-xl p-2 shadow-md transform -rotate-3">
+          {/* <Map className="w-5 h-5 text-white" /> */}
+        </div>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+          text-transparent bg-clip-text transform rotate-1">
+          MappBook
+        </h1>
+      </div>
+      <p className="text-xs font-medium text-purple-400">
+        Share Your World ✨ Track Your Adventures 🌎
+      </p>
+    </div>
 
-      {/* Main Container */}
-      <div className="border border-gray-300 bg-white p-6 rounded-lg shadow-sm">
-        <h3 className="text-xl font-semibold text-gray-800 text-center mb-4">
-          Search and Add a Place
-        </h3>
-
-        <SearchPlace />
-
-        <div>
-          {/* Visit Status Toggle */}
-          <div className="flex justify-center my-4">
-            <button
-              className={`
-                px-4 py-1 rounded-l-md transition-colors duration-200
-                ${visitStatus === 'visited'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-200 text-gray-800'
-                }
-                disabled:opacity-50
-              `}
-              onClick={() => setVisitStatus('visited')}
-              disabled={!enableAddPlaceButton}
-            >
-              Visited
-            </button>
-            <button
-              className={`
-                px-4 py-1 rounded-r-md transition-colors duration-200
-                ${visitStatus === 'wanttovisit'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-200 text-gray-800'
-                }
-                disabled:opacity-50
-              `}
-              onClick={() => setVisitStatus('wanttovisit')}
-              disabled={!enableAddPlaceButton}
-            >
-              Want to Visit
-            </button>
-          </div>
-
-          {/* Add Place Button */}
-          <button
-            className={`
-              w-full py-3 mt-3 rounded-md font-semibold text-lg 
-              shadow-sm transition-all duration-200 
-              focus:outline-none focus:ring-2 focus:ring-red-300
-              ${enableAddPlaceButton
-                ? 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-gray-300 text-gray-600 cursor-not-allowed'
-              }
-            `}
-            onClick={onAddPlaceButtonClick}
-            disabled={!enableAddPlaceButton || isSubmitting}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Adding...
-              </div>
-            ) : (
-              'Add Place to Map'
-            )}
-          </button>
-
-          {/* Success Message */}
-          {successMessage && (
-            <div className="text-green-600 text-center my-2 py-2 px-4 bg-green-50 rounded-md">
-              {successMessage}
-            </div>
-          )}
-
-          {/* Error Message */}
-          {errorMessage && (
-            <div className="text-red-600 text-center my-2 py-2 px-4 bg-red-50 rounded-md">
-              {errorMessage}
-            </div>
-          )}
+    {/* User Header */}
+    <div className="p-4 border-b border-pink-100/50 bg-white/30">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 
+          text-white flex items-center justify-center font-medium shadow-inner">
+          {user.firstName?.[0] || user.fullName?.[0]}
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold text-gray-700">
+            {user.fullName}
+          </span>
+          <span className="text-xs text-purple-500 font-medium">
+            Travel Creator ✈️
+          </span>
         </div>
       </div>
     </div>
+
+    {/* Search Container */}
+    <div className="p-6 space-y-6">
+      {/* Search Component Wrapper */}
+      <div className="bg-white/80 rounded-xl p-2 shadow-sm border border-pink-100">
+        <SearchPlace />
+      </div>
+
+      {/* Visit Status Toggle */}
+      <div className="flex gap-3">
+        <button
+          className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300
+            flex items-center justify-center gap-2 font-medium
+            ${visitStatus === 'visited'
+              ? 'bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-lg scale-105'
+              : 'bg-white/80 text-gray-600 border border-pink-100 hover:bg-pink-50'
+            }
+            disabled:opacity-50 disabled:cursor-not-allowed transform`}
+          onClick={() => setVisitStatus('visited')}
+          disabled={!enableAddPlaceButton}
+        >
+          <MapPin className="w-4 h-4" />
+          <span>Been Here ✨</span>
+        </button>
+        <button
+          className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300
+            flex items-center justify-center gap-2 font-medium
+            ${visitStatus === 'wanttovisit'
+              ? 'bg-gradient-to-r from-purple-400 to-blue-400 text-white shadow-lg scale-105'
+              : 'bg-white/80 text-gray-600 border border-pink-100 hover:bg-purple-50'
+            }
+            disabled:opacity-50 disabled:cursor-not-allowed transform`}
+          onClick={() => setVisitStatus('wanttovisit')}
+          disabled={!enableAddPlaceButton}
+        >
+          <Navigation className="w-4 h-4" />
+          <span>Bucket List 🌟</span>
+        </button>
+      </div>
+
+      {/* Add Button */}
+      <button
+        className={`w-full py-3.5 px-4 rounded-xl font-medium text-base
+          transition-all duration-300 
+          flex items-center justify-center gap-2 transform
+          ${enableAddPlaceButton
+            ? 'bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 text-white shadow-lg hover:scale-[1.02]'
+            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
+        onClick={onAddPlaceButtonClick}
+        disabled={!enableAddPlaceButton || isSubmitting}
+      >
+        {isSubmitting ? (
+          <>
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span>Adding to Your Map...</span>
+          </>
+        ) : (
+          <>
+            <MapPin className="w-5 h-5" />
+            <span>Pin This Location 📍</span>
+          </>
+        )}
+      </button>
+
+      {/* Messages */}
+      {successMessage && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-green-50 to-blue-50 text-green-600 
+          flex items-center justify-center gap-2 border border-green-100 shadow-sm">
+          <span className="text-xl">🎉</span>
+          <span className="font-medium">{successMessage}</span>
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-pink-50 to-red-50 text-red-500 
+          flex items-center justify-center gap-2 border border-pink-100 shadow-sm">
+          <span className="text-xl">💫</span>
+          <span className="font-medium">{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Engagement Hint */}
+      <div className="text-center text-xs font-medium text-purple-400">
+      Show the world where you have been 📸
+      </div>
+      
+    </div>
+      {/* New Bottom Section with Divider */}
+      <div className="px-6 pb-6">
+        {/* Decorative Divider */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-pink-200/50"></div>
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-gradient-to-r from-pink-50 via-purple-50 to-blue-50 px-4">
+              {/* <Sparkles className="w-5 h-5 text-purple-400" /> */}
+            </span>
+          </div>
+        </div>
+
+        {/* CTA Buttons Container */}
+        <div className="space-y-3">
+          {/* Pro Button */}
+          <button
+            className="w-full py-3 px-4 rounded-xl font-medium
+              bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 
+              text-white shadow-lg transform transition-all duration-300
+              hover:scale-[1.02] hover:shadow-xl
+              flex items-center justify-center gap-2 relative
+              overflow-hidden group"
+          >
+            <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
+            {/* <Sparkles className="w-5 h-5" /> */}
+            <span className="font-semibold">Upgrade to Pro</span>
+            <span className="bg-white/30 text-xs py-0.5 px-2 rounded-full ml-2">
+              50% OFF
+            </span>
+          </button>
+
+          {/* Share Button */}
+          <button
+            // onClick={handleShare}
+            className="w-full py-3 px-4 rounded-xl font-medium
+              bg-white/80 border border-pink-100 text-gray-700
+              hover:bg-white hover:shadow-md transform transition-all duration-300
+              flex items-center justify-center gap-2"
+          >
+            {/* <Share2 className="w-5 h-5 text-purple-400" /> */}
+            <span>Share Your Map</span>
+          </button>
+
+          {/* Pro Features Preview */}
+          <div className="text-center mt-4">
+            <div className="text-xs font-medium text-purple-400 flex items-center justify-center gap-2">
+              <span>✨ Unlimited Places</span>
+              <span>•</span>
+              <span>🎨 Sharing to all</span>
+              <span>•</span>
+              <span>📊 Stats</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+  </div>
   );
 };
 
