@@ -4,7 +4,7 @@ export type MappBookUser = {
     id: string;
     clerk_user_id: string;
     display_name: string;
-    created_at?: string;
+    is_premium_user?: boolean;
   };
 
 interface UserContextType {

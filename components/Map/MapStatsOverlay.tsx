@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { supabase } from '../supabase';
 import { useUser } from '@clerk/nextjs';
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
+import { MapStatsContext } from '@/context/MapStatsContext';
 import { MapPin, Plane, Globe2 } from 'lucide-react';
 
 interface StatBoxProps {
@@ -29,11 +30,11 @@ interface AllUserPlacesContextType {
   setAllUserPlaces: React.Dispatch<React.SetStateAction<Place[]>>;
 }
 
-const StatBox: React.FC<StatBoxProps> = ({ 
-  count = 0, 
-  label, 
-  color, 
-  icon 
+const StatBox: React.FC<StatBoxProps> = ({
+  count = 0,
+  label,
+  color,
+  icon
 }) => (
   <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2.5 
     border border-pink-100/50 shadow-sm hover:shadow-md
@@ -56,15 +57,19 @@ const StatBox: React.FC<StatBoxProps> = ({
 );
 
 const MapStatsOverlay: React.FC = () => {
-  const [countVisitedPlaces, setCountVisitedPlaces] = useState<number>(0);
-  const [countWantToVisitPlaces, setCountWantToVisitPlaces] = useState<number>(0);
-  const [countVisitedCountries, setCountVisitedCountries] = useState<number>(0);
   const { isLoaded, isSignedIn, user } = useUser();
+  const {
+    visitedPlacesCount,
+    wantToVisitPlacesCount,
+    visitedCountriesCount,
+    setVisitedPlacesCount,
+    setWantToVisitPlacesCount,
+    setVisitedCountriesCount,
+    setAllPlacesCount
+  } = useContext(MapStatsContext);
 
   const allUserPlacesContext = useContext<AllUserPlacesContextType | null>(AllUserPlacesContext);
-  const [userPlaces, setAllUserPlaces] = allUserPlacesContext
-    ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
-    : [[] as Place[], () => {}];
+  const userPlaces = allUserPlacesContext?.userPlaces || [];
 
   const fetchPlaceCounts = async (userId: string) => {
     try {
@@ -76,10 +81,8 @@ const MapStatsOverlay: React.FC = () => {
         .eq('isRemoved', false)
         .eq('visitedorwanttovisit', 'visited');
 
-      if (visitedError) {
-        console.error("Error fetching visited count:", visitedError);
-      } else {
-        setCountVisitedPlaces(visitedCount || 0);
+      if (!visitedError) {
+        setVisitedPlacesCount(visitedCount || 0);
       }
 
       // Get want to visit places count
@@ -90,10 +93,8 @@ const MapStatsOverlay: React.FC = () => {
         .eq('isRemoved', false)
         .eq('visitedorwanttovisit', 'wanttovisit');
 
-      if (wantToVisitError) {
-        console.error("Error fetching want to visit count:", wantToVisitError);
-      } else {
-        setCountWantToVisitPlaces(wantToVisitCount || 0);
+      if (!wantToVisitError) {
+        setWantToVisitPlacesCount(wantToVisitCount || 0);
       }
 
       // Get visited countries count
@@ -104,22 +105,27 @@ const MapStatsOverlay: React.FC = () => {
         .eq('isRemoved', false)
         .eq('visitedorwanttovisit', 'visited');
 
-      if (error) {
-        console.error("Error fetching countries:", error);
-        return;
+      if (!error) {
+        const uniqueCountryCounts = new Set(data.map(place => place.place_country_code)).size;
+        setVisitedCountriesCount(uniqueCountryCounts);
       }
-      const uniqueCountryCounts = new Set(data.map(place => place.place_country_code)).size;
-      setCountVisitedCountries(uniqueCountryCounts || 0);
 
+      // Get all places count
+      const { count: allCount, error: allError } = await supabase
+        .from('Mappbook_User_Places')
+        .select('*', { count: 'exact', head: true })
+        .eq('clerk_user_id', userId);
+
+      if (!allError) {
+        setAllPlacesCount(allCount || 0);
+      }
     } catch (err) {
-      console.error("Error fetching visited count:", err);
+      console.error("Error fetching place counts:", err);
     }
   };
 
   useEffect(() => {
-    if (!isLoaded) return;
-
-    if (isSignedIn && user?.id && process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN) {
+    if (isLoaded && isSignedIn && user?.id) {
       fetchPlaceCounts(user.id);
     }
   }, [isLoaded, isSignedIn, user, userPlaces]);
@@ -131,21 +137,21 @@ const MapStatsOverlay: React.FC = () => {
   return (
     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
       <div className="flex gap-4">
-        <StatBox 
-          count={countVisitedPlaces}
-          label="Places Visited" 
+        <StatBox
+          count={visitedPlacesCount}
+          label="Places Visited"
           color="text-blue-600"
           icon={<MapPin className="w-6 h-6 text-blue-600" />}
         />
-        <StatBox 
-          count={countWantToVisitPlaces}
-          label="Want to Visit" 
+        <StatBox
+          count={wantToVisitPlacesCount}
+          label="Want to Visit"
           color="text-red-600"
           icon={<Plane className="w-6 h-6 text-red-600" />}
         />
-        <StatBox 
-          count={countVisitedCountries}
-          label="Countries Visited" 
+        <StatBox
+          count={visitedCountriesCount}
+          label="Countries Visited"
           color="text-indigo-600"
           icon={<Globe2 className="w-6 h-6 text-indigo-600" />}
         />

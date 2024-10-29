@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
 import { UserProvider } from '@/context/UserContext';
 import UserCheck from '@/components/User/UserCheck';
+import { MapStatsProvider } from '@/context/MapStatsContext';
 
 const outfit = Outfit({ subsets: ['latin'] });
 
@@ -24,7 +25,9 @@ export default function RootLayout({
         <ClerkProvider>
           <UserProvider>
             <UserCheck>
-              {children}
+              <MapStatsProvider>
+                {children}
+              </MapStatsProvider>
             </UserCheck>
           </UserProvider>
         </ClerkProvider>

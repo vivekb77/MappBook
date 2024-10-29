@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
+import { useUser } from '@/context/UserContext';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Types
 interface Suggestion {
@@ -31,6 +33,8 @@ interface SearchedPlaceContextType {
 }
 
 const SearchPlace = () => {
+  const { user, setUser } = useUser();
+
   // State
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -45,12 +49,19 @@ const SearchPlace = () => {
   const { setSearchedPlaceDetails } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
 
   // Constants
-  const SESSION_TOKEN = '5ccce4a4-ab0a-4a7c-943d-580e55542363'; // TODO: Generate dynamically
+  const SESSION_TOKEN = '5ccce4a4-ab0a-4a7c-943d-580e55542363';
   const MAPBOX_RETRIEVE_URL = 'https://api.mapbox.com/search/searchbox/v1/retrieve/';
   const DEBOUNCE_DELAY = 1000;
 
+  // Check if user is logged in and premium
+  const isLoggedIn = !!user;
+  const canSearch = isLoggedIn && user.is_premium_user;
+  console.log("Is the user premium " + user?.is_premium_user)
+
   // Fetch suggestions when search query changes
   useEffect(() => {
+    if (!canSearch) return;
+
     const delayDebounceFn = setTimeout(async () => {
       if (searchQuery.trim()) {
         try {
@@ -70,10 +81,11 @@ const SearchPlace = () => {
     }, DEBOUNCE_DELAY);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery]);
+  }, [searchQuery, canSearch]);
 
   // Fetch address suggestions from API
   const fetchAddressSuggestions = async (query: string): Promise<Suggestion[]> => {
+    console.log("isSearching...")
     const response = await fetch(`/api/search-address?q=${encodeURIComponent(query)}`, {
       headers: { "Content-Type": "application/json" }
     });
@@ -88,6 +100,8 @@ const SearchPlace = () => {
 
   // Handle selection of an address
   const handleAddressSelection = async (suggestion: Suggestion) => {
+    if (!canSearch) return;
+
     try {
       setError(null);
       setSelectedPlace({
@@ -125,40 +139,71 @@ const SearchPlace = () => {
     }
   };
 
+  const getInputPlaceholder = () => {
+    if (!isLoggedIn) return "Please log in to search";
+    if (!user.is_premium_user) return "Premium feature only";
+    return "Search for a place...";
+  };
+
   return (
     <div className="w-full max-w-md">
+      {!isLoggedIn && (
+        <Alert className="mb-4">
+          <AlertTitle>Authentication Required</AlertTitle>
+          <AlertDescription>
+            Please log in to use the search functionality.
+            <button
+              onClick={() => window.location.href = "/signin"}
+              className="ml-2 text-blue-600 hover:text-blue-800 underline"
+            >
+              Log in
+            </button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!canSearch && (
+        <Alert className="mb-4">
+          <AlertDescription>
+            You can only add 25 places. Upgrade to Pro to add Unlimited places and to share you place map with others.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="relative">
         {/* Search Input */}
         <input
           type="text"
           id="searchField"
-          className="w-full p-3 text-lg bg-white border border-gray-300 rounded-md shadow-sm 
+          className={`w-full p-3 text-lg bg-white border border-gray-300 rounded-md shadow-sm 
                      text-gray-700 placeholder-gray-400 
                      focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent 
-                     transition-colors duration-200"
-          placeholder="Search for a place..."
+                     transition-colors duration-200
+                     ${!canSearch ? 'opacity-50 cursor-not-allowed' : ''}`}
+          placeholder={getInputPlaceholder()}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => canSearch && setSearchQuery(e.target.value)}
           aria-label="Search for a place"
           autoComplete="off"
+          disabled={!canSearch}
         />
 
         {/* Loading Indicator */}
-        {isSearching && (
+        {isSearching && canSearch && (
           <div className="absolute right-3 top-3">
             <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
         {/* Error Message */}
-        {error && (
+        {error && canSearch && (
           <div className="mt-2 text-red-500 text-sm" role="alert">
             {error}
           </div>
         )}
 
         {/* Selected Place Display */}
-        {selectedPlace && (
+        {selectedPlace && canSearch && (
           <div className="mt-3 space-y-1">
             <h2 className="text-lg font-semibold text-gray-900">
               {selectedPlace.name}
@@ -170,9 +215,9 @@ const SearchPlace = () => {
         )}
 
         {/* Suggestions Dropdown */}
-        {suggestions.length > 0 && (
+        {suggestions.length > 0 && canSearch && (
           <div className="absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-md shadow-lg">
-            {suggestions.map((suggestion, index) => (
+            {suggestions.map((suggestion) => (
               <button
                 key={suggestion.mapbox_id}
                 className="w-full p-3 text-left hover:bg-green-100 transition-colors duration-200

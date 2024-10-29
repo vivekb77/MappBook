@@ -6,14 +6,6 @@ import { supabase } from '../supabase';
 import SearchPlace from './SearchPlace';
 import { MapPin, Navigation } from 'lucide-react';
 import { logout } from '../utils/auth';
-// import { useUser } from '@/context/UserContext';
-
-
-  // const { user } = useUser();
-  
-  // if (!user) return <div>Loading...</div>;
-  
-  // return <div>Welcome, {user.display_name}!</div>;
 
 // Types remain the same
 interface PlaceDetails {
