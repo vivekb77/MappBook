@@ -17,7 +17,7 @@ function NavBar() {
             />
             <div className='hidden md:flex gap-6'>
             <h2 className='hover:bg-blue-400 p-2 rounded-md cursor-pointer transition-all duration-200 ease-in-out'>
-            Create Your Own Map
+            Create Your Own Map With Places
             </h2>
             </div>
         </div>

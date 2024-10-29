@@ -136,7 +136,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         )}
 
         {/* Map Container */}
-        <div className="h-[50vh] md:h-[100vh]">
+        <div className="h-[50vh] md:h-[80vh]">
           <Map
             ref={mapRef}
             mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}

@@ -23,7 +23,7 @@ export default function RootLayout({
     <ClerkProvider>
     <html lang="en">
       <body className={outfit.className}>
-        <NavBar/>
+        {/* <NavBar/> */}
         {children}
         </body>
     </html>
