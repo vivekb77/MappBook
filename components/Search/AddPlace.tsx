@@ -477,7 +477,7 @@ const AddPlace = () => {
               {/* Name Section with Label */}
               <div className="space-y-2">
                 <div className="text-center text-xs font-medium text-purple-400">
-                  Your MappBook name?
+                  Your MappBook title?
                 </div>
                 <div className="bg-white border border-gray-200 rounded-lg p-3">
                   {isEditing ? (
@@ -563,7 +563,7 @@ const AddPlace = () => {
 
               <Alert className="bg-blue-50 border-blue-100">
                 <AlertDescription className="text-sm text-blue-700">
-                  Share this link to let others view "{displayName || 'Untitled Map'}'s MappBook". Use #MappBook. Others can view only if you are a Premium user.
+                Spread the word, use #MappBook while sharing. Others can view {displayName || 'MappBook User'}'s Mapp only if you are a Premium user.
                 </AlertDescription>
               </Alert>
             </div>

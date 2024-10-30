@@ -51,7 +51,7 @@ const SearchPlace = () => {
   const { setSearchedPlaceDetails } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
 
   // Constants
-  const SESSION_TOKEN = '5ccce4a4-ab0a-4a7c-943d-580e55542363';
+  const SESSION_TOKEN = user?.id || '09012072-b5b0-4ae7-859f-565ee978b6c5';
   const MAPBOX_RETRIEVE_URL = 'https://api.mapbox.com/search/searchbox/v1/retrieve/';
   const DEBOUNCE_DELAY = 1000;
   const FREE_TIER_LIMIT = 25;
