@@ -1,11 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 import { useClerk, useUser } from '@clerk/nextjs';
 import { supabase } from '../supabase';
 import SearchPlace from './SearchPlace';
-import { BarChart, MapPin, Navigation } from 'lucide-react';
+import { BarChart, Check, Copy, MapPin, Navigation, Pencil, Share2, X } from 'lucide-react';
 import { logout } from '../utils/auth';
+import { Alert, AlertDescription } from '../ui/alert';
 
 // Types remain the same
 interface PlaceDetails {
@@ -45,8 +46,17 @@ const AddPlace = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [totalMapViews, setTotalMapViews] = useState(0);
-  const { isLoaded, isSignedIn, user } = useUser();
   const [clerkUserId, setClerkUserId] = useState<string | null>(null);
+  const { isLoaded, isSignedIn, user } = useUser();
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [mappBoxUserId, setMappBoxUserId] = useState<string | null>(null);
+  const [showLink, setShowLink] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [isSaving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
 
   const searchedPlaceContext = useContext(SearchedPlaceDetailsContext);
   const { searchedPlace, setSearchedPlaceDetails } = searchedPlaceContext || {};
@@ -84,7 +94,7 @@ const AddPlace = () => {
       if (user?.id) {
         const { data, error } = await supabase
           .from('MappBook_Users')
-          .select('is_premium_user,total_map_views')
+          .select('id,is_premium_user,total_map_views,display_name')
           .eq('clerk_user_id', user.id)
           .single();
 
@@ -96,12 +106,15 @@ const AddPlace = () => {
         if (data) {
           setIsPremiumUser(data.is_premium_user);
           setTotalMapViews(data.total_map_views);
+          setDisplayName(data.display_name || 'MappBook User');
+          setMappBoxUserId(data.id)
         }
       }
     };
 
     fetchUserData();
   }, [user]);
+
 
 
   const onAddPlaceButtonClick = async () => {
@@ -186,6 +199,97 @@ const AddPlace = () => {
     }
   };
 
+
+
+  const handleShare = () => {
+    setShowLink(!showLink); // Toggle the share section
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(`https://mappbook.com/map/${mappBoxUserId}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const startEditing = () => {
+    setNameInput(displayName || '');
+    setIsEditing(true);
+  };
+
+  const MAX_NAME_LENGTH = 25;
+  const sanitizeInput = (input: string): string => {
+    return input
+      .trim()
+      .replace(/[<>&'"]/g, '') // Remove potentially harmful characters
+      .slice(0, MAX_NAME_LENGTH); // Ensure max length
+  };
+
+  const saveName = async () => {
+    const sanitizedName = sanitizeInput(nameInput);
+
+    // Validation checks
+    if (!sanitizedName) {
+      setError('Name cannot be empty');
+      return;
+    }
+
+    if (sanitizedName.length > MAX_NAME_LENGTH) {
+      setError(`Name must be ${MAX_NAME_LENGTH} characters or less`);
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError(null);
+
+      const saveSuccess = await saveNameToDb(sanitizedName);
+
+      if (saveSuccess) {
+        setDisplayName(sanitizedName);
+        setIsEditing(false);
+      } else {
+        setError('Failed to save name. Please try again.');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('Error in saveName:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveNameToDb = async (name: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('MappBook_Users')
+        .update({ display_name: name })
+        .eq('id', mappBoxUserId)
+        .single()
+
+      if (error) {
+        console.error('Error saving name:', error.message)
+        return false
+      }
+      return true
+    } catch (err) {
+      console.error('Error saving name:', err)
+      return false
+    }
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setNameInput('');
+  };
+
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setNameInput(e.target.value);
+  };
+
   return (
     <div className="bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-xl shadow-lg border border-pink-100/50 backdrop-blur-sm">
       {/* Logo Header */}
@@ -229,7 +333,12 @@ const AddPlace = () => {
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2">
                 <BarChart className="w-4 h-4" />
-                <span className="text-sm font-medium">Stats - {totalMapViews} Map Views</span>
+                {!isPremiumUser && (
+                  <span className="text-sm font-medium">Stats - 0 Map Views</span>
+                )}
+                {isPremiumUser && (
+                  <span className="text-sm font-medium">Stats - {totalMapViews} Map Views</span>
+                )}
               </div>
               {!isPremiumUser && (
                 <span className="text-[10px] text-purple-400/80 italic">✨ Premium feature</span>
@@ -344,60 +453,166 @@ const AddPlace = () => {
 
 
 
-        {/* CTA Buttons Container */}
+        {/* share button start */}
+
+
+
         <div className="space-y-3">
           {/* Share Button */}
           <button
-            // onClick={handleShare}
+            onClick={handleShare}
             className="w-full py-3 px-4 rounded-xl font-medium
-              bg-white/80 border border-pink-100 text-gray-700
-              hover:bg-white hover:shadow-md transform transition-all duration-300
-              flex items-center justify-center gap-2"
+          bg-white/80 border border-pink-100 text-gray-700
+          hover:bg-white hover:shadow-md transform transition-all duration-300
+          flex items-center justify-center gap-2"
           >
-            {/* <Share2 className="w-5 h-5 text-purple-400" /> */}
+            <Share2 className="w-5 h-5 text-purple-400" />
             <span>Share Your Map</span>
           </button>
 
+          {/* Share Link Section */}
 
-          {/* Premium Button */}
-          <button
-            disabled={isPremiumUser}
-            className={`w-full py-3 px-4 rounded-xl font-medium
-            ${isPremiumUser
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 text-white shadow-lg hover:scale-[1.02]'
-              }
-            transform transition-all duration-300
-            flex items-center justify-center gap-2 relative
-            overflow-hidden group`}
-          >
-            <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
-            <span className="font-semibold">
-              {isPremiumUser ? 'Premium Active' : 'Upgrade to Premium'}
-            </span>
-            {!isPremiumUser && (
-              <span className="bg-white/30 text-xs py-0.5 px-2 rounded-full ml-2">
-                50% OFF
-              </span>
-            )}
-          </button>
+          {showLink && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+              {/* Name Section with Label */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">What name should be displayed on your shared MappBook?</label>
+                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={nameInput}
+                          onChange={handleNameChange}
+                          placeholder="Enter your mapp name"
+                          maxLength={MAX_NAME_LENGTH}
+                          className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                          autoFocus
+                        />
+                        <button
+                          onClick={saveName}
+                          disabled={isSaving}
+                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isSaving ? (
+                            <span className="inline-block animate-spin">↻</span>
+                          ) : (
+                            <Check className="w-5 h-5" />
+                          )}
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          disabled={isSaving}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className={error ? "text-red-500" : "text-gray-400"}>
+                          {error || `${nameInput.length}/${MAX_NAME_LENGTH} characters`}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-700">
+                        {displayName || 'Untitled Map'}
+                      </span>
+                      <button
+                        onClick={startEditing}
+                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      >
+                        <Pencil className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Share Link Section */}
+              <div className="space-y-2">
+                <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-lg">
+
+                  <button
+                    onClick={handleCopy}
+                    className="w-full py-3 px-6 bg-purple-500 hover:bg-purple-600 
+                  text-white rounded-lg flex items-center justify-center gap-2 
+                  transition-colors duration-300 font-medium"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-5 h-5" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-5 h-5" />
+                        <span>Copy Link</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+              </div>
 
 
 
-          {/* Pro Features Preview */}
-          <div className="text-center mt-4">
-            <div className="text-xs font-medium text-purple-400 flex items-center justify-center gap-2">
-              <span>✨ Unlimited Places</span>
-              <span>•</span>
-              <span>🎨 Sharing your Map</span>
-              <span>•</span>
-              <span>📊 Stats</span>
+              <Alert className="bg-blue-50 border-blue-100">
+                <AlertDescription className="text-sm text-blue-700">
+                  Share this link to let others view "{displayName || 'Untitled Map'}'s MappBook". Others can view only if you are a Premium user.
+                </AlertDescription>
+              </Alert>
             </div>
+          )}
+        </div>
+        {/* share button end */}
+
+        {/* Premium button start */}
+        <button
+          disabled={isPremiumUser}
+          className={`w-full py-3 px-4 rounded-xl font-medium mt-6
+          ${isPremiumUser
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 text-white shadow-lg hover:scale-[1.02]'
+            }
+          transform transition-all duration-300
+          flex items-center justify-center gap-2 relative
+          overflow-hidden group`}
+        >
+          <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
+          <span className="font-semibold">
+            {isPremiumUser ? 'Premium Active' : 'Upgrade to Premium'}
+          </span>
+          {!isPremiumUser && (
+            <span className="bg-white/30 text-xs py-0.5 px-2 rounded-full ml-2">
+              50% OFF
+            </span>
+          )}
+        </button>
+        {/* Premium button end */}
+
+        {/* Pro Features Preview */}
+        <div className="text-center mt-4">
+          <div className="text-xs font-medium text-purple-400 flex items-center justify-center gap-2">
+            <span>✨ Unlimited Places</span>
+            <span>•</span>
+            <span>🎨 Sharing your Map</span>
+            <span>•</span>
+            <span>📊 Stats</span>
           </div>
         </div>
 
         <div className="mt-8 pt-4 border-t border-pink-100/50">
           <div className="flex items-center justify-center gap-4 text-xs">
+            <a
+              href="/"
+              className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+            >
+              Support
+            </a>
+            <span className="text-gray-300">•</span>
             <button
               onClick={handleLogout}
               className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
@@ -427,3 +642,11 @@ const AddPlace = () => {
 };
 
 export default AddPlace;
+
+function setError(arg0: string) {
+  throw new Error('Function not implemented.');
+}
+function setSaving(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+

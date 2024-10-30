@@ -197,7 +197,9 @@ const SearchPlace = () => {
           onChange={(e) => canSearch && setSearchQuery(e.target.value)}
           aria-label="Search for a place"
           autoComplete="off"
+          maxLength={100}
           disabled={!canSearch}
+          
         />
 
         {/* Loading Indicator */}
