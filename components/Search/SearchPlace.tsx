@@ -61,11 +61,11 @@ const SearchPlace = () => {
   const isLoggedIn = !!user;
   // const canSearch = isLoggedIn && (user.is_premium_user || allPlacesCount < FREE_TIER_LIMIT);
   const canSearch = isLoggedIn && (
-    (user.is_premium_user && allPlacesCount < PREMIUM_TIER_LIMIT) || 
+    (user.is_premium_user && allPlacesCount < PREMIUM_TIER_LIMIT) ||
     (!user.is_premium_user && allPlacesCount < FREE_TIER_LIMIT)
   );
-  
-  console.log("Is the user premium " + user?.is_premium_user +" " +allPlacesCount)
+
+  console.log("Is the user premium " + user?.is_premium_user + " " + allPlacesCount)
   // Fetch suggestions when search query changes
   useEffect(() => {
     if (!canSearch) return;
@@ -93,7 +93,7 @@ const SearchPlace = () => {
 
   // Fetch address suggestions from API
   const fetchAddressSuggestions = async (query: string): Promise<Suggestion[]> => {
-    
+
     console.log("Searching...")
     const response = await fetch(`/api/search-address?q=${encodeURIComponent(query)}`, {
       headers: { "Content-Type": "application/json" }
@@ -149,40 +149,22 @@ const SearchPlace = () => {
   };
 
   const getInputPlaceholder = () => {
-    if (!isLoggedIn) return "Please log in to search";
-    if (!canSearch) return `Upgrade to Premium to add more than ${FREE_TIER_LIMIT} places`;
+    // if (!isLoggedIn) return "Please log in to search";
+    // if (!canSearch) return `Upgrade to Premium to add more than ${FREE_TIER_LIMIT} places`;
     return "Search for a place...";
   };
 
   return (
     <div className="w-full max-w-md">
-      {!isLoggedIn && (
-        <Alert className="mb-4">
-          <AlertTitle>Authentication Required</AlertTitle>
+      {isLoggedIn && !user.is_premium_user && allPlacesCount >= FREE_TIER_LIMIT && (
+        <Alert>
           <AlertDescription>
-            Please log in to use the search functionality.
-            <button
-              onClick={() => window.location.href = "/signin"}
-              className="ml-2 text-blue-600 hover:text-blue-800 underline"
-            >
-              Log in
-            </button>
+            You've reached the limit of {FREE_TIER_LIMIT} places. Upgrade to Premium to add unlimited places and share your MappBook with others.
           </AlertDescription>
         </Alert>
       )}
 
-      {isLoggedIn && !user.is_premium_user && (
-        <Alert className="mb-4">
-          <AlertDescription>
-            {allPlacesCount >= FREE_TIER_LIMIT 
-              ? `You've reached the limit of ${FREE_TIER_LIMIT} places. Upgrade to Premium to add unlimited places and share your place map with others.`
-              : `You can add up to ${FREE_TIER_LIMIT} places. Upgrade to Premium to add unlimited places and share your place map with others.`
-            }
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="relative">
+<div className="relative">
         {/* Search Input */}
         <input
           type="text"
@@ -199,7 +181,6 @@ const SearchPlace = () => {
           autoComplete="off"
           maxLength={100}
           disabled={!canSearch}
-          
         />
 
         {/* Loading Indicator */}
@@ -215,22 +196,11 @@ const SearchPlace = () => {
             {error}
           </div>
         )}
-
-        {/* Selected Place Display */}
-        {selectedPlace && canSearch && (
-          <div className="mt-3 space-y-1">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {selectedPlace.name}
-            </h2>
-            <p className="text-sm text-gray-600">
-              {selectedPlace.fullAddress}
-            </p>
-          </div>
-        )}
+        
 
         {/* Suggestions Dropdown */}
         {suggestions.length > 0 && canSearch && (
-          <div className="absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-md shadow-lg">
+          <div className="absolute left-0 right-0 z-20 bg-white border border-gray-200 rounded-md shadow-lg">
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion.mapbox_id}
@@ -246,6 +216,17 @@ const SearchPlace = () => {
                 </p>
               </button>
             ))}
+          </div>
+        )}
+         {/* Selected Place Display */}
+         {selectedPlace && canSearch && (
+          <div className="mt-3 space-y-1">
+            <h2 className="text-lg font-semibold text-gray-900">
+              {selectedPlace.name}
+            </h2>
+            <p className="text-sm text-gray-600">
+              {selectedPlace.fullAddress}
+            </p>
           </div>
         )}
       </div>

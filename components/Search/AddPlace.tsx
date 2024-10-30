@@ -334,10 +334,10 @@ const AddPlace = () => {
               <div className="flex items-center gap-2">
                 <BarChart className="w-4 h-4" />
                 {!isPremiumUser && (
-                  <span className="text-sm font-medium">Stats - 0 Map Views</span>
+                  <span className="text-sm font-medium">0 Mapp Views</span>
                 )}
                 {isPremiumUser && (
-                  <span className="text-sm font-medium">Stats - {totalMapViews} Map Views</span>
+                  <span className="text-sm font-medium">{totalMapViews} Mapp Views</span>
                 )}
               </div>
               {!isPremiumUser && (
@@ -467,7 +467,7 @@ const AddPlace = () => {
           flex items-center justify-center gap-2"
           >
             <Share2 className="w-5 h-5 text-purple-400" />
-            <span>Share Your Map</span>
+            <span>Share Your #MappBook</span>
           </button>
 
           {/* Share Link Section */}
@@ -476,7 +476,9 @@ const AddPlace = () => {
             <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
               {/* Name Section with Label */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">What name should be displayed on your shared MappBook?</label>
+                <div className="text-center text-xs font-medium text-purple-400">
+                  Your MappBook name?
+                </div>
                 <div className="bg-white border border-gray-200 rounded-lg p-3">
                   {isEditing ? (
                     <div className="space-y-2">
@@ -561,7 +563,7 @@ const AddPlace = () => {
 
               <Alert className="bg-blue-50 border-blue-100">
                 <AlertDescription className="text-sm text-blue-700">
-                  Share this link to let others view "{displayName || 'Untitled Map'}'s MappBook". Others can view only if you are a Premium user.
+                  Share this link to let others view "{displayName || 'Untitled Map'}'s MappBook". Use #MappBook. Others can view only if you are a Premium user.
                 </AlertDescription>
               </Alert>
             </div>
@@ -596,9 +598,9 @@ const AddPlace = () => {
         {/* Pro Features Preview */}
         <div className="text-center mt-4">
           <div className="text-xs font-medium text-purple-400 flex items-center justify-center gap-2">
-            <span>✨ Unlimited Places</span>
+            <span>✨ Add Unlimited Places</span>
             <span>•</span>
-            <span>🎨 Sharing your Map</span>
+            <span>🎨 Share your MappBook</span>
             <span>•</span>
             <span>📊 Stats</span>
           </div>

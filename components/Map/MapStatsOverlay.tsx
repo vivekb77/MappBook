@@ -139,19 +139,19 @@ const MapStatsOverlay: React.FC = () => {
       <div className="flex gap-4">
         <StatBox
           count={visitedPlacesCount}
-          label="Places Visited"
+          label=""
           color="text-blue-600"
           icon={<MapPin className="w-6 h-6 text-blue-600" />}
         />
         <StatBox
           count={wantToVisitPlacesCount}
-          label="Want to Visit"
+          label=""
           color="text-red-600"
           icon={<Plane className="w-6 h-6 text-red-600" />}
         />
         <StatBox
           count={visitedCountriesCount}
-          label="Countries Visited"
+          label=""
           color="text-indigo-600"
           icon={<Globe2 className="w-6 h-6 text-indigo-600" />}
         />

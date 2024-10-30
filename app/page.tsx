@@ -95,7 +95,7 @@ export default function Home() {
                   flex items-center gap-2 z-20"
               >
                 <Search className="w-5 h-5" />
-                <span>Search Places</span>
+                <span>Add Places</span>
               </button>
             )}
 

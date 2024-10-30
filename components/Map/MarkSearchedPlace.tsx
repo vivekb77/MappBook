@@ -38,14 +38,14 @@ const MarkSearchedPlace = () => {
   // Validate coordinates
   const isValidCoordinates = (place: PlaceDetails | undefined): place is PlaceDetails => {
     if (!place) return false;
-    
+
     return (
-      typeof place.latitude === 'number' && 
+      typeof place.latitude === 'number' &&
       typeof place.longitude === 'number' &&
-      !isNaN(place.latitude) && 
+      !isNaN(place.latitude) &&
       !isNaN(place.longitude) &&
       Object.keys(place).length > 0 &&
-      place.latitude !== 0 && 
+      place.latitude !== 0 &&
       place.longitude !== 0
     );
   };
@@ -62,7 +62,7 @@ const MarkSearchedPlace = () => {
         latitude={searchedPlace.latitude}
         anchor="bottom"
       >
-        <div 
+        <div
           className={`
             relative flex flex-col items-center
             transform transition-all duration-300 ease-in-out
@@ -71,15 +71,15 @@ const MarkSearchedPlace = () => {
         >
           {/* Marker Pin */}
           <div className="relative">
-            <div className="absolute -inset-1 bg-green-500 rounded-full opacity-20 animate-pulse" />
-            <MapPin 
-              className="w-8 h-8 text-green-600 drop-shadow-lg transform-gpu hover:scale-110 transition-transform duration-200" 
-              strokeWidth={2.5}
+            <div className="absolute -inset-1 bg-yellow-500 rounded-full opacity-10 animate-pulse" />
+            <img
+              src={"searched.png"}
+              className="w-10 h-10"
             />
           </div>
 
           {/* Location Label */}
-          <div 
+          <div
             className="
               mt-2 px-3 py-1.5 
               bg-white rounded-lg shadow-lg
