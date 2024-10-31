@@ -8,7 +8,25 @@ import { BarChart, Check, Copy, MapPin, Navigation, Pencil, Share2, X } from 'lu
 import { logout } from '../utils/auth';
 import { Alert, AlertDescription } from '../ui/alert';
 
-// Types remain the same
+
+const mapStyles = [
+  {
+    id: 'satellite',
+    imageSrc: '/mapstylesatellite.png',
+    label: 'Satellite'
+  },
+  {
+    id: 'light',
+    imageSrc: '/mapstylelight.png',
+    label: 'Light'
+  },
+  {
+    id: 'dark',
+    imageSrc: '/mapstyledark.png',
+    label: 'Dark'
+  },
+];
+
 interface PlaceDetails {
   mapboxId: string;
   name: string;
@@ -56,6 +74,7 @@ const AddPlace = () => {
   const [nameInput, setNameInput] = useState('');
   const [isSaving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mapStypeSelection, setMapStypeSelection] = useState<string>("satellite");
 
 
   const searchedPlaceContext = useContext(SearchedPlaceDetailsContext);
@@ -94,7 +113,7 @@ const AddPlace = () => {
       if (user?.id) {
         const { data, error } = await supabase
           .from('MappBook_Users')
-          .select('id,is_premium_user,total_map_views,display_name')
+          .select('id,is_premium_user,total_map_views,display_name,map_style')
           .eq('clerk_user_id', user.id)
           .single();
 
@@ -107,7 +126,8 @@ const AddPlace = () => {
           setIsPremiumUser(data.is_premium_user);
           setTotalMapViews(data.total_map_views);
           setDisplayName(data.display_name || 'MappBook User');
-          setMappBoxUserId(data.id)
+          setMappBoxUserId(data.id);
+          setMapStypeSelection(data.map_style)
         }
       }
     };
@@ -288,6 +308,30 @@ const AddPlace = () => {
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setNameInput(e.target.value);
+  };
+
+  const saveStyleToDb = async (style: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('MappBook_Users')
+        .update({ map_style: style })
+        .eq('id', mappBoxUserId)
+        .single();
+
+      if (error) {
+        console.error('Error saving style:', error.message);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('Error saving style:', err);
+      return false;
+    }
+  };
+
+  const handleStyleSelect = async (style: string) => {
+    setMapStypeSelection(style);
+    await saveStyleToDb(style);
   };
 
   return (
@@ -533,6 +577,44 @@ const AddPlace = () => {
                 </div>
               </div>
 
+              <div className="space-y-3">
+                <div className="text-center text-xs font-medium text-purple-400">
+                  Choose map style to share
+                </div>
+                <div className="flex justify-center items-center gap-2 overflow-x-auto pb-2 px-1">
+                  {mapStyles.map((style) => (
+                    <button
+                      key={style.id}
+                      onClick={() => handleStyleSelect(style.id)}
+                      className={`
+          relative flex-shrink-0 rounded-lg overflow-hidden
+          aspect-square w-16 group transition-all duration-200
+          ${mapStypeSelection === style.id
+                          ? 'ring-2 ring-purple-500'
+                          : 'hover:ring-2 hover:ring-gray-300'
+                        }
+        `}
+                    >
+                      <img
+                        src={style.imageSrc}
+                        alt={style.label}
+                        className="w-full h-full object-cover"
+                      />
+                      {mapStypeSelection === style.id && (
+                        <div className="absolute inset-0 bg-purple-500/20 flex items-center justify-center">
+                          <Check className="w-6 h-6 text-white drop-shadow-md" />
+                        </div>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 bg-black/40 py-1">
+                        <span className="text-xs text-white font-medium text-center block">
+                          {style.label}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Share Link Section */}
               <div className="space-y-2">
                 <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-lg">
@@ -563,7 +645,7 @@ const AddPlace = () => {
 
               <Alert className="bg-blue-50 border-blue-100">
                 <AlertDescription className="text-sm text-blue-700">
-                Spread the word, use #MappBook while sharing. Others can view {displayName || 'MappBook User'}'s Mapp only if you are a Premium user.
+                  Spread the word, use #MappBook while sharing. Others can view {displayName || 'MappBook User'}'s Mapp only if you are a Premium user.
                 </AlertDescription>
               </Alert>
             </div>
@@ -644,11 +726,3 @@ const AddPlace = () => {
 };
 
 export default AddPlace;
-
-function setError(arg0: string) {
-  throw new Error('Function not implemented.');
-}
-function setSaving(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
-

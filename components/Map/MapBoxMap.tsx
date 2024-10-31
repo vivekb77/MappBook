@@ -60,7 +60,7 @@ const DEFAULT_VIEW_STATE: MapViewState = {
 };
 
 const ROTATION_VIEW_STATE = {
-  zoom: 0.9, // More zoomed out during rotation
+  // zoom: 0.9, // More zoomed out during rotation
   pitch: 25,
   latitude: 20, // Slightly tilted view for better globe perspective
 };
