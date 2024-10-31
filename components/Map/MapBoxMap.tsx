@@ -7,10 +7,16 @@ import MarkSearchedPlace from "./MarkSearchedPlace";
 import MarkAllPlaces from "./MarkAllPlaces";
 import MapStatsOverlay from "./MapStatsOverlay";
 import { SearchedPlaceDetailsContext } from "@/context/SearchedPlaceDetailsContext";
+import MapStyleSwitcher from "./MapStyleSwitcher";
 
+const MAP_STYLES = {
+  satellite: "mapbox://styles/mapbox/satellite-streets-v12",
+  dark: "mapbox://styles/mapbox/dark-v11",
+  light: "mapbox://styles/newsexpressnz/cm2wvy2vv005c01q25cl3eo0w",
+};
 interface MapboxMapProps {
   className?: string;
-  defaultStyle?: "satellite" | "light" | "dark" | "custom";
+  defaultStyle?: "satellite" | "light" | "dark";
 }
 
 interface MapViewState {
@@ -45,13 +51,6 @@ interface SearchedPlaceContextType {
   setSearchedPlaceDetails: (details: PlaceDetails) => void;
 }
 
-const MAP_STYLES = {
-  satellite: "mapbox://styles/mapbox/satellite-streets-v12",
-  light: "mapbox://styles/mapbox/light-v11",
-  dark: "mapbox://styles/mapbox/dark-v11",
-  custom: "mapbox://styles/newsexpressnz/cm2oewdbb002p01pwb1epbr8l",
-};
-
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -114.370789,
   latitude: 46.342303,
@@ -77,20 +76,21 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const [isRotating, setIsRotating] = useState(true);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  const [currentMapStyle, setCurrentMapStyle] = useState<keyof typeof MAP_STYLES>(defaultStyle);
 
   const { searchedPlace } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
   const mapStyle = useMemo(() => MAP_STYLES[defaultStyle], [defaultStyle]);
 
   const isValidCoordinates = (place: PlaceDetails | undefined): place is PlaceDetails => {
     if (!place) return false;
-    
+
     return (
-      typeof place.latitude === 'number' && 
+      typeof place.latitude === 'number' &&
       typeof place.longitude === 'number' &&
-      !isNaN(place.latitude) && 
+      !isNaN(place.latitude) &&
       !isNaN(place.longitude) &&
       Object.keys(place).length > 0 &&
-      place.latitude !== 0 && 
+      place.latitude !== 0 &&
       place.longitude !== 0
     );
   };
@@ -111,7 +111,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   useEffect(() => {
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) startTimeRef.current = timestamp;
-      const progress = (timestamp - startTimeRef.current) / 30000; // Complete rotation every 30 seconds
+      const progress = (timestamp - startTimeRef.current) / 25000; // Complete rotation every 30 seconds
 
       if (isRotating) {
         setViewState(prev => ({
@@ -195,6 +195,13 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       bearing,
     });
   };
+  // Add handler for style changes
+  const handleStyleChange = (newStyle: keyof typeof MAP_STYLES) => {
+    setCurrentMapStyle(newStyle);
+    if (mapRef.current) {
+      mapRef.current.getMap().setStyle(MAP_STYLES[newStyle]);
+    }
+  };
 
   return (
     <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
@@ -223,8 +230,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         onWheel={handleMapInteraction}
         onLoad={handleMapLoad}
         onError={handleMapError}
-        mapStyle={mapStyle}
-        // projection="globe"
+        mapStyle={MAP_STYLES[currentMapStyle]}
         reuseMaps
         attributionControl={false}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
@@ -233,6 +239,10 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         <MarkAllPlaces />
         <MapStatsOverlay />
         <MarkSearchedPlace />
+        <MapStyleSwitcher
+          currentStyle={currentMapStyle}
+          onStyleChange={handleStyleChange}
+        />
       </Map>
 
       {!isRotating && !isValidCoordinates(searchedPlace) && (
