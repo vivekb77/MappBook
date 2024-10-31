@@ -62,7 +62,7 @@ const DEFAULT_VIEW_STATE: MapViewState = {
 const ROTATION_VIEW_STATE = {
   // zoom: 0.9, // More zoomed out during rotation
   pitch: 25,
-  latitude: 20, // Slightly tilted view for better globe perspective
+  latitude: 35, // Slightly tilted view for better globe perspective
 };
 
 const MapboxMap: React.FC<MapboxMapProps> = ({
@@ -107,17 +107,21 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
   };
 
+
   // Globe rotation animation
   useEffect(() => {
+    const SILICON_VALLEY_LONGITUDE = -122;
+
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) startTimeRef.current = timestamp;
-      const progress = (timestamp - startTimeRef.current) / 25000; // Complete rotation every 30 seconds
+      const progress = (timestamp - startTimeRef.current) / 25000;
 
       if (isRotating) {
         setViewState(prev => ({
           ...prev,
           ...ROTATION_VIEW_STATE,
-          longitude: (progress * 360) % 360 - 180,
+          // Start from Silicon Valley and rotate
+          longitude: SILICON_VALLEY_LONGITUDE + (progress * 360) % 360,
         }));
         animationRef.current = requestAnimationFrame(animate);
       }
