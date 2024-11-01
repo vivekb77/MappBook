@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { useUser } from '@clerk/nextjs';
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
@@ -10,6 +10,7 @@ interface StatBoxProps {
   label: string;
   color: string;
   icon: React.ReactNode;
+  loading?: boolean;
 }
 
 interface Place {
@@ -32,26 +33,44 @@ interface AllUserPlacesContextType {
 
 const StatBox: React.FC<StatBoxProps> = ({
   count = 0,
-  label,
   color,
-  icon
+  icon,
+  loading = false
 }) => (
   <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2.5 
-    border border-pink-100/50 shadow-sm hover:shadow-md
-    transition-all duration-300 hover:scale-105 group">
-    <div className="flex items-center gap-3">
-      <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
-        rounded-lg p-1.5 group-hover:scale-110 transition-transform duration-300`}>
-        {icon}
-      </div>
-      <div className="flex flex-col">
-        <span className={`text-lg font-bold ${color} leading-none`}>
-          {count.toLocaleString()}
-        </span>
-        <span className="text-xs text-gray-500 font-medium mt-0.5">
-          {label}
-        </span>
-      </div>
+  border border-pink-100/50 shadow-sm hover:shadow-md
+  transition-all duration-300 hover:scale-105 group">
+  <div className="flex items-center gap-3">
+    <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
+      rounded-lg p-1.5 group-hover:scale-110 transition-transform duration-500
+      ${loading ? 'animate-pulse' : ''}`}>
+      {icon}
+    </div>
+    <div className="flex flex-col">
+      {loading ? (
+        <div className="flex flex-col gap-1.5">
+          <div className="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
+          {/* <div className="h-3 w-16 bg-gray-100 rounded animate-pulse"></div> */}
+        </div>
+      ) : (
+        <>
+          <span className={`text-lg font-bold ${color} leading-none`}>
+            {count.toLocaleString()}
+          </span>
+        </>
+      )}
+    </div>
+  </div>
+</div>
+);
+
+const LoadingOverlay: React.FC = () => (
+  <div className="absolute inset-0 bg-white/50 backdrop-blur-sm 
+    flex items-center justify-center rounded-xl z-20">
+    <div className="flex items-center gap-2">
+      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
     </div>
   </div>
 );
@@ -70,57 +89,62 @@ const MapStatsOverlay: React.FC = () => {
 
   const allUserPlacesContext = useContext<AllUserPlacesContextType | null>(AllUserPlacesContext);
   const userPlaces = allUserPlacesContext?.userPlaces || [];
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPlaceCounts = async (userId: string) => {
     try {
-      // Get visited places count
-      const { count: visitedCount, error: visitedError } = await supabase
-        .from('Mappbook_User_Places')
-        .select('*', { count: 'exact', head: true })
-        .eq('clerk_user_id', userId)
-        .eq('isRemoved', false)
-        .eq('visitedorwanttovisit', 'visited');
-
-      if (!visitedError) {
-        setVisitedPlacesCount(visitedCount || 0);
-      }
-
-      // Get want to visit places count
-      const { count: wantToVisitCount, error: wantToVisitError } = await supabase
-        .from('Mappbook_User_Places')
-        .select('*', { count: 'exact', head: true })
-        .eq('clerk_user_id', userId)
-        .eq('isRemoved', false)
-        .eq('visitedorwanttovisit', 'wanttovisit');
-
-      if (!wantToVisitError) {
-        setWantToVisitPlacesCount(wantToVisitCount || 0);
-      }
-
-      // Get visited countries count
+      setIsLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from('Mappbook_User_Places')
-        .select('place_country_code')
-        .eq('clerk_user_id', userId)
-        .eq('isRemoved', false)
-        .eq('visitedorwanttovisit', 'visited');
-
-      if (!error) {
-        const uniqueCountryCounts = new Set(data.map(place => place.place_country_code)).size;
-        setVisitedCountriesCount(uniqueCountryCounts);
-      }
-
-      // Get all places count
-      const { count: allCount, error: allError } = await supabase
-        .from('Mappbook_User_Places')
-        .select('*', { count: 'exact', head: true })
+        .select(`
+          id,
+          visitedorwanttovisit,
+          place_country_code,
+          isRemoved
+        `)
         .eq('clerk_user_id', userId);
 
-      if (!allError) {
-        setAllPlacesCount(allCount || 0);
+      if (error) {
+        throw new Error('Failed to fetch places data');
       }
+
+      // Initialize counters
+      let visitedCount = 0;
+      let wantToVisitCount = 0;
+      let allPlacesCount = 0;
+      const visitedCountries = new Set();
+
+      // Process all records in a single pass
+      data.forEach(record => {
+        // Count all places regardless of status
+        allPlacesCount++;
+
+        // Only process non-removed records for other counts
+        if (!record.isRemoved) {
+          if (record.visitedorwanttovisit === 'visited') {
+            visitedCount++;
+            if (record.place_country_code) {
+              visitedCountries.add(record.place_country_code);
+            }
+          } else if (record.visitedorwanttovisit === 'wanttovisit') {
+            wantToVisitCount++;
+          }
+        }
+      });
+
+      // Update all state variables at once
+      setVisitedPlacesCount(visitedCount);
+      setWantToVisitPlacesCount(wantToVisitCount);
+      setVisitedCountriesCount(visitedCountries.size);
+      setAllPlacesCount(allPlacesCount);
+
     } catch (err) {
-      console.error("Error fetching place counts:", err);
+      setError('An unexpected error occurred');
+    } finally {
+      // Add a minimum delay to prevent flickering on fast connections
+      setTimeout(() => setIsLoading(false), 500);
     }
   };
 
@@ -136,25 +160,36 @@ const MapStatsOverlay: React.FC = () => {
 
   return (
     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
-      <div className="flex gap-4">
-        <StatBox
-          count={visitedPlacesCount}
-          label=""
-          color="text-blue-600"
-          icon={<MapPin className="w-6 h-6 text-blue-600" />}
-        />
-        <StatBox
-          count={wantToVisitPlacesCount}
-          label=""
-          color="text-red-600"
-          icon={<Plane className="w-6 h-6 text-red-600" />}
-        />
-        <StatBox
-          count={visitedCountriesCount}
-          label=""
-          color="text-indigo-600"
-          icon={<Globe2 className="w-6 h-6 text-indigo-600" />}
-        />
+      <div className="relative">
+        <div className="flex gap-4">
+          <StatBox
+            count={visitedPlacesCount}
+            color="text-blue-600"
+            icon={<MapPin strokeWidth={2.5} className="w-6 h-6 text-blue-600" />}
+            loading={isLoading} label={''}          />
+          <StatBox
+            count={wantToVisitPlacesCount}
+            color="text-red-600"
+            icon={<Plane strokeWidth={2.5} className="w-6 h-6 text-red-600" />}
+            loading={isLoading} label={''}          />
+          <StatBox
+            count={visitedCountriesCount}
+            color="text-indigo-600"
+            icon={<Globe2 strokeWidth={2.5} className="w-6 h-6 text-indigo-600" />}
+            loading={isLoading} label={''}          />
+        </div>
+        {error && (
+          <div className="mt-2 text-sm text-red-600 bg-white/90 px-3 py-1.5 rounded-md 
+            shadow-sm border border-red-100 animate-fade-in">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
