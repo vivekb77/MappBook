@@ -110,7 +110,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
   // Globe rotation animation
   useEffect(() => {
-    const SILICON_VALLEY_LONGITUDE = -122;
+    const SILICON_VALLEY_LONGITUDE = -100;
 
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) startTimeRef.current = timestamp;

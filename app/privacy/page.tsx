@@ -12,7 +12,7 @@ const PrivacyPolicyPage: FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
-            <Link 
+            <Link
               href="/"
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
@@ -148,8 +148,8 @@ const PrivacyPolicyPage: FC = () => {
               </ul>
               <p>
                 To exercise these rights, please contact us at:{' '}
-                <a href="mailto:newsexpressnz@gmail.com" className="text-blue-600 hover:text-blue-800">
-                    newsexpressnz@gmail.com
+                <a href="mailto:contact@mappbook.com" className="text-blue-600 hover:text-blue-800">
+                  contact@mappbook.com
                 </a>
               </p>
             </div>
@@ -172,8 +172,8 @@ const PrivacyPolicyPage: FC = () => {
           <section className="border-t pt-8">
             <p className="text-gray-700">
               If you have any questions about this Privacy Policy, please contact us at:{' '}
-              <a href="mailto:newsexpressnz@gmail.com" className="text-blue-600 hover:text-blue-800">
-                newsexpressnz@gmail.com
+              <a href="mailto:contact@mappbook.com" className="text-blue-600 hover:text-blue-800">
+                contact@mappbook.com
               </a>
             </p>
           </section>
