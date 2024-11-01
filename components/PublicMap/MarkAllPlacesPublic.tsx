@@ -1,10 +1,9 @@
-import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 import { useUser } from '@clerk/nextjs';
-import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
-import { Map, Marker, Popup, Source, Layer, FillLayer } from 'react-map-gl';
-import type { GeoJSON } from 'geojson';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Map, Marker, Popup, Source, Layer, LayerProps } from 'react-map-gl';
+import type { GeoJSON, Feature } from 'geojson';
 import { supabase } from '../supabase';
-import '../Map/popupstyles.css'; 
+import '../Map/popupstyles.css';
 
 interface Place {
   id: string;
@@ -19,20 +18,24 @@ interface Place {
   isRemoved?: boolean;
 }
 
+interface CountryFeatureProperties {
+  ISO_A2?: string;
+  isVisited?: boolean;
+  [key: string]: any;
+}
 
 function MarkAllPlacesPublic() {
-
   const { isLoaded, isSignedIn, user } = useUser();
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [countryData, setCountryData] = useState<GeoJSON | null>(null);
+  const [userPlaces, setUserPlaces] = useState<Place[]>([]);
 
   // Fetch country GeoJSON data
   useEffect(() => {
     fetch('/countries.geojson')
       .then(response => response.json())
       .then((data: GeoJSON) => {
-        // Ensure the data is in the correct format
         if (data.type !== 'FeatureCollection') {
           throw new Error('Invalid GeoJSON format');
         }
@@ -55,15 +58,18 @@ function MarkAllPlacesPublic() {
     try {
       const { data, error } = await supabase
         .from('Mappbook_User_Places')
-        .select('id, clerk_user_id, place_name, place_full_address, place_longitude, place_latitude, place_country, place_country_code, visitedorwanttovisit')
+        .select('*')
         .eq('clerk_user_id', userId)
         .eq('isRemoved', false);
 
       if (error) {
         console.error("Error fetching places:", error);
         setError("Failed to fetch places");
-      } else if (data) {
-        setAllUserPlaces(data);
+        return;
+      }
+
+      if (data) {
+        setUserPlaces(data as Place[]);
       }
     } catch (err) {
       console.error("Unexpected error:", err);
@@ -81,37 +87,22 @@ function MarkAllPlacesPublic() {
   }, [userPlaces]);
 
   // Create the country fill layer style
-  const countryFillLayer: FillLayer = {
+  const countryFillLayer: LayerProps = {
     id: 'country-fills',
     type: 'fill',
     paint: {
       'fill-color': [
         'case',
         ['get', 'isVisited'],
-        'rgba(79, 70, 229, 1)',  //  visited countries
-        'rgba(200, 200, 200, 0.1)'  //  unvisited countries
+        'rgba(79, 70, 229, 1)',
+        'rgba(200, 200, 200, 0.1)'
       ],
       'fill-outline-color': [
         'case',
         ['get', 'isVisited'],
-        'rgba(7, 4, 77, 1)',  // visited country borders
-        'rgba(100, 100, 100, 0.2)'  // unvisited country borders
+        'rgba(7, 4, 77, 1)',
+        'rgba(100, 100, 100, 0.2)'
       ]
-    }
-  };
-
-  // Add a line layer for country borders
-  const countryBorderLayer = {
-    id: 'country-borders',
-    type: 'line' as const,
-    paint: {
-      'line-color': [
-        'case',
-        ['get', 'isVisited'],
-        'rgba(0, 128, 0, 0.5)',  // Darker green for visited country borders
-        'rgba(100, 100, 100, 0.2)'  // Gray for unvisited country borders
-      ],
-      'line-width': 1
     }
   };
 
@@ -120,8 +111,7 @@ function MarkAllPlacesPublic() {
     if (!countryData || countryData.type !== 'FeatureCollection') return null;
 
     const updatedFeatures = countryData.features.map(feature => {
-      // Get the country code from properties (assuming it exists in your GeoJSON)
-      const countryCode = (feature.properties?.ISO_A2 || '').toLowerCase();
+      const countryCode = ((feature.properties as CountryFeatureProperties)?.ISO_A2 || '').toLowerCase();
       
       return {
         ...feature,
@@ -135,21 +125,14 @@ function MarkAllPlacesPublic() {
     return {
       type: 'FeatureCollection' as const,
       features: updatedFeatures
-    } as GeoJSON;
+    };
   }, [countryData, visitedCountries]);
-
-  const handleMarkerClick = (place: Place) => {
-    setSelectedPlace(place);
-  };
-
 
   return (
     <>
-    // @ts-ignore
       {geojsonData && (
         <Source id="country-data" type="geojson" data={geojsonData}>
           <Layer {...countryFillLayer} />
-          {/* <Layer {...countryBorderLayer} /> */}
         </Source>
       )}
       
@@ -162,7 +145,7 @@ function MarkAllPlacesPublic() {
         >
           <div 
             className="relative flex flex-col items-center cursor-pointer transform transition-transform hover:scale-105"
-            onClick={() => handleMarkerClick(place)}
+            onClick={() => setSelectedPlace(place)}
           >
             <img
               src={place.visitedorwanttovisit === "visited" ? "/visited.png" : "/wanttovisit.png"}
@@ -183,89 +166,87 @@ function MarkAllPlacesPublic() {
           </div>
 
           {selectedPlace?.id === place.id && (
-        <Popup
-        longitude={selectedPlace.place_longitude}
-        latitude={selectedPlace.place_latitude}
-        anchor="bottom"
-        onClose={() => setSelectedPlace(null)}
-        closeOnClick={false}
-        closeButton={true}
-        closeOnMove={true}
-        className="rounded-lg shadow-lg custom-popup z-50" // Added z-50 for overlay
-      >
-        <div className="p-4 max-w-xs bg-white relative z-50"> {/* Added bg-white and relative z-50 if z-50 is removed cross button will appear on pop up but we dont want that now*/}
-          {/* Header */}
-          <div className="border-b border-gray-200 pb-3 mb-3">
-            <h3 className="font-bold text-xl text-gray-800 mb-1">
-              {selectedPlace.place_name}
-            </h3>
-            <p className="text-sm text-gray-600 leading-snug">
-              {selectedPlace.place_full_address}
-            </p>
-          </div>
-  
-          {/* Info Section */}
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center text-gray-600">
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                strokeWidth="2"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"
-                />
-              </svg>
-              <span className="text-sm font-medium">
-                {selectedPlace.place_country}
-              </span>
-            </div>
-  
-            <div className="flex items-center">
-              <div
-                className={`
-                  flex items-center px-3 py-1 rounded-full text-sm font-medium
-                  ${selectedPlace.visitedorwanttovisit === "visited"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-blue-100 text-blue-800"
-                  }
-                `}
-              >
-                <svg
-                  className={`w-4 h-4 mr-1.5 ${
-                    selectedPlace.visitedorwanttovisit === "visited"
-                      ? "text-green-600"
-                      : "text-blue-600"
-                  }`}
-                  fill="none"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {selectedPlace.visitedorwanttovisit === "visited" ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  )}
-                </svg>
-                {selectedPlace.visitedorwanttovisit === "visited" ? "Visited" : "Bucket List"}
+            <Popup
+              longitude={selectedPlace.place_longitude}
+              latitude={selectedPlace.place_latitude}
+              anchor="bottom"
+              onClose={() => setSelectedPlace(null)}
+              closeOnClick={false}
+              closeButton={true}
+              closeOnMove={true}
+              className="rounded-lg shadow-lg custom-popup z-50"
+            >
+              <div className="p-4 max-w-xs bg-white relative z-50">
+                <div className="border-b border-gray-200 pb-3 mb-3">
+                  <h3 className="font-bold text-xl text-gray-800 mb-1">
+                    {selectedPlace.place_name}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-snug">
+                    {selectedPlace.place_full_address}
+                  </p>
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center text-gray-600">
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"
+                      />
+                    </svg>
+                    <span className="text-sm font-medium">
+                      {selectedPlace.place_country}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center">
+                    <div
+                      className={`
+                        flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        ${selectedPlace.visitedorwanttovisit === "visited"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-blue-100 text-blue-800"
+                        }
+                      `}
+                    >
+                      <svg
+                        className={`w-4 h-4 mr-1.5 ${
+                          selectedPlace.visitedorwanttovisit === "visited"
+                            ? "text-green-600"
+                            : "text-blue-600"
+                        }`}
+                        fill="none"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        {selectedPlace.visitedorwanttovisit === "visited" ? (
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        ) : (
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        )}
+                      </svg>
+                      {selectedPlace.visitedorwanttovisit === "visited" ? "Visited" : "Bucket List"}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </Popup>
+            </Popup>
           )}
         </Marker>
       ))}

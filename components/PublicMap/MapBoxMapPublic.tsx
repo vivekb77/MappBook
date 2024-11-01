@@ -1,21 +1,23 @@
-import React, { useContext, useEffect, useRef, useState, useMemo } from "react";
-import { Map, MapRef, MapLayerMouseEvent, ViewState } from "react-map-gl";
+import React, { useEffect, useRef, useState } from "react";
+import { Map, MapRef, ViewState } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, RotateCcw } from "lucide-react";
-
-import MarkAllPlacesPublic from "./MarkAllPlacesPublic";
 import MapStatsOverlayPublic from "./MapStatsOverlayPublic";
+import MarkAllPlacesPublic from "./MarkAllPlacesPublic";
 import MapStyleSwitcher from "../Map/MapStyleSwitcher";
 
 const MAP_STYLES = {
   satellite: "mapbox://styles/mapbox/satellite-streets-v12",
   dark: "mapbox://styles/mapbox/dark-v11",
   light: "mapbox://styles/newsexpressnz/cm2wvy2vv005c01q25cl3eo0w",
-};
+} as const;
+
+type MapStyle = keyof typeof MAP_STYLES;
+
 interface MapboxMapProps {
   className?: string;
-  defaultStyle?: "satellite" | "light" | "dark";
+  defaultStyle?: MapStyle;
 }
 
 interface MapViewState {
@@ -32,34 +34,21 @@ interface MapViewState {
   };
 }
 
-interface PlaceDetails {
-  longitude: number;
-  latitude: number;
-  mapboxId: string;
-  name: string;
-  address: string;
-  country: string;
-  countryCode: string;
-  language: string;
-  poiCategory?: string;
-  maki?: string;
-}
-
-
-
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -114.370789,
   latitude: 46.342303,
-  zoom: 0.8, // Slightly zoomed in initial state
-  pitch: 25, //controls slanting
+  zoom: 0.8,
+  pitch: 25,
   bearing: 0,
 };
 
 const ROTATION_VIEW_STATE = {
-  // zoom: 0.9, // More zoomed out during rotation
   pitch: 25,
-  latitude: 35, // Slightly tilted view for better globe perspective
+  latitude: 35,
 };
+
+const SILICON_VALLEY_LONGITUDE = -100;
+const ROTATION_DURATION = 25000;
 
 const MapboxMap: React.FC<MapboxMapProps> = ({
   className = "",
@@ -72,24 +61,36 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const [isRotating, setIsRotating] = useState(true);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
-  const [currentMapStyle, setCurrentMapStyle] = useState<keyof typeof MAP_STYLES>(defaultStyle);
+  const [currentMapStyle, setCurrentMapStyle] = useState<MapStyle>(defaultStyle);
 
+  // Globe rotation animation
+  useEffect(() => {
+    const animate = (timestamp: number) => {
+      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      const progress = (timestamp - startTimeRef.current) / ROTATION_DURATION;
 
-  const isValidCoordinates = (place: PlaceDetails | undefined): place is PlaceDetails => {
-    if (!place) return false;
+      if (isRotating) {
+        setViewState(prev => ({
+          ...prev,
+          ...ROTATION_VIEW_STATE,
+          longitude: SILICON_VALLEY_LONGITUDE + (progress * 360) % 360,
+        }));
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    };
 
-    return (
-      typeof place.latitude === 'number' &&
-      typeof place.longitude === 'number' &&
-      !isNaN(place.latitude) &&
-      !isNaN(place.longitude) &&
-      Object.keys(place).length > 0 &&
-      place.latitude !== 0 &&
-      place.longitude !== 0
-    );
-  };
+    if (isRotating) {
+      startTimeRef.current = null;
+      animationRef.current = requestAnimationFrame(animate);
+    }
 
-  // Initialize rotation with zoom out effect
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isRotating]);
+
   const startRotation = () => {
     setIsRotating(true);
     if (mapRef.current) {
@@ -100,38 +101,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       });
     }
   };
-
-
-  // Globe rotation animation
-  useEffect(() => {
-    const SILICON_VALLEY_LONGITUDE = -100;
-
-    const animate = (timestamp: number) => {
-      if (!startTimeRef.current) startTimeRef.current = timestamp;
-      const progress = (timestamp - startTimeRef.current) / 25000;
-
-      if (isRotating) {
-        setViewState(prev => ({
-          ...prev,
-          ...ROTATION_VIEW_STATE,
-          // Start from Silicon Valley and rotate
-          longitude: SILICON_VALLEY_LONGITUDE + (progress * 360) % 360,
-        }));
-        animationRef.current = requestAnimationFrame(animate);
-      }
-    };
-
-    // if (isRotating && !isValidCoordinates(searchedPlace)) {
-    //   startTimeRef.current = null;
-    //   animationRef.current = requestAnimationFrame(animate);
-    // }
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [isRotating]);
 
   const handleMapLoad = () => {
     setIsLoading(false);
@@ -147,7 +116,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
   };
 
-  const handleMapError = (e: any) => {
+  const handleMapError = () => {
     setError("Failed to load map. Please check your connection and try again.");
     setIsLoading(false);
   };
@@ -157,17 +126,16 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   const handleViewStateChange = (evt: { viewState: ViewState }) => {
-    const { longitude, latitude, zoom, pitch, bearing } = evt.viewState;
     setViewState({
-      longitude,
-      latitude,
-      zoom,
-      pitch,
-      bearing,
+      longitude: evt.viewState.longitude,
+      latitude: evt.viewState.latitude,
+      zoom: evt.viewState.zoom,
+      pitch: evt.viewState.pitch,
+      bearing: evt.viewState.bearing,
     });
   };
-  // Add handler for style changes
-  const handleStyleChange = (newStyle: keyof typeof MAP_STYLES) => {
+
+  const handleStyleChange = (newStyle: MapStyle) => {
     setCurrentMapStyle(newStyle);
     if (mapRef.current) {
       mapRef.current.getMap().setStyle(MAP_STYLES[newStyle]);
@@ -209,7 +177,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       >
         <MarkAllPlacesPublic />
         <MapStatsOverlayPublic />
-
         <MapStyleSwitcher
           currentStyle={currentMapStyle}
           onStyleChange={handleStyleChange}
