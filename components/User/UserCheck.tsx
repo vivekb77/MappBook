@@ -16,7 +16,7 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
       try {
         const { data: existingUser, error: fetchError } = await supabase
           .from('MappBook_Users')
-          .select('*')
+          .select('is_premium_user,id,clerk_user_id')
           .eq('clerk_user_id', userId)
           .single();
 

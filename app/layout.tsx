@@ -5,13 +5,12 @@ import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
 import { UserProvider } from '@/context/UserContext';
 import UserCheck from '@/components/User/UserCheck';
-import { MapStatsProvider } from '@/context/MapStatsContext';
 
 const outfit = Outfit({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'MappBook',
-  description: 'Tell the world where have you been',
+  description: 'Show the world where you have been.',
 };
 
 export default function RootLayout({
@@ -25,9 +24,7 @@ export default function RootLayout({
         <ClerkProvider>
           <UserProvider>
             <UserCheck>
-              <MapStatsProvider>
                 {children}
-              </MapStatsProvider>
             </UserCheck>
           </UserProvider>
         </ClerkProvider>

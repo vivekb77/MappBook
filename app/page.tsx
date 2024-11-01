@@ -5,6 +5,7 @@ import AddPlace from '@/components/Search/AddPlace'
 import MapboxMap from '@/components/Map/MapBoxMap'
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext'
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext'
+import { MapStatsProvider } from '@/context/MapStatsContext';
 import { Search } from 'lucide-react'
 
 export default function Home() {
@@ -70,6 +71,7 @@ export default function Home() {
     <div className="h-screen w-screen overflow-hidden">
       <SearchedPlaceDetailsContext.Provider value={{ searchedPlace, setSearchedPlaceDetails }}>
         <AllUserPlacesContext.Provider value={{ userPlaces, setAllUserPlaces }}>
+        <MapStatsProvider>
           <div className="flex h-full w-full relative">
             {/* Map Section - Adjusted width for desktop */}
             <div className="flex-1 h-full w-full md:w-[70%]">
@@ -145,6 +147,7 @@ export default function Home() {
               </div>
             )}
           </div>
+          </MapStatsProvider>
         </AllUserPlacesContext.Provider>
       </SearchedPlaceDetailsContext.Provider>
     </div>

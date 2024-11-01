@@ -1,6 +1,6 @@
 "use client"
 
-import MapboxMap from '@/components/PublicMap/MapBoxMapPublic'
+import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
@@ -11,7 +11,7 @@ export default function Home() {
     <main className="relative h-screen w-screen overflow-hidden">
       {/* Map Container */}
       <div className="h-full w-full">
-        <MapboxMap />
+        <MapboxMapPublic />
       </div>
 
       {/* Create Map Button */}
