@@ -2,7 +2,7 @@ import { useUser } from '@clerk/nextjs';
 import React, { useEffect, useState, useMemo } from 'react';
 import { Map, Marker, Popup, Source, Layer, LayerProps } from 'react-map-gl';
 import type { GeoJSON, Feature } from 'geojson';
-import { supabase } from '../supabase';
+import { supabase } from '../utils/supabase';
 import '../Map/popupstyles.css';
 
 interface Place {
@@ -42,7 +42,6 @@ function MarkAllPlacesPublic() {
         setCountryData(data);
       })
       .catch(error => {
-        console.error('Error loading country data:', error);
         setError('Failed to load country data');
       });
   }, []);
@@ -58,13 +57,12 @@ function MarkAllPlacesPublic() {
     try {
       const { data, error } = await supabase
         .from('Mappbook_User_Places')
-        .select('*')
+        .select('id, clerk_user_id, place_name, place_full_address, place_longitude, place_latitude, place_country, place_country_code, visitedorwanttovisit')
         .eq('clerk_user_id', userId)
         .eq('isRemoved', false);
 
       if (error) {
-        console.error("Error fetching places:", error);
-        setError("Failed to fetch places");
+        setError("Failed to fetch user's mappbook info");
         return;
       }
 
@@ -72,9 +70,9 @@ function MarkAllPlacesPublic() {
         setUserPlaces(data as Place[]);
       }
     } catch (err) {
-      console.error("Unexpected error:", err);
       setError("An unexpected error occurred");
     }
+    
   }
 
   // Create a list of visited countries using country codes
@@ -250,6 +248,23 @@ function MarkAllPlacesPublic() {
           )}
         </Marker>
       ))}
+       {error && (
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-[30%] z-50">
+          <div className="mt-2 text-sm text-red-600 bg-white/90 px-3 py-1.5 rounded-md shadow-sm border border-red-100 animate-fade-in">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                />
+              </svg>
+              {error}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

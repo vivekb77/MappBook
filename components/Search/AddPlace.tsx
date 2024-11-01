@@ -2,7 +2,7 @@ import React, { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 import { useClerk, useUser } from '@clerk/nextjs';
-import { supabase } from '../supabase';
+import { supabase } from '../utils/supabase';
 import SearchPlace from './SearchPlace';
 import { BarChart, Check, Copy, MapPin, Navigation, Pencil, Share2, X } from 'lucide-react';
 import { logout } from '../utils/auth';

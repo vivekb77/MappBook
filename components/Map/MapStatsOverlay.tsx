@@ -1,5 +1,5 @@
 import React, { useEffect, useContext } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../utils/supabase';
 import { useUser } from '@clerk/nextjs';
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 import { MapStatsContext } from '@/context/MapStatsContext';

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../utils/supabase';
 import { useUser } from '@clerk/nextjs';
 import { MapPin, Plane, Globe2 } from 'lucide-react';
 
@@ -93,8 +93,7 @@ const MapStatsOverlayPublic: React.FC = () => {
       });
 
     } catch (err) {
-      console.error("Error fetching stats:", err);
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      setError('An unexpected error occurred');
     } finally {
       // Add a minimum delay to prevent flickering on fast connections
       setTimeout(() => setIsLoading(false), 500);

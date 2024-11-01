@@ -59,12 +59,15 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
   const [isRotating, setIsRotating] = useState(true);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const [currentMapStyle, setCurrentMapStyle] = useState<MapStyle>(defaultStyle);
 
   // Globe rotation animation
   useEffect(() => {
+    let animationFrameId: number;
+
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) startTimeRef.current = timestamp;
       const progress = (timestamp - startTimeRef.current) / ROTATION_DURATION;
@@ -75,18 +78,18 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
           ...ROTATION_VIEW_STATE,
           longitude: SILICON_VALLEY_LONGITUDE + (progress * 360) % 360,
         }));
-        animationRef.current = requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
       }
     };
 
     if (isRotating) {
       startTimeRef.current = null;
-      animationRef.current = requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     }
 
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
   }, [isRotating]);
@@ -104,8 +107,9 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
   const handleMapLoad = () => {
     setIsLoading(false);
-    if (mapRef.current) {
-      const map = mapRef.current.getMap();
+    setMapLoaded(true);
+    const map = mapRef.current?.getMap();
+    if (map) {
       map.setFog({
         'horizon-blend': 0.2,
         'color': '#ffffff',
@@ -116,45 +120,53 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
   };
 
-  const handleMapError = () => {
-    setError("Failed to load map. Please check your connection and try again.");
+  const handleMapError = (error: { error: Error }) => {
+    setError("Unable to load map. Please try again later.");
     setIsLoading(false);
+    setIsRotating(false);
+    setMapLoaded(false);
+    // Clean up animation if it's running
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
   };
 
   const handleMapInteraction = () => {
-    setIsRotating(false);
+    if (isRotating) {
+      setIsRotating(false);
+    }
   };
 
-  const handleViewStateChange = (evt: { viewState: ViewState }) => {
-    setViewState({
-      longitude: evt.viewState.longitude,
-      latitude: evt.viewState.latitude,
-      zoom: evt.viewState.zoom,
-      pitch: evt.viewState.pitch,
-      bearing: evt.viewState.bearing,
-    });
+  const handleViewStateChange = ({ viewState }: { viewState: ViewState }) => {
+    const { longitude, latitude, zoom, pitch, bearing } = viewState;
+    setViewState({ longitude, latitude, zoom, pitch, bearing });
   };
 
   const handleStyleChange = (newStyle: MapStyle) => {
     setCurrentMapStyle(newStyle);
-    if (mapRef.current) {
-      mapRef.current.getMap().setStyle(MAP_STYLES[newStyle]);
+    const map = mapRef.current?.getMap();
+    if (map) {
+      map.setStyle(MAP_STYLES[newStyle]);
     }
   };
+
+  if (error) {
+    return (
+      <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
+        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+          <Alert variant="destructive" className="w-96">
+            <AlertDescription>Unable to load map. Please try again later.</AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
       {isLoading && (
         <div className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10">
           <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-        </div>
-      )}
-
-      {error && (
-        <div className="absolute top-10 left-4 right-4 z-1">
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
         </div>
       )}
 
@@ -175,19 +187,24 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         style={{ width: '100%', height: '100%' }}
       >
-        <MarkAllPlacesPublic />
-        <MapStatsOverlayPublic />
-        <MapStyleSwitcher
-          currentStyle={currentMapStyle}
-          onStyleChange={handleStyleChange}
-        />
+        {mapLoaded && (
+          <>
+            <MarkAllPlacesPublic />
+            <MapStatsOverlayPublic />
+            <MapStyleSwitcher
+              currentStyle={currentMapStyle}
+              onStyleChange={handleStyleChange}
+            />
+          </>
+        )}
       </Map>
 
-      {!isRotating && (
+      {!isRotating && !error && (
         <button
           onClick={startRotation}
-          className="absolute bottom-4 right-4 p-2 bg-white/80 hover:bg-white shadow-md rounded-full transition-colors"
+          className="absolute bottom-4 right-4 p-2 bg-white/80 hover:bg-white shadow-md rounded-full transition-colors z-50"
           title="Resume rotation"
+          type="button"
         >
           <RotateCcw className="w-5 h-5 text-gray-700" />
         </button>

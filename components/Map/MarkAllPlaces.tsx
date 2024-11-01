@@ -3,7 +3,7 @@ import { useUser } from '@clerk/nextjs';
 import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { Map, Marker, Popup, Source, Layer, FillLayer } from 'react-map-gl';
 import type { GeoJSON } from 'geojson';
-import { supabase } from '../supabase';
+import { supabase } from '../utils/supabase';
 import './PopupStyles.css'; 
 
 interface Place {

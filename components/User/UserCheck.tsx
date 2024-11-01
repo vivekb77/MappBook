@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuth, useUser as useClerkUser } from '@clerk/nextjs';
-import { supabase } from '../supabase';
+import { supabase } from '../utils/supabase';
 
 export default function UserCheck({ children }: { children: React.ReactNode }) {
   const { isLoaded, userId } = useAuth();
