@@ -10,7 +10,8 @@ interface UserData {
   display_name: string;
   is_premium_user: boolean;
   map_style: string;
-  total_map_views: number;
+  map_views_left: number;
+  total_map_views : number
 }
 
 interface MarkAllPlacesProps {
