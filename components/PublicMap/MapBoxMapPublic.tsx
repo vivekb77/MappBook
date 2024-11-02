@@ -50,6 +50,12 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   zoom: 0.8,
   pitch: 25,
   bearing: 0,
+  padding: {
+    top: 0,      
+    bottom: 200,  // Add bottom padding to account for the Create button
+    left: 0,
+    right: 0
+  }
 };
 
 const ROTATION_VIEW_STATE = {
@@ -197,7 +203,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         </div>
       )}
 
-      <Map
+<Map
         ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
         initialViewState={DEFAULT_VIEW_STATE}
@@ -212,7 +218,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         reuseMaps
         attributionControl={false}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
-        style={{ width: '100%', height: '100%' }}
+        // style={{ width: '100%', height: 'calc(100% + 100px)', marginTop: '-50px' }}  // Adjust height and margin to center
       >
         {mapLoaded && (
           <>

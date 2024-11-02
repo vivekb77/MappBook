@@ -57,6 +57,12 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   zoom: 0.8, // Slightly zoomed in initial state
   pitch: 25, //controls slanting
   bearing: 0,
+  padding: {
+    top: 0,      
+    bottom: 300,  // Add bottom padding to account for the Create button
+    left: 0,
+    right: 0
+  }
 };
 
 const ROTATION_VIEW_STATE = {
