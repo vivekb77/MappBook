@@ -240,7 +240,7 @@ const AddPlace = () => {
     setIsEditing(true);
   };
 
-  const MAX_NAME_LENGTH = 25;
+  const MAX_NAME_LENGTH = 20;
   const sanitizeInput = (input: string): string => {
     return input
       .trim()
@@ -645,7 +645,7 @@ const AddPlace = () => {
 
               <Alert className="bg-blue-50 border-blue-100">
                 <AlertDescription className="text-sm text-blue-700">
-                  Spread the word, use #MappBook while sharing. Others can view {displayName || 'MappBook User'}'s Mapp only if you are a Premium user.
+                  Use #MappBook while sharing. Others can view {displayName || 'MappBook User'}'s MappBook only if you are a Premium user.
                 </AlertDescription>
               </Alert>
             </div>

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
-import { MapPin, Plane, Globe2 } from 'lucide-react';
+import { MapPin, Plane, Globe2, Map } from 'lucide-react';
 
 interface UserData {
-  clerk_user_id : string;
+  clerk_user_id: string;
   id: string;
   display_name: string;
   is_premium_user: boolean;
@@ -28,30 +28,27 @@ const StatBox: React.FC<StatBoxProps> = ({
   icon,
   loading = false
 }) => (
-  <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2.5 
-    border border-pink-100/50 shadow-sm hover:shadow-md
-    transition-all duration-300 hover:scale-105 group">
-    <div className="flex items-center gap-3">
-      <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
-        rounded-lg p-1.5 group-hover:scale-110 transition-transform duration-500
-        ${loading ? 'animate-pulse' : ''}`}>
-        {icon}
-      </div>
-      <div className="flex flex-col">
-        {loading ? (
-          <div className="flex flex-col gap-1.5">
-            <div className="h-5 w-6 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-        ) : (
-          <>
-            <span className={`text-lg font-bold ${color} leading-none`}>
-              {count.toLocaleString()}
-            </span>
-          </>
-        )}
-      </div>
+  <div className="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1.5 
+  border border-pink-100/50 shadow-sm hover:shadow-md 
+  transition-all duration-300 hover:scale-105 group
+  w-[80px]"> {/* Reduced fixed width */}
+  <div className="flex items-center gap-1.5"> {/* Reduced gap */}
+    <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
+      rounded-md p-1 group-hover:scale-110 transition-transform duration-500
+      ${loading ? 'animate-pulse' : ''}`}>
+      {icon}
+    </div>
+    <div className="min-w-[32px]"> {/* Reduced minimum width for number container */}
+      {loading ? (
+        <div className="h-4 w-[32px] bg-gray-200 rounded animate-pulse"></div>
+      ) : (
+        <span className={`text-sm font-bold ${color} leading-none`}>
+          {count.toLocaleString()}
+        </span>
+      )}
     </div>
   </div>
+</div>
 );
 
 const LoadingOverlay: React.FC = () => (
@@ -79,7 +76,6 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
       setIsLoading(true);
       setError(null);
 
-      // Single query to fetch all places
       const { data: places, error: placesError } = await supabase
         .from('Mappbook_User_Places')
         .select('visitedorwanttovisit, place_country_code')
@@ -90,7 +86,6 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
         throw new Error('Failed to fetch places data');
       }
 
-      // Process the data locally
       const visitedPlaces = places.filter(place => place.visitedorwanttovisit === 'visited');
       const wantToVisitPlaces = places.filter(place => place.visitedorwanttovisit === 'wanttovisit');
       const uniqueCountries = new Set(visitedPlaces.map(place => place.place_country_code));
@@ -104,7 +99,6 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
     } catch (err) {
       setError('An unexpected error occurred');
     } finally {
-      // Add a minimum delay to prevent flickering on fast connections
       setTimeout(() => setIsLoading(false), 500);
     }
   };
@@ -116,41 +110,68 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
   }, [userData.clerk_user_id]);
 
   return (
-    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
-      <div className="relative">
-        <div className="flex gap-4">
-          <StatBox
-            count={stats.visitedCount}
-            color="text-blue-600"
-            icon={<MapPin strokeWidth={2.5} className="w-6 h-6 text-blue-600" />}
-            loading={isLoading}
-          />
-          <StatBox
-            count={stats.wantToVisitCount}
-            color="text-red-600"
-            icon={<Plane strokeWidth={2.5} className="w-6 h-6 text-red-600" />}
-            loading={isLoading}
-          />
-          <StatBox
-            count={stats.countriesCount}
-            color="text-indigo-600"
-            icon={<Globe2 strokeWidth={2.5} className="w-6 h-6 text-indigo-600" />}
-            loading={isLoading}
-          />
-        </div>
-        {error && (
-          <div className="mt-2 text-sm text-red-600 bg-white/90 px-3 py-1.5 rounded-md 
-            shadow-sm border border-red-100 animate-fade-in">
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {error}
+    <div className="absolute top-0 left-0 right-0 z-10">
+      {/* Logo Section - Left aligned with consistent margins */}
+      <div className="absolute top-3 left-3">
+        <div className="flex flex-col items-start">
+          <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+                rounded-lg p-1 shadow-sm transform -rotate-3">
+              <Map className="w-3 h-3 text-white" />
             </div>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+                text-transparent bg-clip-text transform rotate-1">
+              MappBook
+            </h1>
           </div>
-        )}
+          <p className="text-xs font-medium text-purple-400 mt-0.5">
+            Share Your World ✨ Track Your Adventures 🌎
+          </p>
+        </div>
       </div>
+
+       {/* Stats Section - Right aligned */}
+       <div className="absolute top-3 right-3">
+        <div className="flex flex-col items-end gap-2">
+          <h2 className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-blue-600 
+            text-transparent bg-clip-text px-2 mb-1">
+            {userData.display_name}'s #MappBook
+          </h2>
+          <div className="flex flex-col gap-1.5">
+            <StatBox
+              count={stats.visitedCount}
+              color="text-blue-600"
+              icon={<MapPin strokeWidth={2.5} className="w-4 h-4 text-blue-600" />}
+              loading={isLoading}
+            />
+            <StatBox
+              count={stats.wantToVisitCount}
+              color="text-red-600"
+              icon={<Plane strokeWidth={2.5} className="w-4 h-4 text-red-600" />}
+              loading={isLoading}
+            />
+            <StatBox
+              count={stats.countriesCount}
+              color="text-indigo-600"
+              icon={<Globe2 strokeWidth={2.5} className="w-4 h-4 text-indigo-600" />}
+              loading={isLoading}
+            />
+          </div>
+        </div>
+      </div>
+ 
+      {/* {error && (
+        <div className="mt-2 mx-3 text-sm text-red-600 bg-white/90 px-3 py-1.5 rounded-md 
+          shadow-sm border border-red-100 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {error}
+          </div>
+        </div>
+      )} */}
     </div>
   );
 };

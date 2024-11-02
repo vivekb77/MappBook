@@ -38,19 +38,18 @@ const MapStyleSwitcher: React.FC<MapStyleSwitcherProps> = ({
     onStyleChange,
 }) => {
     return (
-        <div className="absolute sm:top-10 sm:right-4 top-[10%] right-2 z-15">
+        <div className="absolute bottom-14 right-3 z-50">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button
-                        className="p-1.5 sm:p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white/100 transition-colors"
+                        className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors"
                         title="Change map style"
                     >
-                        <MapIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
+                        <MapIcon className="w-5 h-5 text-gray-700" />
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                     align="end"
-                    //   className="p-2 w-[80px]"
                     className="min-w-0 w-26 p-1"
                 >
                     <div className="grid grid-cols-1 gap-2">

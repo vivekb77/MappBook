@@ -108,7 +108,7 @@ export default function MapPage() {
         <div className="w-full max-w-md px-4">
           <Alert variant="destructive" className="w-full">
             <AlertDescription>
-              {'No user exists. Please check the URL and try again.'}
+              {'This user does not exist. Please check that you have the correct URL and try again.'}
             </AlertDescription>
           </Alert>
         </div>
@@ -157,7 +157,7 @@ export default function MapPage() {
         <div className="w-full max-w-md px-4">
           <Alert className="w-full">
             <AlertDescription>
-              This map view is restricted. The user needs to be premium and have available map views.
+              This MappBook can't be displayed because the owner has reached their view limit.
             </AlertDescription>
           </Alert>
         </div>
