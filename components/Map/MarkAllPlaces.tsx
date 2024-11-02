@@ -1,7 +1,7 @@
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 import { useUser } from '@clerk/nextjs';
 import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
-import { Map, Marker, Popup, Source, Layer, FillLayer } from 'react-map-gl';
+import { Map, Marker, Popup, Source, Layer, FillLayer, useMap } from 'react-map-gl';
 import type { GeoJSON } from 'geojson';
 import { supabase } from '../utils/supabase';
 import './PopupStyles.css'; 
@@ -68,12 +68,12 @@ function MarkAllPlaces() {
         .eq('isRemoved', false);
 
       if (error) {
-        setError("Failed to fetch user's mappbook info");
+        setError("Failed to fetch user's MappBook info");
       } else if (data) {
         setAllUserPlaces(data);
       }
     } catch (err) {
-      setError("Failed to fetch user's mappbook info");
+      setError("Failed to fetch user's MappBook info");
     }
   }
 
@@ -87,24 +87,25 @@ function MarkAllPlaces() {
   }, [userPlaces]);
 
   // Create the country fill layer style
-  const countryFillLayer: FillLayer = {
-    id: 'country-fills',
-    type: 'fill',
-    paint: {
-      'fill-color': [
-        'case',
-        ['get', 'isVisited'],
-        'rgba(79, 70, 229, 1)',  //  visited countries
-        'rgba(200, 200, 200, 0.1)'  //  unvisited countries
-      ],
-      'fill-outline-color': [
-        'case',
-        ['get', 'isVisited'],
-        'rgba(7, 4, 77, 1)',  // visited country borders
-        'rgba(100, 100, 100, 0.2)'  // unvisited country borders
-      ]
-    }
-  };
+  const [zoom, setZoom] = useState<number>(1);
+  const { current: map } = useMap();
+
+  // Add zoom change listener
+  useEffect(() => {
+    if (!map) return;
+
+    const onZoom = () => {
+      setZoom(map.getZoom());
+    };
+
+    map.on('zoom', onZoom);
+    // Set initial zoom
+    setZoom(map.getZoom());
+
+    return () => {
+      map.off('zoom', onZoom);
+    };
+  }, [map]);
 
   // Update GeoJSON features with visited status
   const geojsonData = useMemo(() => {
@@ -133,6 +134,31 @@ function MarkAllPlaces() {
     setSelectedPlace(place);
   };
 
+  const countryFillLayer: FillLayer = {
+    id: 'country-fills',
+    type: 'fill',
+    paint: {
+      'fill-color': [
+        'case',
+        ['get', 'isVisited'],
+        'rgba(79, 70, 229, 1)',
+        'rgba(200, 200, 200, 0.1)'
+      ],
+      'fill-opacity': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        1, 1,  // At zoom level 1, opacity is 1
+        6, 0   // At zoom level 6, opacity is 0
+      ],
+      'fill-outline-color': [
+        'case',
+        ['get', 'isVisited'],
+        'rgba(7, 4, 77, 1)',
+        'rgba(100, 100, 100, 0.2)'
+      ]
+    }
+  };
   async function markAsVisited(id: string): Promise<void> {
     try {
       const { error } = await supabase

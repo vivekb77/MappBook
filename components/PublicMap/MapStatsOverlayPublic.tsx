@@ -32,23 +32,23 @@ const StatBox: React.FC<StatBoxProps> = ({
   border border-pink-100/50 shadow-sm hover:shadow-md 
   transition-all duration-300 hover:scale-105 group
   w-[80px]"> {/* Reduced fixed width */}
-  <div className="flex items-center gap-1.5"> {/* Reduced gap */}
-    <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
+    <div className="flex items-center gap-1.5"> {/* Reduced gap */}
+      <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
       rounded-md p-1 group-hover:scale-110 transition-transform duration-500
       ${loading ? 'animate-pulse' : ''}`}>
-      {icon}
-    </div>
-    <div className="min-w-[32px]"> {/* Reduced minimum width for number container */}
-      {loading ? (
-        <div className="h-4 w-[32px] bg-gray-200 rounded animate-pulse"></div>
-      ) : (
-        <span className={`text-sm font-bold ${color} leading-none`}>
-          {count.toLocaleString()}
-        </span>
-      )}
+        {icon}
+      </div>
+      <div className="min-w-[32px]"> {/* Reduced minimum width for number container */}
+        {loading ? (
+          <div className="h-4 w-[32px] bg-gray-200 rounded animate-pulse"></div>
+        ) : (
+          <span className={`text-sm font-bold ${color} leading-none`}>
+            {count.toLocaleString()}
+          </span>
+        )}
+      </div>
     </div>
   </div>
-</div>
 );
 
 const LoadingOverlay: React.FC = () => (
@@ -125,13 +125,13 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
             </h1>
           </div>
           <p className="text-xs font-medium text-purple-400 mt-0.5">
-            Share Your World ✨ Track Your Adventures 🌎
+            Track Your Adventures 🌎
           </p>
         </div>
       </div>
 
-       {/* Stats Section - Right aligned */}
-       <div className="absolute top-3 right-3">
+      {/* Stats Section - Right aligned */}
+      <div className="absolute top-3 right-3">
         <div className="flex flex-col items-end gap-2">
           <h2 className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-blue-600 
             text-transparent bg-clip-text px-2 mb-1">
@@ -159,7 +159,7 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
           </div>
         </div>
       </div>
- 
+
       {/* {error && (
         <div className="mt-2 mx-3 text-sm text-red-600 bg-white/90 px-3 py-1.5 rounded-md 
           shadow-sm border border-red-100 animate-fade-in">

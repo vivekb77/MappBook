@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Marker, Popup, Source, Layer, LayerProps } from 'react-map-gl';
+import { Marker, Popup, Source, Layer, LayerProps, useMap } from 'react-map-gl';
 import type { GeoJSON, Feature } from 'geojson';
 import { supabase } from '../utils/supabase';
 import '../Map/popupstyles.css';
 
 interface UserData {
-  clerk_user_id : string;
+  clerk_user_id: string;
   id: string;
   display_name: string;
   is_premium_user: boolean;
@@ -41,6 +41,25 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
   const [error, setError] = useState<string | null>(null);
   const [countryData, setCountryData] = useState<GeoJSON | null>(null);
   const [userPlaces, setUserPlaces] = useState<Place[]>([]);
+  const [zoom, setZoom] = useState<number>(1);
+  const { current: map } = useMap();
+
+  // Add zoom change listener
+  useEffect(() => {
+    if (!map) return;
+
+    const onZoom = () => {
+      setZoom(map.getZoom());
+    };
+
+    map.on('zoom', onZoom);
+    // Set initial zoom
+    setZoom(map.getZoom());
+
+    return () => {
+      map.off('zoom', onZoom);
+    };
+  }, [map]);
 
   // Fetch country GeoJSON data
   useEffect(() => {
@@ -71,7 +90,6 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         .select('id, clerk_user_id, place_name, place_full_address, place_longitude, place_latitude, place_country, place_country_code, visitedorwanttovisit')
         .eq('clerk_user_id', clerk_user_id)
         .eq('isRemoved', false);
-        
 
       if (error) {
         setError("Failed to fetch user's mappbook info");
@@ -95,7 +113,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
     );
   }, [userPlaces]);
 
-  // Create the country fill layer style
+  // Create the country fill layer style with opacity based on zoom
   const countryFillLayer: LayerProps = {
     id: 'country-fills',
     type: 'fill',
@@ -105,6 +123,13 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         ['get', 'isVisited'],
         'rgba(79, 70, 229, 1)',
         'rgba(200, 200, 200, 0.1)'
+      ],
+      'fill-opacity': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        1, 1,  // At zoom level 1, opacity is 1
+        6, 0   // At zoom level 6, opacity is 0
       ],
       'fill-outline-color': [
         'case',
@@ -137,6 +162,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
     };
   }, [countryData, visitedCountries]);
 
+  // Rest of the component remains the same...
   return (
     <>
       {geojsonData && (
