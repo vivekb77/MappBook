@@ -1,7 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
-import { useUser } from '@clerk/nextjs';
 import { MapPin, Plane, Globe2 } from 'lucide-react';
+
+interface UserData {
+  clerk_user_id : string;
+  id: string;
+  display_name: string;
+  is_premium_user: boolean;
+  map_style: string;
+  total_map_views: number;
+}
+
+interface MapStatsOverlayProps {
+  userData: UserData;
+}
 
 interface StatBoxProps {
   count?: number;
@@ -9,7 +21,6 @@ interface StatBoxProps {
   icon: React.ReactNode;
   loading?: boolean;
 }
-
 
 const StatBox: React.FC<StatBoxProps> = ({
   count = 0,
@@ -30,7 +41,6 @@ const StatBox: React.FC<StatBoxProps> = ({
         {loading ? (
           <div className="flex flex-col gap-1.5">
             <div className="h-5 w-6 bg-gray-200 rounded animate-pulse"></div>
-            {/* <div className="h-3 w-16 bg-gray-100 rounded animate-pulse"></div> */}
           </div>
         ) : (
           <>
@@ -55,8 +65,7 @@ const LoadingOverlay: React.FC = () => (
   </div>
 );
 
-const MapStatsOverlayPublic: React.FC = () => {
-  const { isLoaded, isSignedIn, user } = useUser();
+const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     visitedCount: 0,
@@ -65,7 +74,7 @@ const MapStatsOverlayPublic: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = async (userId: string) => {
+  const fetchStats = async (clerk_user_id: string) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -74,7 +83,7 @@ const MapStatsOverlayPublic: React.FC = () => {
       const { data: places, error: placesError } = await supabase
         .from('Mappbook_User_Places')
         .select('visitedorwanttovisit, place_country_code')
-        .eq('clerk_user_id', userId)
+        .eq('clerk_user_id', clerk_user_id)
         .eq('isRemoved', false);
 
       if (placesError) {
@@ -101,14 +110,10 @@ const MapStatsOverlayPublic: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isLoaded && isSignedIn && user?.id) {
-      fetchStats(user.id);
+    if (userData.clerk_user_id) {
+      fetchStats(userData.clerk_user_id);
     }
-  }, [isLoaded, isSignedIn, user]);
-
-  if (!isLoaded || !isSignedIn) {
-    return null;
-  }
+  }, [userData.clerk_user_id]);
 
   return (
     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
@@ -116,21 +121,18 @@ const MapStatsOverlayPublic: React.FC = () => {
         <div className="flex gap-4">
           <StatBox
             count={stats.visitedCount}
-            // label="Places Visited"
             color="text-blue-600"
             icon={<MapPin strokeWidth={2.5} className="w-6 h-6 text-blue-600" />}
             loading={isLoading}
           />
           <StatBox
             count={stats.wantToVisitCount}
-            // label="Bucket List"
             color="text-red-600"
             icon={<Plane strokeWidth={2.5} className="w-6 h-6 text-red-600" />}
             loading={isLoading}
           />
           <StatBox
             count={stats.countriesCount}
-            // label="Countries"
             color="text-indigo-600"
             icon={<Globe2 strokeWidth={2.5} className="w-6 h-6 text-indigo-600" />}
             loading={isLoading}

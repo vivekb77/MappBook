@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import { Map, MapRef, ViewState } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -6,6 +6,26 @@ import { Loader2, RotateCcw } from "lucide-react";
 import MapStatsOverlayPublic from "./MapStatsOverlayPublic";
 import MarkAllPlacesPublic from "./MarkAllPlacesPublic";
 import MapStyleSwitcher from "../Map/MapStyleSwitcher";
+import { UserDataContext } from "../../app/map/[id]/page";
+
+// Define the UserData type
+interface UserData {
+  id: string;
+  clerk_user_id: string;
+  display_name: string;
+  is_premium_user: boolean;
+  map_style: string;
+  total_map_views: number;
+}
+
+// Define props interfaces for child components
+interface MarkAllPlacesProps extends React.HTMLAttributes<HTMLDivElement> {
+  userData: UserData;
+}
+
+interface MapStatsOverlayProps extends React.HTMLAttributes<HTMLDivElement> {
+  userData: UserData;
+}
 
 const MAP_STYLES = {
   satellite: "mapbox://styles/mapbox/satellite-streets-v12",
@@ -17,7 +37,6 @@ type MapStyle = keyof typeof MAP_STYLES;
 
 interface MapboxMapProps {
   className?: string;
-  defaultStyle?: MapStyle;
 }
 
 interface MapViewState {
@@ -50,10 +69,10 @@ const ROTATION_VIEW_STATE = {
 const SILICON_VALLEY_LONGITUDE = -100;
 const ROTATION_DURATION = 25000;
 
-const MapboxMap: React.FC<MapboxMapProps> = ({
+const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   className = "",
-  defaultStyle = "satellite"
 }) => {
+  const userData = useContext(UserDataContext);
   const mapRef = useRef<MapRef>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +81,20 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const [mapLoaded, setMapLoaded] = useState(false);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
-  const [currentMapStyle, setCurrentMapStyle] = useState<MapStyle>(defaultStyle);
+  const [currentMapStyle, setCurrentMapStyle] = useState<MapStyle>(
+    (userData?.map_style as MapStyle) || "satellite"
+  );
+
+  // Update map style when user data changes
+  useEffect(() => {
+    if (userData?.map_style && MAP_STYLES[userData.map_style as MapStyle]) {
+      setCurrentMapStyle(userData.map_style as MapStyle);
+      const map = mapRef.current?.getMap();
+      if (map) {
+        map.setStyle(MAP_STYLES[userData.map_style as MapStyle]);
+      }
+    }
+  }, [userData?.map_style]);
 
   // Globe rotation animation
   useEffect(() => {
@@ -125,7 +157,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     setIsLoading(false);
     setIsRotating(false);
     setMapLoaded(false);
-    // Clean up animation if it's running
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
@@ -162,6 +193,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     );
   }
 
+  // Don't render anything if there's no user data
+  if (!userData) {
+    return null;
+  }
+
   return (
     <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
       {isLoading && (
@@ -189,8 +225,8 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       >
         {mapLoaded && (
           <>
-            <MarkAllPlacesPublic />
-            <MapStatsOverlayPublic />
+            <MarkAllPlacesPublic userData={userData} />
+            <MapStatsOverlayPublic userData={userData} />
             <MapStyleSwitcher
               currentStyle={currentMapStyle}
               onStyleChange={handleStyleChange}
@@ -213,4 +249,4 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   );
 };
 
-export default React.memo(MapboxMap);
+export default React.memo(MapboxMapPublic);

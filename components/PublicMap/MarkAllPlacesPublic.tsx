@@ -1,9 +1,21 @@
-import { useUser } from '@clerk/nextjs';
 import React, { useEffect, useState, useMemo } from 'react';
-import { Map, Marker, Popup, Source, Layer, LayerProps } from 'react-map-gl';
+import { Marker, Popup, Source, Layer, LayerProps } from 'react-map-gl';
 import type { GeoJSON, Feature } from 'geojson';
 import { supabase } from '../utils/supabase';
 import '../Map/popupstyles.css';
+
+interface UserData {
+  clerk_user_id : string;
+  id: string;
+  display_name: string;
+  is_premium_user: boolean;
+  map_style: string;
+  total_map_views: number;
+}
+
+interface MarkAllPlacesProps {
+  userData: UserData;
+}
 
 interface Place {
   id: string;
@@ -24,8 +36,7 @@ interface CountryFeatureProperties {
   [key: string]: any;
 }
 
-function MarkAllPlacesPublic() {
-  const { isLoaded, isSignedIn, user } = useUser();
+function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [countryData, setCountryData] = useState<GeoJSON | null>(null);
@@ -48,18 +59,19 @@ function MarkAllPlacesPublic() {
 
   // Fetch user places
   useEffect(() => {
-    if (isLoaded && isSignedIn && user?.id) {
-      getAllUserPlaces(user.id);
+    if (userData.clerk_user_id) {
+      getAllUserPlaces(userData.clerk_user_id);
     }
-  }, [isLoaded, isSignedIn, user]);
+  }, [userData.clerk_user_id]);
 
-  async function getAllUserPlaces(userId: string) {
+  async function getAllUserPlaces(clerk_user_id: string) {
     try {
       const { data, error } = await supabase
         .from('Mappbook_User_Places')
         .select('id, clerk_user_id, place_name, place_full_address, place_longitude, place_latitude, place_country, place_country_code, visitedorwanttovisit')
-        .eq('clerk_user_id', userId)
+        .eq('clerk_user_id', clerk_user_id)
         .eq('isRemoved', false);
+        
 
       if (error) {
         setError("Failed to fetch user's mappbook info");
@@ -72,7 +84,6 @@ function MarkAllPlacesPublic() {
     } catch (err) {
       setError("An unexpected error occurred");
     }
-    
   }
 
   // Create a list of visited countries using country codes
@@ -248,7 +259,7 @@ function MarkAllPlacesPublic() {
           )}
         </Marker>
       ))}
-       {error && (
+      {error && (
         <div className="absolute left-1/2 -translate-x-1/2 bottom-[30%] z-50">
           <div className="mt-2 text-sm text-red-600 bg-white/90 px-3 py-1.5 rounded-md shadow-sm border border-red-100 animate-fade-in">
             <div className="flex items-center gap-2">

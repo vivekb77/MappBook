@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface UserData {
+  clerk_user_id: string
   id: string
   display_name: string
   is_premium_user: boolean
@@ -50,7 +51,7 @@ export default function MapPage() {
         // Query Supabase for user data
         const { data, error: supabaseError } = await supabase
           .from('MappBook_Users')
-          .select('id, display_name, is_premium_user, map_style, total_map_views')
+          .select('id,clerk_user_id, display_name, is_premium_user, map_style, total_map_views')
           .eq('id', userId)
           .single()
 
