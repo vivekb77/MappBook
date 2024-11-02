@@ -154,7 +154,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   const handleMapError = (e: any) => {
-    setError("Failed to load map. Please check your connection and try again.");
+    setError("Unable to load map. Please try again later.");
     setIsLoading(false);
   };
 
@@ -218,7 +218,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       {error && (
         <div className="absolute top-10 left-4 right-4 z-1">
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>Unable to load map. Please try again later.</AlertDescription>
           </Alert>
         </div>
       )}

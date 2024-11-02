@@ -18,15 +18,6 @@ interface UserData {
   total_map_views: number;
 }
 
-// Define props interfaces for child components
-interface MarkAllPlacesProps extends React.HTMLAttributes<HTMLDivElement> {
-  userData: UserData;
-}
-
-interface MapStatsOverlayProps extends React.HTMLAttributes<HTMLDivElement> {
-  userData: UserData;
-}
-
 const MAP_STYLES = {
   satellite: "mapbox://styles/mapbox/satellite-streets-v12",
   dark: "mapbox://styles/mapbox/dark-v11",

@@ -68,14 +68,12 @@ function MarkAllPlaces() {
         .eq('isRemoved', false);
 
       if (error) {
-        console.error("Error fetching places:", error);
-        setError("Failed to fetch places");
+        setError("Failed to fetch user's mappbook info");
       } else if (data) {
         setAllUserPlaces(data);
       }
     } catch (err) {
-      console.error("Unexpected error:", err);
-      setError("An unexpected error occurred");
+      setError("Failed to fetch user's mappbook info");
     }
   }
 
@@ -105,21 +103,6 @@ function MarkAllPlaces() {
         'rgba(7, 4, 77, 1)',  // visited country borders
         'rgba(100, 100, 100, 0.2)'  // unvisited country borders
       ]
-    }
-  };
-
-  // Add a line layer for country borders
-  const countryBorderLayer = {
-    id: 'country-borders',
-    type: 'line' as const,
-    paint: {
-      'line-color': [
-        'case',
-        ['get', 'isVisited'],
-        'rgba(0, 128, 0, 0.5)',  // Darker green for visited country borders
-        'rgba(100, 100, 100, 0.2)'  // Gray for unvisited country borders
-      ],
-      'line-width': 1
     }
   };
 
@@ -158,7 +141,6 @@ function MarkAllPlaces() {
         .eq('id', id);
 
       if (error) {
-        console.error("Error marking as visited:", error);
         setError("Failed to mark place as visited");
       } else {
         setAllUserPlaces((prevPlaces) => 
@@ -169,8 +151,7 @@ function MarkAllPlaces() {
         setSelectedPlace((prev) => (prev ? { ...prev, visitedorwanttovisit: "visited" } : prev));
       }
     } catch (err) {
-      console.error("Unexpected error:", err);
-      setError("An unexpected error occurred");
+      setError("Failed to mark place as visited");
     }
   }
 
@@ -190,7 +171,7 @@ function MarkAllPlaces() {
       }
     } catch (err) {
       console.error("Unexpected error:", err);
-      setError("An unexpected error occurred");
+      setError("Failed to remove place");
     }
   }
 
@@ -208,7 +189,6 @@ function MarkAllPlaces() {
       {geojsonData && (
         <Source id="country-data" type="geojson" data={geojsonData}>
           <Layer {...countryFillLayer} />
-          {/* <Layer {...countryBorderLayer} /> */}
         </Source>
       )}
       

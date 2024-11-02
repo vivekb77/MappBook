@@ -82,7 +82,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         setUserPlaces(data as Place[]);
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError("Failed to fetch user's mappbook info");
     }
   }
 
