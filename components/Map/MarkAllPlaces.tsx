@@ -261,7 +261,7 @@ function MarkAllPlaces() {
         <div className="p-4 max-w-xs bg-white relative z-50"> {/* Added bg-white and relative z-50 if z-50 is removed cross button will appear on pop up but we dont want that now*/}
           {/* Header */}
           <div className="border-b border-gray-200 pb-3 mb-3">
-            <h3 className="font-bold text-xl text-gray-800 mb-1">
+            <h3 className="font-bold text-sm text-gray-800 mb-1">
               {selectedPlace.place_name}
             </h3>
             <p className="text-sm text-gray-600 leading-snug">
@@ -270,7 +270,7 @@ function MarkAllPlaces() {
           </div>
   
           {/* Info Section */}
-          <div className="space-y-2 mb-4">
+          <div className="space-y-2 mb-1">
             <div className="flex items-center text-gray-600">
               <svg
                 className="w-4 h-4 mr-2"
@@ -293,7 +293,7 @@ function MarkAllPlaces() {
             <div className="flex items-center">
               <div
                 className={`
-                  flex items-center px-3 py-1 rounded-full text-sm font-medium
+                  flex items-center px-3 py-0 rounded-full text-sm font-medium
                   ${selectedPlace.visitedorwanttovisit === "visited"
                     ? "bg-green-100 text-green-800"
                     : "bg-blue-100 text-blue-800"

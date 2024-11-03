@@ -124,7 +124,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         'case',
         ['get', 'isVisited'],
         userData.country_fill_color,
-        'rgba(200, 200, 200, 0.3)' //greyesh
+        'rgba(200, 200, 200, 0.1)' //greyesh
       ],
       'fill-opacity': [
         'interpolate',
@@ -136,7 +136,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
       'fill-outline-color': [
         'case',
         ['get', 'isVisited'],
-        'rgba(7, 4, 77, 1)',
+        'rgba(7, 4, 77, 0.3)',
         'rgba(100, 100, 100, 0.2)'
       ]
     }
@@ -215,7 +215,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
             >
               <div className="p-4 max-w-xs bg-white relative z-50">
                 <div className="border-b border-gray-200 pb-3 mb-3">
-                  <h3 className="font-bold text-xl text-gray-800 mb-1">
+                  <h3 className="font-bold text-sm text-gray-800 mb-1">
                     {selectedPlace.place_name}
                   </h3>
                   <p className="text-sm text-gray-600 leading-snug">
@@ -223,7 +223,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
                   </p>
                 </div>
                 
-                <div className="space-y-2 mb-4">
+                <div className="space-y-2 mb-1">
                   <div className="flex items-center text-gray-600">
                     <svg
                       className="w-4 h-4 mr-2"
@@ -246,7 +246,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
                   <div className="flex items-center">
                     <div
                       className={`
-                        flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        flex items-center px-3 py-0 rounded-full text-sm font-medium
                         ${selectedPlace.visitedorwanttovisit === "visited"
                           ? "bg-green-100 text-green-800"
                           : "bg-blue-100 text-blue-800"
@@ -287,7 +287,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
           )}
         </Marker>
       ))}
-      {error && (
+      {/* {error && (
         <div className="absolute left-1/2 -translate-x-1/2 bottom-[30%] z-50">
           <div className="mt-2 text-sm text-red-600 bg-white/90 px-3 py-1.5 rounded-md shadow-sm border border-red-100 animate-fade-in">
             <div className="flex items-center gap-2">
@@ -303,7 +303,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 }
