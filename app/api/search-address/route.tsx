@@ -8,7 +8,7 @@ export async function GET(request:any) {
     const sessionToken = searchParams.get('session_token');
 
     const res = await fetch(
-        `${BASE_URL}?q=${searchText}&language=en&session_token=${sessionToken}&access_token=${process.env.MAPBOX_ACCESS_TOKEN}`
+        `${BASE_URL}?q=${searchText}&language=en&session_token=${sessionToken}&access_token=${process.env.MAPBOX_ACCESS_TOKEN_SEARCH}`
     );
 
     console.log("Search text is" +searchText);

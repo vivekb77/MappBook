@@ -123,7 +123,7 @@ const SearchPlace = () => {
       setSearchQuery('');
 
       const response = await fetch(
-        `${MAPBOX_RETRIEVE_URL}${suggestion.mapbox_id}?session_token=${SESSION_TOKEN}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`
+        `${MAPBOX_RETRIEVE_URL}${suggestion.mapbox_id}?session_token=${SESSION_TOKEN}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_RETRIEVE}`
       );
 
       if (!response.ok) {

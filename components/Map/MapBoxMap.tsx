@@ -231,7 +231,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
       <Map
         ref={mapRef}
-        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP}
         initialViewState={DEFAULT_VIEW_STATE}
         {...viewState}
         onMove={handleViewStateChange}
