@@ -258,7 +258,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       {!isRotating && !error && (
        <button
        onClick={startRotation}
-       className="absolute bottom-4 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-50"
+       className="absolute bottom-4 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
        title="Resume rotation"
        type="button"
      >

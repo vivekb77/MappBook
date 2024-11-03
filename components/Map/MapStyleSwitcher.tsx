@@ -38,7 +38,7 @@ const MapStyleSwitcher: React.FC<MapStyleSwitcherProps> = ({
     onStyleChange,
 }) => {
     return (
-        <div className="absolute bottom-14 right-3 z-50">
+        <div className="absolute bottom-14 right-3 z-5">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button

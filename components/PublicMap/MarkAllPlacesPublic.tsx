@@ -186,17 +186,17 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
           >
             <img
               src={place.visitedorwanttovisit === "visited" ? "/visited.png" : "/wanttovisit.png"}
-              className="w-10 h-10"
+              className="w-7 h-7"
               alt={`Marker for ${place.place_name}`}
             />
             <span
-              className={`
-                mt-1 text-xs font-semibold px-2 py-1 rounded-md shadow-md
-                ${place.visitedorwanttovisit === "visited"
-                  ? "text-gray-000 bg-blue-400 hover:bg-blue-500"
-                  : "text-gray-000 bg-red-400 hover:bg-red-500"}
-                transition-colors duration-200
-              `}
+             className={`
+              mt-1 text-[0.75rem] font-semibold px-2 py-1 rounded-md shadow-md
+              ${place.visitedorwanttovisit === "visited"
+                ? "text-gray-000 bg-blue-400 hover:bg-blue-500"
+                : "text-gray-000 bg-red-400 hover:bg-red-500"}
+              transition-colors duration-200
+            `}
             >
               {place.place_name}
             </span>

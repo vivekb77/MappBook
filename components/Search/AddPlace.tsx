@@ -88,6 +88,7 @@ const AddPlace = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [totalMapViews, setTotalMapViews] = useState(0);
+  const [mapViewsLeft, setMapViewsLeft] = useState(0);
   const [clerkUserId, setClerkUserId] = useState<string | null>(null);
   const { isLoaded, isSignedIn, user } = useUser();
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -137,7 +138,7 @@ const AddPlace = () => {
       if (user?.id) {
         const { data, error } = await supabase
           .from('MappBook_Users')
-          .select('id,is_premium_user,total_map_views,display_name,map_style,country_fill_color')
+          .select('id,is_premium_user,total_map_views,map_views_left,display_name,map_style,country_fill_color')
           .eq('clerk_user_id', user.id)
           .single();
 
@@ -149,6 +150,7 @@ const AddPlace = () => {
         if (data) {
           setIsPremiumUser(data.is_premium_user);
           setTotalMapViews(data.total_map_views);
+          setMapViewsLeft(data.map_views_left);
           setDisplayName(data.display_name || 'MappBook User');
           setMappBoxUserId(data.id);
           setMapStypeSelection(data.map_style)
@@ -733,7 +735,7 @@ const AddPlace = () => {
                     ) : (
                       <>
                         <Copy className="w-5 h-5" />
-                        <span>Copy Link</span>
+                        <span>Copy Link ({mapViewsLeft} views left)</span>
                       </>
                     )}
                   </button>
@@ -745,7 +747,10 @@ const AddPlace = () => {
 
               <Alert className="bg-blue-50 border-blue-100">
                 <AlertDescription className="text-sm text-blue-700">
-                  Use #MappBook while sharing. Others can view {displayName || 'MappBook User'}'s MappBook only if you are a Premium user.
+                  Others can view <b>{displayName || 'MappBook User'}'s MappBook</b> only if your account has available MappBook Views. 
+                  You have <b>{mapViewsLeft} MappBook Views left.</b> Add more views using the Premium button. 
+                  A view is counted when a user views your MappBook, and page refreshes also count as views. 
+                  Use #MappBook when sharing.
                 </AlertDescription>
               </Alert>
             </div>
@@ -758,10 +763,10 @@ const AddPlace = () => {
 
         {/* Premium button start */}
         <button
-          disabled={isPremiumUser}
+          // disabled={isPremiumUser}
           className={`w-full py-3 px-4 rounded-xl font-medium mt-6
           ${isPremiumUser
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 text-white shadow-lg hover:scale-[1.02]'
               : 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 text-white shadow-lg hover:scale-[1.02]'
             }
           transform transition-all duration-300
@@ -770,7 +775,7 @@ const AddPlace = () => {
         >
           <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
           <span className="font-semibold">
-            {isPremiumUser ? 'Premium Active' : 'Upgrade to Premium'}
+            {isPremiumUser ? `Add Views (${mapViewsLeft} views left)` : `Upgrade to Premium`}
           </span>
           {!isPremiumUser && (
             <span className="bg-white/30 text-xs py-0.5 px-2 rounded-full ml-2">
