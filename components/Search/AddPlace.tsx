@@ -27,6 +27,30 @@ const mapStyles = [
   },
 ];
 
+const colorOptions = [
+  {
+    // rgba: 'rgba(79, 70, 229, 1)', old purple
+    rgba: 'rgba(116, 117, 246, 1)',
+    label: 'Purple'
+  },
+  {
+    rgba: 'rgba(239, 130, 182, 1)',
+    label: 'Pink'
+  },
+  {
+    rgba: 'rgba(239, 108, 94, 1)',
+    label: 'Orange'
+  },
+  {
+    rgba: 'rgba(243, 156, 81, 1)',
+    label: 'Yellow'
+  },
+  {
+    rgba: 'rgba(115, 205, 114, 1)',
+    label: 'Green'
+  }
+];
+
 interface PlaceDetails {
   mapboxId: string;
   name: string;
@@ -75,7 +99,7 @@ const AddPlace = () => {
   const [isSaving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mapStypeSelection, setMapStypeSelection] = useState<string>("satellite");
-
+  const [selectedCountryFillColor, setSelectedCountryFillColor] = React.useState(colorOptions[0].rgba);
 
   const searchedPlaceContext = useContext(SearchedPlaceDetailsContext);
   const { searchedPlace, setSearchedPlaceDetails } = searchedPlaceContext || {};
@@ -113,7 +137,7 @@ const AddPlace = () => {
       if (user?.id) {
         const { data, error } = await supabase
           .from('MappBook_Users')
-          .select('id,is_premium_user,total_map_views,display_name,map_style')
+          .select('id,is_premium_user,total_map_views,display_name,map_style,country_fill_color')
           .eq('clerk_user_id', user.id)
           .single();
 
@@ -128,6 +152,7 @@ const AddPlace = () => {
           setDisplayName(data.display_name || 'MappBook User');
           setMappBoxUserId(data.id);
           setMapStypeSelection(data.map_style)
+          setSelectedCountryFillColor(data.country_fill_color)
         }
       }
     };
@@ -333,6 +358,47 @@ const AddPlace = () => {
     setMapStypeSelection(style);
     await saveStyleToDb(style);
   };
+
+  const saveCountryFillColorToDb = async (rgba: string): Promise<boolean> => {
+    setSaving(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase
+        .from('MappBook_Users')
+        .update({ country_fill_color: rgba })
+        .eq('id', mappBoxUserId)
+        .single();
+
+      if (error) {
+        console.error('Error saving color:', error.message);
+        // setError('Failed to save color preference');
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('Error saving color:', err);
+      // setError('An unexpected error occurred');
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Handle color selection
+  const handleCountryFillColorSelect = async (colorRGBA: string) => {
+    const selectedCountryFillColorOption = colorOptions.find(color => color.rgba === colorRGBA);
+    if (!selectedCountryFillColorOption) return;
+
+    setSelectedCountryFillColor(colorRGBA);
+    const success = await saveCountryFillColorToDb(selectedCountryFillColorOption.rgba);
+
+    if (success) {
+      // You might want to update your map or UI here
+      // console.log(`Color ${selectedCountryFillColorOption.label} saved successfully`);
+    }
+  };
+
 
   return (
     <div className="bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-xl shadow-lg border border-pink-100/50 backdrop-blur-sm">
@@ -615,6 +681,40 @@ const AddPlace = () => {
                 </div>
               </div>
 
+              {/* Country fill Color Selection Section */}
+
+              <div className="text-center text-xs font-medium text-purple-400">
+                Choose visited country fill color
+              </div>
+              <div className="flex justify-center items-center gap-3">
+                {colorOptions.map((colorOption) => (
+                  <button
+                    key={colorOption.label}
+                    onClick={() => handleCountryFillColorSelect(colorOption.rgba)}
+                    disabled={isSaving}
+                    className={`
+                relative group 
+                ${isSaving ? 'cursor-not-allowed opacity-50' : ''}
+              `}
+                    aria-label={`Select ${colorOption.label} color`}
+                  >
+                    <div
+                      className={`
+                  w-8 h-8 rounded-full 
+                  transition-all duration-200
+                  ${selectedCountryFillColor === colorOption.rgba ? 'scale-110 ring-2 ring-purple-400' : 'hover:scale-105'}
+                `}
+                      style={{ backgroundColor: colorOption.rgba }}
+                    />
+                    {selectedCountryFillColor === colorOption.rgba && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white drop-shadow-md" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
               {/* Share Link Section */}
               <div className="space-y-2">
                 <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-lg">
@@ -651,6 +751,9 @@ const AddPlace = () => {
             </div>
           )}
         </div>
+
+
+
         {/* share button end */}
 
         {/* Premium button start */}

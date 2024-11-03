@@ -14,6 +14,7 @@ interface UserData {
   display_name: string
   is_premium_user: boolean
   map_style: string
+  country_fill_color : string;
   map_views_left: number
   total_map_views: number
 }
@@ -83,7 +84,7 @@ export default function MapPage() {
         // Query Supabase for user data
         const { data, error: supabaseError } = await supabase
           .from('MappBook_Users')
-          .select('id,clerk_user_id, display_name, is_premium_user, map_style, map_views_left')
+          .select('id,clerk_user_id, display_name, is_premium_user, map_style, map_views_left, country_fill_color')
           .eq('id', userId)
           .single()
 

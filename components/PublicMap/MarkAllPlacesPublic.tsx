@@ -10,6 +10,7 @@ interface UserData {
   display_name: string;
   is_premium_user: boolean;
   map_style: string;
+  country_fill_color : string;
   map_views_left: number;
   total_map_views : number
 }
@@ -122,8 +123,8 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
       'fill-color': [
         'case',
         ['get', 'isVisited'],
-        'rgba(79, 70, 229, 1)',
-        'rgba(200, 200, 200, 0.1)'
+        userData.country_fill_color,
+        'rgba(200, 200, 200, 0.3)' //greyesh
       ],
       'fill-opacity': [
         'interpolate',
