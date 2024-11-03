@@ -30,23 +30,23 @@ const mapStyles = [
 const colorOptions = [
   {
     // rgba: 'rgba(79, 70, 229, 1)', old purple
-    rgba: 'rgba(116, 117, 246, 1)',
+    rgba: 'rgba(168,85,247,255)',
     label: 'Purple'
   },
   {
-    rgba: 'rgba(239, 130, 182, 1)',
+    rgba: 'rgba(236,72,153,255)',
     label: 'Pink'
   },
   {
-    rgba: 'rgba(239, 108, 94, 1)',
+    rgba: 'rgba(239,68,68,255)',
     label: 'Orange'
   },
   {
-    rgba: 'rgba(243, 156, 81, 1)',
+    rgba: 'rgba(249,115,21,255)',
     label: 'Yellow'
   },
   {
-    rgba: 'rgba(115, 205, 114, 1)',
+    rgba: 'rgba(34,197,93,255)',
     label: 'Green'
   }
 ];
