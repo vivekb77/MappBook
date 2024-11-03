@@ -54,7 +54,7 @@ const SearchPlace = () => {
   const SESSION_TOKEN = user?.id || '09012072-b5b0-4ae7-859f-565ee978b6c5';
   const MAPBOX_RETRIEVE_URL = 'https://api.mapbox.com/search/searchbox/v1/retrieve/';
   const DEBOUNCE_DELAY = 1000;
-  const FREE_TIER_LIMIT = 25;
+  const FREE_TIER_LIMIT = 50;
   const PREMIUM_TIER_LIMIT = 500;
 
   // Check if user is logged in and can search
@@ -65,7 +65,8 @@ const SearchPlace = () => {
     (!user.is_premium_user && allPlacesCount < FREE_TIER_LIMIT)
   );
 
-  console.log("Is the user premium " + user?.is_premium_user + " " + allPlacesCount)
+  console.log("Is the user premium - " + user?.is_premium_user + " All the places user added count - " + allPlacesCount)
+
   // Fetch suggestions when search query changes
   useEffect(() => {
     if (!canSearch) return;
@@ -95,7 +96,8 @@ const SearchPlace = () => {
   const fetchAddressSuggestions = async (query: string): Promise<Suggestion[]> => {
 
     console.log("Searching...")
-    const response = await fetch(`/api/search-address?q=${encodeURIComponent(query)}`, {
+
+    const response = await fetch(`/api/search-address?q=${encodeURIComponent(query)}&session_token=${SESSION_TOKEN}`, {
       headers: { "Content-Type": "application/json" }
     });
 
