@@ -14,6 +14,7 @@ const MAP_STYLES = {
   dark: "mapbox://styles/mapbox/dark-v11",
   light: "mapbox://styles/newsexpressnz/cm2wvy2vv005c01q25cl3eo0w",
 };
+
 interface MapboxMapProps {
   className?: string;
   defaultStyle?: "satellite" | "light" | "dark";
@@ -71,12 +72,14 @@ const ROTATION_VIEW_STATE = {
   latitude: 35, // Slightly tilted view for better globe perspective
 };
 
+
 const MapboxMap: React.FC<MapboxMapProps> = ({
   className = "",
   defaultStyle = "satellite"
 }) => {
   const mapRef = useRef<MapRef>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mapLoaded, setMapLoaded] = useState(false); // New state to track map load completion
   const [error, setError] = useState<string | null>(null);
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
   const [isRotating, setIsRotating] = useState(true);
@@ -89,7 +92,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
   const isValidCoordinates = (place: PlaceDetails | undefined): place is PlaceDetails => {
     if (!place) return false;
-
     return (
       typeof place.latitude === 'number' &&
       typeof place.longitude === 'number' &&
@@ -101,7 +103,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     );
   };
 
-  // Initialize rotation with zoom out effect
   const startRotation = () => {
     setIsRotating(true);
     if (mapRef.current) {
@@ -113,8 +114,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
   };
 
-
-  // Globe rotation animation
   useEffect(() => {
     const SILICON_VALLEY_LONGITUDE = -100;
 
@@ -126,7 +125,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         setViewState(prev => ({
           ...prev,
           ...ROTATION_VIEW_STATE,
-          // Start from Silicon Valley and rotate
           longitude: SILICON_VALLEY_LONGITUDE + (progress * 360) % 360,
         }));
         animationRef.current = requestAnimationFrame(animate);
@@ -157,11 +155,13 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         'star-intensity': 0.6
       });
     }
+    setMapLoaded(true); // Set mapLoaded to true after successful load
   };
 
   const handleMapError = (e: any) => {
     setError("Unable to load map. Please try again later.");
     setIsLoading(false);
+    setMapLoaded(false); // Ensure mapLoaded is false on error
   };
 
   useEffect(() => {
@@ -205,7 +205,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       bearing,
     });
   };
-  // Add handler for style changes
+
   const handleStyleChange = (newStyle: keyof typeof MAP_STYLES) => {
     setCurrentMapStyle(newStyle);
     if (mapRef.current) {
@@ -246,24 +246,28 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         style={{ width: '100%', height: '100%' }}
       >
-        <MarkAllPlaces />
-        <MapStatsOverlay />
-        <MarkSearchedPlace />
-        <MapStyleSwitcher
-          currentStyle={currentMapStyle}
-          onStyleChange={handleStyleChange}
-        />
+        {mapLoaded && (
+          <>
+            <MarkAllPlaces />
+            <MapStatsOverlay />
+            <MarkSearchedPlace />
+            <MapStyleSwitcher
+              currentStyle={currentMapStyle}
+              onStyleChange={handleStyleChange}
+            />
+          </>
+        )}
       </Map>
 
       {!isRotating && !error && (
-       <button
-       onClick={startRotation}
-       className="absolute bottom-4 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
-       title="Resume rotation"
-       type="button"
-     >
-       <RotateCcw className="w-5 h-5 text-gray-700" />
-     </button>
+        <button
+          onClick={startRotation}
+          className="absolute bottom-4 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
+          title="Resume rotation"
+          type="button"
+        >
+          <RotateCcw className="w-5 h-5 text-gray-700" />
+        </button>
       )}
     </div>
   );
