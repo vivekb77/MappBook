@@ -3,7 +3,7 @@ import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsConte
 import { useUser } from '@/context/UserContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MapStatsContext } from '@/context/MapStatsContext';
-
+ 
 // Types
 interface Suggestion {
   name: string;
@@ -46,12 +46,12 @@ const SearchPlace = () => {
     fullAddress: string;
   } | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [sessionToken, setSessionToken] = useState(() => crypto.randomUUID());
 
   // Context
   const { setSearchedPlaceDetails } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
 
   // Constants
-  const SESSION_TOKEN = user?.id || '09012072-b5b0-4ae7-859f-565ee978b6c5';
   const MAPBOX_RETRIEVE_URL = 'https://api.mapbox.com/search/searchbox/v1/retrieve/';
   const DEBOUNCE_DELAY = 1000;
   const FREE_TIER_LIMIT = 50;
@@ -95,9 +95,9 @@ const SearchPlace = () => {
   // Fetch address suggestions from API
   const fetchAddressSuggestions = async (query: string): Promise<Suggestion[]> => {
 
-    console.log("Searching...")
+    console.log("Searching... Session token - " +sessionToken)
 
-    const response = await fetch(`/api/search-address?q=${encodeURIComponent(query)}&session_token=${SESSION_TOKEN}`, {
+    const response = await fetch(`/api/search-address?q=${encodeURIComponent(query)}&session_token=${sessionToken}`, {
       headers: { "Content-Type": "application/json" }
     });
 
@@ -111,6 +111,8 @@ const SearchPlace = () => {
 
   // Handle selection of an address
   const handleAddressSelection = async (suggestion: Suggestion) => {
+
+    console.log("Retrieving... Session token - " +sessionToken)
     if (!canSearch) return;
 
     try {
@@ -123,7 +125,7 @@ const SearchPlace = () => {
       setSearchQuery('');
 
       const response = await fetch(
-        `${MAPBOX_RETRIEVE_URL}${suggestion.mapbox_id}?session_token=${SESSION_TOKEN}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_RETRIEVE}`
+        `${MAPBOX_RETRIEVE_URL}${suggestion.mapbox_id}?session_token=${sessionToken}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_RETRIEVE}`
       );
 
       if (!response.ok) {

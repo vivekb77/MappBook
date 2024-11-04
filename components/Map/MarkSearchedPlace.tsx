@@ -74,7 +74,7 @@ const MarkSearchedPlace = () => {
             <div className="absolute -inset-1 bg-yellow-500 rounded-full opacity-10 animate-pulse" />
             <img
               src={"searched.png"}
-              className="w-10 h-10"
+              className="w-7 h-7"
             />
           </div>
 
