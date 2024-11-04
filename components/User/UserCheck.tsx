@@ -16,7 +16,7 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
       try {
         const { data: existingUser, error: fetchError } = await supabase
           .from('MappBook_Users')
-          .select('mappbook_user_id,clerk_user_id, is_premium_user, total_map_views, map_views_left, display_name, map_style, country_fill_color, email_address')
+          .select('mappbook_user_id, is_premium_user, total_map_views, map_views_left, display_name, map_style, country_fill_color')
           .eq('clerk_user_id', userId)
           .single();
 
@@ -32,7 +32,7 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
               {
                 clerk_user_id: clerkUser.id,
                 display_name: clerkUser.fullName,
-                email_address:clerkUser.primaryEmailAddress?.emailAddress,
+                // email_address:clerkUser.primaryEmailAddress?.emailAddress,
               },
             ])
             .select()

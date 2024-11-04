@@ -9,14 +9,13 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface UserData {
-  clerk_user_id: string
-  id: string
-  display_name: string
-  is_premium_user: boolean
-  map_style: string
+  mappbook_user_id: string;
+  display_name: string;
+  is_premium_user: boolean;
+  map_style: string;
   country_fill_color : string;
-  map_views_left: number
-  total_map_views: number
+  map_views_left: number;
+  total_map_views : number
 }
 
 type UserDataContextType = UserData | null
@@ -84,8 +83,8 @@ export default function MapPage() {
         // Query Supabase for user data
         const { data, error: supabaseError } = await supabase
           .from('MappBook_Users')
-          .select('id,clerk_user_id, display_name, is_premium_user, map_style, map_views_left, country_fill_color')
-          .eq('id', userId)
+          .select('mappbook_user_id, display_name, is_premium_user, map_style, map_views_left, country_fill_color')
+          .eq('mappbook_user_id', userId)
           .single()
 
         if (supabaseError) {
@@ -117,7 +116,7 @@ export default function MapPage() {
     const canViewMap = userData.map_views_left > 0;
 
     if (canViewMap && !viewCountUpdated) {
-      updateViewCounts(userData.id);
+      updateViewCounts(userData.mappbook_user_id);
       setViewCountUpdated(true);
     }
   }, [userData, viewCountUpdated]);

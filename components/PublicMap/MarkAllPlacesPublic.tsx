@@ -5,8 +5,7 @@ import { supabase } from '../utils/supabase';
 import '../Map/popupstyles.css';
 
 interface UserData {
-  clerk_user_id: string;
-  id: string;
+  mappbook_user_id: string;
   display_name: string;
   is_premium_user: boolean;
   map_style: string;
@@ -20,8 +19,8 @@ interface MarkAllPlacesProps {
 }
 
 interface Place {
-  id: string;
-  clerk_user_id: string;
+  place_id: string;
+  mappbook_user_id: string;
   place_name: string;
   place_full_address: string;
   place_longitude: number;
@@ -80,24 +79,23 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
 
   // Fetch user places
   useEffect(() => {
-    if (userData.clerk_user_id) {
-      getAllUserPlaces(userData.clerk_user_id);
+    if (userData.mappbook_user_id) {
+      getAllUserPlaces(userData.mappbook_user_id);
     }
-  }, [userData.clerk_user_id]);
+  }, [userData.mappbook_user_id]);
 
-  async function getAllUserPlaces(clerk_user_id: string) {
+  async function getAllUserPlaces(mappbook_user_id: string) {
     try {
       const { data, error } = await supabase
         .from('Mappbook_User_Places')
-        .select('id, clerk_user_id, place_name, place_full_address, place_longitude, place_latitude, place_country, place_country_code, visitedorwanttovisit')
-        .eq('clerk_user_id', clerk_user_id)
+        .select('place_id, mappbook_user_id, place_name, place_full_address, place_longitude, place_latitude, place_country, place_country_code, visitedorwanttovisit')
+        .eq('mappbook_user_id', mappbook_user_id)
         .eq('isRemoved', false);
 
       if (error) {
         setError("Failed to fetch user's mappbook info");
         return;
       }
-
       if (data) {
         setUserPlaces(data as Place[]);
       }
@@ -175,7 +173,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
       
       {userPlaces.map((place) => (
         <Marker
-          key={place.id}
+          key={place.place_id}
           longitude={place.place_longitude}
           latitude={place.place_latitude}
           anchor="top"
@@ -202,7 +200,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
             </span>
           </div>
 
-          {selectedPlace?.id === place.id && (
+          {selectedPlace?.place_id === place.place_id && (
             <Popup
               longitude={selectedPlace.place_longitude}
               latitude={selectedPlace.place_latitude}

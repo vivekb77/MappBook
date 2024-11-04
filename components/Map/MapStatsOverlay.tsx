@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { supabase } from '../utils/supabase';
-import { useUser } from '@clerk/nextjs';
+import { useMappbookUser } from '@/context/UserContext';
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 import { MapStatsContext } from '@/context/MapStatsContext';
 import { MapPin, Plane, Globe2 } from 'lucide-react';
@@ -14,8 +14,8 @@ interface StatBoxProps {
 }
 
 interface Place {
-  id: string;
-  clerk_user_id: string;
+  place_id: string;
+  mappbook_user_id: string;
   place_name: string;
   place_full_address: string;
   place_longitude: number;
@@ -30,6 +30,7 @@ interface AllUserPlacesContextType {
   userPlaces: Place[];
   setAllUserPlaces: React.Dispatch<React.SetStateAction<Place[]>>;
 }
+
 
 const StatBox: React.FC<StatBoxProps> = ({
   count = 0,
@@ -72,7 +73,7 @@ const LoadingOverlay: React.FC = () => (
 );
 
 const MapStatsOverlay: React.FC = () => {
-  const { isLoaded, isSignedIn, user } = useUser();
+
   const {
     visitedPlacesCount,
     wantToVisitPlacesCount,
@@ -88,19 +89,19 @@ const MapStatsOverlay: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPlaceCounts = async (userId: string) => {
+  const fetchPlaceCounts = async (mappbook_user_id: string) => {
     try {
       setIsLoading(true);
       setError(null);
       const { data, error } = await supabase
         .from('Mappbook_User_Places')
         .select(`
-          id,
+          place_id,
           visitedorwanttovisit,
           place_country_code,
           isRemoved
         `)
-        .eq('clerk_user_id', userId);
+        .eq('mappbook_user_id', mappbook_user_id);
 
       if (error) {
         throw new Error('Failed to fetch places data');
@@ -143,16 +144,12 @@ const MapStatsOverlay: React.FC = () => {
       setTimeout(() => setIsLoading(false), 500);
     }
   };
-
+  const { mappbookUser, setMappbookUser } = useMappbookUser();
   useEffect(() => {
-    if (isLoaded && isSignedIn && user?.id) {
-      fetchPlaceCounts(user.id);
+    if (mappbookUser) {
+      fetchPlaceCounts(mappbookUser.mappbook_user_id);
     }
-  }, [isLoaded, isSignedIn, user, userPlaces]);
-
-  if (!isLoaded || !isSignedIn) {
-    return null;
-  }
+  }, [mappbookUser]);
 
   return (
     <div className="absolute top-3 right-3">

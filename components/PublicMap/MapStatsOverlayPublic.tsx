@@ -3,11 +3,11 @@ import { supabase } from '../utils/supabase';
 import { MapPin, Plane, Globe2, Map } from 'lucide-react';
 
 interface UserData {
-  clerk_user_id: string;
-  id: string;
+  mappbook_user_id: string;
   display_name: string;
   is_premium_user: boolean;
   map_style: string;
+  country_fill_color : string;
   map_views_left: number;
   total_map_views : number
 }
@@ -72,7 +72,7 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
   });
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = async (clerk_user_id: string) => {
+  const fetchStats = async (mappbook_user_id: string) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -80,7 +80,7 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
       const { data: places, error: placesError } = await supabase
         .from('Mappbook_User_Places')
         .select('visitedorwanttovisit, place_country_code')
-        .eq('clerk_user_id', clerk_user_id)
+        .eq('mappbook_user_id', mappbook_user_id)
         .eq('isRemoved', false);
 
       if (placesError) {
@@ -105,10 +105,10 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
   };
 
   useEffect(() => {
-    if (userData.clerk_user_id) {
-      fetchStats(userData.clerk_user_id);
+    if (userData.mappbook_user_id) {
+      fetchStats(userData.mappbook_user_id);
     }
-  }, [userData.clerk_user_id]);
+  }, [userData.mappbook_user_id]);
 
   return (
     <div className="absolute top-0 left-0 right-0 z-10">

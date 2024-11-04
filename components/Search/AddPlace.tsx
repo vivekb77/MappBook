@@ -63,8 +63,7 @@ interface PlaceDetails {
 }
 
 interface UserPlace {
-  id: number;
-  clerk_user_id: string;
+  place_id: number;
   place_name: string;
   place_full_address: string;
   place_longitude: number;
@@ -155,7 +154,6 @@ const AddPlace = () => {
     if (!searchedPlace || !user) return false;
 
     const newlySearchedPlace = {
-      clerk_user_id: mappbookUser?.clerk_user_id,
       mappbook_user_id: mappbookUser?.mappbook_user_id,
       mapbox_id: searchedPlace.mapboxId,
       place_name: searchedPlace.name,
@@ -182,7 +180,7 @@ const AddPlace = () => {
 
       if (data?.[0]) {
         const newPlace = {
-          id: data[0].id,
+          place_id: data[0].place_id,
           mappbook_user_id: data[0].mappbook_user_id,
           place_name: data[0].place_name,
           place_full_address: data[0].place_full_address,

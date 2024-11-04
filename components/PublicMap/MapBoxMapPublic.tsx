@@ -10,8 +10,7 @@ import { UserDataContext } from "../../app/map/[id]/page";
 
 // Define the UserData type
 interface UserData {
-  id: string;
-  clerk_user_id: string;
+  mappbook_user_id: string;
   display_name: string;
   is_premium_user: boolean;
   map_style: string;

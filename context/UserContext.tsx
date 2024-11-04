@@ -2,14 +2,12 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 export type MappBookUser = {
   mappbook_user_id: string;
-    clerk_user_id: string;
     is_premium_user?: boolean;
     total_map_views: number;
     map_views_left: number;
     display_name : string;
     map_style: string;
     country_fill_color : string;
-    email_address : string;
   };
 
 interface UserContextType {

@@ -1,5 +1,5 @@
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
-import { useUser } from '@clerk/nextjs';
+import { useMappbookUser } from '@/context/UserContext';
 import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { Map, Marker, Popup, Source, Layer, FillLayer, useMap } from 'react-map-gl';
 import type { GeoJSON } from 'geojson';
@@ -7,8 +7,8 @@ import { supabase } from '../utils/supabase';
 import './PopupStyles.css'; 
 
 interface Place {
-  id: string;
-  clerk_user_id: string;
+  place_id: string;
+  mappbook_user_id: string;
   place_name: string;
   place_full_address: string;
   place_longitude: number;
@@ -18,7 +18,6 @@ interface Place {
   visitedorwanttovisit: 'visited' | 'wanttovisit';
   isRemoved?: boolean;
 }
-
 interface AllUserPlacesContextType {
   userPlaces: Place[];
   setAllUserPlaces: React.Dispatch<React.SetStateAction<Place[]>>;
@@ -30,10 +29,10 @@ function MarkAllPlaces() {
     ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
     : [[] as Place[], () => {}];
 
-  const { isLoaded, isSignedIn, user } = useUser();
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [countryData, setCountryData] = useState<GeoJSON | null>(null);
+  const { mappbookUser, setMappbookUser } = useMappbookUser();
 
   // Fetch country GeoJSON data
   useEffect(() => {
@@ -52,19 +51,18 @@ function MarkAllPlaces() {
       });
   }, []);
 
-  // Fetch user places
   useEffect(() => {
-    if (isLoaded && isSignedIn && user?.id) {
-      getAllUserPlaces(user.id);
+    if (mappbookUser) {
+      getAllUserPlaces(mappbookUser.mappbook_user_id);
     }
-  }, [isLoaded, isSignedIn, user]);
+  }, [mappbookUser]);
 
-  async function getAllUserPlaces(userId: string) {
+  async function getAllUserPlaces(mappbook_user_id: string) {
     try {
       const { data, error } = await supabase
         .from('Mappbook_User_Places')
-        .select('id, clerk_user_id, place_name, place_full_address, place_longitude, place_latitude, place_country, place_country_code, visitedorwanttovisit')
-        .eq('clerk_user_id', userId)
+        .select('place_id, mappbook_user_id, place_name, place_full_address, place_longitude, place_latitude, place_country, place_country_code, visitedorwanttovisit')
+        .eq('mappbook_user_id', mappbook_user_id)
         .eq('isRemoved', false);
 
       if (error) {
@@ -159,19 +157,19 @@ function MarkAllPlaces() {
       ]
     }
   };
-  async function markAsVisited(id: string): Promise<void> {
+  async function markAsVisited(place_id: string): Promise<void> {
     try {
       const { error } = await supabase
         .from('Mappbook_User_Places')
         .update({ visitedorwanttovisit: "visited" })
-        .eq('id', id);
+        .eq('place_id', place_id);
 
       if (error) {
         setError("Failed to mark place as visited");
       } else {
         setAllUserPlaces((prevPlaces) => 
           prevPlaces.map((place) => 
-            place.id === id ? { ...place, visitedorwanttovisit: "visited" } : place
+            place.place_id === place_id ? { ...place, visitedorwanttovisit: "visited" } : place
           )
         );
         setSelectedPlace((prev) => (prev ? { ...prev, visitedorwanttovisit: "visited" } : prev));
@@ -181,18 +179,18 @@ function MarkAllPlaces() {
     }
   }
 
-  async function removePlace(id: string): Promise<void> {
+  async function removePlace(place_id: string): Promise<void> {
     try {
       const { error } = await supabase
         .from('Mappbook_User_Places')
         .update({ isRemoved: true })
-        .eq('id', id);
+        .eq('place_id', place_id);
 
       if (error) {
         console.error("Error removing place:", error);
         setError("Failed to remove place");
       } else {
-        setAllUserPlaces((prevPlaces) => prevPlaces.filter((place) => place.id !== id));
+        setAllUserPlaces((prevPlaces) => prevPlaces.filter((place) => place.place_id !== place_id));
         setSelectedPlace(null);
       }
     } catch (err) {
@@ -220,7 +218,7 @@ function MarkAllPlaces() {
       
       {userPlaces.map((place) => (
         <Marker
-          key={place.id}
+          key={place.place_id}
           longitude={place.place_longitude}
           latitude={place.place_latitude}
           anchor="top"
@@ -247,7 +245,7 @@ function MarkAllPlaces() {
             </span>
           </div>
 
-          {selectedPlace?.id === place.id && (
+          {selectedPlace?.place_id === place.place_id && (
         <Popup
         longitude={selectedPlace.place_longitude}
         latitude={selectedPlace.place_latitude}
@@ -337,7 +335,7 @@ function MarkAllPlaces() {
                 className="flex-1 flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 
                            text-white py-2 px-4 rounded-lg transition duration-200 ease-in-out
                            shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                onClick={() => markAsVisited(selectedPlace.id)}
+                onClick={() => markAsVisited(selectedPlace.place_id)}
               >
                 <svg
                   className="w-4 h-4"
@@ -359,7 +357,7 @@ function MarkAllPlaces() {
               className="flex-1 flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 
                          text-white py-2 px-4 rounded-lg transition duration-200 ease-in-out
                          shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-              onClick={() => removePlace(selectedPlace.id)}
+              onClick={() => removePlace(selectedPlace.place_id)}
             >
               <svg
                 className="w-4 h-4"
