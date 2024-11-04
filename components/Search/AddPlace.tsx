@@ -9,7 +9,6 @@ import { BarChart, Check, Copy, MapPin, Navigation, Pencil, Share2, X } from 'lu
 import { logout } from '../utils/auth';
 import { Alert, AlertDescription } from '../ui/alert';
 
-
 const mapStyles = [
   {
     id: 'satellite',
@@ -30,7 +29,6 @@ const mapStyles = [
 
 const colorOptions = [
   {
-    // rgba: 'rgba(79, 70, 229, 1)', old purple
     rgba: 'rgba(168,85,247,255)',
     label: 'Purple'
   },
@@ -81,13 +79,14 @@ interface UserPlace {
 type VisitStatus = 'visited' | 'wanttovisit';
 
 const AddPlace = () => {
+  const { isLoaded, isSignedIn, user } = useUser();
   const { mappbookUser, setMappbookUser } = useMappbookUser();
+  const [isLoading, setIsLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [visitStatus, setVisitStatus] = useState<VisitStatus>('visited');
   const [enableAddPlaceButton, setEnableAddPlaceButton] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isLoaded, isSignedIn, user } = useUser();
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [showLink, setShowLink] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -106,13 +105,11 @@ const AddPlace = () => {
     ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
     : [[], () => { }];
 
-
   useEffect(() => {
-    if (isLoaded && isSignedIn && mappbookUser?.mappbook_user_id) {
-
+    if (isLoaded) {
+      setIsLoading(false);
     }
-  }, [isLoaded, isSignedIn, mappbookUser]);
-
+  }, [isLoaded]);
 
   useEffect(() => {
     if (searchedPlace && Object.keys(searchedPlace).length > 0) {
@@ -129,8 +126,14 @@ const AddPlace = () => {
       setSearchedPlaceDetails({} as PlaceDetails);
     }
   };
-
-
+  useEffect(() => {
+    if (mappbookUser) {
+      setMapStypeSelection(mappbookUser.map_style);
+      setSelectedCountryFillColor(mappbookUser.country_fill_color);
+      setDisplayName(mappbookUser.display_name);
+    }
+  }, [mappbookUser]);
+  
   const onAddPlaceButtonClick = async () => {
     if (!searchedPlace || !user) return;
 
@@ -149,7 +152,6 @@ const AddPlace = () => {
   };
 
   const addPlaceDetails = async () => {
-
     if (!searchedPlace || !user) return false;
 
     const newlySearchedPlace = {
@@ -210,10 +212,8 @@ const AddPlace = () => {
     }
   };
 
-
-
   const handleShare = () => {
-    setShowLink(!showLink); // Toggle the share section
+    setShowLink(!showLink);
   };
 
   const handleCopy = async () => {
@@ -235,14 +235,13 @@ const AddPlace = () => {
   const sanitizeInput = (input: string): string => {
     return input
       .trim()
-      .replace(/[<>&'"]/g, '') // Remove potentially harmful characters
-      .slice(0, MAX_NAME_LENGTH); // Ensure max length
+      .replace(/[<>&'"]/g, '')
+      .slice(0, MAX_NAME_LENGTH);
   };
 
   const saveName = async () => {
     const sanitizedName = sanitizeInput(nameInput);
 
-    // Validation checks
     if (!sanitizedName) {
       setError('Name cannot be empty');
       return;
@@ -344,14 +343,12 @@ const AddPlace = () => {
       return true;
     } catch (err) {
       console.error('Error saving color:', err);
-      // setError('An unexpected error occurred');
+      // setError('Failed to save color preference');
       return false;
     } finally {
       setSaving(false);
     }
   };
-
-  // Handle color selection
   const handleCountryFillColorSelect = async (colorRGBA: string) => {
     const selectedCountryFillColorOption = colorOptions.find(color => color.rgba === colorRGBA);
     if (!selectedCountryFillColorOption) return;
@@ -359,12 +356,31 @@ const AddPlace = () => {
     setSelectedCountryFillColor(colorRGBA);
     const success = await saveCountryFillColorToDb(selectedCountryFillColorOption.rgba);
 
-    if (success) {
-      // You might want to update your map or UI here
-      // console.log(`Color ${selectedCountryFillColorOption.label} saved successfully`);
-    }
   };
 
+  // Early return if still loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+          {/* <p className="text-purple-600 font-medium">Loading MappBook...</p> */}
+        </div>
+      </div>
+    );
+  }
+
+  // Early return if mappbookUser is not loaded
+  if (!mappbookUser) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+          {/* <p className="text-purple-600 font-medium">Loading MappBook...</p> */}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-xl shadow-lg border border-pink-100/50 backdrop-blur-sm">
@@ -391,11 +407,11 @@ const AddPlace = () => {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 
             text-white flex items-center justify-center font-medium shadow-inner">
-              { mappbookUser?.display_name?.[0].toUpperCase() || 'MappBook User'?.[0].toUpperCase()}
+              {mappbookUser?.display_name?.[0].toUpperCase() || 'MappBook User'?.[0].toUpperCase()}
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-gray-700">
-              { mappbookUser?.display_name || 'MappBook User'}
+                {displayName || 'MappBook User'}
               </span>
               <span className="text-xs text-purple-500 font-medium">
                 {mappbookUser?.is_premium_user ? '✨ Premium Travel Creator' : 'Travel Creator'} ✈️
@@ -596,7 +612,7 @@ const AddPlace = () => {
                   ) : (
                     <div className="flex items-center justify-between">
                       <span className="text-gray-700">
-                        {displayName || mappbookUser?.display_name || 'Untitled Map'}
+                        {displayName || 'MappBook User'}
                       </span>
                       <button
                         onClick={startEditing}
@@ -711,9 +727,9 @@ const AddPlace = () => {
 
               <Alert className="bg-blue-50 border-blue-100">
                 <AlertDescription className="text-sm text-blue-700">
-                  Others can view <b>{displayName || 'MappBook User'}'s MappBook</b> only if your account has available MappBook Views. 
-                  You have <b>{mappbookUser?.map_views_left} MappBook Views left.</b> Add more views using the Premium button. 
-                  A view is counted when a user views your MappBook, and page refreshes also count as views. 
+                  Others can view <b>{displayName || mappbookUser?.display_name || 'MappBook User'}'s MappBook</b> only if your account has available MappBook Views.
+                  You have <b>{mappbookUser?.map_views_left} MappBook Views left.</b> Add more views using the Premium button.
+                  A view is counted when a user views your MappBook, and page refreshes also count as views.
                   Use #MappBook when sharing.
                 </AlertDescription>
               </Alert>

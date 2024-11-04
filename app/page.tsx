@@ -6,7 +6,9 @@ import MapboxMap from '@/components/Map/MapBoxMap'
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext'
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext'
 import { MapStatsProvider } from '@/context/MapStatsContext';
-import { Search } from 'lucide-react'
+import { Search, Loader2 } from 'lucide-react'
+import { useClerk, useUser } from '@clerk/nextjs';
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function Home() {
   const [searchedPlace, setSearchedPlaceDetails] = useState<any>([]);
@@ -15,6 +17,8 @@ export default function Home() {
   const sheetRef = useRef<HTMLDivElement>(null)
   const [startY, setStartY] = useState<number | null>(null)
   const [currentY, setCurrentY] = useState<number>(0)
+  const { isLoaded, isSignedIn, user } = useUser();
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Touch handlers remain the same
   const handleDragStart = (e: React.TouchEvent | React.MouseEvent) => {
@@ -67,6 +71,43 @@ export default function Home() {
     }
   }, [startY])
 
+  // Loading state
+  if (!isLoaded) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  // Not signed in state
+  if (!isSignedIn) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full px-4">
+          <Alert variant="destructive">
+            <AlertDescription>
+              Please sign in to access MappBook
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
+
+  // Authentication error state
+  if (authError) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full px-4">
+          <Alert variant="destructive">
+            <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen w-screen overflow-hidden">
       <SearchedPlaceDetailsContext.Provider value={{ searchedPlace, setSearchedPlaceDetails }}>
@@ -81,9 +122,6 @@ export default function Home() {
             {/* Desktop Sidebar - Set to 30% width */}
             <div className="hidden md:block w-[30%] bg-white h-full">
               <div className="h-full p-4 overflow-y-auto">
-                {/* <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                  Find Places
-                </h3> */}
                 <AddPlace />
               </div>
             </div>
@@ -130,9 +168,6 @@ export default function Home() {
                 </div>
                 
                 <div className="p-4 overflow-y-auto" style={{ height: sheetState === 'peek' ? '300px' : 'auto' }}>
-                  {/* <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                    Find Places
-                  </h3> */}
                   <AddPlace />
                 </div>
 
