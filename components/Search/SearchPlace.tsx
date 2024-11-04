@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
-import { useUser } from '@/context/UserContext';
+import { useMappbookUser } from '@/context/UserContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MapStatsContext } from '@/context/MapStatsContext';
  
@@ -34,7 +34,7 @@ interface SearchedPlaceContextType {
 }
 
 const SearchPlace = () => {
-  const { user, setUser } = useUser();
+  const { mappbookUser, setMappbookUser } = useMappbookUser();
   const { allPlacesCount } = useContext(MapStatsContext);
 
   // State
@@ -58,14 +58,14 @@ const SearchPlace = () => {
   const PREMIUM_TIER_LIMIT = 500;
 
   // Check if user is logged in and can search
-  const isLoggedIn = !!user;
+  const isLoggedIn = !!mappbookUser;
   // const canSearch = isLoggedIn && (user.is_premium_user || allPlacesCount < FREE_TIER_LIMIT);
   const canSearch = isLoggedIn && (
-    (user.is_premium_user && allPlacesCount < PREMIUM_TIER_LIMIT) ||
-    (!user.is_premium_user && allPlacesCount < FREE_TIER_LIMIT)
+    (mappbookUser.is_premium_user && allPlacesCount < PREMIUM_TIER_LIMIT) ||
+    (!mappbookUser.is_premium_user && allPlacesCount < FREE_TIER_LIMIT)
   );
 
-  console.log("Is the user premium - " + user?.is_premium_user + " All the places user added count - " + allPlacesCount)
+  console.log("Is the user premium - " + mappbookUser?.is_premium_user + " All the places user added count - " + allPlacesCount)
 
   // Fetch suggestions when search query changes
   useEffect(() => {
@@ -160,7 +160,7 @@ const SearchPlace = () => {
 
   return (
     <div className="w-full max-w-md">
-      {isLoggedIn && !user.is_premium_user && allPlacesCount >= FREE_TIER_LIMIT && (
+      {isLoggedIn && !mappbookUser.is_premium_user && allPlacesCount >= FREE_TIER_LIMIT && (
         <Alert>
           <AlertDescription>
             You've reached the limit of {FREE_TIER_LIMIT} places. Upgrade to Premium to add unlimited places and share your MappBook with others.

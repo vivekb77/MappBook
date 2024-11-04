@@ -1,13 +1,13 @@
 "use client";
 import { useEffect } from 'react';
-import { useUser } from '@/context/UserContext';
+import { useMappbookUser } from '@/context/UserContext';
 import { useAuth, useUser as useClerkUser } from '@clerk/nextjs';
 import { supabase } from '../utils/supabase';
 
 export default function UserCheck({ children }: { children: React.ReactNode }) {
   const { isLoaded, userId } = useAuth();
   const { user: clerkUser } = useClerkUser();
-  const { setUser } = useUser();
+  const { setMappbookUser } = useMappbookUser();
 
   useEffect(() => {
     async function checkAndCreateUser() {
@@ -16,7 +16,7 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
       try {
         const { data: existingUser, error: fetchError } = await supabase
           .from('MappBook_Users')
-          .select('is_premium_user,id,clerk_user_id')
+          .select('mappbook_user_id,clerk_user_id, is_premium_user, total_map_views, map_views_left, display_name, map_style, country_fill_color, email_address')
           .eq('clerk_user_id', userId)
           .single();
 
@@ -26,13 +26,13 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
         }
 
         if (!existingUser) {
-          // console.log("New user "+clerkUser.fullName)
           const { data: newUser, error: createError } = await supabase
             .from('MappBook_Users')
             .insert([
               {
-                clerk_user_id: userId,
+                clerk_user_id: clerkUser.id,
                 display_name: clerkUser.fullName,
+                email_address:clerkUser.primaryEmailAddress?.emailAddress,
               },
             ])
             .select()
@@ -43,11 +43,11 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
             return;
           }
 
-          setUser(newUser);
-          // console.log("New user created" + JSON.stringify(clerkUser))
+          setMappbookUser(newUser);
+          console.log("New user created" + JSON.stringify(newUser))
         } else {
-          setUser(existingUser);
-          // console.log("Existing user " + JSON.stringify(clerkUser))
+          setMappbookUser(existingUser);
+          console.log("Existing user " + JSON.stringify(existingUser))
         }
       } catch (error) {
         console.error('Error in checkAndCreateUser:', error);
@@ -57,7 +57,7 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
     if (isLoaded && userId) {
       checkAndCreateUser();
     }
-  }, [isLoaded, userId, clerkUser, setUser]);
+  }, [isLoaded, userId, clerkUser, setMappbookUser]);
 
   return <>{children}</>;
 }

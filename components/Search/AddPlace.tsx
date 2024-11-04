@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
+import { useMappbookUser } from '@/context/UserContext';
 import { useClerk, useUser } from '@clerk/nextjs';
 import { supabase } from '../utils/supabase';
 import SearchPlace from './SearchPlace';
@@ -80,19 +81,14 @@ interface UserPlace {
 type VisitStatus = 'visited' | 'wanttovisit';
 
 const AddPlace = () => {
-  // State management remains the same
+  const { mappbookUser, setMappbookUser } = useMappbookUser();
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [visitStatus, setVisitStatus] = useState<VisitStatus>('visited');
   const [enableAddPlaceButton, setEnableAddPlaceButton] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPremiumUser, setIsPremiumUser] = useState(false);
-  const [totalMapViews, setTotalMapViews] = useState(0);
-  const [mapViewsLeft, setMapViewsLeft] = useState(0);
-  const [clerkUserId, setClerkUserId] = useState<string | null>(null);
   const { isLoaded, isSignedIn, user } = useUser();
   const [displayName, setDisplayName] = useState<string | null>(null);
-  const [mappBoxUserId, setMappBoxUserId] = useState<string | null>(null);
   const [showLink, setShowLink] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -110,12 +106,13 @@ const AddPlace = () => {
     ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
     : [[], () => { }];
 
-  // Effects and functions remain the same
+
   useEffect(() => {
-    if (isLoaded && isSignedIn && user?.id) {
-      setClerkUserId(user.id);
+    if (isLoaded && isSignedIn && mappbookUser?.mappbook_user_id) {
+
     }
-  }, [isLoaded, isSignedIn, user]);
+  }, [isLoaded, isSignedIn, mappbookUser]);
+
 
   useEffect(() => {
     if (searchedPlace && Object.keys(searchedPlace).length > 0) {
@@ -133,39 +130,9 @@ const AddPlace = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user?.id) {
-        const { data, error } = await supabase
-          .from('MappBook_Users')
-          .select('id,is_premium_user,total_map_views,map_views_left,display_name,map_style,country_fill_color')
-          .eq('clerk_user_id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching user data:', error);
-          return;
-        }
-
-        if (data) {
-          setIsPremiumUser(data.is_premium_user);
-          setTotalMapViews(data.total_map_views);
-          setMapViewsLeft(data.map_views_left);
-          setDisplayName(data.display_name || 'MappBook User');
-          setMappBoxUserId(data.id);
-          setMapStypeSelection(data.map_style)
-          setSelectedCountryFillColor(data.country_fill_color)
-        }
-      }
-    };
-
-    fetchUserData();
-  }, [user]);
-
-
 
   const onAddPlaceButtonClick = async () => {
-    if (!searchedPlace || !clerkUserId) return;
+    if (!searchedPlace || !user) return;
 
     setIsSubmitting(true);
     const isSuccess = await addPlaceDetails();
@@ -182,11 +149,12 @@ const AddPlace = () => {
   };
 
   const addPlaceDetails = async () => {
-    // Implementation remains the same
-    if (!searchedPlace || !clerkUserId) return false;
+
+    if (!searchedPlace || !user) return false;
 
     const newlySearchedPlace = {
-      clerk_user_id: clerkUserId,
+      clerk_user_id: mappbookUser?.clerk_user_id,
+      mappbook_user_id: mappbookUser?.mappbook_user_id,
       mapbox_id: searchedPlace.mapboxId,
       place_name: searchedPlace.name,
       place_full_address: searchedPlace.address,
@@ -213,7 +181,7 @@ const AddPlace = () => {
       if (data?.[0]) {
         const newPlace = {
           id: data[0].id,
-          clerk_user_id: data[0].clerk_user_id,
+          mappbook_user_id: data[0].mappbook_user_id,
           place_name: data[0].place_name,
           place_full_address: data[0].place_full_address,
           place_longitude: data[0].place_longitude,
@@ -235,10 +203,6 @@ const AddPlace = () => {
     }
   };
 
-  if (!isLoaded || !isSignedIn) {
-    return null;
-  }
-
   const handleLogout = async () => {
     const { success, error } = await logout();
     if (!success) {
@@ -254,7 +218,7 @@ const AddPlace = () => {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(`https://mappbook.com/map/${mappBoxUserId}`);
+      await navigator.clipboard.writeText(`https://mappbook.com/map/${mappbookUser?.mappbook_user_id}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -263,7 +227,7 @@ const AddPlace = () => {
   };
 
   const startEditing = () => {
-    setNameInput(displayName || '');
+    setNameInput(mappbookUser?.display_name || '');
     setIsEditing(true);
   };
 
@@ -314,7 +278,7 @@ const AddPlace = () => {
       const { data, error } = await supabase
         .from('MappBook_Users')
         .update({ display_name: name })
-        .eq('id', mappBoxUserId)
+        .eq('mappbook_user_id', mappbookUser?.mappbook_user_id)
         .single()
 
       if (error) {
@@ -342,7 +306,7 @@ const AddPlace = () => {
       const { error } = await supabase
         .from('MappBook_Users')
         .update({ map_style: style })
-        .eq('id', mappBoxUserId)
+        .eq('mappbook_user_id', mappbookUser?.mappbook_user_id)
         .single();
 
       if (error) {
@@ -369,7 +333,7 @@ const AddPlace = () => {
       const { error } = await supabase
         .from('MappBook_Users')
         .update({ country_fill_color: rgba })
-        .eq('id', mappBoxUserId)
+        .eq('mappbook_user_id', mappbookUser?.mappbook_user_id)
         .single();
 
       if (error) {
@@ -427,14 +391,14 @@ const AddPlace = () => {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 
             text-white flex items-center justify-center font-medium shadow-inner">
-              {user.firstName?.[0] || user.fullName?.[0]}
+              { mappbookUser?.display_name?.[0].toUpperCase() || 'MappBook User'?.[0].toUpperCase()}
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-gray-700">
-                {user.fullName}
+              { mappbookUser?.display_name || 'MappBook User'}
               </span>
               <span className="text-xs text-purple-500 font-medium">
-                {isPremiumUser ? '✨ Premium Travel Creator' : 'Travel Creator'} ✈️
+                {mappbookUser?.is_premium_user ? '✨ Premium Travel Creator' : 'Travel Creator'} ✈️
               </span>
             </div>
           </div>
@@ -445,14 +409,14 @@ const AddPlace = () => {
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2">
                 <BarChart className="w-4 h-4" />
-                {!isPremiumUser && (
+                {!mappbookUser?.is_premium_user && (
                   <span className="text-sm font-medium">0 Mapp Views</span>
                 )}
-                {isPremiumUser && (
-                  <span className="text-sm font-medium">{totalMapViews} Mapp Views</span>
+                {mappbookUser?.is_premium_user && (
+                  <span className="text-sm font-medium">{mappbookUser.total_map_views} Mapp Views</span>
                 )}
               </div>
-              {!isPremiumUser && (
+              {!mappbookUser?.is_premium_user && (
                 <span className="text-[10px] text-purple-400/80 italic">✨ Premium feature</span>
               )}
             </div>
@@ -632,7 +596,7 @@ const AddPlace = () => {
                   ) : (
                     <div className="flex items-center justify-between">
                       <span className="text-gray-700">
-                        {displayName || 'Untitled Map'}
+                        {displayName || mappbookUser?.display_name || 'Untitled Map'}
                       </span>
                       <button
                         onClick={startEditing}
@@ -735,7 +699,7 @@ const AddPlace = () => {
                     ) : (
                       <>
                         <Copy className="w-5 h-5" />
-                        <span>Copy Link ({mapViewsLeft} views left)</span>
+                        <span>Copy Link ({mappbookUser?.map_views_left} views left)</span>
                       </>
                     )}
                   </button>
@@ -748,7 +712,7 @@ const AddPlace = () => {
               <Alert className="bg-blue-50 border-blue-100">
                 <AlertDescription className="text-sm text-blue-700">
                   Others can view <b>{displayName || 'MappBook User'}'s MappBook</b> only if your account has available MappBook Views. 
-                  You have <b>{mapViewsLeft} MappBook Views left.</b> Add more views using the Premium button. 
+                  You have <b>{mappbookUser?.map_views_left} MappBook Views left.</b> Add more views using the Premium button. 
                   A view is counted when a user views your MappBook, and page refreshes also count as views. 
                   Use #MappBook when sharing.
                 </AlertDescription>
@@ -765,7 +729,7 @@ const AddPlace = () => {
         <button
           // disabled={isPremiumUser}
           className={`w-full py-3 px-4 rounded-xl font-medium mt-6
-          ${isPremiumUser
+          ${mappbookUser?.is_premium_user
               ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 text-white shadow-lg hover:scale-[1.02]'
               : 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 text-white shadow-lg hover:scale-[1.02]'
             }
@@ -775,9 +739,9 @@ const AddPlace = () => {
         >
           <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
           <span className="font-semibold">
-            {isPremiumUser ? `Add Views (${mapViewsLeft} views left)` : `Upgrade to Premium`}
+            {mappbookUser?.is_premium_user ? `Add Views (${mappbookUser?.map_views_left} views left)` : `Upgrade to Premium`}
           </span>
-          {!isPremiumUser && (
+          {!mappbookUser?.is_premium_user && (
             <span className="bg-white/30 text-xs py-0.5 px-2 rounded-full ml-2">
               50% OFF
             </span>
