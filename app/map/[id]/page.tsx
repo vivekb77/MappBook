@@ -15,7 +15,6 @@ interface UserData {
   map_style: string;
   country_fill_color : string;
   map_views_left: number;
-  total_map_views : number
 }
 
 type UserDataContextType = UserData | null
@@ -32,10 +31,10 @@ export default function MapPage() {
   const [updateFailed, setUpdateFailed] = useState<boolean>(false)
   
   // Function to update map view counts in databse
-  const updateViewCounts = async (userId: string) => {
+  const updateViewCounts = async (mappbook_user_id: string) => {
     try {
       const { data, error: updateError } = await supabase
-        .rpc('update_left_map_view_counts', { user_id: userId })
+        .rpc('incrementtotalmapviews_decrementleftmapviews', { mappbook_user_id: mappbook_user_id })
 
       if (updateError) {
         console.error('Error updating view counts:', updateError)
@@ -47,13 +46,12 @@ export default function MapPage() {
       setUserData(prev =>
         prev ? {
           ...prev,
-          map_views_left: prev.map_views_left - 1,
-          total_map_views: (prev.total_map_views || 0) + 1
+          map_views_left: prev.map_views_left - 1
         } : null
       )
       return true
     } catch (err) {
-      console.error('Error in updateViewCounts:', err)
+      console.error('Error in incrementtotalmapviews_decrementleftmapviews function :', err)
       setUpdateFailed(true)
       return false
     }
