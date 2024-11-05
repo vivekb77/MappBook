@@ -3,7 +3,7 @@ import { useMappbookUser } from '@/context/UserContext';
 import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { Map, Marker, Popup, Source, Layer, FillLayer, useMap } from 'react-map-gl';
 import type { GeoJSON } from 'geojson';
-import { supabase } from '../utils/supabase';
+import { useClerkSupabase } from "../../components/utils/supabase";
 import './PopupStyles.css'; 
 
 interface Place {
@@ -24,6 +24,7 @@ interface AllUserPlacesContextType {
 }
 
 function MarkAllPlaces() {
+  const supabase = useClerkSupabase();
   const allUserPlacesContext = useContext<AllUserPlacesContextType | null>(AllUserPlacesContext);
   const [userPlaces, setAllUserPlaces] = allUserPlacesContext
     ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]

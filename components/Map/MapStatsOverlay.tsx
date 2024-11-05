@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { supabase } from '../utils/supabase';
+import { useClerkSupabase } from "../../components/utils/supabase";
 import { useMappbookUser } from '@/context/UserContext';
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 import { MapStatsContext } from '@/context/MapStatsContext';
@@ -88,6 +88,7 @@ const MapStatsOverlay: React.FC = () => {
   const userPlaces = allUserPlacesContext?.userPlaces || [];
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabase = useClerkSupabase();
 
   const fetchPlaceCounts = async (mappbook_user_id: string) => {
     try {

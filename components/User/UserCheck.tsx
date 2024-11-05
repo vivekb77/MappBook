@@ -1,14 +1,17 @@
 "use client";
 import { useEffect } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
-import { useAuth, useUser as useClerkUser } from '@clerk/nextjs';
-import { supabase } from '../utils/supabase';
+import { useAuth, useUser as useClerkUser, useSession } from '@clerk/nextjs';
+import { useClerkSupabase } from "../../components/utils/supabase";
+
+
 
 export default function UserCheck({ children }: { children: React.ReactNode }) {
   const { isLoaded, userId } = useAuth();
   const { user: clerkUser } = useClerkUser();
   const { setMappbookUser } = useMappbookUser();
-
+  const supabase = useClerkSupabase();
+  
   useEffect(() => {
     async function checkAndCreateUser() {
       if (!userId || !clerkUser) return;

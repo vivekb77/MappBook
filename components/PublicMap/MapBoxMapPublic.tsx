@@ -16,7 +16,6 @@ interface UserData {
   map_style: string;
   country_fill_color : string;
   map_views_left: number;
-  total_map_views : number
 }
 
 const MAP_STYLES = {

@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../../../components/utils/supabase'
+import { useClerkSupabase } from "../../../components/utils/supabase";
 import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -22,6 +22,7 @@ type UserDataContextType = UserData | null
 export const UserDataContext = createContext<UserDataContextType>(null)
 
 export default function MapPage() {
+  const supabase = useClerkSupabase();
   const router = useRouter()
   const params = useParams()
   const [userData, setUserData] = useState<UserData | null>(null)
@@ -34,7 +35,7 @@ export default function MapPage() {
   const updateViewCounts = async (mappbook_user_id: string) => {
     try {
       const { data, error: updateError } = await supabase
-        .rpc('incrementtotalmapviews_decrementleftmapviews', { mappbook_user_id: mappbook_user_id })
+        .rpc('incrementtotalmapviews_decrementleftmapviews', { m_user_id: mappbook_user_id })
 
       if (updateError) {
         console.error('Error updating view counts:', updateError)
@@ -80,7 +81,7 @@ export default function MapPage() {
 
         // Query Supabase for user data
         const { data, error: supabaseError } = await supabase
-          .from('MappBook_Users')
+          .from('public_user_profile')
           .select('mappbook_user_id, display_name, is_premium_user, map_style, map_views_left, country_fill_color')
           .eq('mappbook_user_id', userId)
           .single()

@@ -3,11 +3,12 @@ import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsConte
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 import { useMappbookUser } from '@/context/UserContext';
 import { useClerk, useUser } from '@clerk/nextjs';
-import { supabase } from '../utils/supabase';
 import SearchPlace from './SearchPlace';
 import { BarChart, Check, Copy, MapPin, Navigation, Pencil, Share2, X } from 'lucide-react';
 import { logout } from '../utils/auth';
 import { Alert, AlertDescription } from '../ui/alert';
+import { useClerkSupabase } from "../../components/utils/supabase";
+
 
 const mapStyles = [
   {
@@ -78,6 +79,7 @@ interface UserPlace {
 type VisitStatus = 'visited' | 'wanttovisit';
 
 const AddPlace = () => {
+  const supabase = useClerkSupabase();
   const { isLoaded, isSignedIn, user } = useUser();
   const { mappbookUser, setMappbookUser } = useMappbookUser();
   const [isLoading, setIsLoading] = useState(true);
@@ -130,6 +132,7 @@ const AddPlace = () => {
       setMapStypeSelection(mappbookUser.map_style);
       setSelectedCountryFillColor(mappbookUser.country_fill_color);
       setDisplayName(mappbookUser.display_name);
+      setNameInput(mappbookUser.display_name);
     }
   }, [mappbookUser]);
   
@@ -225,7 +228,7 @@ const AddPlace = () => {
   };
 
   const startEditing = () => {
-    setNameInput(mappbookUser?.display_name || '');
+    setNameInput(displayName || '');
     setIsEditing(true);
   };
 
@@ -577,7 +580,7 @@ const AddPlace = () => {
                           type="text"
                           value={nameInput}
                           onChange={handleNameChange}
-                          placeholder="Enter your mapp name"
+                          placeholder="Enter your MappBook name"
                           maxLength={MAX_NAME_LENGTH}
                           className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
                           autoFocus
