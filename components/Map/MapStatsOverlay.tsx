@@ -150,7 +150,7 @@ const MapStatsOverlay: React.FC = () => {
     if (mappbookUser) {
       fetchPlaceCounts(mappbookUser.mappbook_user_id);
     }
-  }, [mappbookUser]);
+  }, [mappbookUser,userPlaces]);
 
   return (
     <div className="absolute top-3 right-3">

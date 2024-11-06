@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
-import { supabase } from "@/components/utils/supabasenonauth";
+import { supabase } from "@/components/utils/supabase";
 import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -32,7 +32,6 @@ export default function MapPage() {
   
   // Function to update map view counts in databse
   const updateViewCounts = async (mappbook_user_id: string) => {
-    console.error('Updating view count in databse', mappbook_user_id)
     try {
       const { data, error: updateError } = await supabase
         .rpc('update_map_views', { m_user_id: mappbook_user_id })

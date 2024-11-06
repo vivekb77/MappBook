@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Marker, Popup, Source, Layer, LayerProps, useMap } from 'react-map-gl';
 import type { GeoJSON, Feature } from 'geojson';
-import { supabase } from "@/components/utils/supabasenonauth";
+import { supabase } from "@/components/utils/supabase";
 import '../Map/popupstyles.css';
 
 interface UserData {

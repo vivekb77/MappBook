@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from "@/components/utils/supabasenonauth";
+import { supabase } from "@/components/utils/supabase";
 import { MapPin, Plane, Globe2, Map } from 'lucide-react';
 
 interface UserData {
