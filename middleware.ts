@@ -4,6 +4,9 @@ import { authMiddleware } from "@clerk/nextjs";
 export default authMiddleware({
   publicRoutes: [
     // "/",
+    "/terms",
+    "/privacy",
+    "/contact",
     "/map",
     "/map/:id", // Add this for dynamic routes
     // "/map/(.*)", // This is correct but let's be explicit

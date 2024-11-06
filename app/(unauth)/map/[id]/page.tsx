@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
-import { useClerkSupabase } from "../../../components/utils/supabase";
+import { supabase } from "@/components/utils/supabasenonauth";
 import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -22,7 +22,6 @@ type UserDataContextType = UserData | null
 export const UserDataContext = createContext<UserDataContextType>(null)
 
 export default function MapPage() {
-  const supabase = useClerkSupabase();
   const router = useRouter()
   const params = useParams()
   const [userData, setUserData] = useState<UserData | null>(null)
@@ -33,9 +32,10 @@ export default function MapPage() {
   
   // Function to update map view counts in databse
   const updateViewCounts = async (mappbook_user_id: string) => {
+    console.error('Updating view count in databse', mappbook_user_id)
     try {
       const { data, error: updateError } = await supabase
-        .rpc('incrementtotalmapviews_decrementleftmapviews', { m_user_id: mappbook_user_id })
+        .rpc('update_map_views', { m_user_id: mappbook_user_id })
 
       if (updateError) {
         console.error('Error updating view counts:', updateError)
@@ -52,7 +52,7 @@ export default function MapPage() {
       )
       return true
     } catch (err) {
-      console.error('Error in incrementtotalmapviews_decrementleftmapviews function :', err)
+      console.error('Error in update_map_views function :', err)
       setUpdateFailed(true)
       return false
     }
@@ -81,7 +81,7 @@ export default function MapPage() {
 
         // Query Supabase for user data
         const { data, error: supabaseError } = await supabase
-          .from('public_user_profile')
+          .from('public_user_profiles')
           .select('mappbook_user_id, display_name, is_premium_user, map_style, map_views_left, country_fill_color')
           .eq('mappbook_user_id', userId)
           .single()

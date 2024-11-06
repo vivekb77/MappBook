@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Marker, Popup, Source, Layer, LayerProps, useMap } from 'react-map-gl';
 import type { GeoJSON, Feature } from 'geojson';
-import { useClerkSupabase } from "../../components/utils/supabase";
+import { supabase } from "@/components/utils/supabasenonauth";
 import '../Map/popupstyles.css';
 
 interface UserData {
@@ -37,7 +37,6 @@ interface CountryFeatureProperties {
 }
 
 function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
-  const supabase = useClerkSupabase();
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [countryData, setCountryData] = useState<GeoJSON | null>(null);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useClerkSupabase } from "../../components/utils/supabase";
+import { supabase } from "@/components/utils/supabasenonauth";
 import { MapPin, Plane, Globe2, Map } from 'lucide-react';
 
 interface UserData {
@@ -63,7 +63,6 @@ const LoadingOverlay: React.FC = () => (
 );
 
 const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => {
-  const supabase = useClerkSupabase();
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     visitedCount: 0,

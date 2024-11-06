@@ -1,10 +1,6 @@
-// app/layout.tsx
-import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
-import { UserProvider } from '@/context/UserContext';
-import UserCheck from '@/components/User/UserCheck';
 
 const outfit = Outfit({ subsets: ['latin'] });
 
@@ -21,13 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={outfit.className}>
-        <ClerkProvider>
-          <UserProvider>
-            <UserCheck>
-                {children}
-            </UserCheck>
-          </UserProvider>
-        </ClerkProvider>
+          {children}
       </body>
     </html>
   );
