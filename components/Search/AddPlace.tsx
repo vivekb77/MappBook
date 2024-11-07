@@ -135,7 +135,7 @@ const AddPlace = () => {
       setNameInput(mappbookUser.display_name);
     }
   }, [mappbookUser]);
-  
+
   const onAddPlaceButtonClick = async () => {
     if (!searchedPlace || !user) return;
 
@@ -780,7 +780,9 @@ const AddPlace = () => {
         <div className="mt-8 pt-4 border-t border-pink-100/50">
           <div className="flex items-center justify-center gap-4 text-xs">
             <a
-              href="/"
+              href="/contact"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
             >
               Support
@@ -795,6 +797,8 @@ const AddPlace = () => {
             <span className="text-gray-300">•</span>
             <a
               href="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
             >
               Terms
@@ -802,6 +806,8 @@ const AddPlace = () => {
             <span className="text-gray-300">•</span>
             <a
               href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
             >
               Privacy

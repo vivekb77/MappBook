@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useState, useCallback, useMemo } from 're
 import { Map, Marker, Popup, Source, Layer, FillLayer, useMap } from 'react-map-gl';
 import type { GeoJSON } from 'geojson';
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
-import './PopupStyles.css'; 
+import './PlaceInfoPopUp.css'; 
 
 interface Place {
   place_id: string;

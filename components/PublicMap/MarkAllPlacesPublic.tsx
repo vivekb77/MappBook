@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Marker, Popup, Source, Layer, LayerProps, useMap } from 'react-map-gl';
 import type { GeoJSON, Feature } from 'geojson';
 import { supabase } from "@/components/utils/supabase";
-import '../Map/popupstyles.css';
+import '../Map/PlaceInfoPopUp.css';
 
 interface UserData {
   mappbook_user_id: string;
