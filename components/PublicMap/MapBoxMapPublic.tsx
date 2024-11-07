@@ -8,13 +8,12 @@ import MarkAllPlacesPublic from "./MarkAllPlacesPublic";
 import MapStyleSwitcher from "../Map/MapStyleSwitcher";
 import { UserDataContext } from "../../app/(unauth)/map/[id]/page";
 
-// Define the UserData type
 interface UserData {
   mappbook_user_id: string;
   display_name: string;
   is_premium_user: boolean;
   map_style: string;
-  country_fill_color : string;
+  country_fill_color: string;
   map_views_left: number;
 }
 
@@ -51,8 +50,8 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   pitch: 25,
   bearing: 0,
   padding: {
-    top: 0,      
-    bottom: 200,  // Add bottom padding to account for the Create button
+    top: 0,
+    bottom: 200,
     left: 0,
     right: 0
   }
@@ -63,7 +62,6 @@ const ROTATION_VIEW_STATE = {
   latitude: 35,
 };
 
-const SILICON_VALLEY_LONGITUDE = -100;
 const ROTATION_DURATION = 25000;
 
 const MapboxMapPublic: React.FC<MapboxMapProps> = ({
@@ -78,11 +76,11 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   const [mapLoaded, setMapLoaded] = useState(false);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  const startLongitudeRef = useRef<number>(DEFAULT_VIEW_STATE.longitude);
   const [currentMapStyle, setCurrentMapStyle] = useState<MapStyle>(
     (userData?.map_style as MapStyle) || "satellite"
   );
 
-  // Update map style when user data changes
   useEffect(() => {
     if (userData?.map_style && MAP_STYLES[userData.map_style as MapStyle]) {
       setCurrentMapStyle(userData.map_style as MapStyle);
@@ -93,26 +91,28 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
     }
   }, [userData?.map_style]);
 
-  // Globe rotation animation
   useEffect(() => {
     let animationFrameId: number;
 
     const animate = (timestamp: number) => {
-      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      if (!startTimeRef.current) {
+        startTimeRef.current = timestamp;
+        startLongitudeRef.current = viewState.longitude;
+      }
+      
       const progress = (timestamp - startTimeRef.current) / ROTATION_DURATION;
 
       if (isRotating) {
         setViewState(prev => ({
           ...prev,
           ...ROTATION_VIEW_STATE,
-          longitude: SILICON_VALLEY_LONGITUDE + (progress * 360) % 360,
+          longitude: startLongitudeRef.current + (progress * 360) % 360,
         }));
         animationFrameId = requestAnimationFrame(animate);
       }
     };
 
     if (isRotating) {
-      startTimeRef.current = null;
       animationFrameId = requestAnimationFrame(animate);
     }
 
@@ -124,14 +124,17 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   }, [isRotating]);
 
   const startRotation = () => {
+    startTimeRef.current = null;
+    startLongitudeRef.current = viewState.longitude;
     setIsRotating(true);
-    if (mapRef.current) {
-      mapRef.current.flyTo({
-        ...ROTATION_VIEW_STATE,
-        duration: 2000,
-        essential: true,
-      });
-    }
+    // if (mapRef.current) {
+    //   mapRef.current.flyTo({
+    //     ...ROTATION_VIEW_STATE,
+    //     longitude: viewState.longitude,
+    //     duration: 2000,
+    //     essential: true,
+    //   });
+    // }
   };
 
   const handleMapLoad = () => {
@@ -190,7 +193,6 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
     );
   }
 
-  // Don't render anything if there's no user data
   if (!userData) {
     return null;
   }
@@ -203,7 +205,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         </div>
       )}
 
-<Map
+      <Map
         ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_PUBLIC_USER}
         initialViewState={DEFAULT_VIEW_STATE}
@@ -218,7 +220,6 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         reuseMaps
         attributionControl={false}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
-        // style={{ width: '100%', height: 'calc(100% + 100px)', marginTop: '-50px' }}  // Adjust height and margin to center
       >
         {mapLoaded && (
           <>
@@ -233,14 +234,14 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
       </Map>
 
       {!isRotating && !error && (
-       <button
-       onClick={startRotation}
-       className="absolute bottom-4 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-50"
-       title="Resume rotation"
-       type="button"
-     >
-       <RotateCcw className="w-5 h-5 text-gray-700" />
-     </button>
+        <button
+          onClick={startRotation}
+          className="absolute bottom-4 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-50"
+          title="Resume rotation"
+          type="button"
+        >
+          <RotateCcw className="w-5 h-5 text-gray-700" />
+        </button>
       )}
     </div>
   );
