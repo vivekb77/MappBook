@@ -3,7 +3,7 @@ import { useMappbookUser } from '@/context/UserContext';
 import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { Map, Marker, Popup, Source, Layer, FillLayer, useMap } from 'react-map-gl';
 import type { GeoJSON } from 'geojson';
-import { useClerkSupabase } from "../../components/utils/supabase";
+import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import './PopupStyles.css'; 
 
 interface Place {
@@ -24,7 +24,6 @@ interface AllUserPlacesContextType {
 }
 
 function MarkAllPlaces() {
-  const supabase = useClerkSupabase();
   const allUserPlacesContext = useContext<AllUserPlacesContextType | null>(AllUserPlacesContext);
   const [userPlaces, setAllUserPlaces] = allUserPlacesContext
     ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
@@ -34,7 +33,7 @@ function MarkAllPlaces() {
   const [error, setError] = useState<string | null>(null);
   const [countryData, setCountryData] = useState<GeoJSON | null>(null);
   const { mappbookUser, setMappbookUser } = useMappbookUser();
-
+  const supabase = getClerkSupabaseClient();
   // Fetch country GeoJSON data
   useEffect(() => {
     fetch('/countries.geojson')

@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
 import { useAuth, useUser as useClerkUser, useSession } from '@clerk/nextjs';
-import { useClerkSupabase } from "../../components/utils/supabase";
+import { getClerkSupabaseClient } from "@/components/utils/supabase";
 
 
 
@@ -10,7 +10,7 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
   const { isLoaded, userId } = useAuth();
   const { user: clerkUser } = useClerkUser();
   const { setMappbookUser } = useMappbookUser();
-  const supabase = useClerkSupabase();
+  const supabase = getClerkSupabaseClient();
   
   useEffect(() => {
     async function checkAndCreateUser() {

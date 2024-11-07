@@ -7,7 +7,7 @@ import SearchPlace from './SearchPlace';
 import { BarChart, Check, Copy, MapPin, Navigation, Pencil, Share2, X } from 'lucide-react';
 import { logout } from '../utils/auth';
 import { Alert, AlertDescription } from '../ui/alert';
-import { useClerkSupabase } from "../../components/utils/supabase";
+import { getClerkSupabaseClient } from "@/components/utils/supabase";
 
 
 const mapStyles = [
@@ -79,7 +79,7 @@ interface UserPlace {
 type VisitStatus = 'visited' | 'wanttovisit';
 
 const AddPlace = () => {
-  const supabase = useClerkSupabase();
+  const supabase = getClerkSupabaseClient();
   const { isLoaded, isSignedIn, user } = useUser();
   const { mappbookUser, setMappbookUser } = useMappbookUser();
   const [isLoading, setIsLoading] = useState(true);
