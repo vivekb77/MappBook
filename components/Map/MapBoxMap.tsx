@@ -15,6 +15,13 @@ const MAP_STYLES = {
   light: "mapbox://styles/newsexpressnz/cm2wvy2vv005c01q25cl3eo0w",
 };
 
+const ROTATION_CONSTRAINTS = {
+  MIN_ZOOM: 0.8,
+  MAX_ZOOM: 2.0,
+  ROTATION_DURATION: 25000, // 25 seconds for full rotation
+  ZOOM_SPEED: 0.09 // Lower value = smoother zoom transition
+};
+
 interface MapboxMapProps {
   className?: string;
   defaultStyle?: "satellite" | "light" | "dark";
@@ -55,23 +62,21 @@ interface SearchedPlaceContextType {
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -114.370789,
   latitude: 46.342303,
-  zoom: 0.8, // Slightly zoomed in initial state
-  pitch: 25, //controls slanting
+  zoom: 0.8,
+  pitch: 25,
   bearing: 0,
   padding: {
-    top: 0,      
-    bottom: 300,  // Add bottom padding to account for the Create button
+    top: 0,
+    bottom: 300,
     left: 0,
     right: 0
   }
 };
 
 const ROTATION_VIEW_STATE = {
-  // zoom: 0.9, // More zoomed out during rotation
   pitch: 25,
-  latitude: 35, // Slightly tilted view for better globe perspective
+  latitude: 35,
 };
-
 
 const MapboxMap: React.FC<MapboxMapProps> = ({
   className = "",
@@ -79,12 +84,14 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 }) => {
   const mapRef = useRef<MapRef>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [mapLoaded, setMapLoaded] = useState(false); // New state to track map load completion
+  const [mapLoaded, setMapLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
   const [isRotating, setIsRotating] = useState(true);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  const targetZoomRef = useRef<number | null>(null);
+  const initialLongitudeRef = useRef<number | null>(null);
   const [currentMapStyle, setCurrentMapStyle] = useState<keyof typeof MAP_STYLES>(defaultStyle);
 
   const { searchedPlace } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
@@ -103,36 +110,61 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     );
   };
 
+  const getRotationZoom = (currentZoom: number) => {
+    return Math.min(Math.max(currentZoom, ROTATION_CONSTRAINTS.MIN_ZOOM), ROTATION_CONSTRAINTS.MAX_ZOOM);
+  };
+
   const startRotation = () => {
     setIsRotating(true);
+    startTimeRef.current = null;
+    initialLongitudeRef.current = viewState.longitude;
+    const targetZoom = getRotationZoom(viewState.zoom);
+    targetZoomRef.current = targetZoom;
+
     if (mapRef.current) {
-      mapRef.current.flyTo({
-        ...ROTATION_VIEW_STATE,
-        duration: 2000,
-        essential: true,
+      const map = mapRef.current.getMap();
+      map.flyTo({
+        center: [viewState.longitude, ROTATION_VIEW_STATE.latitude],
+        zoom: targetZoom,
+        pitch: ROTATION_VIEW_STATE.pitch,
+        duration: 1500,
+        essential: true
       });
     }
   };
 
   useEffect(() => {
-    const SILICON_VALLEY_LONGITUDE = -100;
-
     const animate = (timestamp: number) => {
-      if (!startTimeRef.current) startTimeRef.current = timestamp;
-      const progress = (timestamp - startTimeRef.current) / 25000;
+      if (!startTimeRef.current) {
+        startTimeRef.current = timestamp;
+        initialLongitudeRef.current = viewState.longitude;
+      }
 
       if (isRotating) {
+        const elapsed = timestamp - startTimeRef.current;
+        const rotationProgress = (elapsed % ROTATION_CONSTRAINTS.ROTATION_DURATION) / ROTATION_CONSTRAINTS.ROTATION_DURATION;
+        const startLongitude = initialLongitudeRef.current ?? viewState.longitude;
+        const newLongitude = startLongitude + (rotationProgress * 360);
+
+        // Handle zoom transition
+        const targetZoom = targetZoomRef.current ?? getRotationZoom(viewState.zoom);
+        const currentZoom = viewState.zoom;
+        const zoomDiff = targetZoom - currentZoom;
+        const newZoom = currentZoom + (zoomDiff * ROTATION_CONSTRAINTS.ZOOM_SPEED);
+
         setViewState(prev => ({
           ...prev,
-          ...ROTATION_VIEW_STATE,
-          longitude: SILICON_VALLEY_LONGITUDE + (progress * 360) % 360,
+          longitude: newLongitude,
+          latitude: ROTATION_VIEW_STATE.latitude,
+          zoom: newZoom,
+          pitch: ROTATION_VIEW_STATE.pitch
         }));
+
         animationRef.current = requestAnimationFrame(animate);
       }
     };
 
     if (isRotating && !isValidCoordinates(searchedPlace)) {
-      startTimeRef.current = null;
       animationRef.current = requestAnimationFrame(animate);
     }
 
@@ -141,7 +173,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isRotating, searchedPlace]);
+  }, [isRotating, searchedPlace, viewState.longitude, viewState.zoom]);
 
   const handleMapLoad = () => {
     setIsLoading(false);
@@ -155,29 +187,28 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         'star-intensity': 0.6
       });
     }
-    setMapLoaded(true); // Set mapLoaded to true after successful load
+    setMapLoaded(true);
   };
 
   const handleMapError = (e: any) => {
     setError("Unable to load map. Please try again later.");
     setIsLoading(false);
-    setMapLoaded(false); // Ensure mapLoaded is false on error
+    setMapLoaded(false);
   };
 
   useEffect(() => {
     if (isValidCoordinates(searchedPlace) && mapRef.current) {
       setIsRotating(false);
       const { longitude, latitude } = searchedPlace;
+      const map = mapRef.current.getMap();
 
-      mapRef.current.flyTo({
+      map.flyTo({
         center: [longitude, latitude],
-        duration: 2000,
         zoom: 14,
         pitch: 45,
         bearing: 0,
-        curve: 1.5,
-        easing: (t: number) => t * (2 - t),
-        essential: true,
+        duration: 2000,
+        essential: true
       });
 
       setViewState(prev => ({
