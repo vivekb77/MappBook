@@ -45,8 +45,8 @@ interface MapViewState {
 
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -114.370789,
-  latitude: 46.342303,
-  zoom: 0.8,
+  latitude: 35,
+  zoom: 1.0,
   pitch: 25,
   bearing: 0,
   padding: {
@@ -62,7 +62,11 @@ const ROTATION_VIEW_STATE = {
   latitude: 35,
 };
 
+const ROTATION_MIN_ZOOM = 0.8;
+const ROTATION_MAX_ZOOM = 1.8;
 const ROTATION_DURATION = 25000;
+const ZOOM_TRANSITION_DURATION = 2000;
+const LATITUDE_TRANSITION_DURATION = 2000;
 
 const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   className = "",
@@ -77,6 +81,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const startLongitudeRef = useRef<number>(DEFAULT_VIEW_STATE.longitude);
+  const startLatitudeRef = useRef<number>(DEFAULT_VIEW_STATE.latitude);
   const [currentMapStyle, setCurrentMapStyle] = useState<MapStyle>(
     (userData?.map_style as MapStyle) || "satellite"
   );
@@ -91,6 +96,12 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
     }
   }, [userData?.map_style]);
 
+  const easeInOutCubic = (t: number): number => {
+    return t < 0.5
+      ? 4 * t * t * t
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  };
+
   useEffect(() => {
     let animationFrameId: number;
 
@@ -98,17 +109,31 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
       if (!startTimeRef.current) {
         startTimeRef.current = timestamp;
         startLongitudeRef.current = viewState.longitude;
+        startLatitudeRef.current = viewState.latitude;
       }
       
-      const progress = (timestamp - startTimeRef.current) / ROTATION_DURATION;
+      const rotationProgress = (timestamp - startTimeRef.current) / ROTATION_DURATION;
+      const latitudeProgress = Math.min((timestamp - startTimeRef.current) / LATITUDE_TRANSITION_DURATION, 1);
+      
+      // Calculate smooth latitude transition
+      const latitudeDiff = ROTATION_VIEW_STATE.latitude - startLatitudeRef.current;
+      const currentLatitude = startLatitudeRef.current + (latitudeDiff * easeInOutCubic(latitudeProgress));
 
       if (isRotating) {
         setViewState(prev => ({
           ...prev,
-          ...ROTATION_VIEW_STATE,
-          longitude: startLongitudeRef.current + (progress * 360) % 360,
+          pitch: ROTATION_VIEW_STATE.pitch,
+          longitude: startLongitudeRef.current + (rotationProgress * 360) % 360,
+          latitude: currentLatitude,
+          zoom: prev.zoom // Maintain current zoom level during rotation
         }));
-        animationFrameId = requestAnimationFrame(animate);
+        
+        if (latitudeProgress < 1) {
+          animationFrameId = requestAnimationFrame(animate);
+        } else {
+          // Continue rotation after latitude transition is complete
+          animationFrameId = requestAnimationFrame(animate);
+        }
       }
     };
 
@@ -124,17 +149,27 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   }, [isRotating]);
 
   const startRotation = () => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    const currentZoom = viewState.zoom;
+    const targetZoom = currentZoom < ROTATION_MIN_ZOOM ? ROTATION_MIN_ZOOM :
+                      currentZoom > ROTATION_MAX_ZOOM ? ROTATION_MAX_ZOOM :
+                      currentZoom;
+
+    // If zoom adjustment is needed, animate to target zoom first
+    if (currentZoom !== targetZoom) {
+      map.flyTo({
+        zoom: targetZoom,
+        duration: ZOOM_TRANSITION_DURATION,
+        essential: true
+      });
+    }
+
     startTimeRef.current = null;
     startLongitudeRef.current = viewState.longitude;
+    startLatitudeRef.current = viewState.latitude;
     setIsRotating(true);
-    // if (mapRef.current) {
-    //   mapRef.current.flyTo({
-    //     ...ROTATION_VIEW_STATE,
-    //     longitude: viewState.longitude,
-    //     duration: 2000,
-    //     essential: true,
-    //   });
-    // }
   };
 
   const handleMapLoad = () => {
