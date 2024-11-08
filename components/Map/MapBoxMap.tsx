@@ -19,7 +19,9 @@ const ROTATION_CONSTRAINTS = {
   MIN_ZOOM: 0.8,
   MAX_ZOOM: 2.0,
   ROTATION_DURATION: 25000, // 25 seconds for full rotation
-  ZOOM_SPEED: 0.09 // Lower value = smoother zoom transition
+  ZOOM_SPEED: 0.09, // Lower value = smoother zoom transition
+  TARGET_LATITUDE: 35,
+  LATITUDE_TRANSITION_DURATION: 2000 // 2 seconds for latitude transition
 };
 
 interface MapboxMapProps {
@@ -75,7 +77,7 @@ const DEFAULT_VIEW_STATE: MapViewState = {
 
 const ROTATION_VIEW_STATE = {
   pitch: 25,
-  latitude: 35,
+  latitude: ROTATION_CONSTRAINTS.TARGET_LATITUDE,
 };
 
 const MapboxMap: React.FC<MapboxMapProps> = ({
@@ -92,6 +94,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const startTimeRef = useRef<number | null>(null);
   const targetZoomRef = useRef<number | null>(null);
   const initialLongitudeRef = useRef<number | null>(null);
+  const initialLatitudeRef = useRef<number | null>(null);
   const [currentMapStyle, setCurrentMapStyle] = useState<keyof typeof MAP_STYLES>(defaultStyle);
 
   const { searchedPlace } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
@@ -114,10 +117,18 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     return Math.min(Math.max(currentZoom, ROTATION_CONSTRAINTS.MIN_ZOOM), ROTATION_CONSTRAINTS.MAX_ZOOM);
   };
 
+  const calculateLatitudeTransition = (elapsed: number, startLat: number) => {
+    const progress = Math.min(elapsed / ROTATION_CONSTRAINTS.LATITUDE_TRANSITION_DURATION, 1);
+    // Easing function for smooth transition
+    const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic easing out
+    return startLat + (ROTATION_CONSTRAINTS.TARGET_LATITUDE - startLat) * easeProgress;
+  };
+
   const startRotation = () => {
     setIsRotating(true);
     startTimeRef.current = null;
     initialLongitudeRef.current = viewState.longitude;
+    initialLatitudeRef.current = viewState.latitude;
     const targetZoom = getRotationZoom(viewState.zoom);
     targetZoomRef.current = targetZoom;
 
@@ -127,7 +138,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         center: [viewState.longitude, ROTATION_VIEW_STATE.latitude],
         zoom: targetZoom,
         pitch: ROTATION_VIEW_STATE.pitch,
-        duration: 1500,
+        duration: ROTATION_CONSTRAINTS.LATITUDE_TRANSITION_DURATION,
         essential: true
       });
     }
@@ -138,6 +149,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       if (!startTimeRef.current) {
         startTimeRef.current = timestamp;
         initialLongitudeRef.current = viewState.longitude;
+        initialLatitudeRef.current = viewState.latitude;
       }
 
       if (isRotating) {
@@ -145,6 +157,10 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         const rotationProgress = (elapsed % ROTATION_CONSTRAINTS.ROTATION_DURATION) / ROTATION_CONSTRAINTS.ROTATION_DURATION;
         const startLongitude = initialLongitudeRef.current ?? viewState.longitude;
         const newLongitude = startLongitude + (rotationProgress * 360);
+
+        // Calculate latitude transition
+        const startLat = initialLatitudeRef.current ?? viewState.latitude;
+        const newLatitude = calculateLatitudeTransition(elapsed, startLat);
 
         // Handle zoom transition
         const targetZoom = targetZoomRef.current ?? getRotationZoom(viewState.zoom);
@@ -155,12 +171,25 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         setViewState(prev => ({
           ...prev,
           longitude: newLongitude,
-          latitude: ROTATION_VIEW_STATE.latitude,
+          latitude: newLatitude,
           zoom: newZoom,
           pitch: ROTATION_VIEW_STATE.pitch
         }));
 
-        animationRef.current = requestAnimationFrame(animate);
+        // Continue animation only if latitude hasn't reached target
+        if (Math.abs(newLatitude - ROTATION_CONSTRAINTS.TARGET_LATITUDE) > 0.01) {
+          animationRef.current = requestAnimationFrame(animate);
+        } else {
+          // Once target latitude is reached, continue with just longitude rotation
+          setViewState(prev => ({
+            ...prev,
+            longitude: newLongitude,
+            latitude: ROTATION_CONSTRAINTS.TARGET_LATITUDE,
+            zoom: newZoom,
+            pitch: ROTATION_VIEW_STATE.pitch
+          }));
+          animationRef.current = requestAnimationFrame(animate);
+        }
       }
     };
 
