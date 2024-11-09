@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import posthog from 'posthog-js';
 import { UserDataContext } from '@/context/UserDataContextPublicMap'
 
-//just a change to commit again
 export default function MapPage() {
   const router = useRouter()
   const params = useParams()
