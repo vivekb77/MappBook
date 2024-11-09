@@ -7,6 +7,7 @@ import { supabase } from "@/components/utils/supabase";
 import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import posthog from 'posthog-js';
 
 interface UserData {
   mappbook_user_id: string;
@@ -39,6 +40,7 @@ export default function MapPage() {
       if (updateError) {
         console.error('Error updating view counts:', updateError)
         setUpdateFailed(true)
+        posthog.capture('RED - Failed to Update map views to DB on public MappBook', { property: mappbook_user_id })
         return false
       }
 
@@ -52,6 +54,7 @@ export default function MapPage() {
       return true
     } catch (err) {
       console.error('Error in update_map_views function :', err)
+      posthog.capture('RED - Failed to Update map views to DB on public MappBook', { property: mappbook_user_id })
       setUpdateFailed(true)
       return false
     }
@@ -128,6 +131,9 @@ export default function MapPage() {
   }
 
   if (error || !userData) {
+
+    posthog.capture('YELLOW - This user does not exist. Please check that you have the correct URL and try again.', { property: '' })
+
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
         {/* Logo Header */}
@@ -224,6 +230,9 @@ export default function MapPage() {
   const canViewMap = userData.map_views_left > 0
   // Return early if user can't view the map
   if (!canViewMap) {
+
+    posthog.capture('YELLOW - This MappBook cant be displayed because the owner has reached their view limit', { property: '' })
+
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
         {/* Logo Header */}

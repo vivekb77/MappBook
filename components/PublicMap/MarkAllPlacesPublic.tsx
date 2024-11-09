@@ -120,7 +120,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
       'fill-color': [
         'case',
         ['get', 'isVisited'],
-        userData.country_fill_color,
+        userData.country_fill_color || 'rgba(168,85,247,255)',
         'rgba(200, 200, 200, 0.1)' //greyesh
       ],
       'fill-opacity': [

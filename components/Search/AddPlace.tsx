@@ -8,6 +8,7 @@ import { BarChart, Check, Copy, MapPin, Navigation, Pencil, Share2, X } from 'lu
 import { logout } from '../utils/auth';
 import { Alert, AlertDescription } from '../ui/alert';
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
+import posthog from 'posthog-js';
 
 
 const mapStyles = [
@@ -219,6 +220,9 @@ const AddPlace = () => {
 
   const handleCopy = async () => {
     try {
+      
+      posthog.capture('GREEN - Copy share url button clicked', { property: '' });
+
       await navigator.clipboard.writeText(`https://mappbook.com/map/${mappbookUser?.mappbook_user_id}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -391,6 +395,8 @@ const AddPlace = () => {
     setIsLoading(true);
     try {
 
+      posthog.capture('GREEN - Buy Premium button clicked', { property: '' });
+      
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -404,6 +410,9 @@ const AddPlace = () => {
 
       if (!response.ok) {
         const error = await response.json();
+        
+        posthog.capture('RED - Buy Premium failed', { property: mappbookUser.mappbook_user_id });
+
         throw new Error(error.message || 'Failed to create checkout session');
       }
 
