@@ -2,7 +2,6 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
 import { CSPostHogProvider } from '../app/provider'
-const outfit = Outfit({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'MappBook',
@@ -18,8 +17,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+       <head>
+        <meta name="robots" content="noindex,nofollow" />
+        <meta name="googlebot" content="noindex,nofollow" />
+      </head>
        <CSPostHogProvider>
-      <body className={outfit.className}>
+      <body>
           {children}
       </body>
       </CSPostHogProvider>
