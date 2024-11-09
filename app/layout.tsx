@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Outfit } from 'next/font/google';
 import { CSPostHogProvider } from '../app/provider'
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
   title: 'MappBook',
@@ -26,6 +26,7 @@ export default function RootLayout({
           {children}
       </body>
       </CSPostHogProvider>
+      <Analytics />
     </html>
   );
 }
