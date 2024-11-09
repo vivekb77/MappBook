@@ -115,7 +115,6 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
       const rotationProgress = (timestamp - startTimeRef.current) / ROTATION_DURATION;
       const latitudeProgress = Math.min((timestamp - startTimeRef.current) / LATITUDE_TRANSITION_DURATION, 1);
       
-      // Calculate smooth latitude transition
       const latitudeDiff = ROTATION_VIEW_STATE.latitude - startLatitudeRef.current;
       const currentLatitude = startLatitudeRef.current + (latitudeDiff * easeInOutCubic(latitudeProgress));
 
@@ -125,13 +124,12 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
           pitch: ROTATION_VIEW_STATE.pitch,
           longitude: startLongitudeRef.current + (rotationProgress * 360) % 360,
           latitude: currentLatitude,
-          zoom: prev.zoom // Maintain current zoom level during rotation
+          zoom: prev.zoom
         }));
         
         if (latitudeProgress < 1) {
           animationFrameId = requestAnimationFrame(animate);
         } else {
-          // Continue rotation after latitude transition is complete
           animationFrameId = requestAnimationFrame(animate);
         }
       }
@@ -157,7 +155,6 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
                       currentZoom > ROTATION_MAX_ZOOM ? ROTATION_MAX_ZOOM :
                       currentZoom;
 
-    // If zoom adjustment is needed, animate to target zoom first
     if (currentZoom !== targetZoom) {
       map.flyTo({
         zoom: targetZoom,
@@ -255,6 +252,15 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         reuseMaps
         attributionControl={false}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
+        boxZoom={false}
+        doubleClickZoom={false}
+        dragPan={true}
+        dragRotate={false}
+        keyboard={false}
+        scrollZoom={true}
+        touchPitch={false}
+        // touchZoomRotate={false}
+        touchZoomRotate={{ around: 'center' }} 
       >
         {mapLoaded && (
           <>

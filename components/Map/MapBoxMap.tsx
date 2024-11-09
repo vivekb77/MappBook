@@ -305,6 +305,14 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         attributionControl={false}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         style={{ width: '100%', height: '100%' }}
+        boxZoom={false}
+        doubleClickZoom={false}
+        dragPan={true}
+        dragRotate={false}
+        keyboard={false}
+        scrollZoom={true}
+        touchPitch={false} //When enabled, users on touch devices can use two fingers to adjust the map's pitch (tilt)
+        touchZoomRotate={false}
       >
         {mapLoaded && (
           <>
