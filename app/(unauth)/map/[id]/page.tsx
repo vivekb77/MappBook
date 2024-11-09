@@ -8,19 +8,7 @@ import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import posthog from 'posthog-js';
-
-interface UserData {
-  mappbook_user_id: string;
-  display_name: string;
-  is_premium_user: boolean;
-  map_style: string;
-  country_fill_color : string;
-  map_views_left: number;
-}
-
-type UserDataContextType = UserData | null
-
-export const UserDataContext = createContext<UserDataContextType>(null)
+import { UserDataContext } from '@/context/UserDataContextPublicMap'
 
 export default function MapPage() {
   const router = useRouter()
@@ -30,6 +18,15 @@ export default function MapPage() {
   const [error, setError] = useState<string | null>(null)
   const [viewCountUpdated, setViewCountUpdated] = useState<boolean>(false)
   const [updateFailed, setUpdateFailed] = useState<boolean>(false)
+  
+  interface UserData {
+    mappbook_user_id: string;
+    display_name: string;
+    is_premium_user: boolean;
+    map_style: string;
+    country_fill_color: string;
+    map_views_left: number;
+  }
   
   // Function to update map view counts in databse
   const updateViewCounts = async (mappbook_user_id: string) => {

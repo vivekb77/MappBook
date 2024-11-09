@@ -6,7 +6,7 @@ import { Loader2, RotateCcw } from "lucide-react";
 import MapStatsOverlayPublic from "./MapStatsOverlayPublic";
 import MarkAllPlacesPublic from "./MarkAllPlacesPublic";
 import MapStyleSwitcher from "../Map/MapStyleSwitcher";
-import { UserDataContext } from "../../app/(unauth)/map/[id]/page";
+import { UserDataContext } from "@/context/UserDataContextPublicMap";
 
 interface UserData {
   mappbook_user_id: string;
