@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import posthog from 'posthog-js';
 import { UserDataContext } from '@/context/UserDataContextPublicMap'
 
+//just a change to commit again
 export default function MapPage() {
   const router = useRouter()
   const params = useParams()
@@ -27,7 +28,7 @@ export default function MapPage() {
     country_fill_color: string;
     map_views_left: number;
   }
-  
+
   // Function to update map view counts in databse
   const updateViewCounts = async (mappbook_user_id: string) => {
     try {
