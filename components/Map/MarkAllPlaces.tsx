@@ -246,118 +246,96 @@ function MarkAllPlaces() {
           </div>
 
           {selectedPlace?.place_id === place.place_id && (
-        <Popup
-        longitude={selectedPlace.place_longitude}
-        latitude={selectedPlace.place_latitude}
-        anchor="bottom"
-        onClose={() => setSelectedPlace(null)}
-        closeOnClick={false}
-        closeButton={true}
-        closeOnMove={true}
-        className="rounded-lg shadow-lg custom-popup z-50" // Added z-50 for overlay
-      >
-        <div className="p-4 max-w-xs bg-white relative z-50"> {/* Added bg-white and relative z-50 if z-50 is removed cross button will appear on pop up but we dont want that now*/}
-          {/* Header */}
-          <div className="border-b border-gray-200 pb-3 mb-3">
-            <h3 className="font-bold text-sm text-gray-800 mb-1">
-              {selectedPlace.place_name}
-            </h3>
-            <p className="text-sm text-gray-600 leading-snug">
-              {selectedPlace.place_full_address}
-            </p>
+      
+      
+      <Popup
+      longitude={selectedPlace.place_longitude}
+      latitude={selectedPlace.place_latitude}
+      anchor="bottom"
+      onClose={() => setSelectedPlace(null)}
+      closeOnClick={false}
+      closeButton={true}
+      closeOnMove={true}
+      className="rounded-xl shadow-2xl custom-popup z-50"
+    >
+      <div className="p-4 max-w-xs bg-white relative z-50 rounded-xl">
+        {/* Rest of your original code stays exactly the same */}
+        <div className="border-b border-gray-200 pb-3 mb-3">
+          <h3 className="font-bold text-sm text-gray-800 mb-1">
+            {selectedPlace.place_name}
+          </h3>
+          <p className="text-sm text-gray-600 leading-snug">
+            {selectedPlace.place_full_address}
+          </p>
+        </div>
+  
+        <div className="space-y-2 mb-1">
+          <div className="flex items-center text-gray-600">
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              strokeWidth="2"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"
+              />
+            </svg>
+            <span className="text-sm font-medium">
+              {selectedPlace.place_country}
+            </span>
           </div>
   
-          {/* Info Section */}
-          <div className="space-y-2 mb-1">
-            <div className="flex items-center text-gray-600">
+          <div className="flex items-center">
+            <div
+              className={`
+                flex items-center px-3 py-0 rounded-full text-sm font-medium
+                ${selectedPlace.visitedorwanttovisit === "visited"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-blue-100 text-blue-800"
+                }
+              `}
+            >
               <svg
-                className="w-4 h-4 mr-2"
+                className={`w-4 h-4 mr-1.5 ${
+                  selectedPlace.visitedorwanttovisit === "visited"
+                    ? "text-green-600"
+                    : "text-blue-600"
+                }`}
                 fill="none"
                 strokeWidth="2"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"
-                />
-              </svg>
-              <span className="text-sm font-medium">
-                {selectedPlace.place_country}
-              </span>
-            </div>
-  
-            <div className="flex items-center">
-              <div
-                className={`
-                  flex items-center px-3 py-0 rounded-full text-sm font-medium
-                  ${selectedPlace.visitedorwanttovisit === "visited"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-blue-100 text-blue-800"
-                  }
-                `}
-              >
-                <svg
-                  className={`w-4 h-4 mr-1.5 ${
-                    selectedPlace.visitedorwanttovisit === "visited"
-                      ? "text-green-600"
-                      : "text-blue-600"
-                  }`}
-                  fill="none"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {selectedPlace.visitedorwanttovisit === "visited" ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  )}
-                </svg>
-                {selectedPlace.visitedorwanttovisit === "visited" ? "Visited" : "Bucket List"}
-              </div>
-            </div>
-          </div>
-  
-          {/* Action Buttons */}
-          <div className="flex gap-2 pt-2 border-t border-gray-200">
-            {selectedPlace.visitedorwanttovisit === "wanttovisit" && (
-              <button
-                className="flex-1 flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 
-                           text-white py-2 px-4 rounded-lg transition duration-200 ease-in-out
-                           shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                onClick={() => markAsVisited(selectedPlace.place_id)}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                {selectedPlace.visitedorwanttovisit === "visited" ? (
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
-                </svg>
-                Mark Visited
-              </button>
-            )}
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                )}
+              </svg>
+              {selectedPlace.visitedorwanttovisit === "visited" ? "Visited" : "Bucket List"}
+            </div>
+          </div>
+        </div>
+  
+        <div className="flex gap-2 pt-2 border-t border-gray-200">
+          {selectedPlace.visitedorwanttovisit === "wanttovisit" && (
             <button
-              className="flex-1 flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 
+              className="flex-1 flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 
                          text-white py-2 px-4 rounded-lg transition duration-200 ease-in-out
-                         shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-              onClick={() => removePlace(selectedPlace.place_id)}
+                         shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              onClick={() => markAsVisited(selectedPlace.place_id)}
             >
               <svg
                 className="w-4 h-4"
@@ -369,14 +347,37 @@ function MarkAllPlaces() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  d="M5 13l4 4L19 7"
                 />
               </svg>
-              Remove
+              Mark Visited
             </button>
-          </div>
+          )}
+          <button
+            className="flex-1 flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 
+                       text-white py-2 px-4 rounded-lg transition duration-200 ease-in-out
+                       shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+            onClick={() => removePlace(selectedPlace.place_id)}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              strokeWidth="2"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            Remove
+          </button>
         </div>
-      </Popup>
+      </div>
+    </Popup>
+
           )}
         </Marker>
       ))}

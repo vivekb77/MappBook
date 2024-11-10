@@ -9,7 +9,7 @@ interface UserData {
   display_name: string;
   is_premium_user: boolean;
   map_style: string;
-  country_fill_color : string;
+  country_fill_color: string;
   map_views_left: number;
 }
 
@@ -145,7 +145,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
 
     const updatedFeatures = countryData.features.map(feature => {
       const countryCode = ((feature.properties as CountryFeatureProperties)?.ISO_A2 || '').toLowerCase();
-      
+
       return {
         ...feature,
         properties: {
@@ -169,7 +169,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
           <Layer {...countryFillLayer} />
         </Source>
       )}
-      
+
       {userPlaces.map((place) => (
         <Marker
           key={place.place_id}
@@ -177,7 +177,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
           latitude={place.place_latitude}
           anchor="top"
         >
-          <div 
+          <div
             className="relative flex flex-col items-center cursor-pointer transform transition-transform hover:scale-105"
             onClick={() => setSelectedPlace(place)}
           >
@@ -187,11 +187,11 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
               alt={`Marker for ${place.place_name}`}
             />
             <span
-             className={`
+              className={`
               mt-1 text-[0.75rem] font-semibold px-2 py-1 rounded-md shadow-md
               ${place.visitedorwanttovisit === "visited"
-                ? "text-gray-000 bg-blue-400 hover:bg-blue-500"
-                : "text-gray-000 bg-red-400 hover:bg-red-500"}
+                  ? "text-gray-000 bg-blue-400 hover:bg-blue-500"
+                  : "text-gray-000 bg-red-400 hover:bg-red-500"}
               transition-colors duration-200
             `}
             >
@@ -208,9 +208,9 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
               closeOnClick={false}
               closeButton={true}
               closeOnMove={true}
-              className="rounded-lg shadow-lg custom-popup z-50"
+              className="rounded-xl shadow-2xl custom-popup z-50"
             >
-              <div className="p-4 max-w-xs bg-white relative z-50">
+              <div className="p-4 max-w-xs bg-white relative z-50 rounded-xl">
                 <div className="border-b border-gray-200 pb-3 mb-3">
                   <h3 className="font-bold text-sm text-gray-800 mb-1">
                     {selectedPlace.place_name}
@@ -219,7 +219,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
                     {selectedPlace.place_full_address}
                   </p>
                 </div>
-                
+
                 <div className="space-y-2 mb-1">
                   <div className="flex items-center text-gray-600">
                     <svg
@@ -251,11 +251,10 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
                       `}
                     >
                       <svg
-                        className={`w-4 h-4 mr-1.5 ${
-                          selectedPlace.visitedorwanttovisit === "visited"
+                        className={`w-4 h-4 mr-1.5 ${selectedPlace.visitedorwanttovisit === "visited"
                             ? "text-green-600"
                             : "text-blue-600"
-                        }`}
+                          }`}
                         fill="none"
                         strokeWidth="2"
                         stroke="currentColor"
