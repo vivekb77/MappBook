@@ -51,7 +51,7 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   bearing: 0,
   padding: {
     top: 0,
-    bottom: 200,
+    bottom: 180,
     left: 0,
     right: 0
   }
