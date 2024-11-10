@@ -19,7 +19,7 @@ export default function MapPage() {
   const [error, setError] = useState<string | null>(null)
   const [viewCountUpdated, setViewCountUpdated] = useState<boolean>(false)
   const [updateFailed, setUpdateFailed] = useState<boolean>(false)
-  
+
   interface UserData {
     mappbook_user_id: string;
     display_name: string;
@@ -28,6 +28,42 @@ export default function MapPage() {
     country_fill_color: string;
     map_views_left: number;
   }
+
+  // Add viewport meta tag effect
+  useEffect(() => {
+    // Prevent viewport zooming and scaling on mobile devices
+    const viewport = document.createElement('meta')
+    viewport.name = 'viewport'
+    viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+    document.head.appendChild(viewport)
+
+    // Cleanup function to remove the viewport meta tag
+    return () => {
+      document.head.removeChild(viewport)
+    }
+  }, [])
+
+  // Handle viewport height for mobile browsers
+  useEffect(() => {
+    const setVH = () => {
+      const vh = window.innerHeight * 0.01
+      document.documentElement.style.setProperty('--vh', `${vh}px`)
+    }
+
+    setVH()
+    window.addEventListener('resize', setVH)
+    window.addEventListener('orientationchange', setVH)
+
+    return () => {
+      window.removeEventListener('resize', setVH)
+      window.removeEventListener('orientationchange', setVH)
+    }
+  }, [])
+
+  // Modified height classes to use custom vh
+  const mainClassName = "relative w-screen overflow-hidden"
+  const mainStyle = { height: 'calc(var(--vh, 1vh) * 100)' }
+
 
   // Function to update map view counts in databse
   const updateViewCounts = async (mappbook_user_id: string) => {
@@ -276,28 +312,27 @@ export default function MapPage() {
   }
 
   // Only render the map and UI if canViewMap is true
-  if(!updateFailed && canViewMap)
-  return (
-    <UserDataContext.Provider value={userData}>
-      <main className="relative h-screen w-screen overflow-hidden">
-        {/* Map Container */}
-        <div className="h-full w-full">
-          <MapboxMapPublic />
-        </div>
+  if (!updateFailed && canViewMap) {
+    return (
+      <UserDataContext.Provider value={userData}>
+        <main className={mainClassName} style={mainStyle}>
+          <div className="h-full w-full">
+            <MapboxMapPublic />
+          </div>
 
-        {/* Create Map Button */}
-        <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 flex justify-center px-4">
-          <Button
-            onClick={() => router.push('/')}
-            className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-            text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
-            shadow-lg rounded-full px-6 py-3"
-            size="lg"
-          >
-            Create Your MappBook
-          </Button>
-        </div>
-      </main>
-    </UserDataContext.Provider>
-  )
+          <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 flex justify-center px-4">
+            <Button
+              onClick={() => router.push('/')}
+              className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+              text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
+              shadow-lg rounded-full px-6 py-3"
+              size="lg"
+            >
+              Create Your MappBook
+            </Button>
+          </div>
+        </main>
+      </UserDataContext.Provider>
+    )
+  }
 }
