@@ -220,7 +220,7 @@ const AddPlace = () => {
 
   const handleCopy = async () => {
     try {
-      
+
       posthog.capture('GREEN - Copy share url button clicked', { property: '' });
 
       await navigator.clipboard.writeText(`https://mappbook.com/map/${mappbookUser?.mappbook_user_id}`);
@@ -396,7 +396,7 @@ const AddPlace = () => {
     try {
 
       posthog.capture('GREEN - Buy Premium button clicked', { property: '' });
-      
+
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -410,14 +410,14 @@ const AddPlace = () => {
 
       if (!response.ok) {
         const error = await response.json();
-        
+
         posthog.capture('RED - Buy Premium failed', { property: mappbookUser.mappbook_user_id });
 
         throw new Error(error.message || 'Failed to create checkout session');
       }
 
       const { url } = await response.json();
-      
+
       if (url) {
         window.location.href = url;
       }
@@ -620,35 +620,37 @@ const AddPlace = () => {
                 </div>
                 <div className="bg-white border border-gray-200 rounded-lg p-3">
                   {isEditing ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
+                    <div className="space-y-2 max-w-full">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <input
                           type="text"
                           value={nameInput}
                           onChange={handleNameChange}
                           placeholder="Enter your MappBook name"
                           maxLength={MAX_NAME_LENGTH}
-                          className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                          className="flex-1 min-w-0 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
                           autoFocus
                         />
-                        <button
-                          onClick={saveName}
-                          disabled={isSaving}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isSaving ? (
-                            <span className="inline-block animate-spin">↻</span>
-                          ) : (
-                            <Check className="w-5 h-5" />
-                          )}
-                        </button>
-                        <button
-                          onClick={cancelEditing}
-                          disabled={isSaving}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={saveName}
+                            disabled={isSaving}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isSaving ? (
+                              <span className="inline-block animate-spin">↻</span>
+                            ) : (
+                              <Check className="w-5 h-5" />
+                            )}
+                          </button>
+                          <button
+                            onClick={cancelEditing}
+                            disabled={isSaving}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className={error ? "text-red-500" : "text-gray-400"}>
@@ -828,7 +830,7 @@ const AddPlace = () => {
             <span>•</span>
             <span>🎨 Share your MappBook</span>
             <span>•</span>
-            <span>📊 Stats</span>
+            <span>📊 See Stats</span>
           </div>
         </div>
 
@@ -840,7 +842,7 @@ const AddPlace = () => {
               rel="noopener noreferrer"
               className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
             >
-              Support
+              Contact
             </a>
             <span className="text-gray-300">•</span>
             <button

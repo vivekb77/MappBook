@@ -51,7 +51,7 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   bearing: 0,
   padding: {
     top: 0,
-    bottom: 180,
+    bottom: 150,
     left: 0,
     right: 0
   }
@@ -148,6 +148,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 
   const startRotation = () => {
     const map = mapRef.current?.getMap();
+    
     if (!map) return;
 
     const currentZoom = viewState.zoom;
@@ -173,6 +174,8 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
     setIsLoading(false);
     setMapLoaded(true);
     const map = mapRef.current?.getMap();
+    map?.touchZoomRotate.enable();
+    map?.touchZoomRotate.disableRotation();
     if (map) {
       map.setFog({
         'horizon-blend': 0.2,
@@ -261,7 +264,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         keyboard={false}
         scrollZoom={true}
         touchPitch={false}
-        touchZoomRotate={true}
+        // touchZoomRotate={true}
       >
         {mapLoaded && (
           <>

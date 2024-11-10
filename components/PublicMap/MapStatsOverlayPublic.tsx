@@ -7,7 +7,7 @@ interface UserData {
   display_name: string;
   is_premium_user: boolean;
   map_style: string;
-  country_fill_color : string;
+  country_fill_color: string;
   map_views_left: number;
 }
 
@@ -125,7 +125,7 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
             </h1>
           </div>
           <p className="text-xs font-medium text-purple-400 mt-0.5">
-            Track Your Adventures 🌎
+            Share Your World 🌎
           </p>
         </div>
       </div>

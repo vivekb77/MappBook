@@ -4,8 +4,8 @@ import { CSPostHogProvider } from '../app/provider'
 import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
-  title: 'MappBook',
-  description: 'Show the world where you have been.',
+  title: 'MappBook.com',
+  description: 'Share your World! Track your Adventures. Show the World where you have been.',
 };
 
 

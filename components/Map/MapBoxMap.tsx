@@ -205,9 +205,12 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   }, [isRotating, searchedPlace, viewState.longitude, viewState.zoom]);
 
   const handleMapLoad = () => {
+    
     setIsLoading(false);
     if (mapRef.current) {
       const map = mapRef.current.getMap();
+      map.touchZoomRotate.enable();
+      map.touchZoomRotate.disableRotation();
       map.setFog({
         'horizon-blend': 0.2,
         'color': '#ffffff',
@@ -312,7 +315,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         keyboard={false}
         scrollZoom={true}
         touchPitch={false} //When enabled, users on touch devices can use two fingers to adjust the map's pitch (tilt)
-        touchZoomRotate={true}
+        // touchZoomRotate={true}
       >
         {mapLoaded && (
           <>
