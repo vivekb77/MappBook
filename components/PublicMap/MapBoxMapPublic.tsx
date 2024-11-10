@@ -210,7 +210,9 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
     const map = mapRef.current?.getMap();
     if (map) {
       map.setStyle(MAP_STYLES[newStyle]);
+      map.touchZoomRotate.disableRotation(); // to disable rotation
     }
+    
   };
 
   if (error) {
@@ -259,8 +261,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         keyboard={false}
         scrollZoom={true}
         touchPitch={false}
-        // touchZoomRotate={false}
-        touchZoomRotate={{ around: 'center' }} 
+        touchZoomRotate={true}
       >
         {mapLoaded && (
           <>

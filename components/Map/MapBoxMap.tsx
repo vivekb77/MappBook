@@ -230,7 +230,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       setIsRotating(false);
       const { longitude, latitude } = searchedPlace;
       const map = mapRef.current.getMap();
-
+      map.touchZoomRotate.disableRotation(); // to disable rotation
       map.flyTo({
         center: [longitude, latitude],
         zoom: 14,
@@ -312,7 +312,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         keyboard={false}
         scrollZoom={true}
         touchPitch={false} //When enabled, users on touch devices can use two fingers to adjust the map's pitch (tilt)
-        touchZoomRotate={false}
+        touchZoomRotate={true}
       >
         {mapLoaded && (
           <>
