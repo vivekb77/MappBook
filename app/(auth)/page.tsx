@@ -53,7 +53,7 @@ export default function Home() {
               {/* Mobile Bottom Sheet */}
               <div
                 className={`md:hidden fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 ease-out
-                  ${isSheetOpen ? 'translate-y-[40%]' : 'translate-y-[95%]'}`}
+                  ${isSheetOpen ? 'translate-y-[20%]' : 'translate-y-[100%]'}`}
               >
                 {/* Chevron with location icon */}
                 <div className="absolute -top-8 right-8 w-48 h-8">

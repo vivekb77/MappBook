@@ -31,7 +31,6 @@ interface AllUserPlacesContextType {
   setAllUserPlaces: React.Dispatch<React.SetStateAction<Place[]>>;
 }
 
-
 const StatBox: React.FC<StatBoxProps> = ({
   count = 0,
   color,
@@ -41,24 +40,24 @@ const StatBox: React.FC<StatBoxProps> = ({
   <div className="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1.5 
   border border-pink-100/50 shadow-sm hover:shadow-md 
   transition-all duration-300 hover:scale-105 group
-  w-[80px]"> {/* Reduced fixed width */}
-  <div className="flex items-center gap-1.5"> {/* Reduced gap */}
-    <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
-      rounded-md p-1 group-hover:scale-110 transition-transform duration-500
-      ${loading ? 'animate-pulse' : ''}`}>
-      {icon}
-    </div>
-    <div className="min-w-[32px]"> {/* Reduced minimum width for number container */}
-      {loading ? (
-        <div className="h-4 w-[32px] bg-gray-200 rounded animate-pulse"></div>
-      ) : (
-        <span className={`text-sm font-bold ${color} leading-none`}>
-          {count.toLocaleString()}
-        </span>
-      )}
+  w-[80px]">
+    <div className="flex items-center gap-1.5">
+      <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
+        rounded-md p-1 group-hover:scale-110 transition-transform duration-500
+        ${loading ? 'animate-pulse' : ''}`}>
+        {icon}
+      </div>
+      <div className="min-w-[32px]">
+        {loading ? (
+          <div className="h-4 w-[32px] bg-gray-200 rounded animate-pulse"></div>
+        ) : (
+          <span className={`text-sm font-bold ${color} leading-none`}>
+            {count.toLocaleString()}
+          </span>
+        )}
+      </div>
     </div>
   </div>
-</div>
 );
 
 const LoadingOverlay: React.FC = () => (
@@ -73,7 +72,6 @@ const LoadingOverlay: React.FC = () => (
 );
 
 const MapStatsOverlay: React.FC = () => {
-
   const {
     visitedPlacesCount,
     wantToVisitPlacesCount,
@@ -89,6 +87,7 @@ const MapStatsOverlay: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = getClerkSupabaseClient();
+
   const fetchPlaceCounts = async (mappbook_user_id: string) => {
     try {
       setIsLoading(true);
@@ -107,18 +106,13 @@ const MapStatsOverlay: React.FC = () => {
         throw new Error('Failed to fetch places data');
       }
 
-      // Initialize counters
       let visitedCount = 0;
       let wantToVisitCount = 0;
       let allPlacesCount = 0;
       const visitedCountries = new Set();
 
-      // Process all records in a single pass
       data.forEach(record => {
-        // Count all places regardless of status
         allPlacesCount++;
-
-        // Only process non-removed records for other counts
         if (!record.isRemoved) {
           if (record.visitedorwanttovisit === 'visited') {
             visitedCount++;
@@ -131,7 +125,6 @@ const MapStatsOverlay: React.FC = () => {
         }
       });
 
-      // Update all state variables at once
       setVisitedPlacesCount(visitedCount);
       setWantToVisitPlacesCount(wantToVisitCount);
       setVisitedCountriesCount(visitedCountries.size);
@@ -140,36 +133,44 @@ const MapStatsOverlay: React.FC = () => {
     } catch (err) {
       setError('An unexpected error occurred');
     } finally {
-      // Add a minimum delay to prevent flickering on fast connections
       setTimeout(() => setIsLoading(false), 500);
     }
   };
+
   const { mappbookUser, setMappbookUser } = useMappbookUser();
+  
   useEffect(() => {
     if (mappbookUser) {
       fetchPlaceCounts(mappbookUser.mappbook_user_id);
     }
-  }, [mappbookUser,userPlaces]);
+  }, [mappbookUser, userPlaces]);
 
   return (
-    <div className="absolute top-3 right-3">
-        <div className="flex flex-col items-end gap-2">
-        <div className="flex flex-col gap-1.5">
+    <div className="absolute top-3 left-0 right-0 md:right-3 md:left-auto">
+      <div className="flex flex-col items-center md:items-end gap-2">
+        {/* Stats container with responsive classes */}
+        <div className="flex md:flex-col gap-1.5 justify-center">
           <StatBox 
             count={visitedPlacesCount}
             color="text-blue-600"
             icon={<MapPin strokeWidth={2.5} className="w-4 h-4 text-blue-600" />}
-            loading={isLoading} label={''}          />
+            loading={isLoading}
+            label={''}
+          />
           <StatBox
             count={wantToVisitPlacesCount}
             color="text-red-600"
             icon={<Plane strokeWidth={2.5} className="w-4 h-4 text-red-600" />}
-            loading={isLoading} label={''}          />
+            loading={isLoading}
+            label={''}
+          />
           <StatBox
             count={visitedCountriesCount}
             color="text-indigo-600"
             icon={<Globe2 strokeWidth={2.5} className="w-4 h-4 text-indigo-600" />}
-            loading={isLoading} label={''}          />
+            loading={isLoading}
+            label={''}
+          />
         </div>
         {error && (
           <div className="mt-2 text-sm text-red-600 bg-white/90 px-3 py-1.5 rounded-md 
