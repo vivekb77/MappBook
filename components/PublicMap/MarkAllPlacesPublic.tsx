@@ -278,6 +278,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
                     </div>
                   </div>
                 </div>
+                <button></button>
               </div>
             </Popup>
           )}
