@@ -20,8 +20,7 @@ const nextConfig = {
         // Split chunks for better caching
         config.optimization.splitChunks = {
           chunks: 'all',
-          minimumChunkSize: 20000,
-          minSize: 20000,
+          minSize: 20000, // Minimum size in bytes for a chunk to be generated
           cacheGroups: {
             default: false,
             vendors: false,
