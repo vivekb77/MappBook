@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 
