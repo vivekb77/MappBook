@@ -36,7 +36,7 @@ function MarkAllPlaces() {
   const supabase = getClerkSupabaseClient();
   // Fetch country GeoJSON data
   useEffect(() => {
-    fetch('/countries.geojson')
+    fetch('/countries10009.geojson')
       .then(response => response.json())
       .then((data: GeoJSON) => {
         // Ensure the data is in the correct format

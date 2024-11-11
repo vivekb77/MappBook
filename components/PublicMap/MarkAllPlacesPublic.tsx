@@ -63,7 +63,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
 
   // Fetch country GeoJSON data
   useEffect(() => {
-    fetch('/countries.geojson')
+    fetch('/countries10009.geojson')
       .then(response => response.json())
       .then((data: GeoJSON) => {
         if (data.type !== 'FeatureCollection') {
