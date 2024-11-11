@@ -8,14 +8,23 @@ import { AllUserPlacesContext } from '@/context/AllUserPlacesContext'
 import { MapStatsProvider } from '@/context/MapStatsContext'
 import { MapPin, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
+  const router = useRouter()
   const [searchedPlace, setSearchedPlaceDetails] = useState<any>([])
   const [userPlaces, setAllUserPlaces] = useState<any[]>([])
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { isLoaded, isSignedIn, user } = useUser()
 
+    // Redirect to sign-in if not authenticated
+    useEffect(() => {
+      if (isLoaded && !isSignedIn) {
+        router.push('/sign-in')
+      }
+    }, [isLoaded, isSignedIn, router])
+
+    
   // Handle mobile viewport height
   useEffect(() => {
     const updateHeight = () => {
@@ -47,11 +56,6 @@ export default function Home() {
       <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
     </div>
   )
-
-  // Redirect to sign-in if not authenticated
-  if (!isSignedIn) {
-    redirect('/sign-in')
-  }
 
   return (
     <div className="fixed inset-0" style={{ height: 'calc(var(--vh, 1vh) * 100)' }}>
