@@ -11,7 +11,7 @@ export async function GET(request:any) {
         `${BASE_URL}?q=${searchText}&language=en&session_token=${sessionToken}&access_token=${process.env.MAPBOX_ACCESS_TOKEN_SEARCH}`
     );
 
-    console.log("Search text is" +searchText);
+    console.log("Search session token - " +sessionToken + "access token - " + process.env.MAPBOX_ACCESS_TOKEN_SEARCH);
 
     const searchResult=await res.json();
     return NextResponse.json(searchResult)
