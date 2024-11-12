@@ -2,18 +2,32 @@
 
 import React, { useEffect } from 'react';
 
-interface MapPullRefreshPreventionProps {
+interface MarkerPullRefreshPreventionProps {
   children: React.ReactNode;
 }
 
-const MapPullRefreshPrevention: React.FC<MapPullRefreshPreventionProps> = ({ children }) => {
+const MarkerPullRefreshPrevention: React.FC<MarkerPullRefreshPreventionProps> = ({ children }) => {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Function to find the closest parent with a specific class
-    const isMapElement = (element: HTMLElement | null): boolean => {
+    // Function to find if the touch is on a marker or popup
+    const isMarkerOrPopupElement = (element: HTMLElement | null): boolean => {
       while (element) {
-        if (element.classList.contains('mapboxgl-map')) {
+        // Check for your specific marker and popup classes
+        if (
+          // Marker image
+          element.classList.contains('w-7') && element.classList.contains('h-7') ||
+          // Marker name span
+          (element.tagName.toLowerCase() === 'span' && 
+           element.classList.contains('mt-1') && 
+           element.classList.contains('text-[0.75rem]')) ||
+          // Popup
+          element.classList.contains('custom-popup') ||
+          // Marker container div
+          (element.classList.contains('relative') && 
+           element.classList.contains('flex') && 
+           element.classList.contains('flex-col'))
+        ) {
           return true;
         }
         element = element.parentElement;
@@ -24,18 +38,9 @@ const MapPullRefreshPrevention: React.FC<MapPullRefreshPreventionProps> = ({ chi
     const handleTouchMove = (e: TouchEvent) => {
       const target = e.target as HTMLElement;
       
-      // Only prevent default if the touch is on the map
-      if (isMapElement(target)) {
-        const touchY = e.touches[0].clientY;
-        const mapElement = document.querySelector('.mapboxgl-map') as HTMLElement;
-        
-        if (mapElement) {
-          const mapRect = mapElement.getBoundingClientRect();
-          // Prevent pull-to-refresh only when touching near the top of the map
-          if (touchY - mapRect.top < 50) {
-            e.preventDefault();
-          }
-        }
+      // Only prevent default if the touch is on a marker or popup
+      if (isMarkerOrPopupElement(target)) {
+        e.preventDefault();
       }
     };
 
@@ -49,4 +54,4 @@ const MapPullRefreshPrevention: React.FC<MapPullRefreshPreventionProps> = ({ chi
   return <>{children}</>;
 };
 
-export default MapPullRefreshPrevention;
+export default MarkerPullRefreshPrevention;
