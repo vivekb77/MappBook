@@ -8,10 +8,10 @@ export async function GET(request:any) {
     const sessionToken = searchParams.get('session_token');
 
     const res = await fetch(
-        `${BASE_URL}?q=${searchText}&language=en&session_token=${sessionToken}&access_token=${process.env.MAPBOX_ACCESS_TOKEN_SEARCH}`
+        `${BASE_URL}?q=${searchText}&language=en&session_token=${sessionToken}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_SEARCH_RETRIEVE}`
     );
 
-    console.log("Search session token - " +sessionToken + "access token - " + process.env.MAPBOX_ACCESS_TOKEN_SEARCH);
+    console.log("Search session token - " +sessionToken + "access token - " + process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_SEARCH_RETRIEVE);
 
     const searchResult=await res.json();
     return NextResponse.json(searchResult)
