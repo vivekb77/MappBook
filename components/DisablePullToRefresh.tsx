@@ -27,7 +27,15 @@ const MarkerPullRefreshPrevention: React.FC<MarkerPullRefreshPreventionProps> = 
           // Stats boxes
           (element.classList.contains('bg-white/90') && 
            element.classList.contains('backdrop-blur-sm')) ||
-           
+          // Logo section
+          element.classList.contains('from-pink-400') ||
+          // Stats section
+          (element.classList.contains('flex') && 
+           element.classList.contains('flex-col') && 
+           element.classList.contains('items-end')) ||
+          // Individual stat boxes
+          element.classList.contains('group') ||
+          
           // Marker container div
           (element.classList.contains('relative') && 
            element.classList.contains('flex') && 
