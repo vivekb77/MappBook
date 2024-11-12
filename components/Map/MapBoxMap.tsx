@@ -8,6 +8,7 @@ import MarkAllPlaces from "./MarkAllPlaces";
 import MapStatsOverlay from "./MapStatsOverlay";
 import { SearchedPlaceDetailsContext } from "@/context/SearchedPlaceDetailsContext";
 import MapStyleSwitcher from "./MapStyleSwitcher";
+import PreventPullToRefresh from '@/components/DisablePullToRefresh';
 
 const MAP_STYLES = {
   satellite: "mapbox://styles/mapbox/satellite-streets-v12",
@@ -277,6 +278,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   return (
+    <PreventPullToRefresh>
     <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
       {isLoading && (
         <div className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10">
@@ -341,6 +343,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         </button>
       )}
     </div>
+    </PreventPullToRefresh>
   );
 };
 
