@@ -23,6 +23,11 @@ const MarkerPullRefreshPrevention: React.FC<MarkerPullRefreshPreventionProps> = 
            element.classList.contains('text-[0.75rem]')) ||
           // Popup
           element.classList.contains('custom-popup') ||
+
+          // Stats boxes
+          (element.classList.contains('bg-white/90') && 
+           element.classList.contains('backdrop-blur-sm')) ||
+           
           // Marker container div
           (element.classList.contains('relative') && 
            element.classList.contains('flex') && 

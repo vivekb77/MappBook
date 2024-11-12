@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from "@/components/utils/supabase";
 import { MapPin, Plane, Globe2, Map } from 'lucide-react';
+import PreventPullToRefresh from '@/components/DisablePullToRefresh';
 
 interface UserData {
   mappbook_user_id: string;
@@ -110,6 +111,7 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
   }, [userData.mappbook_user_id]);
 
   return (
+    <PreventPullToRefresh>
     <div className="absolute top-0 left-0 right-0 z-10">
       {/* Logo Section - Left aligned with consistent margins */}
       <div className="absolute top-3 left-3">
@@ -173,6 +175,7 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
         </div>
       )} */}
     </div>
+     </PreventPullToRefresh>
   );
 };
 

@@ -4,6 +4,7 @@ import { useMappbookUser } from '@/context/UserContext';
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 import { MapStatsContext } from '@/context/MapStatsContext';
 import { MapPin, Plane, Globe2 } from 'lucide-react';
+import PreventPullToRefresh from '@/components/DisablePullToRefresh';
 
 interface StatBoxProps {
   count?: number;
@@ -146,6 +147,7 @@ const MapStatsOverlay: React.FC = () => {
   }, [mappbookUser, userPlaces]);
 
   return (
+    <PreventPullToRefresh>
     <div className="absolute top-3 left-0 right-0 md:right-3 md:left-auto">
       <div className="flex flex-col items-center md:items-end gap-2">
         {/* Stats container with responsive classes */}
@@ -186,6 +188,7 @@ const MapStatsOverlay: React.FC = () => {
         )}
       </div>
     </div>
+    </PreventPullToRefresh>
   );
 };
 
