@@ -13,6 +13,8 @@ export async function GET(request:any) {
 
     console.log("Search session token - " +sessionToken + "access token - " + process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_SEARCH_RETRIEVE);
 
+    
+
     const searchResult=await res.json();
     return NextResponse.json(searchResult)
     
