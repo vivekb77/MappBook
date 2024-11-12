@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { CSPostHogProvider } from '../app/provider'
 import { Analytics } from '@vercel/analytics/react';
+import PreventPullToRefresh from '@/components/DisablePullToRefresh';
 
 export const metadata: Metadata = {
   title: 'MappBook.com',
@@ -17,14 +18,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-       <head>
+      <head>
         <meta name="robots" content="noindex,nofollow" />
         <meta name="googlebot" content="noindex,nofollow" />
       </head>
-       <CSPostHogProvider>
-      <body>
-          {children}
-      </body>
+      <CSPostHogProvider>
+        <body>
+          <PreventPullToRefresh>
+            {children}
+          </PreventPullToRefresh>
+        </body>
       </CSPostHogProvider>
       <Analytics />
     </html>
