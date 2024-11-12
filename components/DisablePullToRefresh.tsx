@@ -1,40 +1,52 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect } from 'react';
 
-interface PreventPullToRefreshProps {
-  children: React.ReactNode
+interface MapPullRefreshPreventionProps {
+  children: React.ReactNode;
 }
 
-const PreventPullToRefresh: React.FC<PreventPullToRefreshProps> = ({ children }) => {
+const MapPullRefreshPrevention: React.FC<MapPullRefreshPreventionProps> = ({ children }) => {
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') return;
 
-    const disablePullToRefresh = (e: TouchEvent) => {
-      // Prevent default action if the touch move is vertical
-      if (e.touches.length > 1 || e.touches[0].clientY > 0) {
-        e.preventDefault()
+    // Function to find the closest parent with a specific class
+    const isMapElement = (element: HTMLElement | null): boolean => {
+      while (element) {
+        if (element.classList.contains('mapboxgl-map')) {
+          return true;
+        }
+        element = element.parentElement;
       }
-    }
+      return false;
+    };
 
-    // Add event listener to the document
-    document.addEventListener('touchmove', disablePullToRefresh, { passive: false })
+    const handleTouchMove = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      
+      // Only prevent default if the touch is on the map
+      if (isMapElement(target)) {
+        const touchY = e.touches[0].clientY;
+        const mapElement = document.querySelector('.mapboxgl-map') as HTMLElement;
+        
+        if (mapElement) {
+          const mapRect = mapElement.getBoundingClientRect();
+          // Prevent pull-to-refresh only when touching near the top of the map
+          if (touchY - mapRect.top < 50) {
+            e.preventDefault();
+          }
+        }
+      }
+    };
 
-    // Clean up the event listener on unmount
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+
     return () => {
-      document.removeEventListener('touchmove', disablePullToRefresh)
-    }
-  }, [])
+      document.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
 
-  return (
-    <div style={{ 
-      touchAction: 'pan-x',
-      minHeight: '100vh',  // Ensure it covers the full viewport height
-      width: '100%'        // Ensure it covers the full width
-    }}>
-      {children}
-    </div>
-  )
-}
+  return <>{children}</>;
+};
 
-export default PreventPullToRefresh
+export default MapPullRefreshPrevention;

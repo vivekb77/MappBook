@@ -3,6 +3,7 @@ import { Marker, Popup, Source, Layer, LayerProps, useMap } from 'react-map-gl';
 import type { GeoJSON, Feature } from 'geojson';
 import { supabase } from "@/components/utils/supabase";
 import '../Map/PlaceInfoPopUp.css';
+import PreventPullToRefresh from '@/components/DisablePullToRefresh';
 
 interface UserData {
   mappbook_user_id: string;
@@ -163,6 +164,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
 
   // Rest of the component remains the same...
   return (
+    <PreventPullToRefresh>
     <>
       {geojsonData && (
         <Source id="country-data" type="geojson" data={geojsonData}>
@@ -302,6 +304,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         </div>
       )} */}
     </>
+    </PreventPullToRefresh>
   );
 }
 
