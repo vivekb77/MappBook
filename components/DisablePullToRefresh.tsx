@@ -36,6 +36,11 @@ const MarkerPullRefreshPrevention: React.FC<MarkerPullRefreshPreventionProps> = 
           // Individual stat boxes
           element.classList.contains('group') ||
           
+          //stats on home page
+          (element.classList.contains('flex') && 
+          element.classList.contains('flex-col') && 
+          element.classList.contains('md:items-end')) ||
+
           // Marker container div
           (element.classList.contains('relative') && 
            element.classList.contains('flex') && 
