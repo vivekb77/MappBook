@@ -8,39 +8,31 @@ export async function GET(request: NextRequest) {
         const searchText = searchParams.get('q');
         const sessionToken = searchParams.get('session_token');
 
-        // Validate required parameters
         if (!searchText || !sessionToken) {
             return NextResponse.json(
-                { error: 'Missing required parameters on mapbox search' },
+                { error: 'Missing required parameters mapbox search' },
                 { status: 400 }
             );
         }
 
-        // Validate access token
-        if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_SEARCH_RETRIEVE) {
-            return NextResponse.json(
-                { error: 'Mapbox access token not configured for mapbox search' },
-                { status: 500 }
-            );
-        }
+        const customHeaders = new Headers({
+            'Content-Type': 'application/json',
+            'Origin': 'https://mappbook.com', 
+            'Referer': 'https://mappbook.com' 
+        });
 
         const res = await fetch(
             `${BASE_URL}?q=${encodeURIComponent(searchText)}&language=en&session_token=${sessionToken}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_SEARCH_RETRIEVE}`,
             {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Origin': request.headers.get('origin') || 'https://mappbook.com'
-                },
-                referrerPolicy: 'origin',
-                cache: 'no-store' // Disable caching for fresh results
+                headers: customHeaders,
+                cache: 'no-store'
             }
         );
 
         if (!res.ok) {
-            const errorData = await res.json().catch(() => null);
-            console.error('Mapbox search API error:', errorData);
+            console.error('Mapbox API error on search :', res.status);
             return NextResponse.json(
-                { error: 'Mapbox search API request failed' },
+                { error: 'Mapbox API request failed on search ' },
                 { status: res.status }
             );
         }
@@ -51,22 +43,8 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('Server error:', error);
         return NextResponse.json(
-            { error: 'Internal server error on mopbox search ' },
+            { error: 'Internal server error on search' },
             { status: 500 }
         );
     }
-}
-
-// Add OPTIONS handler if needed for CORS
-export async function OPTIONS(request: NextRequest) {
-    return NextResponse.json(
-        {},
-        {
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-            }
-        }
-    );
 }
