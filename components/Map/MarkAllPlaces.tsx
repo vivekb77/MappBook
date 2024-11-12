@@ -5,6 +5,7 @@ import { Map, Marker, Popup, Source, Layer, FillLayer, useMap } from 'react-map-
 import type { GeoJSON } from 'geojson';
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import './PlaceInfoPopUp.css'; 
+import PreventPullToRefresh from '@/components/DisablePullToRefresh';
 
 interface Place {
   place_id: string;
@@ -208,6 +209,7 @@ function MarkAllPlaces() {
   }
 
   return (
+    <PreventPullToRefresh>
     <>
     // @ts-ignore
       {geojsonData && (
@@ -382,6 +384,7 @@ function MarkAllPlaces() {
         </Marker>
       ))}
     </>
+    </PreventPullToRefresh>
   );
 }
 
