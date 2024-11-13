@@ -351,7 +351,7 @@ function MarkAllPlaces() {
                             d="M5 13l4 4L19 7"
                           />
                         </svg>
-                        Mark Visited
+                        Visited
                       </button>
                     )}
                     <button

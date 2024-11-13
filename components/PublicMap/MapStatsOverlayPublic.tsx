@@ -117,9 +117,9 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
       <div className="absolute top-3 left-3">
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-                rounded-lg p-1 shadow-sm transform -rotate-3">
-              <Map className="w-3 h-3 text-white" />
+           <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+          rounded-xl p-2 shadow-md transform -rotate-3">
+              {/* <Map className="w-3 h-3 text-white" /> */}
             </div>
             <h1 className="text-lg font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
                 text-transparent bg-clip-text transform rotate-1">

@@ -5,9 +5,8 @@ import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
   title: 'MappBook.com',
-  description: 'Share your World! Track your Adventures. Show the World where you have been.',
+  description: 'Share your World 🌎 Track your Adventures ✈️ Show the World where you have been 📍',
 };
-
 
 
 export default function RootLayout({

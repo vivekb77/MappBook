@@ -444,7 +444,7 @@ const AddPlace = () => {
           </h1>
         </div>
         <p className="text-xs font-medium text-purple-400">
-          Share Your World ✨ Track Your Adventures 🌎
+          Share your World 🌎 Track your Adventures ✈️
         </p>
       </div>
 
@@ -461,7 +461,7 @@ const AddPlace = () => {
                 {displayName || 'MappBook User'}
               </span>
               <span className="text-xs text-purple-500 font-medium">
-                {mappbookUser?.is_premium_user ? '✨ Premium Travel Creator' : 'Travel Creator'} ✈️
+                {mappbookUser?.is_premium_user ? 'Premium Travel Creator' : 'Travel Creator'} ✈️
               </span>
             </div>
           </div>
@@ -543,12 +543,12 @@ const AddPlace = () => {
           {isSubmitting ? (
             <>
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Adding to Your Map...</span>
+              <span>Adding to Your MappBook...</span>
             </>
           ) : (
             <>
               <MapPin className="w-5 h-5" />
-              <span>Pin This Location 📍</span>
+              <span>Pin This Place 📍</span>
             </>
           )}
         </button>
@@ -572,7 +572,7 @@ const AddPlace = () => {
 
         {/* Engagement Hint */}
         <div className="text-center text-xs font-medium text-purple-400">
-          Show the world where you have been 📸
+          Show the world where you have been ✈️
         </div>
 
       </div>
@@ -676,7 +676,7 @@ const AddPlace = () => {
 
               <div className="space-y-3">
                 <div className="text-center text-xs font-medium text-purple-400">
-                  Choose map style to share
+                  Choose mapp style to share
                 </div>
                 <div className="flex justify-center items-center gap-2 overflow-x-auto pb-2 px-1">
                   {mapStyles.map((style) => (

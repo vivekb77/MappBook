@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
 
 interface FormData {
   name: string;
@@ -34,6 +35,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -70,12 +72,16 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
       return;
     }
 
+    setIsSubmitting(true);
+    
     try {
       await onSubmit(formData);
       setFormData(initialFormData);
       setSubmitted(true);
     } catch (error) {
       setSubmitError('Failed to submit form. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -135,9 +141,10 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
           maxLength={MAX_LENGTHS.name}
           value={formData.name}
           onChange={handleChange}
+          disabled={isSubmitting}
           className={`w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
             errors.name ? 'border-red-500' : 'border-gray-300'
-          }`}
+          } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
         />
         {errors.name && (
           <p className="mt-1 text-sm text-red-600">{errors.name}</p>
@@ -160,9 +167,10 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
           maxLength={MAX_LENGTHS.email}
           value={formData.email}
           onChange={handleChange}
+          disabled={isSubmitting}
           className={`w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
             errors.email ? 'border-red-500' : 'border-gray-300'
-          }`}
+          } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
         />
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -184,10 +192,11 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
           maxLength={MAX_LENGTHS.query}
           value={formData.query}
           onChange={handleChange}
+          disabled={isSubmitting}
           rows={5}
           className={`w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
             errors.query ? 'border-red-500' : 'border-gray-300'
-          }`}
+          } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
         />
         {errors.query && (
           <p className="mt-1 text-sm text-red-600">{errors.query}</p>
@@ -196,9 +205,21 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
 
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+        disabled={isSubmitting}
+        className={`w-full flex justify-center items-center gap-2 py-2 px-4 rounded-md transition-colors ${
+          isSubmitting 
+            ? 'bg-purple-400 cursor-not-allowed' 
+            : 'bg-purple-600 hover:bg-purple-700'
+        } text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2`}
       >
-        Send Message
+        {isSubmitting ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Sending...
+          </>
+        ) : (
+          'Send Message'
+        )}
       </button>
     </form>
   );

@@ -171,19 +171,19 @@ export default function MapPage() {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
         {/* Logo Header */}
-        <div className="text-center">
+        <div className="p-4 text-center border-b border-pink-100/50 bg-white/50">
           <div className="flex items-center justify-center gap-2 mb-1">
             <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-              rounded-xl p-2 shadow-md transform -rotate-3">
+          rounded-xl p-2 shadow-md transform -rotate-3">
               {/* <Map className="w-5 h-5 text-white" /> */}
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-              text-transparent bg-clip-text transform rotate-1">
+          text-transparent bg-clip-text transform rotate-1">
               MappBook
             </h1>
           </div>
           <p className="text-xs font-medium text-purple-400">
-            Share Your World ✨ Track Your Adventures 🌎
+            Share your World 🌎 Track your Adventures ✈️
           </p>
         </div>
 
@@ -230,7 +230,7 @@ export default function MapPage() {
             </h1>
           </div>
           <p className="text-xs font-medium text-purple-400">
-            Share Your World ✨ Track Your Adventures 🌎
+            Share your World 🌎 Track your Adventures ✈️
           </p>
         </div>
 
@@ -282,7 +282,7 @@ export default function MapPage() {
             </h1>
           </div>
           <p className="text-xs font-medium text-purple-400">
-            Share Your World ✨ Track Your Adventures 🌎
+            Share your World 🌎 Track your Adventures ✈️
           </p>
         </div>
 

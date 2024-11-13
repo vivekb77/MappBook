@@ -22,7 +22,7 @@ export default function MapPage() {
          </h1>
        </div>
        <p className="text-xs font-medium text-purple-400">
-         Share Your World ✨ Track Your Adventures 🌎
+       Share your World 🌎 Track your Adventures ✈️
        </p>
      </div>
 

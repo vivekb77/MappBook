@@ -55,7 +55,7 @@ const SearchPlace = () => {
   const MAPBOX_RETRIEVE_URL = 'https://api.mapbox.com/search/searchbox/v1/retrieve/';
   const DEBOUNCE_DELAY = 1000;
   const FREE_TIER_LIMIT = 50;
-  const PREMIUM_TIER_LIMIT = 500;
+  const PREMIUM_TIER_LIMIT = 200;
 
   // Check if user is logged in and can search
   const isLoggedIn = !!mappbookUser;
@@ -79,7 +79,7 @@ const SearchPlace = () => {
           const suggestions = await fetchAddressSuggestions(searchQuery);
           setSuggestions(suggestions);
         } catch (err) {
-          setError('Failed to fetch suggestions. Please try again.');
+          setError('Failed to fetch address suggestions.');
           setSuggestions([]);
         } finally {
           setIsSearching(false);
@@ -102,7 +102,7 @@ const SearchPlace = () => {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch suggestions');
+      throw new Error('Failed to fetch address suggestions');
     }
 
     const result: SearchResult = await response.json();
@@ -148,7 +148,7 @@ const SearchPlace = () => {
         maki: feature.properties.maki,
       });
     } catch (err) {
-      setError('Failed to fetch place details. Please try again.');
+      setError('Failed to fetch place details');
     }
   };
 

@@ -34,7 +34,7 @@ const ContactPage: React.FC = () => {
         <div className="flex items-center justify-center gap-2 mb-1">
           <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
           rounded-xl p-2 shadow-md transform -rotate-3">
-            <Map className="w-5 h-5 text-white" />
+            {/* <Map className="w-5 h-5 text-white" /> */}
           </div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
           text-transparent bg-clip-text transform rotate-1">
@@ -42,7 +42,7 @@ const ContactPage: React.FC = () => {
           </h1>
         </div>
         <p className="text-xs font-medium text-purple-400">
-          Share Your World ✨ Track Your Adventures 🌎
+        Share your World 🌎 Track your Adventures ✈️
         </p>
       </div>
 
@@ -53,7 +53,7 @@ const ContactPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">Contact Us</h1>
             <Link
               href="/"
-              className="text-blue-600 hover:text-blue-800 font-medium"
+              className="text-purple-600 hover:text-purple-800 font-medium"
             >
               Back to Home
             </Link>
