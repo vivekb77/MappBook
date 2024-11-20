@@ -16,15 +16,15 @@ export default function Home() {
   const [userPlaces, setAllUserPlaces] = useState<any[]>([])
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { isLoaded, isSignedIn, user } = useUser()
+  const [hasClicked, setHasClicked] = useState(false);
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/sign-in')
+    }
+  }, [isLoaded, isSignedIn, router])
 
-    // Redirect to sign-in if not authenticated
-    useEffect(() => {
-      if (isLoaded && !isSignedIn) {
-        router.push('/sign-in')
-      }
-    }, [isLoaded, isSignedIn, router])
 
-    
   // Handle mobile viewport height
   useEffect(() => {
     const updateHeight = () => {
@@ -78,31 +78,50 @@ export default function Home() {
               {/* Mobile Bottom Sheet */}
               <div
                 className={`md:hidden fixed bottom-0 left-0 right-0 z-40 
-                  transition-transform duration-300 ease-out bg-white
-                  ${isSheetOpen ? 'translate-y-0' : 'translate-y-[100%]'}`}
-                style={{ 
+  transition-transform duration-300 ease-out bg-white 
+  ${isSheetOpen ? 'translate-y-0' : 'translate-y-[100%]'}`}
+                style={{
                   height: 'calc(var(--vh, 1vh) * 60)',
                   paddingBottom: 'env(safe-area-inset-bottom)'
                 }}
               >
                 {/* Chevron with location icon */}
-                <div className="absolute -top-8 right-8 w-48 h-8 touch-none">
-                  <svg width="100%" height="32" className="block shadow-lg">
-                    <path 
-                      d="M0,32 H192 C144,32 120,0 96,0 C72,0 48,32 0,32" 
-                      fill="white" 
-                      width="100%"
-                    />
-                  </svg>
-                  <button 
-                    className="absolute inset-0 flex items-center justify-center -mt-1 cursor-pointer"
-                    onClick={handleChevronClick}
-                    aria-label="Toggle places panel"
+                <div className="absolute -top-12 right-8 w-56 h-12 touch-none">
+                  <div
+                    className="relative cursor-pointer w-full h-full"
+                    onClick={() => {
+                      setHasClicked(true);
+                      handleChevronClick();
+                    }}
                   >
-                    <MapPin className="w-6 h-6 text-gray-700 stroke-[2.5]" />
-                  </button>
+                    <svg width="100%" height="48" className="block shadow-xl">
+                      <defs>
+                        <linearGradient id="chevronGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" style={{ stopColor: '#10B981' }} /> {/* emerald-500 */}
+                          <stop offset="50%" style={{ stopColor: '#14B8A6' }} /> {/* teal-500 */}
+                          <stop offset="100%" style={{ stopColor: '#06B6D4' }} /> {/* cyan-500 */}
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M0,48 H192 C144,48 120,0 96,0 C72,0 48,48 0,48"
+                        fill="url(#chevronGradient)"
+                        width="100%"
+                        className="shadow-lg"
+                      />
+                    </svg>
+                    <button
+                      className={`absolute top-0 left-[96px] -translate-y-1/2 
+      flex items-center justify-center pointer-events-none
+      ${!hasClicked ? 'animate-bounce' : ''} group w-12 h-12`}
+                      aria-label="Toggle places panel"
+                    >
+                      <MapPin
+                        className="w-8 h-8 text-white stroke-[3] transform transition-transform 
+        group-hover:scale-110 group-hover:rotate-12"
+                      />
+                    </button>
+                  </div>
                 </div>
-
                 {/* Sheet Content */}
                 <div className="h-full flex flex-col">
                   <div className="flex-1 min-h-0">

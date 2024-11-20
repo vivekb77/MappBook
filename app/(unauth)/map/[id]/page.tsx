@@ -335,16 +335,16 @@ export default function MapPage() {
               Create Your MappBook
             </Button>
           </div> */}
-          <div className="fixed bottom-12 sm:bottom-16 left-0 right-0 flex flex-col items-center gap-3 px-4">
+          <div className="fixed bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
             <Button
               onClick={() => {
                 posthog.capture('GREEN - Create Your MappBook Clicked', { property: '' });
                 router.push('/');
               }}
               className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 
-    text-white hover:from-emerald-500 hover:via-teal-500 hover:to-cyan-500
-    shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all
-    rounded-full px-8 py-4 text-lg font-semibold animate-pulse"
+text-white hover:from-emerald-500 hover:via-teal-500 hover:to-cyan-500
+shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all
+rounded-full px-8 py-4 text-lg font-semibold animate-pulse"
               size="lg"
             >
               Create Your MappBook
