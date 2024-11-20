@@ -321,7 +321,7 @@ export default function MapPage() {
             <MapboxMapPublic />
           </div>
 
-          {/* <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 flex justify-center px-4">
+          <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 flex justify-center px-4">
             <Button
               onClick={() => {
                 posthog.capture('GREEN - Create Your MappBook Clicked', { property: '' });
@@ -334,8 +334,8 @@ export default function MapPage() {
             >
               Create Your MappBook
             </Button>
-          </div> */}
-          <div className="fixed bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
+          </div>
+          {/* <div className="fixed bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
             <Button
               onClick={() => {
                 posthog.capture('GREEN - Create Your MappBook Clicked', { property: '' });
@@ -352,7 +352,7 @@ rounded-full px-8 py-4 text-lg font-semibold animate-pulse"
             <p className="text-white text-sm font-medium bg-black/30 px-4 py-1 rounded-full">
               Join thousands of travelers
             </p>
-          </div>
+          </div> */}
         </main>
       </UserDataContext.Provider>
     )
