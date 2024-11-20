@@ -313,6 +313,7 @@ export default function MapPage() {
 
   // Only render the map and UI if canViewMap is true
   if (!updateFailed && canViewMap) {
+    posthog.capture('GREEN - MappBook Viewed', { property: '' })
     return (
       <UserDataContext.Provider value={userData}>
         <main className={mainClassName} style={mainStyle}>
@@ -320,9 +321,12 @@ export default function MapPage() {
             <MapboxMapPublic />
           </div>
 
-          <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 flex justify-center px-4">
+          {/* <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 flex justify-center px-4">
             <Button
-              onClick={() => router.push('/')}
+              onClick={() => {
+                posthog.capture('GREEN - Create Your MappBook Clicked', { property: '' });
+                router.push('/');
+              }}
               className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
               text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
               shadow-lg rounded-full px-6 py-3"
@@ -330,6 +334,24 @@ export default function MapPage() {
             >
               Create Your MappBook
             </Button>
+          </div> */}
+          <div className="fixed bottom-12 sm:bottom-16 left-0 right-0 flex flex-col items-center gap-3 px-4">
+            <Button
+              onClick={() => {
+                posthog.capture('GREEN - Create Your MappBook Clicked', { property: '' });
+                router.push('/');
+              }}
+              className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 
+    text-white hover:from-emerald-500 hover:via-teal-500 hover:to-cyan-500
+    shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all
+    rounded-full px-8 py-4 text-lg font-semibold animate-pulse"
+              size="lg"
+            >
+              Create Your MappBook
+            </Button>
+            <p className="text-white text-sm font-medium bg-black/30 px-4 py-1 rounded-full">
+              Join thousands of travelers
+            </p>
           </div>
         </main>
       </UserDataContext.Provider>
