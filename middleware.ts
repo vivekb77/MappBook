@@ -6,6 +6,7 @@ export default authMiddleware({
     "/",
     "/api/stripe/webhook",
     "/terms",
+    "/api/search-address",
     "/privacy",
     "/contact",
     "/payment-success",

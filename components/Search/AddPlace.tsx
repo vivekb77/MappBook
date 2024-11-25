@@ -2,14 +2,147 @@ import React, { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 import { useMappbookUser } from '@/context/UserContext';
-import { useClerk, useUser } from '@clerk/nextjs';
+import { SignedIn, useClerk, useUser } from '@clerk/nextjs';
 import SearchPlace from './SearchPlace';
 import { BarChart, Check, Copy, MapPin, Navigation, Pencil, Share2, X } from 'lucide-react';
 import { logout } from '../utils/auth';
 import { Alert, AlertDescription } from '../ui/alert';
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import posthog from 'posthog-js';
+import router from 'next/router';
 
+const famousPlaces = [
+  {
+    place_id: 'sample1',
+    mapbox_id: 'sample1',
+    place_name: 'Eiffel Tower',
+    place_full_address: 'Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France',
+    place_longitude: 2.2945,
+    place_latitude: 48.8584,
+    place_country: 'France',
+    place_country_code: 'FR',
+    place_language: 'fr',
+    place_poi_category: 'landmark',
+    visitedorwanttovisit: 'wanttovisit'
+  },
+  {
+    place_id: 'sample2',
+    mapbox_id: 'sample2',
+    place_name: 'Taj Mahal',
+    place_full_address: 'Agra, Uttar Pradesh, India',
+    place_longitude: 78.0421,
+    place_latitude: 27.1751,
+    place_country: 'India',
+    place_country_code: 'IN',
+    place_language: 'hi',
+    place_poi_category: 'landmark',
+    visitedorwanttovisit: 'visited'
+  },
+  {
+    place_id: 'sample3',
+    mapbox_id: 'sample3',
+    place_name: 'Machu Picchu',
+    place_full_address: 'Cusco Region, Peru',
+    place_longitude: -72.5450,
+    place_latitude: -13.1631,
+    place_country: 'Peru',
+    place_country_code: 'PE',
+    place_language: 'es',
+    place_poi_category: 'landmark',
+    visitedorwanttovisit: 'visited'
+  },
+  {
+    place_id: 'sample4',
+    mapbox_id: 'sample4',
+    place_name: 'Great Wall of China',
+    place_full_address: 'Mutianyu, Huairou District, Beijing, China',
+    place_longitude: 116.0169,
+    place_latitude: 40.4319,
+    place_country: 'China',
+    place_country_code: 'CN',
+    place_language: 'zh',
+    place_poi_category: 'landmark',
+    visitedorwanttovisit: 'wanttovisit'
+  },
+  {
+    place_id: 'sample5',
+    mapbox_id: 'sample5',
+    place_name: 'Santorini',
+    place_full_address: 'Thira, South Aegean, Greece',
+    place_longitude: 25.4615,
+    place_latitude: 36.3932,
+    place_country: 'Greece',
+    place_country_code: 'GR',
+    place_language: 'el',
+    place_poi_category: 'island',
+    visitedorwanttovisit: 'wanttovisit'
+  },
+  {
+    place_id: 'sample6',
+    mapbox_id: 'sample6',
+    place_name: 'Petra',
+    place_full_address: 'Ma\'an Governorate, Jordan',
+    place_longitude: 35.4444,
+    place_latitude: 30.3285,
+    place_country: 'Jordan',
+    place_country_code: 'JO',
+    place_language: 'ar',
+    place_poi_category: 'landmark',
+    visitedorwanttovisit: 'wanttovisit'
+  },
+  {
+    place_id: 'sample7',
+    mapbox_id: 'sample7',
+    place_name: 'Colosseum',
+    place_full_address: 'Piazza del Colosseo, 1, 00184 Roma RM, Italy',
+    place_longitude: 12.4924,
+    place_latitude: 41.8902,
+    place_country: 'Italy',
+    place_country_code: 'IT',
+    place_language: 'it',
+    place_poi_category: 'landmark',
+    visitedorwanttovisit: 'wanttovisit'
+  },
+  {
+    place_id: 'sample8',
+    mapbox_id: 'sample8',
+    place_name: 'Statue of Liberty',
+    place_full_address: 'New York, NY 10004, United States',
+    place_longitude: -74.0445,
+    place_latitude: 40.6892,
+    place_country: 'United States',
+    place_country_code: 'US',
+    place_language: 'en',
+    place_poi_category: 'landmark',
+    visitedorwanttovisit: 'visited'
+  },
+  {
+    place_id: 'sample9',
+    mapbox_id: 'sample9',
+    place_name: 'Sydney Opera House',
+    place_full_address: 'Bennelong Point, Sydney NSW 2000, Australia',
+    place_longitude: 151.2153,
+    place_latitude: -33.8568,
+    place_country: 'Australia',
+    place_country_code: 'AU',
+    place_language: 'en',
+    place_poi_category: 'landmark',
+    visitedorwanttovisit: 'visited'
+  },
+  {
+    place_id: 'sample10',
+    mapbox_id: 'sample10',
+    place_name: 'Mount Fuji',
+    place_full_address: 'Kitayama, Fujinomiya, Shizuoka 418-0112, Japan',
+    place_longitude: 138.7274,
+    place_latitude: 35.3606,
+    place_country: 'Japan',
+    place_country_code: 'JP',
+    place_language: 'ja',
+    place_poi_category: 'landmark',
+    visitedorwanttovisit: 'wanttovisit'
+  }
+];
 
 const mapStyles = [
   {
@@ -98,7 +231,7 @@ const AddPlace = () => {
   const [error, setError] = useState<string | null>(null);
   const [mapStypeSelection, setMapStypeSelection] = useState<string>("satellite");
   const [selectedCountryFillColor, setSelectedCountryFillColor] = React.useState(colorOptions[0].rgba);
-
+  const [placesAdded, setPlacesAdded] = useState(0);
   const searchedPlaceContext = useContext(SearchedPlaceDetailsContext);
   const { searchedPlace, setSearchedPlaceDetails } = searchedPlaceContext || {};
 
@@ -137,12 +270,43 @@ const AddPlace = () => {
     }
   }, [mappbookUser]);
 
+  useEffect(() => {
+    if (!isSignedIn && userPlaces.length === 0) {
+      setAllUserPlaces(famousPlaces);
+    }
+  }, [isSignedIn]);
+
   const onAddPlaceButtonClick = async () => {
-    if (!searchedPlace || !user) return;
+    if (!searchedPlace) return;
 
     setIsSubmitting(true);
-    const isSuccess = await addPlaceDetails();
 
+    if (!isSignedIn) {
+      setSuccessMessage('Place marked! Sign in to save your progress, add more places and share! ✨');
+      setPlacesAdded(prev => prev + 1);
+
+      const newlySearchedPlace = {
+        place_id: `sample${Date.now()}`,
+        mapbox_id: searchedPlace.mapboxId,
+        place_name: searchedPlace.name,
+        place_full_address: searchedPlace.address,
+        place_longitude: searchedPlace.longitude,
+        place_latitude: searchedPlace.latitude,
+        place_country: searchedPlace.country,
+        place_country_code: searchedPlace.countryCode,
+        place_language: searchedPlace.language,
+        place_poi_category: searchedPlace.poiCategory,
+        visitedorwanttovisit: visitStatus,
+      };
+      setAllUserPlaces([newlySearchedPlace]);
+      resetForm();
+      setIsSubmitting(false);
+      posthog.capture('GREEN - New user added a place', { property: '' });
+      return;
+    }
+
+    // For authenticated users, proceed with normal flow
+    const isSuccess = await addPlaceDetails();
     if (isSuccess) {
       setSuccessMessage('Place added successfully! 🎉');
       resetForm();
@@ -376,16 +540,16 @@ const AddPlace = () => {
   }
 
   // Early return if mappbookUser is not loaded
-  if (!mappbookUser) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-          {/* <p className="text-purple-600 font-medium">Loading MappBook...</p> */}
-        </div>
-      </div>
-    );
-  }
+  // if (!mappbookUser) {
+  //   return (
+  //     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+  //       <div className="flex flex-col items-center gap-4">
+  //         <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+  //         {/* <p className="text-purple-600 font-medium">Loading MappBook...</p> */}
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const handlePremiumButtonClick = async () => {
     if (!user || !mappbookUser) {
@@ -448,8 +612,7 @@ const AddPlace = () => {
         </p>
       </div>
 
-      {/* Modified User Header with Stats Button */}
-      <div className="p-4 border-b border-pink-100/50 bg-white/30">
+      {isSignedIn && (<div className="p-4 border-b border-pink-100/50 bg-white/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 
@@ -479,14 +642,15 @@ const AddPlace = () => {
                   <span className="text-sm font-medium">{mappbookUser.total_map_views} Mapp Views</span>
                 )}
               </div>
-              {!mappbookUser?.is_premium_user && (
+              {/* {!mappbookUser?.is_premium_user && (
                 <span className="text-[10px] text-purple-400/80 italic">✨ Premium feature</span>
-              )}
+              )} */}
             </div>
           </button>
         </div>
 
       </div>
+      )}
 
       {/* Search Container */}
       <div className="p-6 space-y-6">
@@ -570,9 +734,47 @@ const AddPlace = () => {
           </div>
         )}
 
-        {/* Engagement Hint */}
-        <div className="text-center text-xs font-medium text-purple-400">
-          Show the world where you have been ✈️
+        {/* Sign In Call to Action - Show after adding a place when not signed in */}
+        {!isSignedIn && (
+          <div className="space-y-4">
+            <button
+              onClick={async () => {
+                try {
+                  // Capture the event and wait for it
+                  posthog.capture('GREEN - New user tried to sign in', { property: '' });
+
+                  // Add a small delay to ensure the event is sent
+                  await new Promise(resolve => setTimeout(resolve, 300));
+
+                  // Redirect
+                  window.location.href = '/sign-in';
+                } catch (error) {
+                  // If something goes wrong, redirect anyway
+                  window.location.href = '/sign-in';
+                }
+              }}
+              className="w-full py-3 px-4 rounded-xl font-medium
+        bg-gradient-to-r from-purple-400 to-pink-400 text-white
+        hover:from-purple-500 hover:to-pink-500
+        shadow-md hover:shadow-lg
+        transform transition-all duration-300
+        flex items-center justify-center gap-2"
+            >
+              Sign In with Google
+            </button>
+          </div>
+        )}
+
+        <div className="text-center text-xs font-medium text-purple-400 space-x-2">
+          <span>Need help / Got suggestions?</span>
+
+          <a href="/contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+          >
+            Contact Us
+          </a>
         </div>
 
       </div>
@@ -610,8 +812,18 @@ const AddPlace = () => {
           </button>
 
           {/* Share Link Section */}
+          {showLink && !isSignedIn && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+              {/* Name Section with Label */}
+              <div className="space-y-2">
+                <div className="text-center text-xs font-medium text-purple-400">
+                  Sign in to share your MappBook
+                </div>
+              </div>
+            </div>
+          )}
 
-          {showLink && (
+          {showLink && isSignedIn && (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
               {/* Name Section with Label */}
               <div className="space-y-2">
@@ -777,7 +989,7 @@ const AddPlace = () => {
               <Alert className="bg-blue-50 border-blue-100">
                 <AlertDescription className="text-sm text-blue-700">
                   Others can view <b>{displayName || mappbookUser?.display_name || 'MappBook User'}'s MappBook</b> only if your account has available MappBook Views.
-                  You have <b>{mappbookUser?.map_views_left} MappBook Views left.</b> Add more views using the Premium button.
+                  You have <b>{mappbookUser?.map_views_left} MappBook Views left.</b> Add more views using the Add Views button.
                   A view is counted when a user views your MappBook, and page refreshes also count as views.
                   Use #MappBook when sharing.
                 </AlertDescription>
@@ -791,7 +1003,7 @@ const AddPlace = () => {
         {/* share button end */}
 
         {/* Premium button start */}
-        <button
+        {isSignedIn && (<button
           onClick={handlePremiumButtonClick}
           disabled={isLoading}
           className={`w-full py-3 px-4 rounded-xl font-medium mt-6
@@ -820,11 +1032,11 @@ const AddPlace = () => {
               )}
             </>
           )}
-        </button>
+        </button>)}
         {/* Premium button end */}
 
         {/* Pro Features Preview */}
-        <div className="text-center mt-4">
+        {isSignedIn && (<div className="text-center mt-4">
           <div className="text-xs font-medium text-purple-400 flex items-center justify-center gap-2">
             <span>✨ Add Unlimited Places</span>
             <span>•</span>
@@ -832,7 +1044,9 @@ const AddPlace = () => {
             <span>•</span>
             <span>📊 See Stats</span>
           </div>
-        </div>
+        </div>)}
+
+
 
         <div className="mt-8 pt-4 border-t border-pink-100/50">
           <div className="flex items-center justify-center gap-4 text-xs">
@@ -845,12 +1059,15 @@ const AddPlace = () => {
               Contact
             </a>
             <span className="text-gray-300">•</span>
-            <button
-              onClick={handleLogout}
-              className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
-            >
-              Logout
-            </button>
+            {isSignedIn ? (
+              <button onClick={handleLogout} className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
+                Logout
+              </button>
+            ) : (
+              <a href="/sign-in" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
+                Sign In
+              </a>
+            )}
             <span className="text-gray-300">•</span>
             <a
               href="/terms"
@@ -873,7 +1090,7 @@ const AddPlace = () => {
         </div>
       </div>
 
-    </div>
+    </div >
   );
 };
 

@@ -9,6 +9,7 @@ import { MapStatsProvider } from '@/context/MapStatsContext'
 import { MapPin, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
+import posthog from 'posthog-js'
 
 export default function Home() {
   const router = useRouter()
@@ -17,12 +18,14 @@ export default function Home() {
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { isLoaded, isSignedIn, user } = useUser()
   const [hasClicked, setHasClicked] = useState(false);
+  
   // Redirect to sign-in if not authenticated
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.push('/sign-in')
-    }
-  }, [isLoaded, isSignedIn, router])
+  
+  // useEffect(() => {
+  //   if (isLoaded && !isSignedIn) {
+  //     router.push('/sign-in')
+  //   }
+  // }, [isLoaded, isSignedIn, router])
 
 
   // Handle mobile viewport height
@@ -45,6 +48,8 @@ export default function Home() {
       window.removeEventListener('orientationchange', updateHeight)
     }
   }, [])
+
+  posthog.capture('GREEN - User Visited Create MappBook Page', { property: '' })
 
   const handleChevronClick = () => {
     setIsSheetOpen(!isSheetOpen)

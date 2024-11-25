@@ -143,6 +143,8 @@ const MapStatsOverlay: React.FC = () => {
   useEffect(() => {
     if (mappbookUser) {
       fetchPlaceCounts(mappbookUser.mappbook_user_id);
+    }else{
+      setIsLoading(false);
     }
   }, [mappbookUser, userPlaces]);
 

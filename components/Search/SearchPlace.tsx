@@ -3,7 +3,7 @@ import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsConte
 import { useMappbookUser } from '@/context/UserContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MapStatsContext } from '@/context/MapStatsContext';
- 
+
 // Types
 interface Suggestion {
   name: string;
@@ -38,6 +38,7 @@ const SearchPlace = () => {
   const { allPlacesCount } = useContext(MapStatsContext);
 
   // State
+  const [hasSearched, setHasSearched] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,15 +58,12 @@ const SearchPlace = () => {
   const FREE_TIER_LIMIT = 50;
   const PREMIUM_TIER_LIMIT = 200;
 
-  // Check if user is logged in and can search
   const isLoggedIn = !!mappbookUser;
-  // const canSearch = isLoggedIn && (user.is_premium_user || allPlacesCount < FREE_TIER_LIMIT);
-  const canSearch = isLoggedIn && (
-    (mappbookUser.is_premium_user && allPlacesCount < PREMIUM_TIER_LIMIT) ||
+  const canSearch = isLoggedIn
+    ? (mappbookUser.is_premium_user && allPlacesCount < PREMIUM_TIER_LIMIT) ||
     (!mappbookUser.is_premium_user && allPlacesCount < FREE_TIER_LIMIT)
-  );
+    : !hasSearched; // Allow search if user hasn't searched yet
 
-  console.log("Is the user premium - " + mappbookUser?.is_premium_user + " All the places user added count - " + allPlacesCount)
 
   // Fetch suggestions when search query changes
   useEffect(() => {
@@ -95,8 +93,6 @@ const SearchPlace = () => {
   // Fetch address suggestions from API
   const fetchAddressSuggestions = async (query: string): Promise<Suggestion[]> => {
 
-    console.log("Searching... Session token - " +sessionToken)
-
     const response = await fetch(`/api/search-address?q=${encodeURIComponent(query)}&session_token=${sessionToken}`, {
       headers: { "Content-Type": "application/json" }
     });
@@ -112,7 +108,6 @@ const SearchPlace = () => {
   // Handle selection of an address
   const handleAddressSelection = async (suggestion: Suggestion) => {
 
-    console.log("Retrieving... Session token - " +sessionToken)
     if (!canSearch) return;
 
     try {
@@ -147,6 +142,10 @@ const SearchPlace = () => {
         poiCategory: feature.properties.poi_category,
         maki: feature.properties.maki,
       });
+      // Set hasSearched to true for non-signed-in users after successful search
+      if (!isLoggedIn) {
+        setHasSearched(true);
+      }
     } catch (err) {
       setError('Failed to fetch place details');
     }
@@ -155,10 +154,12 @@ const SearchPlace = () => {
   const getInputPlaceholder = () => {
     // if (!isLoggedIn) return "Please log in to search";
     // if (!canSearch) return `Upgrade to Premium to add more than ${FREE_TIER_LIMIT} places`;
+    if (!isLoggedIn && hasSearched) return "Sign in to search more places";
     return "Search for a place...";
   };
 
   return (
+
     <div className="w-full max-w-md">
       {isLoggedIn && !mappbookUser.is_premium_user && allPlacesCount >= FREE_TIER_LIMIT && (
         <Alert>
@@ -168,7 +169,7 @@ const SearchPlace = () => {
         </Alert>
       )}
 
-<div className="relative">
+      <div className="relative">
         {/* Search Input */}
         <input
           type="text"
@@ -200,7 +201,7 @@ const SearchPlace = () => {
             {error}
           </div>
         )}
-        
+
 
         {/* Suggestions Dropdown */}
         {suggestions.length > 0 && canSearch && (
@@ -222,8 +223,8 @@ const SearchPlace = () => {
             ))}
           </div>
         )}
-         {/* Selected Place Display */}
-         {selectedPlace && canSearch && (
+        {/* Selected Place Display */}
+        {selectedPlace && canSearch && (
           <div className="mt-3 space-y-1">
             <h2 className="text-lg font-semibold text-gray-900">
               {selectedPlace.name}

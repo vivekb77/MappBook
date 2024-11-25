@@ -6,6 +6,7 @@ import type { GeoJSON } from 'geojson';
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import './PlaceInfoPopUp.css';
 import PreventPullToRefresh from '@/components/DisablePullToRefresh';
+import { useClerk, useUser } from '@clerk/nextjs';
 
 interface Place {
   place_id: string;
@@ -25,6 +26,7 @@ interface AllUserPlacesContextType {
 }
 
 function MarkAllPlaces() {
+  const { isLoaded, isSignedIn, user } = useUser();
   const allUserPlacesContext = useContext<AllUserPlacesContextType | null>(AllUserPlacesContext);
   const [userPlaces, setAllUserPlaces] = allUserPlacesContext
     ? [allUserPlacesContext.userPlaces, allUserPlacesContext.setAllUserPlaces]
@@ -303,8 +305,8 @@ function MarkAllPlaces() {
                       >
                         <svg
                           className={`w-4 h-4 mr-1.5 ${selectedPlace.visitedorwanttovisit === "visited"
-                              ? "text-green-600"
-                              : "text-blue-600"
+                            ? "text-green-600"
+                            : "text-blue-600"
                             }`}
                           fill="none"
                           strokeWidth="2"
@@ -330,13 +332,36 @@ function MarkAllPlaces() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-2 border-t border-gray-200">
-                    {selectedPlace.visitedorwanttovisit === "wanttovisit" && (
-                      <button
-                        className="flex-1 flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 
+                  {isSignedIn && (
+                    <div className="flex gap-2 pt-2 border-t border-gray-200">
+                      {selectedPlace.visitedorwanttovisit === "wanttovisit" && (
+                        <button
+                          className="flex-1 flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 
                          text-white py-2 px-4 rounded-lg transition duration-200 ease-in-out
                          shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                        onClick={() => markAsVisited(selectedPlace.place_id)}
+                          onClick={() => markAsVisited(selectedPlace.place_id)}
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            strokeWidth="2"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          Visited
+                        </button>
+                      )}
+                      <button
+                        className="flex-1 flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 
+                       text-white py-2 px-4 rounded-lg transition duration-200 ease-in-out
+                       shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                        onClick={() => removePlace(selectedPlace.place_id)}
                       >
                         <svg
                           className="w-4 h-4"
@@ -348,34 +373,13 @@ function MarkAllPlaces() {
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            d="M5 13l4 4L19 7"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                           />
                         </svg>
-                        Visited
+                        Remove
                       </button>
-                    )}
-                    <button
-                      className="flex-1 flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 
-                       text-white py-2 px-4 rounded-lg transition duration-200 ease-in-out
-                       shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                      onClick={() => removePlace(selectedPlace.place_id)}
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        strokeWidth="2"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                      Remove
-                    </button>
-                  </div>
+                    </div>
+                  )}
                 </div>
               </Popup>
 
