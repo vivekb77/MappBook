@@ -994,7 +994,7 @@ const AddPlace = () => {
                     ) : (
                       <>
                         <Copy className="w-5 h-5" />
-                        <span>Copy Link ({mappbookUser?.map_views_left} views left)</span>
+                        <span>Copy Link</span>
                       </>
                     )}
                   </button>
@@ -1006,10 +1006,8 @@ const AddPlace = () => {
 
               <Alert className="bg-blue-50 border-blue-100">
                 <AlertDescription className="text-sm text-blue-700">
-                  Others can view <b>{displayName || mappbookUser?.display_name || 'MappBook User'}'s MappBook</b> only if your account has available MappBook Views.
-                  You have <b>{mappbookUser?.map_views_left} MappBook Views left.</b> Add more views using the Add Views button.
-                  A view is counted when a user views your MappBook, and page refreshes also count as views.
-                  Use #MappBook when sharing.
+                  Your MappBook can be viewed <b>{mappbookUser?.map_views_left} times by others</b>.
+                  Need more? Add views anytime to keep sharing your journey!
                 </AlertDescription>
               </Alert>
             </div>
