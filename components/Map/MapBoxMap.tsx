@@ -8,6 +8,7 @@ import MarkAllPlaces from "./MarkAllPlaces";
 import MapStatsOverlay from "./MapStatsOverlay";
 import { SearchedPlaceDetailsContext } from "@/context/SearchedPlaceDetailsContext";
 import MapStyleSwitcher from "./MapStyleSwitcher";
+import { track } from '@vercel/analytics';
 
 const MAP_STYLES = {
   satellite: "mapbox://styles/mapbox/satellite-streets-v12",
@@ -223,6 +224,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   const handleMapError = (e: any) => {
+    track('Unable to load map on create map');
     setError("Unable to load map. Please try again later.");
     setIsLoading(false);
     setMapLoaded(false);
@@ -270,6 +272,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   const handleStyleChange = (newStyle: keyof typeof MAP_STYLES) => {
+    track('Map style switched on Create map');
     setCurrentMapStyle(newStyle);
     if (mapRef.current) {
       mapRef.current.getMap().setStyle(MAP_STYLES[newStyle]);

@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import posthog from 'posthog-js';
 import router from 'next/router';
+import { track } from '@vercel/analytics';
 
 const famousPlaces = [
   {
@@ -301,7 +302,8 @@ const AddPlace = () => {
       setAllUserPlaces([newlySearchedPlace]);
       resetForm();
       setIsSubmitting(false);
-      posthog.capture('GREEN - New user added a place', { property: '' });
+      track('GREEN - New user added a placeholder place');
+      posthog.capture('GREEN - New user added a placeholder place', { property: '' });
       return;
     }
 
@@ -380,17 +382,21 @@ const AddPlace = () => {
 
   const handleShare = () => {
     setShowLink(!showLink);
+    if(!showLink){
+      track('GREEN - Share button clicked');
+    }
   };
 
   const handleCopy = async () => {
     try {
-
+      track('GREEN - Copy share url button clicked');
       posthog.capture('GREEN - Copy share url button clicked', { property: '' });
 
       await navigator.clipboard.writeText(`https://mappbook.com/map/${mappbookUser?.mappbook_user_id}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
+      track('GREEN - Copy share url button does not work');
       console.error('Failed to copy:', err);
     }
   };
@@ -558,7 +564,7 @@ const AddPlace = () => {
     }
     setIsLoading(true);
     try {
-
+      track('GREEN - Buy Premium button clicked');
       posthog.capture('GREEN - Buy Premium button clicked', { property: '' });
 
       const response = await fetch('/api/stripe/create-checkout-session', {
@@ -574,8 +580,8 @@ const AddPlace = () => {
 
       if (!response.ok) {
         const error = await response.json();
-
-        posthog.capture('RED - Buy Premium failed', { property: mappbookUser.mappbook_user_id });
+        track('RED - Buy Premium failed', { user_is: mappbookUser.mappbook_user_id });
+        posthog.capture('RED - Buy Premium failed', { user_is: mappbookUser.mappbook_user_id });
 
         throw new Error(error.message || 'Failed to create checkout session');
       }
@@ -740,10 +746,12 @@ const AddPlace = () => {
             <button
               onClick={async () => {
                 try {
+                  track('GREEN - New user tried to sign in');
                   posthog.capture('GREEN - New user tried to sign in', { property: '' });
                   await new Promise(resolve => setTimeout(resolve, 300));
                   window.location.href = '/sign-in';
                 } catch (error) {
+                  track('RED - New user sign in has issues');
                   window.location.href = '/sign-in';
                 }
               }}

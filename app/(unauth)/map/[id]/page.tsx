@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import posthog from 'posthog-js';
 import { UserDataContext } from '@/context/UserDataContextPublicMap'
+import { track } from '@vercel/analytics';
+
 
 //unnecessary commit
 export default function MapPage() {
@@ -74,7 +76,8 @@ export default function MapPage() {
       if (updateError) {
         console.error('Error updating view counts:', updateError)
         setUpdateFailed(true)
-        posthog.capture('RED - Failed to Update map views to DB on public MappBook', { property: mappbook_user_id })
+        track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id });
+        posthog.capture('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
         return false
       }
 
@@ -88,7 +91,8 @@ export default function MapPage() {
       return true
     } catch (err) {
       console.error('Error in update_map_views function :', err)
-      posthog.capture('RED - Failed to Update map views to DB on public MappBook', { property: mappbook_user_id })
+      track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id });
+      posthog.capture('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
       setUpdateFailed(true)
       return false
     }
@@ -165,8 +169,8 @@ export default function MapPage() {
   }
 
   if (error || !userData) {
-
-    posthog.capture('YELLOW - This user does not exist. Please check that you have the correct URL and try again.', { property: '' })
+    track('YELLOW - This user does not exist. Please check that you have the correct URL and try again');
+    posthog.capture('YELLOW - This user does not exist. Please check that you have the correct URL and try again', { property: '' })
 
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
@@ -264,7 +268,7 @@ export default function MapPage() {
   const canViewMap = userData.map_views_left > 0
   // Return early if user can't view the map
   if (!canViewMap) {
-
+    track('YELLOW - This MappBook cant be displayed because the owner has reached their view limit');
     posthog.capture('YELLOW - This MappBook cant be displayed because the owner has reached their view limit', { property: '' })
 
     return (
@@ -313,7 +317,8 @@ export default function MapPage() {
 
   // Only render the map and UI if canViewMap is true
   if (!updateFailed && canViewMap) {
-    posthog.capture('GREEN - MappBook Viewed', { property: '' })
+    track('GREEN - Public MappBook Viewed');
+    posthog.capture('GREEN - Public MappBook Viewed', { property: '' })
     return (
       <UserDataContext.Provider value={userData}>
         <main className={mainClassName} style={mainStyle}>
@@ -324,7 +329,8 @@ export default function MapPage() {
           <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 flex justify-center px-4">
             <Button
               onClick={() => {
-                posthog.capture('GREEN - Create Your MappBook Clicked', { property: '' });
+                track('GREEN - Create Your MappBook button Clicked');
+                posthog.capture('GREEN - Create Your MappBook button Clicked', { property: '' });
                 router.push('/');
               }}
               className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 

@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { track } from '@vercel/analytics/server';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-10-28.acacia',
@@ -40,9 +41,12 @@ export async function POST(request: Request) {
         userId: userId.toString(), // Ensure userId is a string
       },
     });
-
+    await track('Checkout session created for ', {
+      userId: userId,
+    });
     return NextResponse.json({ url: session.url });
   } catch (err) {
+    await track('Error creating checkout session');
     console.error('Error creating checkout session:', err);
     return NextResponse.json(
       { error: 'Error creating checkout session' },

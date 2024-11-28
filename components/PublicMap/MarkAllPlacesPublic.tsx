@@ -4,6 +4,7 @@ import type { GeoJSON, Feature } from 'geojson';
 import { supabase } from "@/components/utils/supabase";
 import '../Map/PlaceInfoPopUp.css';
 import PreventPullToRefresh from '@/components/DisablePullToRefresh';
+import { track } from '@vercel/analytics';
 
 interface UserData {
   mappbook_user_id: string;
@@ -73,6 +74,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         setCountryData(data);
       })
       .catch(error => {
+        track('Failed to load country data public Map');
         setError('Failed to load country data');
       });
   }, []);
@@ -100,6 +102,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         setUserPlaces(data as Place[]);
       }
     } catch (err) {
+      track('Failed to fetch users MappBook info on public Map');
       setError("Failed to fetch user's mappbook info");
     }
   }

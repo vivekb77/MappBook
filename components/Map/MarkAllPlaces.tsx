@@ -7,6 +7,7 @@ import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import './PlaceInfoPopUp.css';
 import PreventPullToRefresh from '@/components/DisablePullToRefresh';
 import { useClerk, useUser } from '@clerk/nextjs';
+import { track } from '@vercel/analytics';
 
 interface Place {
   place_id: string;
@@ -49,6 +50,7 @@ function MarkAllPlaces() {
         setCountryData(data);
       })
       .catch(error => {
+        track('Failed to load country data create Map');
         console.error('Error loading country data:', error);
         setError('Failed to load country data');
       });
@@ -74,6 +76,7 @@ function MarkAllPlaces() {
         setAllUserPlaces(data);
       }
     } catch (err) {
+      track('Failed to fetch users MappBook info on create Map');
       setError("Failed to fetch user's MappBook info");
     }
   }

@@ -7,6 +7,7 @@ import MapStatsOverlayPublic from "./MapStatsOverlayPublic";
 import MarkAllPlacesPublic from "./MarkAllPlacesPublic";
 import MapStyleSwitcher from "../Map/MapStyleSwitcher";
 import { UserDataContext } from "@/context/UserDataContextPublicMap";
+import { track } from '@vercel/analytics';
 
 interface UserData {
   mappbook_user_id: string;
@@ -188,6 +189,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   };
 
   const handleMapError = (error: { error: Error }) => {
+    track('Unable to load map on Public map');
     setError("Unable to load map. Please try again later.");
     setIsLoading(false);
     setIsRotating(false);
@@ -209,6 +211,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   };
 
   const handleStyleChange = (newStyle: MapStyle) => {
+    track('Map style switched on Public map');
     setCurrentMapStyle(newStyle);
     const map = mapRef.current?.getMap();
     if (map) {
