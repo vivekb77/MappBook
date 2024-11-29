@@ -273,6 +273,7 @@ const AddPlace = () => {
 
   useEffect(() => {
     if (!isSignedIn && userPlaces.length === 0) {
+      track('GREEN - New User Visited Create MappBook Page');
       setAllUserPlaces(famousPlaces);
     }
   }, [isSignedIn]);

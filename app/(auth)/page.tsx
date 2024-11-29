@@ -10,7 +10,6 @@ import { MapPin, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import posthog from 'posthog-js'
-import { track } from '@vercel/analytics';
 
 export default function Home() {
   const router = useRouter()
@@ -49,7 +48,6 @@ export default function Home() {
       window.removeEventListener('orientationchange', updateHeight)
     }
   }, [])
-  track('GREEN - User Visited Create MappBook Page');
   posthog.capture('GREEN - User Visited Create MappBook Page', { property: '' })
 
   const handleChevronClick = () => {

@@ -3,8 +3,8 @@ import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsConte
 import { useMappbookUser } from '@/context/UserContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MapStatsContext } from '@/context/MapStatsContext';
-// import { track } from '@vercel/analytics';
-// import { track } from '@vercel/analytics/server';
+import { track } from '@vercel/analytics';
+
 // Types
 interface Suggestion {
   name: string;
@@ -99,7 +99,7 @@ const SearchPlace = () => {
     });
 
     if (!response.ok) {
-      // track('Failed to fetch address suggestions');
+      track('Failed to fetch address suggestions');
       throw new Error('Failed to fetch address suggestions');
     }
 
@@ -126,7 +126,7 @@ const SearchPlace = () => {
       );
 
       if (!response.ok) {
-        // track('Failed to fetch place details');
+        track('Failed to fetch place details');
         throw new Error('Failed to fetch place details');
       }
 
