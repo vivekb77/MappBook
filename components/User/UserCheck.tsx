@@ -47,10 +47,10 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
           }
 
           setMappbookUser(newUser);
-          console.log("New user created" + JSON.stringify(newUser))
+          // console.log("New user created" + JSON.stringify(newUser))
         } else {
           setMappbookUser(existingUser);
-          console.log("Existing user " + JSON.stringify(existingUser))
+          // console.log("Existing user " + JSON.stringify(existingUser))
         }
       } catch (error) {
         console.error('Error in checkAndCreateUser:', error);

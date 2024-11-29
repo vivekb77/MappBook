@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       },
     });
     await track('Checkout session created for ', {
-      userId: userId,
+      userId: userId.toString(),
     });
     return NextResponse.json({ url: session.url });
   } catch (err) {
