@@ -90,7 +90,7 @@ export default function Home() {
                 }}
               >
                 {/* Chevron with location icon */}
-                <div className="absolute -top-12 right-8 w-56 h-12 touch-none">
+                <div className="absolute -top-12 right-10 w-56 h-12 touch-none">
                   <div
                     className="relative cursor-pointer w-full h-full"
                     onClick={() => {

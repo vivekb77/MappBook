@@ -95,6 +95,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         .eq('isRemoved', false);
 
       if (error) {
+        track('Failed to fetch users MappBook info on public Map');
         setError("Failed to fetch user's mappbook info");
         return;
       }

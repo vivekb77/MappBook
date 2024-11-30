@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         userId: userId.toString(), // Ensure userId is a string
       },
     });
-    await track('Checkout session created for ', {
+    await track('Checkout session created', {
       userId: userId.toString(),
     });
     return NextResponse.json({ url: session.url });
