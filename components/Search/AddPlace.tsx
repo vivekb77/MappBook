@@ -235,6 +235,7 @@ const AddPlace = () => {
   const [placesAdded, setPlacesAdded] = useState(0);
   const searchedPlaceContext = useContext(SearchedPlaceDetailsContext);
   const { searchedPlace, setSearchedPlaceDetails } = searchedPlaceContext || {};
+  const [copyText, setCopyText] = useState('Copy URL to share');
 
   const allUserPlacesContext = useContext(AllUserPlacesContext);
   const [userPlaces, setAllUserPlaces] = allUserPlacesContext
@@ -383,7 +384,7 @@ const AddPlace = () => {
 
   const handleShare = () => {
     setShowLink(!showLink);
-    if(!showLink){
+    if (!showLink) {
       track('GREEN - Share button clicked');
     }
   };
@@ -532,6 +533,17 @@ const AddPlace = () => {
     setSelectedCountryFillColor(colorRGBA);
     const success = await saveCountryFillColorToDb(selectedCountryFillColorOption.rgba);
 
+  };
+
+  const handleShareToFriends = async () => {
+    try {
+      await navigator.clipboard.writeText("https://www.mappbook.com/map/43ff9fc7-43ca-425e-8da6-f5acb2ad529d");
+      setCopyText('Copied!');
+      track('URL Copied to share with friends');
+      setTimeout(() => setCopyText('Copy URL to share'), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   };
 
   // Early return if still loading
@@ -797,6 +809,17 @@ const AddPlace = () => {
             Send us a message
           </a>
         </div>
+
+        <div className="text-center text-xs font-medium text-purple-400 space-x-2">
+          <span>Love MappBook? Share with you friends! </span>
+          <button
+            onClick={handleShareToFriends}
+            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+          >
+            {copyText}
+          </button>
+        </div>
+
 
       </div>
       {/* New Bottom Section with Divider */}
