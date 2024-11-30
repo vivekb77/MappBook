@@ -21,36 +21,61 @@ interface StatBoxProps {
   color: string;
   icon: React.ReactNode;
   loading?: boolean;
+  label: string;
 }
 
 const StatBox: React.FC<StatBoxProps> = ({
   count = 0,
   color,
   icon,
-  loading = false
-}) => (
-  <div className="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1.5 
-  border border-pink-100/50 shadow-sm hover:shadow-md 
-  transition-all duration-300 hover:scale-105 group
-  w-[80px]"> {/* Reduced fixed width */}
-    <div className="flex items-center gap-1.5"> {/* Reduced gap */}
-      <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
-      rounded-md p-1 group-hover:scale-110 transition-transform duration-500
-      ${loading ? 'animate-pulse' : ''}`}>
-        {icon}
-      </div>
-      <div className="min-w-[32px]"> {/* Reduced minimum width for number container */}
-        {loading ? (
-          <div className="h-4 w-[32px] bg-gray-200 rounded animate-pulse"></div>
-        ) : (
-          <span className={`text-sm font-bold ${color} leading-none`}>
-            {count.toLocaleString()}
-          </span>
+  loading = false,
+  label
+}) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  return (
+    <div className="relative">
+      <div 
+        className="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1.5 
+        border border-pink-100/50 shadow-sm hover:shadow-md 
+        transition-all duration-300 hover:scale-105 group
+        w-[80px] cursor-help"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        onTouchStart={() => setShowTooltip(true)}
+        onTouchEnd={() => setShowTooltip(false)}
+      >
+        <div className="flex items-center gap-1.5">
+          <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
+            rounded-md p-1 group-hover:scale-110 transition-transform duration-500
+            ${loading ? 'animate-pulse' : ''}`}>
+            {icon}
+          </div>
+          <div className="min-w-[32px]">
+            {loading ? (
+              <div className="h-4 w-[32px] bg-gray-200 rounded animate-pulse"></div>
+            ) : (
+              <span className={`text-sm font-bold ${color} leading-none`}>
+                {count.toLocaleString()}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Tooltip */}
+        {showTooltip && (
+          <div className="absolute top-1/2 -translate-y-1/2 right-full mr-2
+            px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg 
+            whitespace-nowrap z-50">
+            {label}
+            <div className="absolute top-1/2 -translate-y-1/2 left-full
+              border-4 border-transparent border-l-gray-900"></div>
+          </div>
         )}
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const LoadingOverlay: React.FC = () => (
   <div className="absolute inset-0 bg-white/50 backdrop-blur-sm 
@@ -113,18 +138,17 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
   return (
     <PreventPullToRefresh>
     <div className="absolute top-0 left-0 right-0 z-10">
-      {/* Logo Section - Left aligned with consistent margins */}
+      {/* Logo Section */}
       <div className="absolute top-3 left-3">
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-2">
            <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-          rounded-xl p-2 shadow-md transform -rotate-3">
-              {/* <Map className="w-3 h-3 text-white" /> */}
-            </div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-                text-transparent bg-clip-text transform rotate-1">
-              MappBook
-            </h1>
+             rounded-xl p-2 shadow-md transform -rotate-3">
+           </div>
+           <h1 className="text-lg font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+               text-transparent bg-clip-text transform rotate-1">
+             MappBook
+           </h1>
           </div>
           <p className="text-xs font-medium text-purple-400 mt-0.5">
             Share Your World 🌎
@@ -132,7 +156,7 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
         </div>
       </div>
 
-      {/* Stats Section - Right aligned */}
+      {/* Stats Section */}
       <div className="absolute top-3 right-3">
         <div className="flex flex-col items-end gap-2">
           <h2 className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-blue-600 
@@ -145,24 +169,27 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
               color="text-blue-600"
               icon={<MapPin strokeWidth={2.5} className="w-4 h-4 text-blue-600" />}
               loading={isLoading}
+              label="Places visited"
             />
             <StatBox
               count={stats.wantToVisitCount}
               color="text-red-600"
               icon={<Plane strokeWidth={2.5} className="w-4 h-4 text-red-600" />}
               loading={isLoading}
+              label="Places in bucket list"
             />
             <StatBox
               count={stats.countriesCount}
               color="text-indigo-600"
               icon={<Globe2 strokeWidth={2.5} className="w-4 h-4 text-indigo-600" />}
               loading={isLoading}
+              label="Countries explored"
             />
           </div>
         </div>
       </div>
 
-      {/* {error && (
+      {error && (
         <div className="mt-2 mx-3 text-sm text-red-600 bg-white/90 px-3 py-1.5 rounded-md 
           shadow-sm border border-red-100 animate-fade-in">
           <div className="flex items-center gap-2">
@@ -173,9 +200,9 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
             {error}
           </div>
         </div>
-      )} */}
+      )}
     </div>
-     </PreventPullToRefresh>
+    </PreventPullToRefresh>
   );
 };
 

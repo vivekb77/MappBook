@@ -12,6 +12,7 @@ interface StatBoxProps {
   color: string;
   icon: React.ReactNode;
   loading?: boolean;
+  position?: 'left' | 'bottom';
 }
 
 interface Place {
@@ -31,35 +32,70 @@ interface AllUserPlacesContextType {
   userPlaces: Place[];
   setAllUserPlaces: React.Dispatch<React.SetStateAction<Place[]>>;
 }
-
 const StatBox: React.FC<StatBoxProps> = ({
   count = 0,
+  label,
   color,
   icon,
-  loading = false
-}) => (
-  <div className="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1.5 
-  border border-pink-100/50 shadow-sm hover:shadow-md 
-  transition-all duration-300 hover:scale-105 group
-  w-[80px]">
-    <div className="flex items-center gap-1.5">
-      <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
-        rounded-md p-1 group-hover:scale-110 transition-transform duration-500
-        ${loading ? 'animate-pulse' : ''}`}>
-        {icon}
-      </div>
-      <div className="min-w-[32px]">
-        {loading ? (
-          <div className="h-4 w-[32px] bg-gray-200 rounded animate-pulse"></div>
-        ) : (
-          <span className={`text-sm font-bold ${color} leading-none`}>
-            {count.toLocaleString()}
-          </span>
+  loading = false,
+  position = 'bottom'
+}) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const tooltipPosition = {
+    bottom: {
+      tooltip: "absolute left-1/2 -translate-x-1/2 top-full mt-2",
+      arrow: "absolute left-1/2 -translate-x-1/2 bottom-full border-b-gray-900"
+    },
+    left: {
+      tooltip: "absolute top-1/2 -translate-y-1/2 right-full mr-2",
+      arrow: "absolute top-1/2 -translate-y-1/2 left-full border-l-gray-900"
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div 
+        className="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1.5 
+        border border-pink-100/50 shadow-sm hover:shadow-md 
+        transition-all duration-300 hover:scale-105 group
+        w-[80px] cursor-help"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        onTouchStart={() => setShowTooltip(true)}
+        onTouchEnd={() => setShowTooltip(false)}
+      >
+        <div className="flex items-center gap-1.5">
+          <div className={`${color.replace('text-', 'bg-').replace('600', '100')} 
+            rounded-md p-1 group-hover:scale-110 transition-transform duration-500
+            ${loading ? 'animate-pulse' : ''}`}>
+            {icon}
+          </div>
+          <div className="min-w-[32px]">
+            {loading ? (
+              <div className="h-4 w-[32px] bg-gray-200 rounded animate-pulse"></div>
+            ) : (
+              <span className={`text-sm font-bold ${color} leading-none`}>
+                {count.toLocaleString()}
+              </span>
+            )}
+          </div>
+        </div>
+        
+        {/* Tooltip */}
+        {showTooltip && (
+          <div className={`${tooltipPosition[position].tooltip} 
+            px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg 
+            whitespace-nowrap z-50`}>
+            {label}
+            <div className={`${tooltipPosition[position].arrow}
+              border-4 border-transparent`}></div>
+          </div>
         )}
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const LoadingOverlay: React.FC = () => (
   <div className="absolute inset-0 bg-white/50 backdrop-blur-sm 
@@ -82,6 +118,18 @@ const MapStatsOverlay: React.FC = () => {
     setVisitedCountriesCount,
     setAllPlacesCount
   } = useContext(MapStatsContext);
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const allUserPlacesContext = useContext<AllUserPlacesContextType | null>(AllUserPlacesContext);
   const userPlaces = allUserPlacesContext?.userPlaces || [];
@@ -152,28 +200,30 @@ const MapStatsOverlay: React.FC = () => {
     <PreventPullToRefresh>
     <div className="absolute top-3 left-0 right-0 md:right-3 md:left-auto">
       <div className="flex flex-col items-center md:items-end gap-2">
-        {/* Stats container with responsive classes */}
         <div className="flex md:flex-col gap-1.5 justify-center">
           <StatBox 
             count={visitedPlacesCount}
             color="text-blue-600"
             icon={<MapPin strokeWidth={2.5} className="w-4 h-4 text-blue-600" />}
             loading={isLoading}
-            label={''}
+            label="Places you've visited"
+            position={isMobile ? 'bottom' : 'left'}
           />
           <StatBox
             count={wantToVisitPlacesCount}
             color="text-red-600"
             icon={<Plane strokeWidth={2.5} className="w-4 h-4 text-red-600" />}
             loading={isLoading}
-            label={''}
+            label="Places in your bucket list"
+            position={isMobile ? 'bottom' : 'left'}
           />
           <StatBox
             count={visitedCountriesCount}
             color="text-indigo-600"
             icon={<Globe2 strokeWidth={2.5} className="w-4 h-4 text-indigo-600" />}
             loading={isLoading}
-            label={''}
+            label="Countries you've explored"
+            position={isMobile ? 'bottom' : 'left'}
           />
         </div>
         {error && (
