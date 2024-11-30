@@ -206,7 +206,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   }, [isRotating, searchedPlace, viewState.longitude, viewState.zoom]);
 
   const handleMapLoad = () => {
-    
+
     setIsLoading(false);
     if (mapRef.current) {
       const map = mapRef.current.getMap();
@@ -224,7 +224,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   const handleMapError = (e: any) => {
-    track('Unable to load map on create map');
+    track('Unable to load map on Create map');
     setError("Unable to load map. Please try again later.");
     setIsLoading(false);
     setMapLoaded(false);
@@ -271,6 +271,30 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     });
   };
 
+  interface MapStyleOption {
+    id: 'satellite' | 'light' | 'dark';
+    imageSrc: string;
+  }
+
+  const styles: MapStyleOption[] = [
+    {
+      id: 'satellite',
+      imageSrc: '/mapstylesatellite.png',
+    },
+    {
+      id: 'light',
+      imageSrc: '/mapstylelight.png',
+    },
+    {
+      id: 'dark',
+      imageSrc: '/mapstyledark.png',
+    },
+  ];
+
+  const getCurrentStyleImage = (styleId: MapStyleOption['id']): string => {
+    return styles.find(style => style.id === styleId)?.imageSrc || styles[0].imageSrc;
+  };
+
   const handleStyleChange = (newStyle: keyof typeof MAP_STYLES) => {
     track('Map style switched on Create map');
     setCurrentMapStyle(newStyle);
@@ -280,7 +304,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   return (
-    
+
     <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
       {isLoading && (
         <div className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10">
@@ -319,7 +343,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         keyboard={false}
         scrollZoom={true}
         touchPitch={false} //When enabled, users on touch devices can use two fingers to adjust the map's pitch (tilt)
-        // touchZoomRotate={true}
+      // touchZoomRotate={true}
       >
         {mapLoaded && (
           <>
@@ -336,12 +360,21 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
       {!isRotating && !error && (
         <button
-          onClick={startRotation}
-          className="absolute bottom-4 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
+        onClick={() => {
+          startRotation();
+          track('Map rotated on Create map');
+        }}
+          className="absolute bottom-6 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
           title="Resume rotation"
           type="button"
         >
-          <RotateCcw className="w-5 h-5 text-gray-700" />
+          <div className="relative w-10 h-10 overflow-hidden rounded-full">
+            <img
+              src={getCurrentStyleImage(currentMapStyle)}
+              alt="Rotate"
+              className="w-full h-full object-cover animate-[spin_30s_linear_infinite]"
+            />
+          </div>
         </button>
       )}
     </div>

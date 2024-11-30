@@ -1,6 +1,5 @@
 import React from 'react';
 import Image from 'next/image';
-import { Map as MapIcon } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -38,29 +37,38 @@ const MapStyleSwitcher: React.FC<MapStyleSwitcherProps> = ({
     onStyleChange,
 }) => {
     return (
-        <div className="absolute bottom-14 right-3 z-5">
+        <div className="absolute right-3 bottom-24 z-5">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button
-                        className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors"
+                        className="p-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white/100 transition-colors"
                         title="Change map style"
                     >
-                        <MapIcon className="w-5 h-5 text-gray-700" />
+                        <div className="relative w-10 h-10 rounded-md overflow-hidden">
+                            <Image
+                                src={styles.find(style => style.id === currentStyle)?.imageSrc || styles[0].imageSrc}
+                                alt="Current map style"
+                                fill
+                                className="object-cover"
+                                sizes="40px"
+                            />
+                        </div>
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                     align="end"
-                    className="min-w-0 w-26 p-1"
+                    side="left"
+                    className="min-w-0 p-2 mr-2 bg-white/95 backdrop-blur-sm"
                 >
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="flex flex-col gap-2">
                         {styles.map((style) => (
                             <DropdownMenuItem
                                 key={style.id}
                                 className={`
-                  p-0 cursor-pointer overflow-hidden rounded-lg h-16 w-16
-                  ${currentStyle === style.id ? 'ring-2 ring-blue-500' : 'hover:ring-2 hover:ring-gray-300'}
-                  transition-all duration-200
-                `}
+                                    p-0 cursor-pointer overflow-hidden rounded-lg w-12 h-12
+                                    ${currentStyle === style.id ? 'ring-2 ring-blue-500' : 'hover:ring-2 hover:ring-gray-300'}
+                                    transition-all duration-200
+                                `}
                                 onClick={() => onStyleChange(style.id)}
                             >
                                 <div className="relative w-full h-full">
@@ -70,7 +78,7 @@ const MapStyleSwitcher: React.FC<MapStyleSwitcherProps> = ({
                                         alt={`${style.id} map style`}
                                         fill
                                         className="object-cover transition-opacity duration-200"
-                                        sizes="64px"
+                                        sizes="48px"
                                         onLoad={(e) => {
                                             const target = e.target as HTMLImageElement;
                                             target.style.opacity = '1';

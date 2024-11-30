@@ -326,7 +326,7 @@ export default function MapPage() {
             <MapboxMapPublic />
           </div>
 
-          <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 flex justify-center px-4">
+          <div className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 w-fit">
             <Button
               onClick={() => {
                 track('GREEN - Create Your MappBook button Clicked');

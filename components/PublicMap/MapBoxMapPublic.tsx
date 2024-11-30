@@ -112,10 +112,10 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         startLongitudeRef.current = viewState.longitude;
         startLatitudeRef.current = viewState.latitude;
       }
-      
+
       const rotationProgress = (timestamp - startTimeRef.current) / ROTATION_DURATION;
       const latitudeProgress = Math.min((timestamp - startTimeRef.current) / LATITUDE_TRANSITION_DURATION, 1);
-      
+
       const latitudeDiff = ROTATION_VIEW_STATE.latitude - startLatitudeRef.current;
       const currentLatitude = startLatitudeRef.current + (latitudeDiff * easeInOutCubic(latitudeProgress));
 
@@ -127,7 +127,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
           latitude: currentLatitude,
           zoom: prev.zoom
         }));
-        
+
         if (latitudeProgress < 1) {
           animationFrameId = requestAnimationFrame(animate);
         } else {
@@ -149,13 +149,13 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 
   const startRotation = () => {
     const map = mapRef.current?.getMap();
-    
+
     if (!map) return;
 
     const currentZoom = viewState.zoom;
     const targetZoom = currentZoom < ROTATION_MIN_ZOOM ? ROTATION_MIN_ZOOM :
-                      currentZoom > ROTATION_MAX_ZOOM ? ROTATION_MAX_ZOOM :
-                      currentZoom;
+      currentZoom > ROTATION_MAX_ZOOM ? ROTATION_MAX_ZOOM :
+        currentZoom;
 
     if (currentZoom !== targetZoom) {
       map.flyTo({
@@ -205,6 +205,30 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
     }
   };
 
+  interface MapStyleOption {
+    id: 'satellite' | 'light' | 'dark';
+    imageSrc: string;
+  }
+
+  const styles: MapStyleOption[] = [
+    {
+      id: 'satellite',
+      imageSrc: '/mapstylesatellite.png',
+    },
+    {
+      id: 'light',
+      imageSrc: '/mapstylelight.png',
+    },
+    {
+      id: 'dark',
+      imageSrc: '/mapstyledark.png',
+    },
+  ];
+
+  const getCurrentStyleImage = (styleId: MapStyleOption['id']): string => {
+    return styles.find(style => style.id === styleId)?.imageSrc || styles[0].imageSrc;
+  };
+
   const handleViewStateChange = ({ viewState }: { viewState: ViewState }) => {
     const { longitude, latitude, zoom, pitch, bearing } = viewState;
     setViewState({ longitude, latitude, zoom, pitch, bearing });
@@ -218,7 +242,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
       map.setStyle(MAP_STYLES[newStyle]);
       map.touchZoomRotate.disableRotation(); // to disable rotation
     }
-    
+
   };
 
   if (error) {
@@ -267,7 +291,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         keyboard={false}
         scrollZoom={true}
         touchPitch={false}
-        // touchZoomRotate={true}
+      // touchZoomRotate={true}
       >
         {mapLoaded && (
           <>
@@ -282,14 +306,23 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
       </Map>
 
       {!isRotating && !error && (
-        <button
-          onClick={startRotation}
-          className="absolute bottom-4 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-50"
-          title="Resume rotation"
-          type="button"
-        >
-          <RotateCcw className="w-5 h-5 text-gray-700" />
-        </button>
+       <button
+       onClick={() => {
+         startRotation();
+         track('Map rotated on Public map');
+       }}
+         className="absolute bottom-6 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
+         title="Resume rotation"
+         type="button"
+       >
+         <div className="relative w-10 h-10 overflow-hidden rounded-full">
+           <img
+             src={getCurrentStyleImage(currentMapStyle)}
+             alt="Rotate"
+             className="w-full h-full object-cover animate-[spin_30s_linear_infinite]"
+           />
+         </div>
+       </button>
       )}
     </div>
   );
