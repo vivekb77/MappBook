@@ -799,7 +799,7 @@ const AddPlace = () => {
         )}
 
         <div className="text-center text-xs font-medium text-purple-400 space-x-2">
-          <span>Need help / Got suggestions - </span>
+          <span>Need help? / Got suggestions? </span>
 
           <a href="/contact"
             target="_blank"
@@ -811,7 +811,7 @@ const AddPlace = () => {
         </div>
 
         <div className="text-center text-xs font-medium text-purple-400 space-x-2">
-          <span>Love MappBook? Share with you friends! </span>
+          <span>Love MappBook? Share with your friends! </span>
           <button
             onClick={handleShareToFriends}
             className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
