@@ -12,6 +12,7 @@ import { getClerkSupabaseClient } from "@/components/utils/supabase";
 // import posthog from 'posthog-js';
 import router from 'next/router';
 import { track } from '@vercel/analytics';
+import DesktopRecommendationBanner from './DesktopRecommendationBanner';
 
 const famousPlaces = [
   {
@@ -727,7 +728,7 @@ const AddPlace = () => {
             </>
           ) : (
             <>
-              <span>📍 Pin This Place</span>
+              <span>Pin This Place</span>
               <MapPin className="w-5 h-5" />
             </>
           )}
@@ -1148,7 +1149,7 @@ const AddPlace = () => {
           </div>
         </div>
       </div>
-
+      <DesktopRecommendationBanner />
     </div >
   );
 };
