@@ -189,7 +189,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   };
 
   const handleMapError = (error: { error: Error }) => {
-    track('Unable to load map on Public map');
+    track('RED - Unable to load map on Public map');
     setError("Unable to load map. Please try again later.");
     setIsLoading(false);
     setIsRotating(false);

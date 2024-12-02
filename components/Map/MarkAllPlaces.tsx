@@ -50,7 +50,7 @@ function MarkAllPlaces() {
         setCountryData(data);
       })
       .catch(error => {
-        track('Failed to load country data create Map');
+        track('RED - Failed to load country data create Map');
         console.error('Error loading country data:', error);
         setError('Failed to load country data');
       });
@@ -71,13 +71,13 @@ function MarkAllPlaces() {
         .eq('isRemoved', false);
 
       if (error) {
-        track('Failed to fetch users MappBook info on create Map');
+        track('RED - Failed to fetch users MappBook places on create Map');
         setError("Failed to fetch user's MappBook info");
       } else if (data) {
         setAllUserPlaces(data);
       }
     } catch (err) {
-      track('Failed to fetch users MappBook info on create Map');
+      track('RED - Failed to fetch users MappBook places on create Map');
       setError("Failed to fetch user's MappBook info");
     }
   }
@@ -137,6 +137,7 @@ function MarkAllPlaces() {
 
   const handleMarkerClick = (place: Place) => {
     setSelectedPlace(place);
+    track('Marker clicked on create Map');
   };
 
   const countryFillLayer: FillLayer = {
@@ -172,7 +173,7 @@ function MarkAllPlaces() {
         .eq('place_id', place_id);
 
       if (error) {
-        track('Failed to mark place as visited');
+        track('RED - Failed to mark place as visited');
         setError("Failed to mark place as visited");
       } else {
         setAllUserPlaces((prevPlaces) =>
@@ -183,7 +184,7 @@ function MarkAllPlaces() {
         setSelectedPlace((prev) => (prev ? { ...prev, visitedorwanttovisit: "visited" } : prev));
       }
     } catch (err) {
-      track('Failed to mark place as visited');
+      track('RED - Failed to mark place as visited');
       setError("Failed to mark place as visited");
     }
   }
@@ -196,7 +197,7 @@ function MarkAllPlaces() {
         .eq('place_id', place_id);
 
       if (error) {
-        track('Failed to remove place');
+        track('RED - Failed to remove place');
         console.error("Error removing place:", error);
         setError("Failed to remove place");
       } else {
@@ -204,7 +205,7 @@ function MarkAllPlaces() {
         setSelectedPlace(null);
       }
     } catch (err) {
-      track('Failed to remove place');
+      track('RED - Failed to remove place');
       console.error("Unexpected error:", err);
       setError("Failed to remove place");
     }

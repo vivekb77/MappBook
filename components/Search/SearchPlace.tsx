@@ -99,7 +99,7 @@ const SearchPlace = () => {
     });
 
     if (!response.ok) {
-      track('Failed to fetch address suggestions');
+      track('RED - Failed to fetch address suggestions');
       throw new Error('Failed to fetch address suggestions');
     }
 
@@ -126,7 +126,7 @@ const SearchPlace = () => {
       );
 
       if (!response.ok) {
-        track('Failed to fetch place details');
+        track('RED - Failed to fetch place details');
         throw new Error('Failed to fetch place details');
       }
 
@@ -158,7 +158,7 @@ const SearchPlace = () => {
     // if (!isLoggedIn) return "Please log in to search";
     // if (!canSearch) return `Upgrade to Premium to add more than ${FREE_TIER_LIMIT} places`;
     if (!isLoggedIn && hasSearched) return "Sign in to search more places";
-    return "Search for a place...";
+    return "Search place...";
   };
 
   return (
@@ -185,7 +185,7 @@ const SearchPlace = () => {
           placeholder={getInputPlaceholder()}
           value={searchQuery}
           onChange={(e) => canSearch && setSearchQuery(e.target.value)}
-          aria-label="Search for a place"
+          aria-label="Search place"
           autoComplete="off"
           maxLength={100}
           disabled={!canSearch}

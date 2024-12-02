@@ -5,7 +5,7 @@ import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 import { MapStatsContext } from '@/context/MapStatsContext';
 import { MapPin, Plane, Globe2 } from 'lucide-react';
 import PreventPullToRefresh from '@/components/DisablePullToRefresh';
-
+import { track } from '@vercel/analytics';
 interface StatBoxProps {
   count?: number;
   label: string;
@@ -152,6 +152,7 @@ const MapStatsOverlay: React.FC = () => {
         .eq('mappbook_user_id', mappbook_user_id);
 
       if (error) {
+        track('RED - Failed to fetch map stats on create Map');
         throw new Error('Failed to fetch places data');
       }
 
@@ -180,6 +181,7 @@ const MapStatsOverlay: React.FC = () => {
       setAllPlacesCount(allPlacesCount);
 
     } catch (err) {
+      track('RED - Failed to fetch map stats on create Map');
       setError('An unexpected error occurred');
     } finally {
       setTimeout(() => setIsLoading(false), 500);

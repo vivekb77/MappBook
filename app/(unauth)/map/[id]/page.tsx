@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from "@/components/utils/supabase";
 import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import posthog from 'posthog-js';
 import { UserDataContext } from '@/context/UserDataContextPublicMap'
@@ -21,6 +22,7 @@ export default function MapPage() {
   const [error, setError] = useState<string | null>(null)
   const [viewCountUpdated, setViewCountUpdated] = useState<boolean>(false)
   const [updateFailed, setUpdateFailed] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   interface UserData {
     mappbook_user_id: string;
@@ -74,7 +76,7 @@ export default function MapPage() {
         .rpc('update_map_views', { m_user_id: mappbook_user_id })
 
       if (updateError) {
-        console.error('Error updating view counts:', updateError)
+        // console.error('Error updating view counts:', updateError)
         setUpdateFailed(true)
         track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id });
         posthog.capture('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
@@ -90,7 +92,7 @@ export default function MapPage() {
       )
       return true
     } catch (err) {
-      console.error('Error in update_map_views function :', err)
+      // console.error('Error in update_map_views function :', err)
       track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id });
       posthog.capture('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
       setUpdateFailed(true)
@@ -127,6 +129,7 @@ export default function MapPage() {
           .single()
 
         if (supabaseError) {
+          track('RED - Failed to pull user data from DB on public MappBook');
           throw supabaseError
         }
 
@@ -138,6 +141,7 @@ export default function MapPage() {
 
         setUserData(data as UserData)
       } catch (err) {
+        track('RED - Failed to pull user data from DB on public MappBook');
         setError('No user found')
       } finally {
         setLoading(false)
@@ -202,17 +206,27 @@ export default function MapPage() {
 
         {/* Button */}
         <div className="w-full max-w-md px-4">
-          <Button
-            onClick={() => router.push('/')}
-            // onClick={() => window.open('/', '_blank', 'noopener,noreferrer')}
-            className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+            <Button
+              onClick={() => {
+                setIsLoading(true);
+                router.push('/');
+              }}
+              className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
               text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
               shadow-lg rounded-full px-6 py-3"
             size="lg"
-          >
-            Create Your MappBook
-          </Button>
-        </div>
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Create Your MappBook'
+              )}
+            </Button>
+          </div>
       </div>
     )
   }
@@ -249,16 +263,27 @@ export default function MapPage() {
 
         {/* Button */}
         <div className="w-full max-w-md px-4">
-          <Button
-            onClick={() => router.push('/')}
-            className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-                text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
-                shadow-lg rounded-full px-6 py-3"
+            <Button
+              onClick={() => {
+                setIsLoading(true);
+                router.push('/');
+              }}
+              className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+              text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
+              shadow-lg rounded-full px-6 py-3"
             size="lg"
-          >
-            Create Your MappBook
-          </Button>
-        </div>
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Create Your MappBook'
+              )}
+            </Button>
+          </div>
       </div>
     )
   }
@@ -301,16 +326,27 @@ export default function MapPage() {
 
         {/* Button */}
         <div className="w-full max-w-md px-4">
-          <Button
-            onClick={() => router.push('/')}
-            className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-                text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
-                shadow-lg rounded-full px-6 py-3"
+            <Button
+              onClick={() => {
+                setIsLoading(true);
+                router.push('/');
+              }}
+              className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+              text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
+              shadow-lg rounded-full px-6 py-3"
             size="lg"
-          >
-            Create Your MappBook
-          </Button>
-        </div>
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Create Your MappBook'
+              )}
+            </Button>
+          </div>
       </div>
     )
   }
@@ -329,36 +365,26 @@ export default function MapPage() {
           <div className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 w-fit">
             <Button
               onClick={() => {
-                track('GREEN - Create Your MappBook button Clicked');
-                posthog.capture('GREEN - Create Your MappBook button Clicked', { property: '' });
+                setIsLoading(true);
+                track('Create Your MappBook button Clicked');
                 router.push('/');
               }}
               className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-              text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
-              shadow-lg rounded-full px-6 py-3"
+    text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
+    shadow-lg rounded-full px-6 py-3"
               size="lg"
+              disabled={isLoading}
             >
-              Create Your MappBook
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Create Your MappBook'
+              )}
             </Button>
           </div>
-          {/* <div className="fixed bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
-            <Button
-              onClick={() => {
-                posthog.capture('GREEN - Create Your MappBook Clicked', { property: '' });
-                router.push('/');
-              }}
-              className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 
-text-white hover:from-emerald-500 hover:via-teal-500 hover:to-cyan-500
-shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all
-rounded-full px-8 py-4 text-lg font-semibold animate-pulse"
-              size="lg"
-            >
-              Create Your MappBook
-            </Button>
-            <p className="text-white text-sm font-medium bg-black/30 px-4 py-1 rounded-full">
-              Join thousands of travelers
-            </p>
-          </div> */}
         </main>
       </UserDataContext.Provider>
     )

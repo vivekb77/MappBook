@@ -9,7 +9,7 @@ import { MapStatsProvider } from '@/context/MapStatsContext'
 import { MapPin, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import posthog from 'posthog-js'
+import { track } from '@vercel/analytics';
 
 export default function Home() {
   const router = useRouter()
@@ -18,15 +18,6 @@ export default function Home() {
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { isLoaded, isSignedIn, user } = useUser()
   const [hasClicked, setHasClicked] = useState(false);
-  
-  // Redirect to sign-in if not authenticated
-  
-  // useEffect(() => {
-  //   if (isLoaded && !isSignedIn) {
-  //     router.push('/sign-in')
-  //   }
-  // }, [isLoaded, isSignedIn, router])
-
 
   // Handle mobile viewport height
   useEffect(() => {
@@ -48,10 +39,13 @@ export default function Home() {
       window.removeEventListener('orientationchange', updateHeight)
     }
   }, [])
-  posthog.capture('GREEN - User Visited Create MappBook Page', { property: '' })
 
   const handleChevronClick = () => {
-    setIsSheetOpen(!isSheetOpen)
+    if (!hasClicked) {
+      track('Chevron button clicked');
+    }
+    setHasClicked(true);
+    setIsSheetOpen(!isSheetOpen);
   }
 
   // Loading state
@@ -90,27 +84,22 @@ export default function Home() {
                 }}
               >
                 {/* Chevron with location icon */}
-                <div className="absolute -top-12 right-10 w-56 h-12 touch-none">
+                <div className="absolute -top-12 right-16 touch-none w-[192px]">
                   <div
-                    className="relative cursor-pointer w-full h-full"
-                    onClick={() => {
-                      setHasClicked(true);
-                      handleChevronClick();
-                    }}
+                    className="relative cursor-pointer"
+                    onClick={handleChevronClick}
                   >
                     <svg width="100%" height="48" className="block shadow-xl">
                       <defs>
                         <linearGradient id="chevronGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" style={{ stopColor: '#10B981' }} /> {/* emerald-500 */}
-                          <stop offset="50%" style={{ stopColor: '#14B8A6' }} /> {/* teal-500 */}
-                          <stop offset="100%" style={{ stopColor: '#06B6D4' }} /> {/* cyan-500 */}
+                          <stop offset="0%" style={{ stopColor: '#10B981' }} />
+                          <stop offset="50%" style={{ stopColor: '#14B8A6' }} />
+                          <stop offset="100%" style={{ stopColor: '#06B6D4' }} />
                         </linearGradient>
                       </defs>
                       <path
                         d="M0,48 H192 C144,48 120,0 96,0 C72,0 48,48 0,48"
                         fill="url(#chevronGradient)"
-                        width="100%"
-                        className="shadow-lg"
                       />
                     </svg>
                     <button
@@ -126,6 +115,7 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
+
                 {/* Sheet Content */}
                 <div className="h-full flex flex-col">
                   <div className="flex-1 min-h-0">

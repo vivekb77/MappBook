@@ -224,7 +224,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   const handleMapError = (e: any) => {
-    track('Unable to load map on Create map');
+    track('RED - Unable to load map on Create map');
     setError("Unable to load map. Please try again later.");
     setIsLoading(false);
     setMapLoaded(false);

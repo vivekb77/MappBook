@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    await track('Error creating checkout session');
+    await track('RED - Error creating checkout session');
     console.error('Error creating checkout session:', err);
     return NextResponse.json(
       { error: 'Error creating checkout session' },

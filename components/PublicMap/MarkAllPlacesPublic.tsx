@@ -74,7 +74,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         setCountryData(data);
       })
       .catch(error => {
-        track('Failed to load country data public Map');
+        track('RED - Failed to load country data public Map');
         setError('Failed to load country data');
       });
   }, []);
@@ -95,7 +95,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         .eq('isRemoved', false);
 
       if (error) {
-        track('Failed to fetch users MappBook info on public Map');
+        track('RED - Failed to fetch users MappBook places on public Map');
         setError("Failed to fetch user's mappbook info");
         return;
       }
@@ -103,7 +103,7 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         setUserPlaces(data as Place[]);
       }
     } catch (err) {
-      track('Failed to fetch users MappBook info on public Map');
+      track('RED - Failed to fetch users MappBook places on public Map');
       setError("Failed to fetch user's mappbook info");
     }
   }
@@ -185,7 +185,10 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
         >
           <div
             className="relative flex flex-col items-center cursor-pointer transform transition-transform hover:scale-105"
-            onClick={() => setSelectedPlace(place)}
+            onClick={() => {
+              setSelectedPlace(place);
+              track('Marker clicked on public Map');
+            }}
           >
             <img
               src={place.visitedorwanttovisit === "visited" ? "/visited.png" : "/wanttovisit.png"}

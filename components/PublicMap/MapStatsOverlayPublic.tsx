@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from "@/components/utils/supabase";
 import { MapPin, Plane, Globe2, Map } from 'lucide-react';
 import PreventPullToRefresh from '@/components/DisablePullToRefresh';
-
+import { track } from '@vercel/analytics';
 interface UserData {
   mappbook_user_id: string;
   display_name: string;
@@ -109,6 +109,7 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
         .eq('isRemoved', false);
 
       if (placesError) {
+        track('RED - Failed to fetch map stats on public Map');
         throw new Error('Failed to fetch places data');
       }
 
@@ -123,6 +124,7 @@ const MapStatsOverlayPublic: React.FC<MapStatsOverlayProps> = ({ userData }) => 
       });
 
     } catch (err) {
+      track('RED - Failed to fetch map stats on public Map');
       setError('An unexpected error occurred');
     } finally {
       setTimeout(() => setIsLoading(false), 500);
