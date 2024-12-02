@@ -365,7 +365,7 @@ export default function MapPage() {
             <Button
               onClick={() => {
                 setIsLoading(true);
-                track('Create Your MappBook button Clicked');
+                // track('Create Your MappBook button Clicked');
                 router.push('/');
               }}
               className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 

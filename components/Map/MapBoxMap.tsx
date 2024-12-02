@@ -208,6 +208,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const handleMapLoad = () => {
 
     setIsLoading(false);
+    setMapLoaded(true);
     if (mapRef.current) {
       const map = mapRef.current.getMap();
       map.touchZoomRotate.enable();
@@ -220,7 +221,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         'star-intensity': 0.6
       });
     }
-    setMapLoaded(true);
+    
   };
 
   const handleMapError = (e: any) => {

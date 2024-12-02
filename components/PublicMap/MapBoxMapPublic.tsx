@@ -173,7 +173,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 
   const handleMapLoad = () => {
     setIsLoading(false);
-    setMapLoaded(true);
+    setMapLoaded(true); 
     const map = mapRef.current?.getMap();
     map?.touchZoomRotate.enable();
     map?.touchZoomRotate.disableRotation();
