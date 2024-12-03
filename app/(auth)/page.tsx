@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import AddPlace from '@/components/Search/AddPlace'
 import MapboxMap from '@/components/Map/MapBoxMap'
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext'
@@ -9,7 +9,7 @@ import { MapStatsProvider } from '@/context/MapStatsContext'
 import { MapPin, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { track } from '@vercel/analytics';
+import { track } from '@vercel/analytics'
 
 export default function Home() {
   const router = useRouter()
@@ -17,38 +17,16 @@ export default function Home() {
   const [userPlaces, setAllUserPlaces] = useState<any[]>([])
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { isLoaded, isSignedIn, user } = useUser()
-  const [hasClicked, setHasClicked] = useState(false);
-
-  // Handle mobile viewport height
-  useEffect(() => {
-    const updateHeight = () => {
-      // Get viewport height and set it as a CSS variable
-      const vh = window.innerHeight * 0.01
-      document.documentElement.style.setProperty('--vh', `${vh}px`)
-    }
-
-    // Initial calculation
-    updateHeight()
-
-    // Recalculate on resize and orientation change
-    window.addEventListener('resize', updateHeight)
-    window.addEventListener('orientationchange', updateHeight)
-
-    return () => {
-      window.removeEventListener('resize', updateHeight)
-      window.removeEventListener('orientationchange', updateHeight)
-    }
-  }, [])
+  const [hasClicked, setHasClicked] = useState(false)
 
   const handleChevronClick = () => {
     if (!hasClicked) {
-      track('Chevron button clicked');
+      track('Chevron button clicked')
     }
-    setHasClicked(true);
-    setIsSheetOpen(!isSheetOpen);
+    setHasClicked(true)
+    setIsSheetOpen(!isSheetOpen)
   }
 
-  // Loading state
   if (!isLoaded) return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-50">
       <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
@@ -56,7 +34,7 @@ export default function Home() {
   )
 
   return (
-    <div className="fixed inset-0" style={{ height: 'calc(var(--vh, 1vh) * 100)' }}>
+    <div className="fixed inset-0 h-[100dvh]">
       <SearchedPlaceDetailsContext.Provider value={{ searchedPlace, setSearchedPlaceDetails }}>
         <AllUserPlacesContext.Provider value={{ userPlaces, setAllUserPlaces }}>
           <MapStatsProvider>
@@ -76,12 +54,9 @@ export default function Home() {
               {/* Mobile Bottom Sheet */}
               <div
                 className={`md:hidden fixed bottom-0 left-0 right-0 z-40 
-  transition-transform duration-300 ease-out bg-white 
-  ${isSheetOpen ? 'translate-y-0' : 'translate-y-[100%]'}`}
-                style={{
-                  height: 'calc(var(--vh, 1vh) * 60)',
-                  paddingBottom: 'env(safe-area-inset-bottom)'
-                }}
+                  transition-transform duration-300 ease-out bg-white h-[60dvh]
+                  ${isSheetOpen ? 'translate-y-0' : 'translate-y-[100%]'}`}
+                style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
               >
                 {/* Chevron with location icon */}
                 <div className="absolute -top-12 right-16 touch-none w-[192px]">
@@ -104,13 +79,13 @@ export default function Home() {
                     </svg>
                     <button
                       className={`absolute top-0 left-[96px] -translate-y-1/2 
-      flex items-center justify-center pointer-events-none
-      ${!hasClicked ? 'animate-bounce' : ''} group w-12 h-12`}
+                        flex items-center justify-center pointer-events-none
+                        ${!hasClicked ? 'animate-bounce' : ''} group w-12 h-12`}
                       aria-label="Toggle places panel"
                     >
                       <MapPin
                         className="w-8 h-8 text-white stroke-[3] transform transition-transform 
-        group-hover:scale-110 group-hover:rotate-12"
+                          group-hover:scale-110 group-hover:rotate-12"
                       />
                     </button>
                   </div>

@@ -3,17 +3,60 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
-import { supabase } from "@/components/utils/supabase";
+import { supabase } from "@/components/utils/supabase"
 import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-// import posthog from 'posthog-js';
 import { UserDataContext } from '@/context/UserDataContextPublicMap'
-import { track } from '@vercel/analytics';
+import { track } from '@vercel/analytics'
 
+interface UserData {
+  mappbook_user_id: string
+  display_name: string
+  is_premium_user: boolean
+  map_style: string
+  country_fill_color: string
+  map_views_left: number
+}
 
-//unnecessary commit
+// Reusable components
+const LogoHeader = () => (
+  <div className="text-center">
+    <div className="flex items-center justify-center gap-2 mb-1">
+      <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+          rounded-xl p-2 shadow-md transform -rotate-3" />
+      <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+          text-transparent bg-clip-text transform rotate-1">
+        MappBook
+      </h1>
+    </div>
+    <p className="text-xs font-medium text-purple-400">
+      Share your World 🌎 Track your Adventures ✈️
+    </p>
+  </div>
+)
+
+const CreateMappBookButton = ({ isLoading, onClick }: { isLoading: boolean; onClick: () => void }) => (
+  <Button
+    onClick={onClick}
+    className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+              text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
+              shadow-lg rounded-full px-6 py-3"
+    size="lg"
+    disabled={isLoading}
+  >
+    {isLoading ? (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        Loading...
+      </>
+    ) : (
+      'Create Your MappBook'
+    )}
+  </Button>
+)
+
 export default function MapPage() {
   const router = useRouter()
   const params = useParams()
@@ -22,68 +65,24 @@ export default function MapPage() {
   const [error, setError] = useState<string | null>(null)
   const [viewCountUpdated, setViewCountUpdated] = useState<boolean>(false)
   const [updateFailed, setUpdateFailed] = useState<boolean>(false)
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
 
-  interface UserData {
-    mappbook_user_id: string;
-    display_name: string;
-    is_premium_user: boolean;
-    map_style: string;
-    country_fill_color: string;
-    map_views_left: number;
+  const handleCreateMappBook = () => {
+    setIsLoading(true)
+    router.push('/')
   }
 
-  // Add viewport meta tag effect
-  useEffect(() => {
-    // Prevent viewport zooming and scaling on mobile devices
-    const viewport = document.createElement('meta')
-    viewport.name = 'viewport'
-    viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
-    document.head.appendChild(viewport)
-
-    // Cleanup function to remove the viewport meta tag
-    return () => {
-      document.head.removeChild(viewport)
-    }
-  }, [])
-
-  // Handle viewport height for mobile browsers
-  useEffect(() => {
-    const setVH = () => {
-      const vh = window.innerHeight * 0.01
-      document.documentElement.style.setProperty('--vh', `${vh}px`)
-    }
-
-    setVH()
-    window.addEventListener('resize', setVH)
-    window.addEventListener('orientationchange', setVH)
-
-    return () => {
-      window.removeEventListener('resize', setVH)
-      window.removeEventListener('orientationchange', setVH)
-    }
-  }, [])
-
-  // Modified height classes to use custom vh
-  const mainClassName = "relative w-screen overflow-hidden"
-  const mainStyle = { height: 'calc(var(--vh, 1vh) * 100)' }
-
-
-  // Function to update map view counts in databse
   const updateViewCounts = async (mappbook_user_id: string) => {
     try {
       const { data, error: updateError } = await supabase
         .rpc('update_map_views', { m_user_id: mappbook_user_id })
 
       if (updateError) {
-        // console.error('Error updating view counts:', updateError)
         setUpdateFailed(true)
-        track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id });
-        // posthog.capture('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
+        track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
         return false
       }
 
-      // Update local state
       setUserData(prev =>
         prev ? {
           ...prev,
@@ -92,21 +91,17 @@ export default function MapPage() {
       )
       return true
     } catch (err) {
-      // console.error('Error in update_map_views function :', err)
-      track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id });
-      // posthog.capture('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
+      track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
       setUpdateFailed(true)
       return false
     }
   }
-
 
   useEffect(() => {
     async function fetchUserData() {
       try {
         const userId = params.id
 
-        // Validate UUID format
         const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId as string)
 
         if (!isValidUUID) {
@@ -121,7 +116,6 @@ export default function MapPage() {
           return
         }
 
-        // Query Supabase for user data
         const { data, error: supabaseError } = await supabase
           .from('public_user_profiles')
           .select('mappbook_user_id, display_name, is_premium_user, map_style, map_views_left, country_fill_color')
@@ -129,7 +123,7 @@ export default function MapPage() {
           .single()
 
         if (supabaseError) {
-          track('RED - Failed to pull user data from DB on public MappBook');
+          track('RED - Failed to pull user data from DB on public MappBook')
           throw supabaseError
         }
 
@@ -141,7 +135,7 @@ export default function MapPage() {
 
         setUserData(data as UserData)
       } catch (err) {
-        track('RED - Failed to pull user data from DB on public MappBook');
+        track('RED - Failed to pull user data from DB on public MappBook')
         setError('No user found')
       } finally {
         setLoading(false)
@@ -151,18 +145,15 @@ export default function MapPage() {
     fetchUserData()
   }, [params.id])
 
-  // Effect to update view counts when map is viewable
   useEffect(() => {
-    // Early return if userData is null or undefined
-    if (!userData) return;
-    // const canViewMap = userData.is_premium_user && userData.map_views_left > 0
-    const canViewMap = userData.map_views_left > 0;
+    if (!userData) return
+    const canViewMap = userData.map_views_left > 0
 
     if (canViewMap && !viewCountUpdated) {
-      updateViewCounts(userData.mappbook_user_id);
-      setViewCountUpdated(true);
+      updateViewCounts(userData.mappbook_user_id)
+      setViewCountUpdated(true)
     }
-  }, [userData, viewCountUpdated]);
+  }, [userData, viewCountUpdated])
 
   if (loading) {
     return (
@@ -173,149 +164,51 @@ export default function MapPage() {
   }
 
   if (error || !userData) {
-    track('YELLOW - This user does not exist. Please check that you have the correct URL and try again');
-    // posthog.capture('YELLOW - This user does not exist. Please check that you have the correct URL and try again', { property: '' })
-
+    track('YELLOW - This user does not exist. Please check that you have the correct URL and try again')
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
-        {/* Logo Header */}
         <div className="p-4 text-center border-b border-pink-100/50 bg-white/50">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-          rounded-xl p-2 shadow-md transform -rotate-3">
-              {/* <Map className="w-5 h-5 text-white" /> */}
-            </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-          text-transparent bg-clip-text transform rotate-1">
-              MappBook
-            </h1>
-          </div>
-          <p className="text-xs font-medium text-purple-400">
-            Share your World 🌎 Track your Adventures ✈️
-          </p>
+          <LogoHeader />
         </div>
-
-        {/* Alert Message */}
         <div className="w-full max-w-md px-4">
           <Alert variant="destructive" className="w-full">
             <AlertDescription>
-              {'This user does not exist. Please check that you have the correct URL and try again.'}
+              This user does not exist. Please check that you have the correct URL and try again.
             </AlertDescription>
           </Alert>
         </div>
-
-        {/* Button */}
         <div className="w-full max-w-md px-4">
-            <Button
-              onClick={() => {
-                setIsLoading(true);
-                router.push('/');
-              }}
-              className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-              text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
-              shadow-lg rounded-full px-6 py-3"
-            size="lg"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'Create Your MappBook'
-              )}
-            </Button>
-          </div>
+          <CreateMappBookButton isLoading={isLoading} onClick={handleCreateMappBook} />
+        </div>
       </div>
     )
   }
 
-  //if the update views to database fails dont load map
   if (updateFailed) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
-        {/* Logo Header */}
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-                rounded-xl p-2 shadow-md transform -rotate-3">
-              {/* <Map className="w-5 h-5 text-white" /> */}
-            </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-                text-transparent bg-clip-text transform rotate-1">
-              MappBook
-            </h1>
-          </div>
-          <p className="text-xs font-medium text-purple-400">
-            Share your World 🌎 Track your Adventures ✈️
-          </p>
-        </div>
-
-        {/* Alert Message */}
+        <LogoHeader />
         <div className="w-full max-w-md px-4">
           <Alert variant="destructive" className="w-full">
             <AlertDescription>
-              Unable to load the MappBook at this time. Please try again later.
+              Unable to load the MappBook at this time. Please refresh the page.
             </AlertDescription>
           </Alert>
         </div>
-
-        {/* Button */}
         <div className="w-full max-w-md px-4">
-            <Button
-              onClick={() => {
-                setIsLoading(true);
-                router.push('/');
-              }}
-              className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-              text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
-              shadow-lg rounded-full px-6 py-3"
-            size="lg"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'Create Your MappBook'
-              )}
-            </Button>
-          </div>
+          <CreateMappBookButton isLoading={isLoading} onClick={handleCreateMappBook} />
+        </div>
       </div>
     )
   }
 
-
-  // const canViewMap = userData.is_premium_user && userData.map_views_left > 0
   const canViewMap = userData.map_views_left > 0
-  // Return early if user can't view the map
-  if (!canViewMap) {
-    track('YELLOW - This MappBook cant be displayed because the owner has reached their view limit');
-    // posthog.capture('YELLOW - This MappBook cant be displayed because the owner has reached their view limit', { property: '' })
 
+  if (!canViewMap) {
+    track('YELLOW - This MappBook cant be viewed because the owner has reached their view limit')
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
-        {/* Logo Header */}
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-                rounded-xl p-2 shadow-md transform -rotate-3">
-              {/* <Map className="w-5 h-5 text-white" /> */}
-            </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-                text-transparent bg-clip-text transform rotate-1">
-              MappBook
-            </h1>
-          </div>
-          <p className="text-xs font-medium text-purple-400">
-            Share your World 🌎 Track your Adventures ✈️
-          </p>
-        </div>
-
-        {/* Alert Message */}
+        <LogoHeader />
         <div className="w-full max-w-md px-4">
           <Alert className="w-full">
             <AlertDescription>
@@ -323,69 +216,28 @@ export default function MapPage() {
             </AlertDescription>
           </Alert>
         </div>
-
-        {/* Button */}
         <div className="w-full max-w-md px-4">
-            <Button
-              onClick={() => {
-                setIsLoading(true);
-                router.push('/');
-              }}
-              className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-              text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
-              shadow-lg rounded-full px-6 py-3"
-            size="lg"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'Create Your MappBook'
-              )}
-            </Button>
-          </div>
+          <CreateMappBookButton isLoading={isLoading} onClick={handleCreateMappBook} />
+        </div>
       </div>
     )
   }
 
-  // Only render the map and UI if canViewMap is true
   if (!updateFailed && canViewMap) {
-    track('Public MappBook Viewed');
+    track('Public MappBook Viewed')
     return (
       <UserDataContext.Provider value={userData}>
-        <main className={mainClassName} style={mainStyle}>
+        <main className="relative w-screen h-screen overflow-hidden">
           <div className="h-full w-full">
             <MapboxMapPublic />
           </div>
-
           <div className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 w-fit">
-            <Button
-              onClick={() => {
-                setIsLoading(true);
-                // track('Create Your MappBook button Clicked');
-                router.push('/');
-              }}
-              className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-    text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
-    shadow-lg rounded-full px-6 py-3"
-              size="lg"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'Create Your MappBook'
-              )}
-            </Button>
+            <CreateMappBookButton isLoading={isLoading} onClick={handleCreateMappBook} />
           </div>
         </main>
       </UserDataContext.Provider>
     )
   }
+
+  return null
 }

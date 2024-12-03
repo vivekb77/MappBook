@@ -1,14 +1,20 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { CSPostHogProvider } from '../app/provider'
 import { Analytics } from '@vercel/analytics/react';
-// import { SpeedInsights } from "@vercel/speed-insights/next"
+
 
 export const metadata: Metadata = {
   title: 'MappBook.com',
   description: 'Share your World 🌎 Track your Adventures ✈️ Show the World where you have been 📍',
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // Note: Consider removing this for better accessibility
+};
 
 export default function RootLayout({
   children,
@@ -23,10 +29,10 @@ export default function RootLayout({
       </head>
       <CSPostHogProvider>
         <body>
-            {children}
+          {children}
         </body>
       </CSPostHogProvider>
-      {/* <SpeedInsights/> */}
+
       <Analytics />
     </html>
   );
