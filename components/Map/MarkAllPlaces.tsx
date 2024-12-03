@@ -227,9 +227,8 @@ function MarkAllPlaces() {
           <Layer {...countryFillLayer} />
         </Source>
       )}
-
+ <PreventPullToRefresh>
       {userPlaces.map((place) => (
-        <PreventPullToRefresh>
           <Marker
             key={place.place_id}
             longitude={place.place_longitude}
@@ -394,8 +393,9 @@ function MarkAllPlaces() {
 
             )}
           </Marker>
-        </PreventPullToRefresh>
+        
       ))}
+      </PreventPullToRefresh>
     </>
   );
 }
