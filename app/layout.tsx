@@ -1,3 +1,4 @@
+"use client"
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { CSPostHogProvider } from '../app/provider';
