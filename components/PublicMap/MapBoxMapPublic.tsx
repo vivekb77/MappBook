@@ -58,6 +58,11 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   }
 };
 
+type MapEventListener = {
+  type: string;
+  listener: (e: any) => void;
+};
+
 const ROTATION_VIEW_STATE = {
   pitch: 25,
   latitude: 35,
@@ -74,18 +79,76 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 }) => {
   const userData = useContext(UserDataContext);
   const mapRef = useRef<MapRef>(null);
+  const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
+  const eventListenersRef = useRef<Array<{ type: string; listener: (e: any) => void }>>([]);
+  const animationFrameRef = useRef<number | null>(null);
+  const animationStartTimeRef = useRef<number | null>(null);
+  const initialPositionRef = useRef<{ longitude: number; latitude: number } | null>(null);
+  const targetZoomRef = useRef<number | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
   const [isRotating, setIsRotating] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const animationRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-  const startLongitudeRef = useRef<number>(DEFAULT_VIEW_STATE.longitude);
-  const startLatitudeRef = useRef<number>(DEFAULT_VIEW_STATE.latitude);
   const [currentMapStyle, setCurrentMapStyle] = useState<MapStyle>(
     (userData?.map_style as MapStyle) || "satellite"
   );
+
+  // Cleanup function
+  const cleanup = () => {
+    // Cancel animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    // Reset animation refs
+    animationStartTimeRef.current = null;
+    initialPositionRef.current = null;
+    targetZoomRef.current = null;
+
+    // Clean up map instance
+    if (mapInstanceRef.current) {
+      const map = mapInstanceRef.current;
+
+      // Remove event listeners
+      eventListenersRef.current.forEach(({ type, listener }) => {
+        map.off(type, listener);
+      });
+      eventListenersRef.current = [];
+
+      try {
+        // Remove layers and sources
+        const style = map.getStyle();
+        style.layers?.forEach(layer => {
+          if (map.getLayer(layer.id)) {
+            map.removeLayer(layer.id);
+          }
+        });
+
+        Object.keys(style.sources || {}).forEach(sourceId => {
+          if (map.getSource(sourceId)) {
+            map.removeSource(sourceId);
+          }
+        });
+
+        // Remove map if still in DOM
+        if (map.getContainer().parentNode) {
+          map.remove();
+        }
+      } catch (e) {
+        console.warn('Map cleanup error:', e);
+      }
+
+      mapInstanceRef.current = null;
+    }
+  };
+
+  // Add cleanup to useEffect
+  useEffect(() => {
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     if (userData?.map_style && MAP_STYLES[userData.map_style as MapStyle]) {
@@ -104,58 +167,55 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   };
 
   useEffect(() => {
-    let animationFrameId: number;
+    if (!mapLoaded || error) return;
 
     const animate = (timestamp: number) => {
-      if (!startTimeRef.current) {
-        startTimeRef.current = timestamp;
-        startLongitudeRef.current = viewState.longitude;
-        startLatitudeRef.current = viewState.latitude;
+      if (!animationStartTimeRef.current) {
+        animationStartTimeRef.current = timestamp;
+        initialPositionRef.current = {
+          longitude: viewState.longitude,
+          latitude: viewState.latitude
+        };
       }
 
-      const rotationProgress = (timestamp - startTimeRef.current) / ROTATION_DURATION;
-      const latitudeProgress = Math.min((timestamp - startTimeRef.current) / LATITUDE_TRANSITION_DURATION, 1);
+      const progress = (timestamp - animationStartTimeRef.current) / ROTATION_DURATION;
+      const latitudeProgress = Math.min((timestamp - animationStartTimeRef.current) / LATITUDE_TRANSITION_DURATION, 1);
 
-      const latitudeDiff = ROTATION_VIEW_STATE.latitude - startLatitudeRef.current;
-      const currentLatitude = startLatitudeRef.current + (latitudeDiff * easeInOutCubic(latitudeProgress));
+      const latitudeDiff = ROTATION_VIEW_STATE.latitude - initialPositionRef.current!.latitude;
+      const currentLatitude = initialPositionRef.current!.latitude + (latitudeDiff * easeInOutCubic(latitudeProgress));
 
       if (isRotating) {
         setViewState(prev => ({
           ...prev,
           pitch: ROTATION_VIEW_STATE.pitch,
-          longitude: startLongitudeRef.current + (rotationProgress * 360) % 360,
+          longitude: initialPositionRef.current!.longitude + (progress * 360) % 360,
           latitude: currentLatitude,
           zoom: prev.zoom
         }));
 
-        if (latitudeProgress < 1) {
-          animationFrameId = requestAnimationFrame(animate);
-        } else {
-          animationFrameId = requestAnimationFrame(animate);
-        }
+        animationFrameRef.current = requestAnimationFrame(animate);
       }
     };
-
     if (isRotating) {
-      animationFrameId = requestAnimationFrame(animate);
+      animationFrameRef.current = requestAnimationFrame(animate);
     }
 
     return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
     };
-  }, [isRotating]);
-
+  }, [isRotating, mapLoaded, error, viewState.zoom]);
   const startRotation = () => {
     const map = mapRef.current?.getMap();
-
     if (!map) return;
 
     const currentZoom = viewState.zoom;
-    const targetZoom = currentZoom < ROTATION_MIN_ZOOM ? ROTATION_MIN_ZOOM :
-      currentZoom > ROTATION_MAX_ZOOM ? ROTATION_MAX_ZOOM :
-        currentZoom;
+    const targetZoom = Math.min(
+      Math.max(currentZoom, ROTATION_MIN_ZOOM),
+      ROTATION_MAX_ZOOM
+    );
 
     if (currentZoom !== targetZoom) {
       map.flyTo({
@@ -165,19 +225,25 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
       });
     }
 
-    startTimeRef.current = null;
-    startLongitudeRef.current = viewState.longitude;
-    startLatitudeRef.current = viewState.latitude;
+    // Reset animation refs
+    animationStartTimeRef.current = null;
+    initialPositionRef.current = {
+      longitude: viewState.longitude,
+      latitude: viewState.latitude
+    };
+    targetZoomRef.current = targetZoom;
+
     setIsRotating(true);
   };
 
   const handleMapLoad = () => {
     setIsLoading(false);
-    setMapLoaded(true); 
+    setMapLoaded(true);
     const map = mapRef.current?.getMap();
-    map?.touchZoomRotate.enable();
-    map?.touchZoomRotate.disableRotation();
     if (map) {
+      mapInstanceRef.current = map; // Add this line
+      map.touchZoomRotate.enable();
+      map.touchZoomRotate.disableRotation();
       map.setFog({
         'horizon-blend': 0.2,
         'color': '#ffffff',
@@ -189,14 +255,12 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   };
 
   const handleMapError = (error: { error: Error }) => {
-    track('RED - Unable to load map on Public map');
-    setError("Unable to load map. Please try again later.");
+    const errorMessage = error?.error?.message || "Unable to load map, please refresh the page.";
+    track('RED - Unable to load map on Public map', { error: errorMessage });
+    setError(errorMessage);
     setIsLoading(false);
     setIsRotating(false);
     setMapLoaded(false);
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
   };
 
   const handleMapInteraction = () => {
@@ -205,52 +269,123 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
     }
   };
 
-  interface MapStyleOption {
-    id: 'satellite' | 'light' | 'dark';
-    imageSrc: string;
-  }
+  const handleStyleChange = async (newStyle: MapStyle) => {
+    if (currentMapStyle === newStyle) return;
 
-  const styles: MapStyleOption[] = [
-    {
-      id: 'satellite',
-      imageSrc: '/mapstylesatellite.png',
-    },
-    {
-      id: 'light',
-      imageSrc: '/mapstylelight.png',
-    },
-    {
-      id: 'dark',
-      imageSrc: '/mapstyledark.png',
-    },
-  ];
+    const map = mapRef.current?.getMap();
+    if (!map) return;
 
-  const getCurrentStyleImage = (styleId: MapStyleOption['id']): string => {
-    return styles.find(style => style.id === styleId)?.imageSrc || styles[0].imageSrc;
+    mapInstanceRef.current = map;
+    const wasRotating = isRotating;
+
+    try {
+      // Save current viewport state
+      const viewport = {
+        center: map.getCenter(),
+        zoom: map.getZoom(),
+        bearing: map.getBearing(),
+        pitch: map.getPitch()
+      };
+
+      // Clean up existing event listeners
+      eventListenersRef.current.forEach(({ type, listener }) => {
+        map.off(type, listener);
+      });
+      eventListenersRef.current = [];
+
+      // Set new style and wait for it to load
+      await new Promise<void>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          reject(new Error('Style load timeout'));
+        }, 9000);
+
+        const handleStyleLoad = () => {
+          try {
+            clearTimeout(timeoutId);
+
+            // Add terrain source if it doesn't exist
+            if (!map.getSource('mapbox-dem')) {
+              map.addSource('mapbox-dem', {
+                type: 'raster-dem',
+                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                tileSize: 512,
+                maxzoom: 14
+              });
+            }
+
+            // Set terrain
+            map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
+
+            // Restore viewport
+            map.setCenter(viewport.center);
+            map.setZoom(viewport.zoom);
+            map.setBearing(viewport.bearing);
+            map.setPitch(viewport.pitch);
+
+            setCurrentMapStyle(newStyle);
+
+            if (wasRotating) {
+              startRotation();
+            }
+
+            map.touchZoomRotate.disableRotation();
+
+            resolve();
+          } catch (err) {
+            console.warn('Error in style load handler:', err);
+            resolve(); // Resolve anyway to prevent hanging
+          }
+        };
+
+        map.once('style.load', handleStyleLoad);
+        eventListenersRef.current.push({
+          type: 'style.load',
+          listener: handleStyleLoad
+        });
+
+        // Set the new style
+        map.setStyle(MAP_STYLES[newStyle]);
+      });
+
+      track('Map style switched on Public map');
+
+    } catch (error) {
+      console.warn('Style switch error:', error);
+      setCurrentMapStyle(newStyle);
+
+      // If style switch fails, try basic style application
+      try {
+        map.setStyle(MAP_STYLES[newStyle]);
+      } catch (e) {
+        console.warn('Fallback style switch failed:', e);
+      }
+    }
   };
 
-  const handleViewStateChange = ({ viewState }: { viewState: ViewState }) => {
-    const { longitude, latitude, zoom, pitch, bearing } = viewState;
+  const handleViewStateChange = ({ viewState: newViewState }: { viewState: ViewState }) => {
+    const { longitude, latitude, zoom, pitch, bearing } = newViewState;
     setViewState({ longitude, latitude, zoom, pitch, bearing });
   };
 
-  const handleStyleChange = (newStyle: MapStyle) => {
-    track('Map style switched on Public map');
-    setCurrentMapStyle(newStyle);
-    const map = mapRef.current?.getMap();
-    if (map) {
-      map.setStyle(MAP_STYLES[newStyle]);
-      map.touchZoomRotate.disableRotation(); // to disable rotation
-    }
+  const styles = [
+    { id: 'satellite' as const, imageSrc: '/mapstylesatellite.png' },
+    { id: 'light' as const, imageSrc: '/mapstylelight.png' },
+    { id: 'dark' as const, imageSrc: '/mapstyledark.png' },
+  ];
 
+  const getCurrentStyleImage = (styleId: MapStyle): string => {
+    return styles.find(style => style.id === styleId)?.imageSrc || styles[0].imageSrc;
   };
 
   if (error) {
     return (
-      <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
+      <div
+        className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}
+        role="alert"
+      >
         <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
           <Alert variant="destructive" className="w-96">
-            <AlertDescription>Unable to load map. Please try again later.</AlertDescription>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         </div>
       </div>
@@ -262,10 +397,19 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   }
 
   return (
-    <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
+    <div
+      className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}
+      role="region"
+      aria-label="Interactive map"
+    >
       {isLoading && (
-        <div className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10">
+        <div
+          className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10"
+          role="status"
+          aria-live="polite"
+        >
           <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <span className="sr-only">Loading map</span>
         </div>
       )}
 
@@ -291,7 +435,6 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         keyboard={false}
         scrollZoom={true}
         touchPitch={false}
-      // touchZoomRotate={true}
       >
         {mapLoaded && (
           <>
@@ -306,26 +449,29 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
       </Map>
 
       {!isRotating && !error && (
-       <button
-       onClick={() => {
-         startRotation();
-         track('Map rotated on Public map');
-       }}
-         className="absolute bottom-6 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
-         title="Resume rotation"
-         type="button"
-       >
-         <div className="relative w-10 h-10 overflow-hidden rounded-full">
-           <img
-             src={getCurrentStyleImage(currentMapStyle)}
-             alt="Rotate"
-             className="w-full h-full object-cover animate-[spin_30s_linear_infinite]"
-           />
-         </div>
-       </button>
+        <button
+          onClick={() => {
+            startRotation();
+            track('Map rotated on Public map');
+          }}
+          className="absolute bottom-6 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
+          title="Resume rotation"
+          type="button"
+          aria-label="Start map rotation"
+        >
+          <div className="relative w-10 h-10 overflow-hidden rounded-full">
+            <img
+              src={getCurrentStyleImage(currentMapStyle)}
+              alt="Rotate"
+              className="w-full h-full object-cover animate-[spin_30s_linear_infinite]"
+            />
+          </div>
+        </button>
       )}
     </div>
   );
 };
 
-export default React.memo(MapboxMapPublic);
+export default React.memo(MapboxMapPublic, (prevProps, nextProps) => {
+  return prevProps.className === nextProps.className;
+});
