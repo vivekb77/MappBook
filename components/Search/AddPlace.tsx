@@ -13,12 +13,13 @@ import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import router from 'next/router';
 import { track } from '@vercel/analytics';
 import DesktopRecommendationBanner from './DesktopRecommendationBanner';
+import StatsPopUp from './StatsPopUp';
 
 const famousPlaces = [
   {
     place_id: 'sample1',
     mapbox_id: 'sample1',
-    place_name: 'Eiffel Tower',
+    place_name: 'Eiffel Tower (Example)',
     place_full_address: 'Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France',
     place_longitude: 2.2945,
     place_latitude: 48.8584,
@@ -31,7 +32,7 @@ const famousPlaces = [
   {
     place_id: 'sample2',
     mapbox_id: 'sample2',
-    place_name: 'Taj Mahal',
+    place_name: 'Taj Mahal (Example)',
     place_full_address: 'Agra,Loader2 Uttar Pradesh, India',
     place_longitude: 78.0421,
     place_latitude: 27.1751,
@@ -44,7 +45,7 @@ const famousPlaces = [
   {
     place_id: 'sample3',
     mapbox_id: 'sample3',
-    place_name: 'Machu Picchu',
+    place_name: 'Machu Picchu (Example)',
     place_full_address: 'Cusco Region, Peru',
     place_longitude: -72.5450,
     place_latitude: -13.1631,
@@ -57,7 +58,7 @@ const famousPlaces = [
   {
     place_id: 'sample4',
     mapbox_id: 'sample4',
-    place_name: 'Great Wall of China',
+    place_name: 'Great Wall of China (Example)',
     place_full_address: 'Mutianyu, Huairou District, Beijing, China',
     place_longitude: 116.0169,
     place_latitude: 40.4319,
@@ -70,7 +71,7 @@ const famousPlaces = [
   {
     place_id: 'sample5',
     mapbox_id: 'sample5',
-    place_name: 'Santorini',
+    place_name: 'Santorini (Example)',
     place_full_address: 'Thira, South Aegean, Greece',
     place_longitude: 25.4615,
     place_latitude: 36.3932,
@@ -83,7 +84,7 @@ const famousPlaces = [
   {
     place_id: 'sample6',
     mapbox_id: 'sample6',
-    place_name: 'Petra',
+    place_name: 'Petra (Example)',
     place_full_address: 'Ma\'an Governorate, Jordan',
     place_longitude: 35.4444,
     place_latitude: 30.3285,
@@ -96,7 +97,7 @@ const famousPlaces = [
   {
     place_id: 'sample7',
     mapbox_id: 'sample7',
-    place_name: 'Colosseum',
+    place_name: 'Colosseum (Example)',
     place_full_address: 'Piazza del Colosseo, 1, 00184 Roma RM, Italy',
     place_longitude: 12.4924,
     place_latitude: 41.8902,
@@ -109,7 +110,7 @@ const famousPlaces = [
   {
     place_id: 'sample8',
     mapbox_id: 'sample8',
-    place_name: 'Statue of Liberty',
+    place_name: 'Statue of Liberty (Example)',
     place_full_address: 'New York, NY 10004, United States',
     place_longitude: -74.0445,
     place_latitude: 40.6892,
@@ -122,7 +123,7 @@ const famousPlaces = [
   {
     place_id: 'sample9',
     mapbox_id: 'sample9',
-    place_name: 'Sydney Opera House',
+    place_name: 'Sydney Opera House (Example)',
     place_full_address: 'Bennelong Point, Sydney NSW 2000, Australia',
     place_longitude: 151.2153,
     place_latitude: -33.8568,
@@ -135,7 +136,7 @@ const famousPlaces = [
   {
     place_id: 'sample10',
     mapbox_id: 'sample10',
-    place_name: 'Mount Fuji',
+    place_name: 'Mount Fuji (Example)',
     place_full_address: 'Kitayama, Fujinomiya, Shizuoka 418-0112, Japan',
     place_longitude: 138.7274,
     place_latitude: 35.3606,
@@ -628,7 +629,6 @@ const AddPlace = () => {
           Share your World 🌎 Track your Adventures ✈️
         </p>
       </div>
-
       {isSignedIn && (<div className="p-4 border-b border-pink-100/50 bg-white/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -645,25 +645,7 @@ const AddPlace = () => {
               </span>
             </div>
           </div>
-          <button
-            className="p-2 rounded-xl bg-white/80 text-purple-500 hover:bg-purple-50 
-      transition-colors duration-300"
-          >
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2">
-                <BarChart className="w-4 h-4" />
-                {!mappbookUser?.is_premium_user && (
-                  <span className="text-sm font-medium">0 Mapp Views</span>
-                )}
-                {mappbookUser?.is_premium_user && (
-                  <span className="text-sm font-medium">{mappbookUser.total_map_views} Mapp Views</span>
-                )}
-              </div>
-              {/* {!mappbookUser?.is_premium_user && (
-                <span className="text-[10px] text-purple-400/80 italic">✨ Premium feature</span>
-              )} */}
-            </div>
-          </button>
+          <StatsPopUp />
         </div>
 
       </div>
