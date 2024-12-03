@@ -20,12 +20,12 @@ const CONFIG = {
     },
     rotation: {
       MIN_ZOOM: 0.8,
-      MAX_ZOOM: 2.0,
+      MAX_ZOOM: 1.5,
       ROTATION_DURATION: 25000,
       ZOOM_SPEED: 0.09,
       TARGET_LATITUDE: 35,
       LATITUDE_TRANSITION_DURATION: 2000,
-      MAX_RETRY_ATTEMPTS: 3,
+      MAX_RETRY_ATTEMPTS: 2,
     },
     fog: {
       'horizon-blend': 0.2,
@@ -84,7 +84,7 @@ interface SearchedPlaceContextType {
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -114.370789,
   latitude: 46.342303,
-  zoom: 0.8,
+  zoom: 1.5,
   pitch: 25,
   bearing: 0,
   padding: {
@@ -204,30 +204,60 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     if (mapInstanceRef.current) {
       const map = mapInstanceRef.current;
 
-      // Remove event listeners
+      // Safely remove event listeners
       eventListenersRef.current.forEach(({ type, listener }) => {
-        map.off(type, listener);
+        try {
+          if (map && typeof map.off === 'function') {
+            map.off(type, listener);
+          }
+        } catch (e) {
+          console.warn('Error removing event listener:', e);
+        }
       });
       eventListenersRef.current = [];
 
       try {
+        // Get map container before removing layers
+        const mapContainer = map.getContainer();
+        const parentNode = mapContainer?.parentNode;
+
         // Remove layers and sources
-        const style = map.getStyle();
-        style.layers?.forEach(layer => {
-          if (map.getLayer(layer.id)) {
-            map.removeLayer(layer.id);
-          }
-        });
+        if (map.getStyle()) {
+          const style = map.getStyle();
+          style.layers?.forEach(layer => {
+            try {
+              if (map.getLayer(layer.id)) {
+                map.removeLayer(layer.id);
+              }
+            } catch (e) {
+              console.warn(`Error removing layer ${layer.id}:`, e);
+            }
+          });
 
-        Object.keys(style.sources || {}).forEach(sourceId => {
-          if (map.getSource(sourceId)) {
-            map.removeSource(sourceId);
-          }
-        });
+          Object.keys(style.sources || {}).forEach(sourceId => {
+            try {
+              if (map.getSource(sourceId)) {
+                map.removeSource(sourceId);
+              }
+            } catch (e) {
+              console.warn(`Error removing source ${sourceId}:`, e);
+            }
+          });
+        }
 
-        // Remove map if still in DOM
-        if (map.getContainer().parentNode) {
+        // Safely remove map container
+        try {
           map.remove();
+        } catch (e) {
+          console.warn('Error removing map:', e);
+          // Fallback: manually remove container if it still exists
+          if (parentNode && mapContainer && parentNode.contains(mapContainer)) {
+            try {
+              parentNode.removeChild(mapContainer);
+            } catch (e) {
+              console.warn('Error manually removing map container:', e);
+            }
+          }
         }
       } catch (e) {
         console.warn('Map cleanup error:', e);
@@ -265,29 +295,45 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     });
   };
 
-  // Event handlers
   const handleMapLoad = () => {
     if (!mapRef.current || mapInstanceRef.current || !isMountedRef.current) return;
 
     const map = mapRef.current.getMap();
+    if (!map || !map.getContainer()) return;
+
     mapInstanceRef.current = map;
 
     safeMapOperation(async () => {
-      map.touchZoomRotate.enable();
-      map.touchZoomRotate.disableRotation();
+      map.touchZoomRotate?.enable();
+      map.touchZoomRotate?.disableRotation();
 
-      // Wait for style to load
-      await new Promise<void>((resolve) => {
-        if (map.isStyleLoaded()) {
-          resolve();
-        } else {
-          const listener = () => resolve();
-          map.once('style.load', listener);
-          eventListenersRef.current.push({ type: 'style.load', listener });
-        }
-      });
+      // Wait for style to load with timeout
+      try {
+        await Promise.race([
+          new Promise<void>((resolve) => {
+            if (map.isStyleLoaded()) {
+              resolve();
+            } else {
+              const listener = () => resolve();
+              map.once('style.load', listener);
+              eventListenersRef.current.push({ type: 'style.load', listener });
+            }
+          }),
+          new Promise<void>((_, reject) => 
+            setTimeout(() => reject(new Error('Style load timeout')), 10000)
+          )
+        ]);
+      } catch (error) {
+        console.warn('Style load error:', error);
+      }
 
-      map.setFog(CONFIG.map.fog);
+      if (!isMountedRef.current) return;
+
+      try {
+        map.setFog(CONFIG.map.fog);
+      } catch (e) {
+        console.warn('Error setting fog:', e);
+      }
 
       if (isMountedRef.current) {
         setMapStatus({ status: 'ready' });
@@ -298,6 +344,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     });
   };
 
+
   const handleStyleChange = async (newStyle: keyof typeof CONFIG.map.styles) => {
     if (currentMapStyle === newStyle) return;
 
@@ -305,7 +352,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       if (!mapInstanceRef.current) return;
       
       track('Map style switched on Create map');
-      setMapStatus({ status: 'loading' });
+      // setMapStatus({ status: 'loading' });
       
       const map = mapInstanceRef.current;
       const wasRotating = isRotating;
@@ -336,7 +383,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
             map.setPitch(viewport.pitch);
             
             setCurrentMapStyle(newStyle);
-            setMapStatus({ status: 'ready' });
+            // setMapStatus({ status: 'ready' });
 
             if (wasRotating && !isValidCoordinates(searchedPlace)) {
               startRotation();
@@ -353,10 +400,10 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         });
       } catch (error) {
         console.warn('Style switch error:', error);
-        setMapStatus({ 
-          status: 'error', 
-          error: 'Failed to switch map style. Please try again.' 
-        });
+        // setMapStatus({ 
+        //   status: 'error', 
+        //   error: 'Failed to switch map style. Please try again.' 
+        // });
       }
     });
   };
@@ -366,7 +413,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     if (isMountedRef.current) {
       setMapStatus({ 
         status: 'error', 
-        error: "Unable to load map. Please check your connection and try again." 
+        error: "Unable to load map. Please refresh the page." 
       });
     }
     cleanup();
@@ -386,14 +433,25 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     });
   };
 
-  // Effects
   useEffect(() => {
     isMountedRef.current = true;
+    
+    // Create a flag to track if we're unmounting
+    let isUnmounting = false;
+
     return () => {
-      isMountedRef.current = false;
+      isUnmounting = true;
+      
+      // Run cleanup synchronously before React tries to remove the node
       cleanup();
+      
+      // Ensure we don't try to update state during unmount
+      if (isUnmounting) {
+        isMountedRef.current = false;
+      }
     };
   }, []);
+
 
   useEffect(() => {
     if (!isRotating || isValidCoordinates(searchedPlace)) return;
