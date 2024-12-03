@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState, useMemo } from "react";
-import { Map, MapRef, MapLayerMouseEvent, ViewState } from "react-map-gl";
+import { Map, MapRef, ViewState } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, RotateCcw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import MarkSearchedPlace from "./MarkSearchedPlace";
 import MarkAllPlaces from "./MarkAllPlaces";
 import MapStatsOverlay from "./MapStatsOverlay";
@@ -19,10 +19,10 @@ const MAP_STYLES = {
 const ROTATION_CONSTRAINTS = {
   MIN_ZOOM: 0.8,
   MAX_ZOOM: 2.0,
-  ROTATION_DURATION: 25000, // 25 seconds for full rotation
-  ZOOM_SPEED: 0.09, // Lower value = smoother zoom transition
+  ROTATION_DURATION: 25000,
+  ZOOM_SPEED: 0.09,
   TARGET_LATITUDE: 35,
-  LATITUDE_TRANSITION_DURATION: 2000 // 2 seconds for latitude transition
+  LATITUDE_TRANSITION_DURATION: 2000
 };
 
 interface MapboxMapProps {
@@ -56,7 +56,6 @@ interface PlaceDetails {
   poiCategory?: string;
   maki?: string;
 }
-
 interface SearchedPlaceContextType {
   searchedPlace?: PlaceDetails;
   setSearchedPlaceDetails: (details: PlaceDetails) => void;
@@ -86,6 +85,8 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   defaultStyle = "satellite"
 }) => {
   const mapRef = useRef<MapRef>(null);
+  const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
+  const isMountedRef = useRef(true);
   const [isLoading, setIsLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,9 +98,111 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const initialLongitudeRef = useRef<number | null>(null);
   const initialLatitudeRef = useRef<number | null>(null);
   const [currentMapStyle, setCurrentMapStyle] = useState<keyof typeof MAP_STYLES>(defaultStyle);
+  const shouldStartRotationRef = useRef(true);
 
   const { searchedPlace } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
-  const mapStyle = useMemo(() => MAP_STYLES[defaultStyle], [defaultStyle]);
+
+  // Safe map operations wrapper
+  const safeMapOperation = async (operation: () => Promise<void> | void) => {
+    if (!mapInstanceRef.current || !isMountedRef.current) return;
+    try {
+      await operation();
+    } catch (error) {
+      console.warn('Map operation error:', error);
+      if (error instanceof Error && error.message.includes('webgl context lost')) {
+        handleWebGLContextLoss();
+      }
+    }
+  };
+
+  // Handle WebGL context loss
+  const handleWebGLContextLoss = () => {
+    if (!isMountedRef.current) return;
+    setError("WebGL context lost. Reloading map...");
+    cleanup();
+    // Attempt to reinitialize after a brief delay
+    setTimeout(() => {
+      if (isMountedRef.current) {
+        setError(null);
+        setIsLoading(true);
+      }
+    }, 1000);
+  };
+
+  const eventListenersRef = useRef<Array<{
+    type: string;
+    listener: (e: any) => void;
+  }>>([]);
+
+  // Enhanced cleanup function
+  const cleanup = () => {
+    return new Promise<void>((resolve) => {
+      // Cancel any ongoing animations
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+
+      // Reset all refs
+      startTimeRef.current = null;
+      initialLongitudeRef.current = null;
+      initialLatitudeRef.current = null;
+      targetZoomRef.current = null;
+
+      // Clean up map instance
+      requestAnimationFrame(() => {
+        if (mapInstanceRef.current) {
+          try {
+            const map = mapInstanceRef.current;
+
+            // Remove all event listeners
+            if (mapInstanceRef.current) {
+              const map = mapInstanceRef.current;
+              // Remove all stored listeners
+              eventListenersRef.current.forEach(({ type, listener }) => {
+                map.off(type, listener);
+              });
+              eventListenersRef.current = [];
+            }
+
+            setIsRotating(false);
+            shouldStartRotationRef.current = true;
+
+            // Remove all layers
+            map.getStyle().layers?.forEach(layer => {
+              if (map.getLayer(layer.id)) {
+                map.removeLayer(layer.id);
+              }
+            });
+
+            // Remove all sources
+            Object.keys(map.getStyle().sources || {}).forEach(sourceId => {
+              if (map.getSource(sourceId)) {
+                map.removeSource(sourceId);
+              }
+            });
+
+            // Remove map only if it's still attached to DOM
+            if (map.getContainer().parentNode) {
+              map.remove();
+            }
+          } catch (e) {
+            console.warn('Map cleanup error:', e);
+          }
+          mapInstanceRef.current = null;
+        }
+
+        // Reset states
+        if (isMountedRef.current) {
+          setMapLoaded(false);
+          setIsLoading(true);
+          setError(null);
+        }
+
+        resolve();
+      });
+    });
+  };
 
   const isValidCoordinates = (place: PlaceDetails | undefined): place is PlaceDetails => {
     if (!place) return false;
@@ -120,32 +223,46 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
   const calculateLatitudeTransition = (elapsed: number, startLat: number) => {
     const progress = Math.min(elapsed / ROTATION_CONSTRAINTS.LATITUDE_TRANSITION_DURATION, 1);
-    // Easing function for smooth transition
-    const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic easing out
+    const easeProgress = 1 - Math.pow(1 - progress, 3);
     return startLat + (ROTATION_CONSTRAINTS.TARGET_LATITUDE - startLat) * easeProgress;
   };
 
+  // Component lifecycle management
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      cleanup();
+    };
+  }, []);
+
   const startRotation = () => {
+    if (!mapInstanceRef.current) return;
+
     setIsRotating(true);
+    shouldStartRotationRef.current = true;
     startTimeRef.current = null;
     initialLongitudeRef.current = viewState.longitude;
     initialLatitudeRef.current = viewState.latitude;
     const targetZoom = getRotationZoom(viewState.zoom);
     targetZoomRef.current = targetZoom;
 
-    if (mapRef.current) {
-      const map = mapRef.current.getMap();
-      map.flyTo({
-        center: [viewState.longitude, ROTATION_VIEW_STATE.latitude],
-        zoom: targetZoom,
-        pitch: ROTATION_VIEW_STATE.pitch,
-        duration: ROTATION_CONSTRAINTS.LATITUDE_TRANSITION_DURATION,
-        essential: true
-      });
-    }
+    mapInstanceRef.current.flyTo({
+      center: [viewState.longitude, ROTATION_VIEW_STATE.latitude],
+      zoom: targetZoom,
+      pitch: ROTATION_VIEW_STATE.pitch,
+      duration: ROTATION_CONSTRAINTS.LATITUDE_TRANSITION_DURATION,
+      essential: true
+    });
   };
 
+  // Animation effect
   useEffect(() => {
+    if (!mapInstanceRef.current || !isRotating || isValidCoordinates(searchedPlace)) {
+      return;
+    }
+
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) {
         startTimeRef.current = timestamp;
@@ -153,66 +270,60 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         initialLatitudeRef.current = viewState.latitude;
       }
 
-      if (isRotating) {
-        const elapsed = timestamp - startTimeRef.current;
-        const rotationProgress = (elapsed % ROTATION_CONSTRAINTS.ROTATION_DURATION) / ROTATION_CONSTRAINTS.ROTATION_DURATION;
-        const startLongitude = initialLongitudeRef.current ?? viewState.longitude;
-        const newLongitude = startLongitude + (rotationProgress * 360);
+      const elapsed = timestamp - startTimeRef.current;
+      const rotationProgress = (elapsed % ROTATION_CONSTRAINTS.ROTATION_DURATION) / ROTATION_CONSTRAINTS.ROTATION_DURATION;
+      const startLongitude = initialLongitudeRef.current ?? viewState.longitude;
+      const newLongitude = startLongitude + (rotationProgress * 360);
 
-        // Calculate latitude transition
-        const startLat = initialLatitudeRef.current ?? viewState.latitude;
-        const newLatitude = calculateLatitudeTransition(elapsed, startLat);
+      const startLat = initialLatitudeRef.current ?? viewState.latitude;
+      const newLatitude = calculateLatitudeTransition(elapsed, startLat);
 
-        // Handle zoom transition
-        const targetZoom = targetZoomRef.current ?? getRotationZoom(viewState.zoom);
-        const currentZoom = viewState.zoom;
-        const zoomDiff = targetZoom - currentZoom;
-        const newZoom = currentZoom + (zoomDiff * ROTATION_CONSTRAINTS.ZOOM_SPEED);
+      const targetZoom = targetZoomRef.current ?? getRotationZoom(viewState.zoom);
+      const currentZoom = viewState.zoom;
+      const zoomDiff = targetZoom - currentZoom;
+      const newZoom = currentZoom + (zoomDiff * ROTATION_CONSTRAINTS.ZOOM_SPEED);
 
-        setViewState(prev => ({
-          ...prev,
-          longitude: newLongitude,
-          latitude: newLatitude,
-          zoom: newZoom,
-          pitch: ROTATION_VIEW_STATE.pitch
-        }));
+      setViewState(prev => ({
+        ...prev,
+        longitude: newLongitude,
+        latitude: Math.abs(newLatitude - ROTATION_CONSTRAINTS.TARGET_LATITUDE) > 0.01 ? newLatitude : ROTATION_CONSTRAINTS.TARGET_LATITUDE,
+        zoom: newZoom,
+        pitch: ROTATION_VIEW_STATE.pitch
+      }));
 
-        // Continue animation only if latitude hasn't reached target
-        if (Math.abs(newLatitude - ROTATION_CONSTRAINTS.TARGET_LATITUDE) > 0.01) {
-          animationRef.current = requestAnimationFrame(animate);
-        } else {
-          // Once target latitude is reached, continue with just longitude rotation
-          setViewState(prev => ({
-            ...prev,
-            longitude: newLongitude,
-            latitude: ROTATION_CONSTRAINTS.TARGET_LATITUDE,
-            zoom: newZoom,
-            pitch: ROTATION_VIEW_STATE.pitch
-          }));
-          animationRef.current = requestAnimationFrame(animate);
-        }
-      }
+      animationRef.current = requestAnimationFrame(animate);
     };
 
-    if (isRotating && !isValidCoordinates(searchedPlace)) {
-      animationRef.current = requestAnimationFrame(animate);
-    }
+    animationRef.current = requestAnimationFrame(animate);
 
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
       }
     };
   }, [isRotating, searchedPlace, viewState.longitude, viewState.zoom]);
 
+  // Map initialization
   const handleMapLoad = () => {
+    if (!mapRef.current || mapInstanceRef.current || !isMountedRef.current) return;
 
-    setIsLoading(false);
-    setMapLoaded(true);
-    if (mapRef.current) {
-      const map = mapRef.current.getMap();
+    const map = mapRef.current.getMap();
+    mapInstanceRef.current = map;
+
+    safeMapOperation(async () => {
       map.touchZoomRotate.enable();
       map.touchZoomRotate.disableRotation();
+
+      // Wait for style to be fully loaded
+      await new Promise<void>((resolve) => {
+        if (map.isStyleLoaded()) {
+          resolve();
+        } else {
+          map.once('style.load', () => resolve());
+        }
+      });
+
       map.setFog({
         'horizon-blend': 0.2,
         'color': '#ffffff',
@@ -220,24 +331,32 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         'space-color': '#000000',
         'star-intensity': 0.6
       });
-    }
-    
+
+      if (isMountedRef.current) {
+        setIsLoading(false);
+        setMapLoaded(true);
+        setError(null);
+
+        // Start rotation if we should and no place is selected
+        if (shouldStartRotationRef.current && !isValidCoordinates(searchedPlace)) {
+          startRotation();
+        }
+      }
+    });
   };
 
-  const handleMapError = (e: any) => {
-    track('RED - Unable to load map on Create map');
-    setError("Unable to load map. Please try again later.");
-    setIsLoading(false);
-    setMapLoaded(false);
-  };
-
+  // Handle searched place updates
   useEffect(() => {
-    if (isValidCoordinates(searchedPlace) && mapRef.current) {
-      setIsRotating(false);
-      const { longitude, latitude } = searchedPlace;
-      const map = mapRef.current.getMap();
-      map.touchZoomRotate.disableRotation(); // to disable rotation
-      map.flyTo({
+    if (!isValidCoordinates(searchedPlace) || !mapInstanceRef.current) return;
+
+    setIsRotating(false);
+    const { longitude, latitude } = searchedPlace;
+
+    safeMapOperation(async () => {
+      if (!mapInstanceRef.current) return;
+
+      mapInstanceRef.current.touchZoomRotate.disableRotation();
+      mapInstanceRef.current.flyTo({
         center: [longitude, latitude],
         zoom: 14,
         pitch: 45,
@@ -254,11 +373,75 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         pitch: 45,
         bearing: 0,
       }));
-    }
+    });
   }, [searchedPlace]);
+
+  
+  const handleStyleChange = async (newStyle: keyof typeof MAP_STYLES) => {
+    // Return early if the same style is selected
+    if (currentMapStyle === newStyle) {
+        return;
+    }
+
+    await safeMapOperation(async () => {
+        if (!mapInstanceRef.current) return;
+        
+        track('Map style switched on Create map');
+        setIsLoading(true);
+        
+        const map = mapInstanceRef.current;
+        const wasRotating = isRotating;
+        
+        try {
+            // Save current state
+            const center = map.getCenter();
+            const zoom = map.getZoom();
+            const bearing = map.getBearing();
+            const pitch = map.getPitch();
+
+            // Set new style
+            map.setStyle(MAP_STYLES[newStyle]);
+
+            // Wait for style to load and restore viewport
+            await new Promise<void>((resolve) => {
+                map.once('style.load', () => {
+                    map.setCenter(center);
+                    map.setZoom(zoom);
+                    map.setBearing(bearing);
+                    map.setPitch(pitch);
+                    
+                    setCurrentMapStyle(newStyle);
+                    setIsLoading(false);
+
+                    // Restore rotation if it was active
+                    if (wasRotating && shouldStartRotationRef.current) {
+                        startRotation();
+                    }
+                    
+                    resolve();
+                });
+            });
+        } catch (error) {
+            console.warn('Style switch error:', error);
+            setError('Failed to switch map style');
+            setIsLoading(false);
+        }
+    });
+};
+
+  const handleMapError = (e: { type: "error"; error: Error }) => {
+    track('RED - Unable to load map on Create map');
+    if (isMountedRef.current) {
+      setError("Unable to load map. Please try again later.");
+      setIsLoading(false);
+      setMapLoaded(false);
+    }
+    cleanup();
+  };
 
   const handleMapInteraction = () => {
     setIsRotating(false);
+    shouldStartRotationRef.current = false;
   };
 
   const handleViewStateChange = (evt: { viewState: ViewState }) => {
@@ -272,40 +455,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     });
   };
 
-  interface MapStyleOption {
-    id: 'satellite' | 'light' | 'dark';
-    imageSrc: string;
-  }
-
-  const styles: MapStyleOption[] = [
-    {
-      id: 'satellite',
-      imageSrc: '/mapstylesatellite.png',
-    },
-    {
-      id: 'light',
-      imageSrc: '/mapstylelight.png',
-    },
-    {
-      id: 'dark',
-      imageSrc: '/mapstyledark.png',
-    },
-  ];
-
-  const getCurrentStyleImage = (styleId: MapStyleOption['id']): string => {
-    return styles.find(style => style.id === styleId)?.imageSrc || styles[0].imageSrc;
-  };
-
-  const handleStyleChange = (newStyle: keyof typeof MAP_STYLES) => {
-    track('Map style switched on Create map');
-    setCurrentMapStyle(newStyle);
-    if (mapRef.current) {
-      mapRef.current.getMap().setStyle(MAP_STYLES[newStyle]);
-    }
-  };
-
   return (
-
     <div className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}>
       {isLoading && (
         <div className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10">
@@ -316,7 +466,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       {error && (
         <div className="absolute top-10 left-4 right-4 z-1">
           <Alert variant="destructive">
-            <AlertDescription>Unable to load map. Please try again later.</AlertDescription>
+            <AlertDescription>Unable to load map. Please refresh the page.</AlertDescription>
           </Alert>
         </div>
       )}
@@ -333,7 +483,8 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         onLoad={handleMapLoad}
         onError={handleMapError}
         mapStyle={MAP_STYLES[currentMapStyle]}
-        reuseMaps
+        reuseMaps={false}
+        preserveDrawingBuffer={true}
         attributionControl={false}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         style={{ width: '100%', height: '100%' }}
@@ -343,8 +494,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         dragRotate={false}
         keyboard={false}
         scrollZoom={true}
-        touchPitch={false} //When enabled, users on touch devices can use two fingers to adjust the map's pitch (tilt)
-      // touchZoomRotate={true}
+        touchPitch={false}
       >
         {mapLoaded && (
           <>
@@ -361,18 +511,18 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
       {!isRotating && !error && (
         <button
-        onClick={() => {
-          startRotation();
-          track('Map rotated on Create map');
-        }}
+          onClick={() => {
+            startRotation();
+            track('Map rotated on Create map');
+          }}
           className="absolute bottom-6 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
-          title="Resume rotation"
+          aria-label="Resume map rotation"
           type="button"
         >
           <div className="relative w-10 h-10 overflow-hidden rounded-full">
             <img
-              src={getCurrentStyleImage(currentMapStyle)}
-              alt="Rotate"
+              src={`/mapstyle${currentMapStyle}.png`}
+              alt="Rotate map"
               className="w-full h-full object-cover animate-[spin_30s_linear_infinite]"
             />
           </div>
