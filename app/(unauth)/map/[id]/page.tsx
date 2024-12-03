@@ -157,7 +157,7 @@ export default function MapPage() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center">
+      <div className="viewport-height w-full flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
       </div>
     )
@@ -166,7 +166,7 @@ export default function MapPage() {
   if (error || !userData) {
     track('YELLOW - This user does not exist. Please check that you have the correct URL and try again')
     return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
+      <div className="viewport-height w-full flex flex-col items-center justify-center space-y-8">
         <div className="p-4 text-center border-b border-pink-100/50 bg-white/50">
           <LogoHeader />
         </div>
@@ -186,7 +186,7 @@ export default function MapPage() {
 
   if (updateFailed) {
     return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
+      <div className="viewport-height w-full flex flex-col items-center justify-center space-y-8">
         <LogoHeader />
         <div className="w-full max-w-md px-4">
           <Alert variant="destructive" className="w-full">
@@ -207,7 +207,7 @@ export default function MapPage() {
   if (!canViewMap) {
     track('YELLOW - This MappBook cant be viewed because the owner has reached their view limit')
     return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-8">
+      <div className="viewport-height w-full flex flex-col items-center justify-center space-y-8">
         <LogoHeader />
         <div className="w-full max-w-md px-4">
           <Alert className="w-full">
@@ -227,7 +227,7 @@ export default function MapPage() {
     track('Public MappBook Viewed')
     return (
       <UserDataContext.Provider value={userData}>
-        <main className="relative w-screen h-screen overflow-hidden">
+        <main className="relative w-full viewport-height overflow-hidden">
           <div className="h-full w-full">
             <MapboxMapPublic />
           </div>

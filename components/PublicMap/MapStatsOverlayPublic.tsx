@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from "@/components/utils/supabase";
 import { MapPin, Plane, Globe2, Map } from 'lucide-react';
-import PreventPullToRefresh from '@/components/DisablePullToRefresh';
+import PreventPullToRefresh from '@/components/utils/DisablePullToRefresh';
 import { track } from '@vercel/analytics';
 interface UserData {
   mappbook_user_id: string;

@@ -4,7 +4,7 @@ import { useMappbookUser } from '@/context/UserContext';
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext';
 import { MapStatsContext } from '@/context/MapStatsContext';
 import { MapPin, Plane, Globe2 } from 'lucide-react';
-import PreventPullToRefresh from '@/components/DisablePullToRefresh';
+import PreventPullToRefresh from '@/components/utils/DisablePullToRefresh';
 import { track } from '@vercel/analytics';
 interface StatBoxProps {
   count?: number;

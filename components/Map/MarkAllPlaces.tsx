@@ -5,7 +5,7 @@ import { Map, Marker, Popup, Source, Layer, FillLayer, useMap } from 'react-map-
 import type { GeoJSON } from 'geojson';
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import './PlaceInfoPopUp.css';
-import PreventPullToRefresh from '@/components/DisablePullToRefresh';
+import PreventPullToRefresh from '@/components/utils/DisablePullToRefresh';
 import { useClerk, useUser } from '@clerk/nextjs';
 import { track } from '@vercel/analytics';
 

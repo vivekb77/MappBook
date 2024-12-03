@@ -3,7 +3,7 @@ import { Marker, Popup, Source, Layer, LayerProps, useMap } from 'react-map-gl';
 import type { GeoJSON, Feature } from 'geojson';
 import { supabase } from "@/components/utils/supabase";
 import '../Map/PlaceInfoPopUp.css';
-import PreventPullToRefresh from '@/components/DisablePullToRefresh';
+import PreventPullToRefresh from '@/components/utils/DisablePullToRefresh';
 import { track } from '@vercel/analytics';
 
 interface UserData {

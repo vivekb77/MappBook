@@ -28,13 +28,13 @@ export default function Home() {
   }
 
   if (!isLoaded) return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-50">
+    <div className="viewport-height w-full flex items-center justify-center bg-gray-50">
       <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
     </div>
   )
 
   return (
-    <div className="fixed inset-0 h-[100dvh]">
+    <div className="fixed inset-0 viewport-height">
       <SearchedPlaceDetailsContext.Provider value={{ searchedPlace, setSearchedPlaceDetails }}>
         <AllUserPlacesContext.Provider value={{ userPlaces, setAllUserPlaces }}>
           <MapStatsProvider>
@@ -54,9 +54,12 @@ export default function Home() {
               {/* Mobile Bottom Sheet */}
               <div
                 className={`md:hidden fixed bottom-0 left-0 right-0 z-40 
-                  transition-transform duration-300 ease-out bg-white h-[60dvh]
+                  transition-transform duration-300 ease-out bg-white h-[60%]
                   ${isSheetOpen ? 'translate-y-0' : 'translate-y-[100%]'}`}
-                style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+                style={{
+                  paddingBottom: 'env(safe-area-inset-bottom)',
+                  height: 'calc(var(--vh, 1vh) * 60)' // 60% of viewport height
+                }}
               >
                 {/* Chevron with location icon */}
                 <div className="absolute -top-12 right-16 touch-none w-[192px]">
