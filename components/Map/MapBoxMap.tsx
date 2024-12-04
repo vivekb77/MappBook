@@ -556,7 +556,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   return (
     <div
       id={mapContainerId.current}
-      className={`viewport-height w-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}
+      className={`h-screen w-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}
       role="region"
       aria-label="Interactive map"
     >
@@ -630,7 +630,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
             startRotation();
             track('Map rotated on Create map');
           }}
-          className="absolute bottom-6 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
+          className="absolute bottom-6 right-3 h-screen p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
           aria-label={`Resume map rotation - Current style: ${currentMapStyle}`}
           type="button"
         >
