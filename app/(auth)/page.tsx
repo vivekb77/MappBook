@@ -15,36 +15,20 @@ export default function Home() {
   const { isLoaded, isSignedIn, user } = useUser()
   
   const [isOpen, setIsOpen] = useState(false)
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
   const sheetRef = useRef<HTMLDivElement>(null)
 
   const toggleSheet = () => setIsOpen(!isOpen)
 
-  // Handle keyboard events
+  // Prevent automatic scroll adjustment on input focus
   useEffect(() => {
-    const handleResize = () => {
-      const windowHeight = window.visualViewport?.height || window.innerHeight;
-      const diff = window.innerHeight - windowHeight;
-      setIsKeyboardOpen(diff > 150); // Threshold to detect keyboard
-    };
-
-    // Subscribe to visualViewport changes if available, otherwise use resize
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize);
-      window.visualViewport.addEventListener('scroll', handleResize);
-    } else {
-      window.addEventListener('resize', handleResize);
-    }
-
-    return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleResize);
-        window.visualViewport.removeEventListener('scroll', handleResize);
-      } else {
-        window.removeEventListener('resize', handleResize);
-      }
-    };
-  }, []);
+    const inputs = sheetRef.current?.querySelectorAll('input')
+    inputs?.forEach(input => {
+      input.addEventListener('focus', (e) => {
+        e.preventDefault()
+        input.focus({ preventScroll: true })
+      })
+    })
+  }, [])
 
   if (!isLoaded) return (
     <div className="viewport-height w-full flex items-center justify-center bg-gray-50">
@@ -78,37 +62,29 @@ export default function Home() {
                   transition-transform duration-300 ease-out"
                 style={{
                   height: '60vh',
-                  bottom: isKeyboardOpen ? '0' : '0',
-                  transform: `translateY(${isOpen ? '0' : '100%'})`,
-                  position: isKeyboardOpen ? 'absolute' : 'fixed'
+                  bottom: 0,
+                  transform: `translateY(${isOpen ? '0' : '100%'})`
                 }}
               >
-                {/* Tab Handle - Hide when keyboard is open */}
-                {!isKeyboardOpen && (
-                  <div 
-                    className="absolute -top-12 left-1/2 -translate-x-1/2 
-                      bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600
-                      rounded-t-xl px-6 py-2 cursor-pointer shadow-lg
-                      hover:scale-105 transition-all"
-                    onClick={toggleSheet}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="w-6 h-6 text-white" />
-                      <ChevronUp 
-                        className={`w-6 h-6 text-white transition-transform duration-300
-                          ${!isOpen ? 'rotate-180' : ''}`}
-                      />
-                    </div>
+                {/* Taller Tab Handle positioned higher */}
+                <div 
+                  className="absolute -top-16 left-1/2 -translate-x-1/2 w-[50%] max-w-md
+                    bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600
+                    rounded-t-xl px-6 py-4 cursor-pointer shadow-lg
+                    hover:scale-105 transition-all"
+                  onClick={toggleSheet}
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <MapPin className="w-8 h-8 text-white" />
+                    <ChevronUp 
+                      className={`w-8 h-8 text-white transition-transform duration-300
+                        ${!isOpen ? 'rotate-180' : ''}`}
+                    />
                   </div>
-                )}
+                </div>
 
                 {/* Scrollable Content */}
-                <div 
-                  className="h-full overflow-y-auto overscroll-contain"
-                  style={{
-                    paddingBottom: isKeyboardOpen ? '16px' : 'env(safe-area-inset-bottom)'
-                  }}
-                >
+                <div className="h-full overflow-y-auto overscroll-contain">
                   <div className="px-4 py-2">
                     <AddPlace />
                   </div>
