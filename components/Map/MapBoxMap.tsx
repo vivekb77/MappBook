@@ -9,6 +9,7 @@ import MapStatsOverlay from "./MapStatsOverlay";
 import { SearchedPlaceDetailsContext } from "@/context/SearchedPlaceDetailsContext";
 import MapStyleSwitcher from "./MapStyleSwitcher";
 import { track } from '@vercel/analytics';
+import { nanoid } from 'nanoid';
 
 // Configuration
 const CONFIG = {
@@ -20,7 +21,7 @@ const CONFIG = {
     },
     rotation: {
       MIN_ZOOM: 0.8,
-      MAX_ZOOM: 1.5,
+      MAX_ZOOM: 0.8,
       ROTATION_DURATION: 25000,
       ZOOM_SPEED: 0.09,
       TARGET_LATITUDE: 35,
@@ -84,7 +85,7 @@ interface SearchedPlaceContextType {
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -114.370789,
   latitude: 46.342303,
-  zoom: 1.5,
+  zoom: 0.8,
   pitch: 25,
   bearing: 0,
   padding: {
@@ -114,12 +115,13 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const initialPositionRef = useRef<{ longitude: number; latitude: number } | null>(null);
   const retryAttemptsRef = useRef(0);
   const eventListenersRef = useRef<Array<{ type: string; listener: (e: any) => void }>>([]);
-
+  const mapContainerId = useRef(`map-container-${nanoid()}`);
   // State
   const [mapStatus, setMapStatus] = useState<MapStatus>({ status: 'idle' });
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
   const [isRotating, setIsRotating] = useState(true);
   const [currentMapStyle, setCurrentMapStyle] = useState<keyof typeof CONFIG.map.styles>(defaultStyle);
+  const [persistentError, setPersistentError] = useState<string | null>(null);
 
   // Context
   const { searchedPlace } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
@@ -149,47 +151,39 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     return startLat + (TARGET_LATITUDE - startLat) * easeProgress;
   };
 
-  // Map operations
-  const safeMapOperation = async (operation: () => Promise<void> | void) => {
-    if (!mapInstanceRef.current || !isMountedRef.current) return;
-    try {
-      await operation();
-    } catch (error) {
-      console.warn('Map operation error:', error);
-      if (error instanceof Error && error.message.includes('webgl context lost')) {
-        handleWebGLContextLoss();
-      }
-    }
-  };
-
   const handleWebGLContextLoss = () => {
     if (!isMountedRef.current) return;
-    
-    retryAttemptsRef.current += 1;
-    if (retryAttemptsRef.current > CONFIG.map.rotation.MAX_RETRY_ATTEMPTS) {
-      setMapStatus({ 
-        status: 'error', 
-        error: "Unable to restore map after multiple attempts. Please refresh the page." 
-      });
-      return;
-    }
 
-    setMapStatus({ 
-      status: 'error', 
-      error: "WebGL context lost. Attempting to reload map..." 
+    retryAttemptsRef.current += 1;
+
+    setMapStatus({
+      status: 'error',
+      error: retryAttemptsRef.current > CONFIG.map.rotation.MAX_RETRY_ATTEMPTS
+        ? "Unable to restore map after multiple attempts. Please refresh the page."
+        : "WebGL context lost. Attempting to reload map..."
     });
-    
-    cleanup();
-    
+
+    // Delay cleanup to allow error UI to render
     setTimeout(() => {
       if (isMountedRef.current) {
-        setMapStatus({ status: 'loading' });
+        cleanup();
+
+        // Only attempt reload if we haven't exceeded max retries
+        if (retryAttemptsRef.current <= CONFIG.map.rotation.MAX_RETRY_ATTEMPTS) {
+          setTimeout(() => {
+            if (isMountedRef.current) {
+              setMapStatus({ status: 'loading' });
+            }
+          }, 1000);
+        }
       }
-    }, 1000);
+    }, 100);
   };
 
   const cleanup = () => {
-    // Cancel animation
+    if (!isMountedRef.current) return;
+
+    // Cancel any ongoing animations
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
@@ -204,7 +198,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     if (mapInstanceRef.current) {
       const map = mapInstanceRef.current;
 
-      // Safely remove event listeners
+      // Remove event listeners
       eventListenersRef.current.forEach(({ type, listener }) => {
         try {
           if (map && typeof map.off === 'function') {
@@ -217,11 +211,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       eventListenersRef.current = [];
 
       try {
-        // Get map container before removing layers
-        const mapContainer = map.getContainer();
-        const parentNode = mapContainer?.parentNode;
+        // Get map container and parent before cleanup
+        const container = map.getContainer();
+        const parent = container?.parentNode;
 
-        // Remove layers and sources
+        // Remove layers and sources safely
         if (map.getStyle()) {
           const style = map.getStyle();
           style.layers?.forEach(layer => {
@@ -245,15 +239,15 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
           });
         }
 
-        // Safely remove map container
+        // Remove map with fallback
         try {
           map.remove();
         } catch (e) {
           console.warn('Error removing map:', e);
-          // Fallback: manually remove container if it still exists
-          if (parentNode && mapContainer && parentNode.contains(mapContainer)) {
+          // Fallback: manual container removal
+          if (parent && container && parent.contains(container)) {
             try {
-              parentNode.removeChild(mapContainer);
+              parent.removeChild(container);
             } catch (e) {
               console.warn('Error manually removing map container:', e);
             }
@@ -272,6 +266,36 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
   };
 
+  // Component lifecycle
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      // Run cleanup synchronously before unmount
+      cleanup();
+    };
+  }, []);
+
+  // Map operations
+  const safeMapOperation = async (operation: () => Promise<void> | void) => {
+    if (!mapInstanceRef.current || !isMountedRef.current) return;
+    try {
+      await operation();
+    } catch (error) {
+      console.warn('Map operation error:', error);
+
+      // Check specifically for WebGL/transformation errors
+      if (error instanceof Error &&
+        (error.message.includes('webgl context lost') ||
+          error.message.includes('transformMat4'))) {
+        handleWebGLContextLoss();
+      } else {
+        handleMapError();
+      }
+    }
+  };
+
   // Animation
   const startRotation = () => {
     if (!mapInstanceRef.current) return;
@@ -282,7 +306,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       longitude: viewState.longitude,
       latitude: viewState.latitude
     };
-    
+
     const targetZoom = getRotationZoom(viewState.zoom);
     targetZoomRef.current = targetZoom;
 
@@ -303,6 +327,15 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
     mapInstanceRef.current = map;
 
+    map.on('error', (e) => {
+      if (isMountedRef.current) {
+        setMapStatus({
+          status: 'error',
+          error: "Unable to load map. Please refresh the page."
+        });
+      }
+    });
+
     safeMapOperation(async () => {
       map.touchZoomRotate?.enable();
       map.touchZoomRotate?.disableRotation();
@@ -319,7 +352,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
               eventListenersRef.current.push({ type: 'style.load', listener });
             }
           }),
-          new Promise<void>((_, reject) => 
+          new Promise<void>((_, reject) =>
             setTimeout(() => reject(new Error('Style load timeout')), 10000)
           )
         ]);
@@ -350,13 +383,13 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
     await safeMapOperation(async () => {
       if (!mapInstanceRef.current) return;
-      
+
       track('Map style switched on Create map');
       // setMapStatus({ status: 'loading' });
-      
+
       const map = mapInstanceRef.current;
       const wasRotating = isRotating;
-      
+
       try {
         // Save viewport state
         const viewport = {
@@ -381,21 +414,21 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
             map.setZoom(viewport.zoom);
             map.setBearing(viewport.bearing);
             map.setPitch(viewport.pitch);
-            
+
             setCurrentMapStyle(newStyle);
             // setMapStatus({ status: 'ready' });
 
             if (wasRotating && !isValidCoordinates(searchedPlace)) {
               startRotation();
             }
-            
+
             resolve();
           };
 
           map.once('style.load', handleStyleLoad);
-          eventListenersRef.current.push({ 
-            type: 'style.load', 
-            listener: handleStyleLoad 
+          eventListenersRef.current.push({
+            type: 'style.load',
+            listener: handleStyleLoad
           });
         });
       } catch (error) {
@@ -409,13 +442,15 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   };
 
   const handleMapError = () => {
-    track('RED - Unable to load map on Create map');
+    // First set the error status before any cleanup
     if (isMountedRef.current) {
-      setMapStatus({ 
-        status: 'error', 
-        error: "Unable to load map. Please refresh the page." 
+      setMapStatus({
+        status: 'error',
+        error: "Unable to load map. Please refresh the page."
       });
     }
+    setPersistentError("Unable to load map. Please refresh the page.");
+    track('RED - Unable to load map on Create map');
     cleanup();
   };
 
@@ -433,25 +468,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     });
   };
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    
-    // Create a flag to track if we're unmounting
-    let isUnmounting = false;
-
-    return () => {
-      isUnmounting = true;
-      
-      // Run cleanup synchronously before React tries to remove the node
-      cleanup();
-      
-      // Ensure we don't try to update state during unmount
-      if (isUnmounting) {
-        isMountedRef.current = false;
-      }
-    };
-  }, []);
-
 
   useEffect(() => {
     if (!isRotating || isValidCoordinates(searchedPlace)) return;
@@ -467,10 +483,10 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
       const elapsed = timestamp - animationStartTimeRef.current;
       const { ROTATION_DURATION, ZOOM_SPEED } = CONFIG.map.rotation;
-      
+
       const rotationProgress = (elapsed % ROTATION_DURATION) / ROTATION_DURATION;
       const startPosition = initialPositionRef.current!;
-      
+
       const newLongitude = startPosition.longitude + (rotationProgress * 360);
       const newLatitude = calculateLatitudeTransition(elapsed, startPosition.latitude);
 
@@ -481,8 +497,8 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       setViewState(prev => ({
         ...prev,
         longitude: newLongitude,
-        latitude: Math.abs(newLatitude - ROTATION_VIEW_STATE.latitude) > 0.01 
-          ? newLatitude 
+        latitude: Math.abs(newLatitude - ROTATION_VIEW_STATE.latitude) > 0.01
+          ? newLatitude
           : ROTATION_VIEW_STATE.latitude,
         zoom: newZoom,
         pitch: ROTATION_VIEW_STATE.pitch
@@ -531,19 +547,21 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     });
   }, [searchedPlace]);
 
+
   // Access token validation
   if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER) {
     track('RED - Mapbox access token is missing on Create map');
   }
 
   return (
-    <div 
+    <div
+      id={mapContainerId.current}
       className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}
       role="region"
       aria-label="Interactive map"
     >
       {mapStatus.status === 'loading' && (
-        <div 
+        <div
           className="absolute inset-0 bg-gray-100/80 flex items-center justify-center z-10"
           role="alert"
           aria-live="polite"
@@ -553,18 +571,21 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         </div>
       )}
 
-      {mapStatus.status === 'error' && (
-        <div 
-          className="absolute top-10 left-4 right-4 z-10"
+      {persistentError && (
+        <div
+          className="absolute inset-0 z-20 flex items-center justify-center bg-black/50"
           role="alert"
           aria-live="assertive"
         >
-          <Alert variant="destructive">
-            <AlertDescription>{mapStatus.error}</AlertDescription>
-          </Alert>
+          <div className="mx-4 w-full max-w-md bg-gradient-to-r from-[#FFB1F1] to-[#B995FF] p-0.5 rounded-lg">
+            <Alert variant="destructive" className="bg-white m-0 border-none">
+              <AlertDescription className="text-center text-[#F364DE]">
+                Unable to load MappBook, please refresh the page.
+              </AlertDescription>
+            </Alert>
+          </div>
         </div>
       )}
-
       <Map
         ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER}
@@ -603,7 +624,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         )}
       </Map>
 
-      {!isRotating && mapStatus.status !== 'error' && (
+      {!isRotating && mapStatus.status === 'ready' && (
         <button
           onClick={() => {
             startRotation();

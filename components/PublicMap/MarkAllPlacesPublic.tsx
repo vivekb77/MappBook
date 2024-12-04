@@ -217,9 +217,9 @@ function MarkAllPlacesPublic({ userData }: MarkAllPlacesProps) {
               closeOnClick={false}
               closeButton={true}
               closeOnMove={true}
-              className="rounded-xl shadow-2xl custom-popup z-50"
+              className="rounded-xl shadow-2xl custom-popup z-30"
             >
-              <div className="p-4 max-w-xs bg-white relative z-50 rounded-xl">
+              <div className="p-4 max-w-xs bg-white relative z-30 rounded-xl">
                 <div className="border-b border-gray-200 pb-3 mb-3">
                   <h3 className="font-bold text-sm text-gray-800 mb-1">
                     {selectedPlace.place_name}
