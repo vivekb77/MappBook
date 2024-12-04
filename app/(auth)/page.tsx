@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import AddPlace from '@/components/Search/AddPlace'
 import MapboxMap from '@/components/Map/MapBoxMap'
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext'
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext'
 import { MapStatsProvider } from '@/context/MapStatsContext'
-import { MapPin, ChevronUp, ChevronDown, Loader2 } from 'lucide-react'
+import { MapPin, ChevronUp, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 
@@ -17,42 +17,122 @@ export default function Home() {
   const [hasClicked, setHasClicked] = useState(false)
   const { isLoaded, isSignedIn, user } = useUser()
   
-  // State for drag functionality
+  // Enhanced dragging state
   const [isDragging, setIsDragging] = useState(false)
-  const [startY, setStartY] = useState(0)
-  const [currentTranslate, setCurrentTranslate] = useState(100)
+  const [currentTranslate, setCurrentTranslate] = useState(100) // Start fully closed
   const sheetRef = useRef<HTMLDivElement>(null)
+  const dragStartRef = useRef(0)
+  const currentTranslateRef = useRef(0)
+  const velocityRef = useRef(0)
+  const lastTouchRef = useRef(0)
 
-  // Constants for sheet limits
-  const MIN_TRANSLATE = 10
-  const MAX_TRANSLATE = 100
-  const MID_POINT = (MIN_TRANSLATE + MAX_TRANSLATE) / 2
+  // Snap points in percentage from bottom of screen
+  const SNAP_POINTS = {
+    CLOSED: 100,   // Completely closed
+    PEEK: 85,      // Just showing the handle
+    HALF: 50,      // Half-way point
+    OPEN: 0        // Fully open
+  }
+
+  const calculateVelocity = (currentY: number, timestamp: number) => {
+    const timeDiff = timestamp - lastTouchRef.current
+    if (timeDiff > 0) {
+      const distance = currentY - dragStartRef.current
+      velocityRef.current = distance / timeDiff
+    }
+    lastTouchRef.current = timestamp
+  }
+
+  const findNearestSnapPoint = (currentPosition: number, velocity: number) => {
+    const snapPoints = Object.values(SNAP_POINTS)
+    const threshold = 0.5 // Velocity threshold for momentum
+
+    // If velocity is high enough, snap in direction of momentum
+    if (Math.abs(velocity) > threshold) {
+      return velocity > 0 
+        ? Math.min(...snapPoints.filter(point => point > currentPosition))
+        : Math.max(...snapPoints.filter(point => point < currentPosition))
+    }
+
+    // Otherwise snap to nearest point
+    return snapPoints.reduce((nearest, point) => 
+      Math.abs(point - currentPosition) < Math.abs(nearest - currentPosition) ? point : nearest
+    )
+  }
 
   const handleDragStart = (e: React.TouchEvent | React.MouseEvent) => {
     if (!hasClicked) setHasClicked(true)
     setIsDragging(true)
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-    setStartY(clientY)
+    dragStartRef.current = clientY
+    currentTranslateRef.current = currentTranslate
+    lastTouchRef.current = e.timeStamp
+    velocityRef.current = 0
+    
+    if (sheetRef.current) {
+      sheetRef.current.style.transition = 'none'
+    }
   }
 
   const handleDragMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isDragging) return
+    
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-    const diff = clientY - startY
+    const diff = clientY - dragStartRef.current
     const sheetHeight = sheetRef.current?.offsetHeight || 0
     
+    calculateVelocity(clientY, e.timeStamp)
+    
     const newTranslate = Math.max(
-      MIN_TRANSLATE,
-      Math.min(MAX_TRANSLATE, currentTranslate + (diff / sheetHeight) * 100)
+      SNAP_POINTS.OPEN,
+      Math.min(SNAP_POINTS.CLOSED, 
+        currentTranslateRef.current + (diff / sheetHeight) * 100
+      )
     )
     
     setCurrentTranslate(newTranslate)
-    setStartY(clientY)
   }
 
   const handleDragEnd = () => {
     setIsDragging(false)
+    
+    if (sheetRef.current) {
+      sheetRef.current.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'
+    }
+    
+    const nearestSnapPoint = findNearestSnapPoint(currentTranslate, velocityRef.current)
+    setCurrentTranslate(nearestSnapPoint)
   }
+
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      if ((e.target as Element).closest('.bottom-sheet-content')) return
+      handleDragStart(e as unknown as React.TouchEvent)
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      handleDragMove(e as unknown as React.TouchEvent)
+    }
+
+    const handleTouchEnd = () => {
+      handleDragEnd()
+    }
+
+    const sheet = sheetRef.current
+    if (sheet) {
+      sheet.addEventListener('touchstart', handleTouchStart)
+      sheet.addEventListener('touchmove', handleTouchMove)
+      sheet.addEventListener('touchend', handleTouchEnd)
+    }
+
+    return () => {
+      if (sheet) {
+        sheet.removeEventListener('touchstart', handleTouchStart)
+        sheet.removeEventListener('touchmove', handleTouchMove)
+        sheet.removeEventListener('touchend', handleTouchEnd)
+      }
+    }
+  }, [isDragging])
 
   if (!isLoaded) return (
     <div className="viewport-height w-full flex items-center justify-center bg-gray-50">
@@ -60,8 +140,7 @@ export default function Home() {
     </div>
   )
 
-  // Determine if sheet is more closed or open
-  const isMoreClosed = currentTranslate > MID_POINT
+  const isFullyClosed = currentTranslate >= SNAP_POINTS.CLOSED - 1
 
   return (
     <div className="fixed inset-0 viewport-height">
@@ -85,12 +164,12 @@ export default function Home() {
               <div
                 ref={sheetRef}
                 className={`md:hidden fixed bottom-0 left-0 right-0 z-50 
-                  bg-white shadow-lg rounded-t-xl
-                  ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
+                  bg-white shadow-lg rounded-t-xl transform will-change-transform
+                  ${isDragging ? 'transition-none' : 'transition-transform duration-300 ease-out'}`}
                 style={{
                   transform: `translateY(${currentTranslate}%)`,
                   paddingBottom: 'env(safe-area-inset-bottom)',
-                  height: '80vh',
+                  height: 'min(80vh, 600px)',
                   touchAction: 'none'
                 }}
               >
@@ -120,16 +199,37 @@ export default function Home() {
                   </svg>
                   <div className={`absolute top-0 left-[128px] -translate-y-1/2 
                     flex flex-col items-center justify-center pointer-events-none
-                    ${!hasClicked ? 'animate-bounce' : ''} group`}
+                    ${!hasClicked ? 'animate-bounce' : ''}`}
                   >
-                    <MapPin className="w-8 h-8 text-pink-200 stroke-[3] mb-1" />
+                    <MapPin 
+                      className={`w-8 h-8 text-pink-200 stroke-[3] mb-1
+                        transform transition-transform duration-200
+                        ${isDragging ? 'scale-110' : ''}`} 
+                    />
+                    {isFullyClosed && (
+                      <ChevronUp 
+                      className="w-6 h-6 text-pink-200 animate-pulse stroke-[4]"
+                      style={{ 
+                        filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.2))',
+                      }}
+                      />
+                    )}
                   </div>
                 </div>
 
                 {/* Sheet Content */}
-                <div className="h-full flex flex-col">
-                  <div className="flex-1 min-h-0">
-                    <div className="h-full px-4 pt-4 pb-4 overflow-y-auto overscroll-contain">
+               <div className="h-full flex flex-col bottom-sheet-content relative">
+                  {/* Add visual drag handle at top */}
+                  <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full" />
+                  
+                  <div className="flex-1 min-h-0 mt-6">
+                    <div 
+                      className="h-full px-4 overflow-y-auto overscroll-contain"
+                      style={{
+                        maxHeight: `calc(100% - env(safe-area-inset-bottom))`,
+                        paddingBottom: 'max(env(safe-area-inset-bottom), 16px)'
+                      }}
+                    >
                       <AddPlace />
                     </div>
                   </div>
