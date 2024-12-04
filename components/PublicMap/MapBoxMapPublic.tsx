@@ -8,6 +8,7 @@ import MarkAllPlacesPublic from "./MarkAllPlacesPublic";
 import MapStyleSwitcher from "../Map/MapStyleSwitcher";
 import { UserDataContext } from "@/context/UserDataContextPublicMap";
 import { track } from '@vercel/analytics';
+import { nanoid } from 'nanoid';
 
 interface UserData {
   mappbook_user_id: string;
@@ -47,7 +48,7 @@ interface MapViewState {
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -114.370789,
   latitude: 35,
-  zoom: 1.0,
+  zoom: 0.8,
   pitch: 25,
   bearing: 0,
   padding: {
@@ -69,7 +70,7 @@ const ROTATION_VIEW_STATE = {
 };
 
 const ROTATION_MIN_ZOOM = 0.8;
-const ROTATION_MAX_ZOOM = 1.8;
+const ROTATION_MAX_ZOOM = 0.8;
 const ROTATION_DURATION = 25000;
 const ZOOM_TRANSITION_DURATION = 2000;
 const LATITUDE_TRANSITION_DURATION = 2000;
@@ -85,7 +86,8 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   const animationStartTimeRef = useRef<number | null>(null);
   const initialPositionRef = useRef<{ longitude: number; latitude: number } | null>(null);
   const targetZoomRef = useRef<number | null>(null);
-
+  const mapContainerId = useRef(`map-container-${nanoid()}`);
+  const isMountedRef = useRef(true);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
@@ -97,7 +99,9 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 
   // Cleanup function
   const cleanup = () => {
-    // Cancel animation
+    if (!isMountedRef.current) return;
+
+    // Cancel any ongoing animations
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
@@ -106,7 +110,6 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
     // Reset animation refs
     animationStartTimeRef.current = null;
     initialPositionRef.current = null;
-    targetZoomRef.current = null;
 
     // Clean up map instance
     if (mapInstanceRef.current) {
@@ -114,28 +117,58 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 
       // Remove event listeners
       eventListenersRef.current.forEach(({ type, listener }) => {
-        map.off(type, listener);
+        try {
+          map.off(type, listener);
+        } catch (e) {
+          console.warn('Error removing event listener:', e);
+        }
       });
       eventListenersRef.current = [];
 
       try {
-        // Remove layers and sources
+        // Get map container and parent before cleanup
+        const container = map.getContainer();
+        const parent = container?.parentNode;
+
+        // Remove layers and sources safely
         const style = map.getStyle();
-        style.layers?.forEach(layer => {
-          if (map.getLayer(layer.id)) {
-            map.removeLayer(layer.id);
-          }
-        });
+        if (style?.layers) {
+          style.layers.forEach(layer => {
+            try {
+              if (map.getLayer(layer.id)) {
+                map.removeLayer(layer.id);
+              }
+            } catch (e) {
+              console.warn(`Error removing layer ${layer.id}:`, e);
+            }
+          });
+        }
 
-        Object.keys(style.sources || {}).forEach(sourceId => {
-          if (map.getSource(sourceId)) {
-            map.removeSource(sourceId);
-          }
-        });
+        if (style?.sources) {
+          Object.keys(style.sources).forEach(sourceId => {
+            try {
+              if (map.getSource(sourceId)) {
+                map.removeSource(sourceId);
+              }
+            } catch (e) {
+              console.warn(`Error removing source ${sourceId}:`, e);
+            }
+          });
+        }
 
-        // Remove map if still in DOM
-        if (map.getContainer().parentNode) {
+        // Remove map with fallback
+        try {
           map.remove();
+        } catch (e) {
+          console.warn('Error removing map:', e);
+          // Fallback: manual container removal
+          if (parent && container && parent.contains(container)) {
+            try {
+              parent.removeChild(container);
+            } catch (e) {
+              console.warn('Error manually removing map container:', e);
+            }
+          }
         }
       } catch (e) {
         console.warn('Map cleanup error:', e);
@@ -145,9 +178,13 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
     }
   };
 
-  // Add cleanup to useEffect
+  // Component lifecycle
   useEffect(() => {
-    return cleanup;
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      cleanup();
+    };
   }, []);
 
   useEffect(() => {
@@ -256,7 +293,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 
   const handleMapError = (error: { error: Error }) => {
     const errorMessage = error?.error?.message || "Unable to load map, please refresh the page.";
-    track('RED - Unable to load map on Public map', { error: errorMessage });
+    track('RED - Unable to load map on Public map');
     setError(errorMessage);
     setIsLoading(false);
     setIsRotating(false);
@@ -270,16 +307,16 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
   };
 
   const handleStyleChange = async (newStyle: MapStyle) => {
-    if (currentMapStyle === newStyle) return;
+    if (!isMountedRef.current || currentMapStyle === newStyle) return;
 
     const map = mapRef.current?.getMap();
     if (!map) return;
 
-    mapInstanceRef.current = map;
     const wasRotating = isRotating;
+    setIsRotating(false);
 
     try {
-      // Save current viewport state
+      // Save viewport state
       const viewport = {
         center: map.getCenter(),
         zoom: map.getZoom(),
@@ -287,78 +324,49 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         pitch: map.getPitch()
       };
 
-      // Clean up existing event listeners
+      // Clean up existing listeners
       eventListenersRef.current.forEach(({ type, listener }) => {
         map.off(type, listener);
       });
       eventListenersRef.current = [];
 
-      // Set new style and wait for it to load
+      // Apply new style
       await new Promise<void>((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-          reject(new Error('Style load timeout'));
-        }, 9000);
+        const timeoutId = setTimeout(() => reject(new Error('Style load timeout')), 9000);
 
         const handleStyleLoad = () => {
+          if (!isMountedRef.current) return;
+
+          clearTimeout(timeoutId);
           try {
-            clearTimeout(timeoutId);
-
-            // Add terrain source if it doesn't exist
-            if (!map.getSource('mapbox-dem')) {
-              map.addSource('mapbox-dem', {
-                type: 'raster-dem',
-                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
-                tileSize: 512,
-                maxzoom: 14
-              });
-            }
-
-            // Set terrain
-            map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
-
-            // Restore viewport
             map.setCenter(viewport.center);
             map.setZoom(viewport.zoom);
             map.setBearing(viewport.bearing);
             map.setPitch(viewport.pitch);
 
-            setCurrentMapStyle(newStyle);
-
             if (wasRotating) {
               startRotation();
             }
 
-            map.touchZoomRotate.disableRotation();
-
+            setCurrentMapStyle(newStyle);
             resolve();
-          } catch (err) {
-            console.warn('Error in style load handler:', err);
-            resolve(); // Resolve anyway to prevent hanging
+          } catch (e) {
+            console.warn('Error restoring viewport:', e);
+            resolve();
           }
         };
 
         map.once('style.load', handleStyleLoad);
-        eventListenersRef.current.push({
-          type: 'style.load',
-          listener: handleStyleLoad
-        });
-
-        // Set the new style
+        eventListenersRef.current.push({ type: 'style.load', listener: handleStyleLoad });
         map.setStyle(MAP_STYLES[newStyle]);
       });
 
       track('Map style switched on Public map');
-
     } catch (error) {
       console.warn('Style switch error:', error);
+      // Fallback to basic style change
+      map.setStyle(MAP_STYLES[newStyle]);
       setCurrentMapStyle(newStyle);
-
-      // If style switch fails, try basic style application
-      try {
-        map.setStyle(MAP_STYLES[newStyle]);
-      } catch (e) {
-        console.warn('Fallback style switch failed:', e);
-      }
     }
   };
 
@@ -379,16 +387,28 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 
   if (error) {
     return (
-      <div
-        className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}
-        role="alert"
-      >
-        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-          <Alert variant="destructive" className="w-96">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+      <>
+        {/* Background overlay - no pointer events */}
+        <div 
+          className="absolute inset-0 z-30 bg-black/50 pointer-events-none" 
+          aria-hidden="true"
+        />
+        
+        {/* Error message - positioned to not interfere with button */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="mx-4 w-full max-w-md bg-gradient-to-r from-[#FFB1F1] to-[#B995FF] p-0.5 rounded-lg">
+            <Alert variant="destructive" className="bg-white m-0 border-none">
+              <AlertDescription className="text-center text-[#F364DE]">
+                Unable to load MappBook, please refresh the page.
+              </AlertDescription>
+            </Alert>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -398,6 +418,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 
   return (
     <div
+      id={mapContainerId.current}
       className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}
       role="region"
       aria-label="Interactive map"
@@ -425,7 +446,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         onLoad={handleMapLoad}
         onError={handleMapError}
         mapStyle={MAP_STYLES[currentMapStyle]}
-        reuseMaps
+        reuseMaps={true}
         attributionControl={false}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         boxZoom={false}
@@ -436,7 +457,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         scrollZoom={true}
         touchPitch={false}
       >
-        {mapLoaded && (
+        {mapLoaded && !error &&(
           <>
             <MarkAllPlacesPublic userData={userData} />
             <MapStatsOverlayPublic userData={userData} />
@@ -454,7 +475,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
             startRotation();
             track('Map rotated on Public map');
           }}
-          className="absolute bottom-6 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
+          className="absolute bottom-6 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-50"
           title="Resume rotation"
           type="button"
           aria-label="Start map rotation"

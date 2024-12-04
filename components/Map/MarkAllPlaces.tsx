@@ -221,7 +221,7 @@ function MarkAllPlaces() {
 
   return (
     <>
-    // @ts-ignore
+
       {geojsonData && (
         <Source id="country-data" type="geojson" data={geojsonData}>
           <Layer {...countryFillLayer} />
@@ -268,9 +268,9 @@ function MarkAllPlaces() {
                 closeOnClick={false}
                 closeButton={true}
                 closeOnMove={true}
-                className="rounded-xl shadow-2xl custom-popup z-50"
+                className="rounded-xl shadow-2xl custom-popup z-30"
               >
-                <div className="p-4 max-w-xs bg-white relative z-50 rounded-xl">
+                <div className="p-4 max-w-xs bg-white relative z-30 rounded-xl">
                   {/* Rest of your original code stays exactly the same */}
                   <div className="border-b border-gray-200 pb-3 mb-3">
                     <h3 className="font-bold text-sm text-gray-800 mb-1">
