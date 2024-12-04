@@ -556,7 +556,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   return (
     <div
       id={mapContainerId.current}
-      className={`relative w-full h-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}
+      className={`viewport-height w-full border-6 border-gray-900 rounded-lg overflow-hidden ${className}`}
       role="region"
       aria-label="Interactive map"
     >
