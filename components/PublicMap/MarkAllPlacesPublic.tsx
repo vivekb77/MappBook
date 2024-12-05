@@ -6,13 +6,13 @@ import '../Map/PlaceInfoPopUp.css';
 import PreventPullToRefresh from '@/components/utils/DisablePullToRefresh';
 import { track } from '@vercel/analytics';
 
-interface UserData {
+export interface UserData {
   mappbook_user_id: string;
   display_name: string;
   is_premium_user: boolean;
   map_style: string;
   country_fill_color: string;
-  map_views_left: number;
+  map_views_left: number | null; // Make it match with your component's type
 }
 
 interface MarkAllPlacesProps {

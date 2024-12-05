@@ -1,27 +1,49 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { useParams, usePathname } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState, memo } from 'react'
+import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { supabase } from "@/components/utils/supabase"
 import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { UserDataContext } from '@/context/UserDataContextPublicMap'
 import { track } from '@vercel/analytics'
+import { UserData, UserDataContext } from '@/context/UserDataContextPublicMap';
 
-interface UserData {
-  mappbook_user_id: string
-  display_name: string
-  is_premium_user: boolean
-  map_style: string
-  country_fill_color: string
-  map_views_left: number
+
+interface State {
+  userData: UserData | null
+  loading: boolean
+  error: string | null
+  viewCountUpdated: boolean
+  updateFailed: boolean
 }
 
-// Reusable components
-const LogoHeader = () => (
+interface CreateMappBookButtonProps {
+  isLoading: boolean
+  onClick: () => void
+}
+
+type MapPageParams = {
+  id: string
+}
+
+// Component Props Types
+interface LogoHeaderProps { }
+interface ErrorViewProps {
+  message: string
+  isLoading: boolean
+  onCreateClick: () => void
+}
+
+// Utility function to validate map views
+const isValidMapViews = (views: number | null | undefined): views is number => {
+  return typeof views === 'number' && !isNaN(views)
+}
+
+// Reusable Components
+const LogoHeader = memo<LogoHeaderProps>(() => (
   <div className="text-center">
     <div className="flex items-center justify-center gap-2 mb-1">
       <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
@@ -35,9 +57,10 @@ const LogoHeader = () => (
       Share your World 🌎 Track your Adventures ✈️
     </p>
   </div>
-)
+))
+LogoHeader.displayName = 'LogoHeader'
 
-const CreateMappBookButton = ({ isLoading, onClick }: { isLoading: boolean; onClick: () => void }) => (
+const CreateMappBookButton = memo<CreateMappBookButtonProps>(({ isLoading, onClick }) => (
   <Button
     onClick={onClick}
     className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
@@ -49,70 +72,89 @@ const CreateMappBookButton = ({ isLoading, onClick }: { isLoading: boolean; onCl
     {isLoading ? (
       <>
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading...
+        Creating...
       </>
     ) : (
       'Create Your MappBook'
     )}
   </Button>
-)
+))
+CreateMappBookButton.displayName = 'CreateMappBookButton'
 
-export default function MapPage() {
-  const router = useRouter()
-  const params = useParams()
-  const [userData, setUserData] = useState<UserData | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-  const [viewCountUpdated, setViewCountUpdated] = useState<boolean>(false)
-  const [updateFailed, setUpdateFailed] = useState<boolean>(false)
-  const [isLoading, setIsLoading] = useState(false)
+const ErrorView = memo<ErrorViewProps>(({ message, isLoading, onCreateClick }) => (
+  <div className="viewport-height w-full flex flex-col items-center justify-center space-y-8">
+    <div className="p-4 text-center border-b border-pink-100/50 bg-white/50">
+      <LogoHeader />
+    </div>
+    <div className="w-full max-w-md px-4">
+      <Alert variant="destructive" className="w-full">
+        <AlertDescription>{message}</AlertDescription>
+      </Alert>
+    </div>
+    <div className="w-full max-w-md px-4">
+      <CreateMappBookButton isLoading={isLoading} onClick={onCreateClick} />
+    </div>
+  </div>
+))
+ErrorView.displayName = 'ErrorView'
 
-  const handleCreateMappBook = () => {
-    setIsLoading(true)
-    router.push('/')
-  }
+// Custom hook for data fetching and state management
+const useMapData = (userId: string | null) => {
+  const [state, setState] = useState<State>({
+    userData: null,
+    loading: true,
+    error: null,
+    viewCountUpdated: false,
+    updateFailed: false
+  })
 
-  const updateViewCounts = async (mappbook_user_id: string) => {
+  const updateViewCounts = useCallback(async (mappbook_user_id: string): Promise<boolean> => {
     try {
-      const { data, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .rpc('update_map_views', { m_user_id: mappbook_user_id })
 
       if (updateError) {
-        setUpdateFailed(true)
-        track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
+        setState(prev => ({ ...prev, updateFailed: true }))
+        track('RED - Public MappBook - Failed to update MappBook views', {
+          user_id: mappbook_user_id,
+          error: updateError.message
+        })
         return false
       }
 
-      setUserData(prev =>
-        prev ? {
-          ...prev,
-          map_views_left: prev.map_views_left - 1
+      setState(prev => ({
+        ...prev,
+        userData: prev.userData ? {
+          ...prev.userData,
+          map_views_left: (prev.userData.map_views_left ?? 0) - 1
         } : null
-      )
+      }))
       return true
     } catch (err) {
-      track('RED - Failed to Update map views to DB on public MappBook', { user_is: mappbook_user_id })
-      setUpdateFailed(true)
+      track('RED - Public MappBook - Failed to update MappBook views', {
+        user_id: mappbook_user_id,
+        error: err instanceof Error ? err.message : 'Unknown error'
+      })
+      setState(prev => ({ ...prev, updateFailed: true }))
       return false
     }
-  }
+  }, [])
 
   useEffect(() => {
+    let mounted = true
+
     async function fetchUserData() {
       try {
-        const userId = params.id
 
-        const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId as string)
-
-        if (!isValidUUID) {
-          setError('Invalid URL format')
-          setLoading(false)
+        if (!userId) {
+          setState(prev => ({ ...prev, error: 'No user ID found in URL', loading: false }))
           return
         }
 
-        if (!userId) {
-          setError('No user ID found in URL')
-          setLoading(false)
+        const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)
+
+        if (!isValidUUID) {
+          setState(prev => ({ ...prev, error: 'Invalid URL format', loading: false }))
           return
         }
 
@@ -123,37 +165,72 @@ export default function MapPage() {
           .single()
 
         if (supabaseError) {
-          track('RED - Failed to pull user data from DB on public MappBook')
           throw supabaseError
         }
 
         if (!data) {
-          setError('No user found')
-          setLoading(false)
+          setState(prev => ({ ...prev, error: 'No user found', loading: false }))
           return
         }
 
-        setUserData(data as UserData)
+        if (mounted) {
+          const userData = data as UserData
+          setState(prev => ({ ...prev, userData }))
+
+          if (isValidMapViews(userData.map_views_left) && userData.map_views_left > 0) {
+            const success = await updateViewCounts(userData.mappbook_user_id)
+            if (success && mounted) {
+              setState(prev => ({ ...prev, viewCountUpdated: true }))
+            }
+          }
+        }
       } catch (err) {
-        track('RED - Failed to pull user data from DB on public MappBook')
-        setError('No user found')
+        if (mounted) {
+          track('RED - Public MappBook - Failed to fetch user data', {
+            error: err instanceof Error ? err.message : 'Unknown error'
+          })
+          setState(prev => ({ ...prev, error: 'No user found' }))
+        }
       } finally {
-        setLoading(false)
+        if (mounted) {
+          setState(prev => ({ ...prev, loading: false }))
+        }
       }
     }
 
     fetchUserData()
-  }, [params.id])
+
+    return () => {
+      mounted = false
+    }
+  }, [userId, updateViewCounts])
+
+  return state
+}
+
+export default function MapPage() {
+  const router = useRouter()
+  const params = useParams<MapPageParams>()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleCreateMappBook = useCallback(() => {
+    setIsLoading(true)
+    track('Public MappBook - Create MappBook button clicked')
+    router.push('/')
+  }, [router])
+
+  const { userData, loading, error, updateFailed } = useMapData(params?.id ?? null)
+
+  const canViewMap = useMemo(() => {
+    if (!userData) return false
+    return isValidMapViews(userData.map_views_left) && userData.map_views_left > 0
+  }, [userData])
 
   useEffect(() => {
-    if (!userData) return
-    const canViewMap = userData.map_views_left > 0
-
-    if (canViewMap && !viewCountUpdated) {
-      updateViewCounts(userData.mappbook_user_id)
-      setViewCountUpdated(true)
+    if (!updateFailed && canViewMap) {
+      track('Public MappBook - MappBook viewed')
     }
-  }, [userData, viewCountUpdated])
+  }, [updateFailed, canViewMap])
 
   if (loading) {
     return (
@@ -164,80 +241,47 @@ export default function MapPage() {
   }
 
   if (error || !userData) {
-    track('YELLOW - This user does not exist. Please check that you have the correct URL and try again')
+    track('YELLOW - Public MappBook - This user does not exist. Please check that you have the correct URL and try again')
     return (
-      <div className="viewport-height w-full flex flex-col items-center justify-center space-y-8">
-        <div className="p-4 text-center border-b border-pink-100/50 bg-white/50">
-          <LogoHeader />
-        </div>
-        <div className="w-full max-w-md px-4">
-          <Alert variant="destructive" className="w-full">
-            <AlertDescription>
-              This user does not exist. Please check that you have the correct URL and try again.
-            </AlertDescription>
-          </Alert>
-        </div>
-        <div className="w-full max-w-md px-4">
-          <CreateMappBookButton isLoading={isLoading} onClick={handleCreateMappBook} />
-        </div>
-      </div>
+      <ErrorView
+        message="This user does not exist. Please check that you have the correct URL and try again."
+        isLoading={isLoading}
+        onCreateClick={handleCreateMappBook}
+      />
     )
   }
 
   if (updateFailed) {
     return (
-      <div className="viewport-height w-full flex flex-col items-center justify-center space-y-8">
-        <LogoHeader />
-        <div className="w-full max-w-md px-4">
-          <Alert variant="destructive" className="w-full">
-            <AlertDescription>
-              Unable to load the MappBook at this time. Please refresh the page.
-            </AlertDescription>
-          </Alert>
-        </div>
-        <div className="w-full max-w-md px-4">
-          <CreateMappBookButton isLoading={isLoading} onClick={handleCreateMappBook} />
-        </div>
-      </div>
+      <ErrorView
+        message="Unable to load the MappBook at this time. Please refresh the page."
+        isLoading={isLoading}
+        onCreateClick={handleCreateMappBook}
+      />
     )
   }
-
-  const canViewMap = userData.map_views_left > 0
 
   if (!canViewMap) {
-    track('YELLOW - This MappBook cant be viewed because the owner has reached their view limit')
+    track('YELLOW - Public MappBook - This MappBook cant be viewed because the owner has reached their view limit')
     return (
-      <div className="viewport-height w-full flex flex-col items-center justify-center space-y-8">
-        <LogoHeader />
-        <div className="w-full max-w-md px-4">
-          <Alert className="w-full">
-            <AlertDescription>
-              This MappBook can't be displayed because the owner has reached their view limit.
-            </AlertDescription>
-          </Alert>
+      <ErrorView
+        message="This MappBook can't be displayed because the owner has reached their view limit."
+        isLoading={isLoading}
+        onCreateClick={handleCreateMappBook}
+      />
+    )
+  }
+
+  return (
+    <UserDataContext.Provider value={userData as UserData | null}>
+      <main className="relative w-full viewport-height overflow-hidden">
+        <div className="h-full w-full">
+          <MapboxMapPublic />
         </div>
-        <div className="w-full max-w-md px-4">
+        <div className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 w-fit">
           <CreateMappBookButton isLoading={isLoading} onClick={handleCreateMappBook} />
         </div>
-      </div>
-    )
-  }
-
-  if (!updateFailed && canViewMap) {
-    track('Public MappBook Viewed')
-    return (
-      <UserDataContext.Provider value={userData}>
-        <main className="relative w-full viewport-height overflow-hidden">
-          <div className="h-full w-full">
-            <MapboxMapPublic />
-          </div>
-          <div className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 w-fit">
-            <CreateMappBookButton isLoading={isLoading} onClick={handleCreateMappBook} />
-          </div>
-        </main>
-      </UserDataContext.Provider>
-    )
-  }
-
-  return null
+      </main>
+    </UserDataContext.Provider>
+  )
 }

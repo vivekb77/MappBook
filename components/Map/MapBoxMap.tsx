@@ -384,7 +384,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     await safeMapOperation(async () => {
       if (!mapInstanceRef.current) return;
 
-      track('Map style switched on Create map');
+      track('Create Map - Map style switched');
       // setMapStatus({ status: 'loading' });
 
       const map = mapInstanceRef.current;
@@ -450,7 +450,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       });
     }
     setPersistentError("Unable to load map. Please refresh the page.");
-    track('RED - Unable to load map on Create map');
+    track('RED - Create Map - Unable to load map');
     cleanup();
   };
 
@@ -550,7 +550,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
   // Access token validation
   if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER) {
-    track('RED - Mapbox access token is missing on Create map');
+    track('RED - Create Map - Mapbox access token is missing');
   }
 
   return (
@@ -628,7 +628,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         <button
           onClick={() => {
             startRotation();
-            track('Map rotated on Create map');
+            track('Create Map - Map rotated');
           }}
           className="absolute bottom-6 right-3 h-screen p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-5"
           aria-label={`Resume map rotation - Current style: ${currentMapStyle}`}

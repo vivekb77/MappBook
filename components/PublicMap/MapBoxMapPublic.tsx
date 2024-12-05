@@ -16,7 +16,7 @@ interface UserData {
   is_premium_user: boolean;
   map_style: string;
   country_fill_color: string;
-  map_views_left: number;
+  map_views_left: number | null;
 }
 
 const MAP_STYLES = {
@@ -293,7 +293,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
 
   const handleMapError = (error: { error: Error }) => {
     const errorMessage = error?.error?.message || "Unable to load map, please refresh the page.";
-    track('RED - Unable to load map on Public map');
+    track('RED - Public Map - Unable to load map', { error: errorMessage });
     setError(errorMessage);
     setIsLoading(false);
     setIsRotating(false);
@@ -361,7 +361,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         map.setStyle(MAP_STYLES[newStyle]);
       });
 
-      track('Map style switched on Public map');
+      track('Public Map - Map style switched');
     } catch (error) {
       console.warn('Style switch error:', error);
       // Fallback to basic style change
@@ -473,7 +473,7 @@ const MapboxMapPublic: React.FC<MapboxMapProps> = ({
         <button
           onClick={() => {
             startRotation();
-            track('Map rotated on Public map');
+            track('Public Map - Map rotated');
           }}
           className="absolute bottom-6 h-screen right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100 transition-colors z-50"
           title="Resume rotation"
