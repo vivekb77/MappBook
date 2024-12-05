@@ -1,10 +1,9 @@
 "use client";
 import { useEffect } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
-import { useAuth, useUser as useClerkUser, useSession } from '@clerk/nextjs';
+import { useAuth, useUser as useClerkUser } from '@clerk/nextjs';
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
-
-
+import { track } from '@vercel/analytics';
 
 export default function UserCheck({ children }: { children: React.ReactNode }) {
   const { isLoaded, userId } = useAuth();
@@ -13,9 +12,10 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
   const supabase = getClerkSupabaseClient();
   
   useEffect(() => {
-    async function checkAndCreateUser() {
-      if (!userId || !clerkUser) return;
-
+    if (!userId || !clerkUser) return;
+  
+    const startTime = performance.now()
+    const checkAndCreateUser = async () => {
       try {
         const { data: existingUser, error: fetchError } = await supabase
           .from('MappBook_Users')
@@ -23,43 +23,50 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
           .eq('clerk_user_id', userId)
           .single();
 
-        if (fetchError && fetchError.code !== 'PGRST116') {
-          console.error('Error fetching user:', fetchError);
-          return;
-        }
-
-        if (!existingUser) {
+        // Handle non-existent user case
+        if (fetchError?.code === 'PGRST116' || !existingUser) {
           const { data: newUser, error: createError } = await supabase
             .from('MappBook_Users')
-            .insert([
-              {
-                clerk_user_id: clerkUser.id,
-                display_name: clerkUser.fullName,
-                // email_address:clerkUser.primaryEmailAddress?.emailAddress,
-              },
-            ])
+            .insert([{
+              clerk_user_id: clerkUser.id,
+              display_name: clerkUser.fullName,
+            }])
             .select()
             .single();
 
           if (createError) {
-            console.error('Error creating user:', createError);
+            track('RED - Create MappBook - Failed to create new user', {
+              error: createError.message
+            });
             return;
           }
 
           setMappbookUser(newUser);
-          // console.log("New user created" + JSON.stringify(newUser))
-        } else {
-          setMappbookUser(existingUser);
-          // console.log("Existing user " + JSON.stringify(existingUser))
+          track('Create MappBook - New user successfully created', {
+            userId: newUser.mappbook_user_id
+          });
+          return;
         }
-      } catch (error) {
-        console.error('Error in checkAndCreateUser:', error);
-      }
-    }
 
-    if (isLoaded && userId) {
-      checkAndCreateUser();
-    }
+        // Handle database fetch errors
+        if (fetchError) {
+          track('RED - Create MappBook - Failed to create new user', {
+            error: fetchError
+          });
+          return;
+        }
+
+        setMappbookUser(existingUser);
+        const endTime = performance.now()          
+        console.log(`Supabase query took ${endTime - startTime}ms`)
+      } catch (error) {
+        track('RED - Create MappBook - Failed to create new user', {
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    };
+
+    checkAndCreateUser();
   }, [isLoaded, userId, clerkUser, setMappbookUser]);
 
   return <>{children}</>;
