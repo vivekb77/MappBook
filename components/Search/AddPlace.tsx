@@ -97,15 +97,15 @@ const famousPlaces = [
   {
     place_id: 'sample7',
     mapbox_id: 'sample7',
-    place_name: 'Colosseum (Example)',
-    place_full_address: 'Piazza del Colosseo, 1, 00184 Roma RM, Italy',
+    place_name: 'Search and add places',
+    place_full_address: 'Search and add places',
     place_longitude: 12.4924,
     place_latitude: 41.8902,
     place_country: 'Italy',
     place_country_code: 'IT',
     place_language: 'it',
     place_poi_category: 'landmark',
-    visitedorwanttovisit: 'wanttovisit'
+    visitedorwanttovisit: 'visited'
   },
   {
     place_id: 'sample8',
@@ -706,11 +706,11 @@ const AddPlace = () => {
           {isSubmitting ? (
             <>
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Adding to Your MappBook...</span>
+              <span>Adding...</span>
             </>
           ) : (
             <>
-              <span>Pin This Place</span>
+              <span>Add This Place</span>
               <MapPin className="w-5 h-5" />
             </>
           )}
