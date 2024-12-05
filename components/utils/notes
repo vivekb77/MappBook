@@ -33,3 +33,16 @@ Implement local storage caching of the last successful style
 Add network connection status monitoring
 
 keep an eye on reuseMaps = true or false , this can reduce mapbox usage
+
+Check query perf with
+
+ const startTime = performance.now()
+
+        const { data, error: supabaseError } = await supabase
+          .from('public_user_profiles')
+          .select('mappbook_user_id, display_name, is_premium_user, map_style, map_views_left, country_fill_color')
+          .eq('mappbook_user_id', userId)
+          .single()
+
+const endTime = performance.now()          
+console.log(`Supabase query took ${endTime - startTime}ms`)

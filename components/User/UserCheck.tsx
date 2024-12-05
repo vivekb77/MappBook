@@ -14,7 +14,6 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!userId || !clerkUser) return;
   
-    const startTime = performance.now()
     const checkAndCreateUser = async () => {
       try {
         const { data: existingUser, error: fetchError } = await supabase
@@ -57,8 +56,6 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
         }
 
         setMappbookUser(existingUser);
-        const endTime = performance.now()          
-        console.log(`Supabase query took ${endTime - startTime}ms`)
       } catch (error) {
         track('RED - Create MappBook - Failed to create new user', {
           error: error instanceof Error ? error.message : 'Unknown error'

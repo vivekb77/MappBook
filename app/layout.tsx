@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { CSPostHogProvider } from '../app/provider';
 import { Analytics } from '@vercel/analytics/react';
 import { ViewportHandler } from '@/components/utils/ViewportHandler';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'MappBook.com',
@@ -31,6 +32,7 @@ export default function RootLayout({
           <ViewportHandler />
           {children}
           <Analytics />
+          <SpeedInsights />
         </body>
       </CSPostHogProvider>
     </html>

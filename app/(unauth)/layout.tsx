@@ -1,4 +1,4 @@
-import { SpeedInsights } from "@vercel/speed-insights/next";
+// import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function UnauthLayout({
   children,
@@ -8,7 +8,7 @@ export default function UnauthLayout({
   return (
     <>
       {children}
-      <SpeedInsights />
+      {/* <SpeedInsights /> */}
     </>
   );
 }
