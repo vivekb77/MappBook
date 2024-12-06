@@ -561,7 +561,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       aria-label="Interactive map"
     >
       {mapStatus.status === 'loading' && (
-        <div className="viewport-height w-full flex items-center justify-center bg-gray-50">
+        <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
           <div className="relative">
             <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
