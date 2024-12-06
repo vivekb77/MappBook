@@ -1,25 +1,26 @@
-// ViewportHandler.tsx
+
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
 export function ViewportHandler() {
+  const pathname = usePathname();
+
   useEffect(() => {
-    const updateViewportHeight = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
-
-    updateViewportHeight();
-
-    window.addEventListener('resize', updateViewportHeight);
-    window.addEventListener('orientationchange', updateViewportHeight);
-
-    return () => {
-      window.removeEventListener('resize', updateViewportHeight);
-      window.removeEventListener('orientationchange', updateViewportHeight);
-    };
-  }, []);
+    // Force viewport meta tag update
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport) {
+      // Store original content with type assertion
+      const originalContent = viewport.getAttribute('content') || '';
+      
+      // Temporarily modify and restore to force update
+      viewport.setAttribute('content', `${originalContent},x=0`);
+      requestAnimationFrame(() => {
+        viewport.setAttribute('content', originalContent);
+      });
+    }
+  }, [pathname]); // Re-run when pathname changes
 
   return null;
 }

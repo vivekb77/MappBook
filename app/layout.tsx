@@ -27,14 +27,15 @@ export default function RootLayout({
         <meta name="robots" content="noindex,nofollow" />
         <meta name="googlebot" content="noindex,nofollow" />
       </head>
-      <CSPostHogProvider>
+     
         <body className="min-h-full">
+        <CSPostHogProvider>
           <ViewportHandler />
           {children}
           <Analytics />
           <SpeedInsights />
+          </CSPostHogProvider>
         </body>
-      </CSPostHogProvider>
     </html>
   );
 }
