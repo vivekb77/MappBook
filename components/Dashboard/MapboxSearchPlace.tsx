@@ -99,7 +99,7 @@ const MapboxSearchPlace = () => {
     });
 
     if (!response.ok) {
-      track('RED - Failed to fetch address suggestions');
+      track('RED - Create Map - Failed to fetch address suggestions');
       throw new Error('Failed to fetch address suggestions');
     }
 
@@ -126,7 +126,7 @@ const MapboxSearchPlace = () => {
       );
 
       if (!response.ok) {
-        track('RED - Failed to fetch place details');
+        track('RED - Create map - Failed to fetch place details');
         throw new Error('Failed to fetch place details');
       }
 

@@ -258,11 +258,11 @@ const DashboardContainer = () => {
               onClick={async () => {
                 setIsLoadingSignIn(true);
                 try {
-                  track('New user tried to sign in');
+                  track('Create Map - New user tried to sign in');
                   await new Promise(resolve => setTimeout(resolve, 300));
                   window.location.href = '/sign-in';
                 } catch (error) {
-                  track('RED - New user sign in has issues');
+                  track('RED - Create Map - New user sign in has issues');
                   window.location.href = '/sign-in';
                 }
               }}

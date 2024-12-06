@@ -16,13 +16,13 @@ const StatsPopUp = () => {
 
   const handleCopy = async () => {
     try {
-      track('Copy share url button clicked on Stats Popup');
+      track('Create Map - Copy share url button clicked on Stats Popup');
 
       await navigator.clipboard.writeText(`https://mappbook.com/map/${mappbookUser?.mappbook_user_id}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      track('RED - Copy share url button clicked on Stats Popup');
+      track('RED - Copy share url button does not work on Stats Popup');
       console.error('Failed to copy:', err);
     }
   };
