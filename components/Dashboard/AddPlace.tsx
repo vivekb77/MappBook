@@ -52,15 +52,15 @@ const AddPlace = () => {
 
     const isPlaceSelected = searchedPlace && Object.keys(searchedPlace).length > 0;
     
-    const TickIcon = React.memo(() => (
-        <div className="bg-emerald-500 rounded-full p-0.5 flex items-center justify-center">
-          <Check className="w-3 h-3 text-white stroke-[3]" />
-        </div>
-      ));
+    const TickIcon = () => (
+        <span className="inline-flex bg-emerald-500 rounded-full p-0.5">
+          <Check className="w-3 h-3 text-white stroke-[3]" aria-hidden="true" />
+        </span>
+      );
 
     const showMessage = (text: string, type: 'success' | 'error') => {
         setMessage({ text, type });
-        setTimeout(() => setMessage(null), 3000);
+        setTimeout(() => setMessage(null), 5000);
     };
 
     const resetForm = () => {
@@ -109,7 +109,7 @@ const AddPlace = () => {
                     ...createPlaceObject()
                 };
                 setAllUserPlaces(prevPlaces => [...(prevPlaces || []), newPlace]);
-                showMessage('Place added successfully! 🎉', 'success');
+                showMessage('Place added!', 'success');
                 return true;
             }
             return false;

@@ -65,7 +65,7 @@ const BuyPremium = () => {
     };
 
     return (
-        <div className="px-6 pb-6">
+        <div className="w-full">
             {isSignedIn && (
                 <button
                     onClick={handlePremiumButtonClick}

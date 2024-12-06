@@ -2,11 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState, memo } from 'react'
 import { useParams } from 'next/navigation'
-import { useRouter } from 'next/navigation'
 import { supabase } from "@/components/utils/supabase"
 import MapboxMapPublic from '@/components/PublicMap/MapBoxMapPublic'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { ChevronRight, Loader2, Plus } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { track } from '@vercel/analytics'
 import { UserData, UserDataContext } from '@/context/UserDataContextPublicMap';
@@ -63,22 +62,33 @@ LogoHeader.displayName = 'LogoHeader'
 const CreateMappBookButton = memo<CreateMappBookButtonProps>(({ isLoading, onClick }) => (
   <Button
     onClick={onClick}
-    className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-              text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
-              shadow-lg rounded-full px-6 py-3"
+    className="group w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
+              text-white shadow-lg rounded-full px-6 py-3
+              hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
+              hover:scale-[1.02] transition-all duration-300
+              relative overflow-hidden"
     size="lg"
     disabled={isLoading}
   >
-    {isLoading ? (
-      <>
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Creating...
-      </>
-    ) : (
-      'Create Your MappBook'
-    )}
+    <div className="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-colors duration-300" />
+    
+    <div className="flex items-center justify-center gap-2">
+      {isLoading ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Creating...</span>
+        </>
+      ) : (
+        <>
+          <Plus className="h-4 w-4" />
+          <span>Create Your MappBook</span>
+          <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+        </>
+      )}
+    </div>
   </Button>
 ))
+
 CreateMappBookButton.displayName = 'CreateMappBookButton'
 
 const ErrorView = memo<ErrorViewProps>(({ message, isLoading, onCreateClick }) => (
@@ -209,27 +219,31 @@ const useMapData = (userId: string | null) => {
 }
 
 export default function MapPage() {
-  const router = useRouter()
   const params = useParams<MapPageParams>()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleCreateMappBook = useCallback(async () => {
     try {
         setIsLoading(true);
-        // Start navigation and tracking concurrently
         await Promise.all([
-            router.push('/'),
+            Promise.resolve().then(() => {
+                const newTab = document.createElement('a');
+                newTab.href = '/';
+                newTab.target = '_blank';
+                newTab.rel = 'noopener noreferrer';
+                newTab.click();
+            }),
             Promise.resolve().then(() => {
                 track('Public MappBook - Create MappBook button clicked');
             })
         ]);
     } catch (error) {
         console.error('Navigation failed:', error);
-        // Optionally show an error message to the user
+        track('RED - Public MappBook - Create MappBook button did not open url');
     } finally {
         setIsLoading(false);
     }
-}, [router]);
+}, []);
 
   const { userData, loading, error, updateFailed } = useMapData(params?.id ?? null)
 

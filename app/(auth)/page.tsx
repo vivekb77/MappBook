@@ -52,12 +52,12 @@ export default function Home() {
           <MapStatsProvider>
             <div className="flex h-full w-full relative">
               {/* Map Section */}
-              <div className="flex-1 h-full w-full md:w-[70%] touch-none">
+              <div className="flex-1 h-full w-full md:w-[67%] touch-none">
                 <MapboxMap />
               </div>
 
               {/* Desktop Sidebar */}
-              <div className="hidden md:block w-[30%] bg-white h-full">
+              <div className="hidden md:block w-[33%] bg-white h-full">
                 <div className="h-full p-4 overflow-y-auto">
                   <DashboardContainer />
                 </div>
