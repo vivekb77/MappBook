@@ -1,6 +1,6 @@
 // app/layout.tsx
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { CSPostHogProvider } from '../app/provider';
 import { Analytics } from '@vercel/analytics/react';
 import { ViewportHandler } from '@/components/utils/ViewportHandler';
@@ -12,8 +12,16 @@ export const metadata: Metadata = {
   robots: {
     index: false,
     follow: false,
-  },
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
+  }
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  minimumScale: 1,
+  userScalable: false, // Disables pinch zoom
+  viewportFit: 'cover'
 };
 
 export default function RootLayout({
@@ -23,17 +31,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
-      </head>
-      <CSPostHogProvider>
-      <body className="min-h-full">
+      <body className="min-h-screen-dynamic">
+        <CSPostHogProvider>
           <ViewportHandler />
           {children}
           <Analytics />
           <SpeedInsights />
+        </CSPostHogProvider>
       </body>
-      </CSPostHogProvider>
     </html>
   );
 }
