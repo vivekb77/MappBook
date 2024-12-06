@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react'
-import AddPlace from '@/components/Search/AddPlace'
+import DashboardContainer from '@/components/Dashboard/DashboardContainer'
 import MapboxMap from '@/components/Map/MapBoxMap'
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext'
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext'
@@ -59,7 +59,7 @@ export default function Home() {
               {/* Desktop Sidebar */}
               <div className="hidden md:block w-[30%] bg-white h-full">
                 <div className="h-full p-4 overflow-y-auto">
-                  <AddPlace />
+                  <DashboardContainer />
                 </div>
               </div>
 
@@ -95,7 +95,7 @@ export default function Home() {
                 {/* Scrollable Content */}
                 <div className="h-full overflow-y-auto overscroll-contain">
                   <div className="px-4 py-2">
-                    <AddPlace />
+                    <DashboardContainer />
                   </div>
                 </div>
               </div>

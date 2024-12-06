@@ -34,7 +34,7 @@ interface SearchedPlaceContextType {
   setSearchedPlaceDetails: (details: PlaceDetails) => void;
 }
 
-const SearchPlace = () => {
+const MapboxSearchPlace = () => {
   const { mappbookUser, setMappbookUser } = useMappbookUser();
   const { allPlacesCount } = useContext(MapStatsContext);
 
@@ -162,7 +162,7 @@ const SearchPlace = () => {
   };
 
   return (
-
+<div className="bg-white/80 rounded-xl p-2 shadow-sm border border-pink-100">
     <div className="w-full max-w-md">
       {isLoggedIn && !mappbookUser.is_premium_user && allPlacesCount >= FREE_TIER_LIMIT && (
         <Alert>
@@ -239,7 +239,8 @@ const SearchPlace = () => {
         )}
       </div>
     </div>
+    </div>
   );
 };
 
-export default SearchPlace;
+export default MapboxSearchPlace;
