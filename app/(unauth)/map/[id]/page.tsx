@@ -213,11 +213,23 @@ export default function MapPage() {
   const params = useParams<MapPageParams>()
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleCreateMappBook = useCallback(() => {
-    setIsLoading(true)
-    track('Public MappBook - Create MappBook button clicked')
-    router.push('/')
-  }, [router])
+  const handleCreateMappBook = useCallback(async () => {
+    try {
+        setIsLoading(true);
+        // Start navigation and tracking concurrently
+        await Promise.all([
+            router.push('/'),
+            Promise.resolve().then(() => {
+                track('Public MappBook - Create MappBook button clicked');
+            })
+        ]);
+    } catch (error) {
+        console.error('Navigation failed:', error);
+        // Optionally show an error message to the user
+    } finally {
+        setIsLoading(false);
+    }
+}, [router]);
 
   const { userData, loading, error, updateFailed } = useMapData(params?.id ?? null)
 
