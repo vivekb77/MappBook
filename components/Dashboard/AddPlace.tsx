@@ -58,10 +58,18 @@ const AddPlace = () => {
         </span>
       );
 
-    const showMessage = (text: string, type: 'success' | 'error') => {
+      const showMessage = (text: string, type: 'success' | 'error') => {
         setMessage({ text, type });
-        setTimeout(() => setMessage(null), 3000);
+        // Only clear message after timeout if it's a success message AND user is signed in
+        if (type === 'success' && isSignedIn) {
+            setTimeout(() => setMessage(null), 3000);
+        }
     };
+
+    const clearMessage = () => {
+        setMessage(null);
+    };
+
 
     const resetForm = () => {
         setVisitStatus('visited');
@@ -90,7 +98,7 @@ const AddPlace = () => {
             ...createPlaceObject()
         };
         setAllUserPlaces([newPlace]);
-        showMessage('Place added! Sign in to save your progress, add more places and share! ✨', 'success');
+        showMessage('Place added! Sign in to save your progress, add more places and share!', 'success');
         track('Create Map - New user added a placeholder place');
     };
 
@@ -115,7 +123,7 @@ const AddPlace = () => {
             return false;
         } catch (err) {
             track('RED - Create Map - Failed to add place', { error: err instanceof Error ? err.message : String(err) });
-            showMessage('Failed to add place. Please try again.', 'error');
+            showMessage('Failed to add place, try again!', 'error');
             return false;
         }
     };
@@ -219,7 +227,7 @@ const AddPlace = () => {
                                     <div className="bg-purple-50/50 rounded-lg p-3 text-sm text-purple-600">
                                         <p className="font-medium">Pro Tip 💫</p>
                                         <p className="mt-1 text-gray-600">
-                                        You can always switch from Bucket List to Been Here / visited or remove a place by clicking the pin on the Map. 
+                                        You can always switch from Bucket List to Been Here / Visited or remove a place by clicking the pin on the Map. 
                                         </p>
                                     </div>
                                 </div>
@@ -232,40 +240,66 @@ const AddPlace = () => {
 
 
 
-            {/* Existing Add Button */}
-            <button
-                className={`w-full py-3.5 px-4 rounded-xl font-medium text-base
-            transition-all duration-300 
-            flex items-center justify-center gap-2 transform
-            ${isPlaceSelected
-                        ? 'bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 text-white shadow-lg hover:scale-[1.02]'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    }`}
-                onClick={onAddPlaceButtonClick}
-                disabled={!isPlaceSelected || isSubmitting}
-            >
-                {isSubmitting ? (
-                    <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Adding...</span>
-                    </>
-                ) : (
-                    <>
-                        <span>Add This Place</span>
-                        <MapPin className="w-5 h-5" />
-                    </>
-                )}
-            </button>
+            <div className="relative">
+                <button
+                    className={`w-full py-3.5 px-4 rounded-xl font-medium text-base
+                        transition-all duration-300 
+                        flex items-center justify-center gap-2 transform
+                        ${isPlaceSelected
+                            ? 'bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 text-white shadow-lg hover:scale-[1.02]'
+                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        }`}
+                    onClick={onAddPlaceButtonClick}
+                    disabled={!isPlaceSelected || isSubmitting}
+                >
+                    {isSubmitting ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Adding...</span>
+                        </>
+                    ) : (
+                        <>
+                            <span>Add This Place</span>
+                            <MapPin className="w-5 h-5" />
+                        </>
+                    )}
+                </button>
 
-            {/* Existing Message Display */}
-            {message && (
-                <div className={`p-4 rounded-xl 
-            bg-gradient-to-r ${message.type === 'success'
+
+            {/* Authenticated Success Message - Overlays the button */}
+                {message && isSignedIn && message.type === 'success' && (
+                    <div className={`absolute inset-0 rounded-xl py-3.5 px-4
+                        bg-gradient-to-r from-green-50 to-blue-50 text-green-600 border-green-100
+                        flex items-center justify-center gap-2 border shadow-sm
+                        animate-in fade-in duration-200 overflow-hidden`}
+                    >
+                        <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-xl flex-shrink-0">🎉</span>
+                            <span className="font-medium text-sm whitespace-normal leading-tight">{message.text}</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+           {/* Permanent Messages (Error or Unauthenticated) */}
+           {message && ((!isSignedIn || message.type === 'error')) && (
+                <div className={`p-4 rounded-xl relative
+                    bg-gradient-to-r ${message.type === 'success'
                         ? 'from-green-50 to-blue-50 text-green-600 border-green-100'
                         : 'from-pink-50 to-red-50 text-red-500 border-pink-100'} 
-            flex items-center justify-center gap-2 border shadow-sm`}>
+                    flex items-center justify-center gap-2 border shadow-sm`}
+                >
                     <span className="text-xl">{message.type === 'success' ? '🎉' : '💫'}</span>
                     <span className="font-medium">{message.text}</span>
+                    {/* Add clear button for error messages */}
+                    {message.type === 'error' && (
+                        <button 
+                            onClick={clearMessage}
+                            className="absolute right-2 top-3 text-gray-400 hover:text-gray-600 p-1"
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
             )}
         </div>
