@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { Info, MapPin, Check } from 'lucide-react';
 import { useMappbookUser } from '@/context/UserContext';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
@@ -12,6 +12,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+
 
 interface PlaceDetails {
     mapboxId: string;
@@ -32,6 +33,8 @@ interface Message {
     type: 'success' | 'error';
 }
 
+  
+
 const AddPlace = () => {
     const supabase = getClerkSupabaseClient();
     const { isSignedIn, user } = useUser();
@@ -40,7 +43,6 @@ const AddPlace = () => {
     const [visitStatus, setVisitStatus] = useState<VisitStatus>('visited');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isInfoOpen, setIsInfoOpen] = useState(false);
-    const [hasAddedPlace, setHasAddedPlace] = useState(false);
     const searchedPlaceContext = useContext(SearchedPlaceDetailsContext);
     const { searchedPlace, setSearchedPlaceDetails } = searchedPlaceContext || {};
     const allUserPlacesContext = useContext(AllUserPlacesContext);
@@ -54,22 +56,12 @@ const AddPlace = () => {
         <span className="inline-flex bg-emerald-500 rounded-full p-0.5">
           <Check className="w-3 h-3 text-white stroke-[3]" aria-hidden="true" />
         </span>
-    );
+      );
 
-    const showMessage = (text: string, type: 'success' | 'error', permanent = false) => {
+    const showMessage = (text: string, type: 'success' | 'error') => {
         setMessage({ text, type });
-        if (!permanent) {
-            setTimeout(() => setMessage(null), 3000);
-        }
+        setTimeout(() => setMessage(null), 3000);
     };
-
-    // Reset message when user signs in
-    useEffect(() => {
-        if (isSignedIn && hasAddedPlace) {
-            setMessage(null);
-            setHasAddedPlace(false);
-        }
-    }, [isSignedIn]);
 
     const resetForm = () => {
         setVisitStatus('visited');
@@ -98,8 +90,7 @@ const AddPlace = () => {
             ...createPlaceObject()
         };
         setAllUserPlaces([newPlace]);
-        setHasAddedPlace(true);
-        showMessage('Place added! Sign in to save your progress, add more places and share! ✨', 'success', true);
+        showMessage('Place added! Sign in to save your progress, add more places and share! ✨', 'success');
         track('Create Map - New user added a placeholder place');
     };
 
@@ -144,12 +135,10 @@ const AddPlace = () => {
         setIsSubmitting(false);
     };
 
-
     return (
         <div className="space-y-6">
-
             <div className="flex items-center bg-white/80 p-2.5 rounded-xl border border-pink-100">
-            <div className="relative flex items-center justify-between w-full">
+                <div className="relative flex items-center justify-between w-full">
                     {/* Pill Toggle */}
                     <div
                         className={`
@@ -230,7 +219,7 @@ const AddPlace = () => {
                                     <div className="bg-purple-50/50 rounded-lg p-3 text-sm text-purple-600">
                                         <p className="font-medium">Pro Tip 💫</p>
                                         <p className="mt-1 text-gray-600">
-                                            You can always switch from Bucket List to Been Here / visited or remove a place by clicking the pin on the Map. 
+                                        You can always switch from Bucket List to Been Here / visited or remove a place by clicking the pin on the Map. 
                                         </p>
                                     </div>
                                 </div>
@@ -241,11 +230,14 @@ const AddPlace = () => {
             </div>
 
 
+
+
+            {/* Existing Add Button */}
             <button
                 className={`w-full py-3.5 px-4 rounded-xl font-medium text-base
-                    transition-all duration-300 
-                    flex items-center justify-center gap-2 transform
-                    ${isPlaceSelected
+            transition-all duration-300 
+            flex items-center justify-center gap-2 transform
+            ${isPlaceSelected
                         ? 'bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 text-white shadow-lg hover:scale-[1.02]'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
@@ -265,15 +257,15 @@ const AddPlace = () => {
                 )}
             </button>
 
-
-            {(message || (!isSignedIn && hasAddedPlace)) && (
+            {/* Existing Message Display */}
+            {message && (
                 <div className={`p-4 rounded-xl 
-                    bg-gradient-to-r ${message?.type === 'success'
+            bg-gradient-to-r ${message.type === 'success'
                         ? 'from-green-50 to-blue-50 text-green-600 border-green-100'
                         : 'from-pink-50 to-red-50 text-red-500 border-pink-100'} 
-                    flex items-center justify-center gap-2 border shadow-sm`}>
-                    <span className="text-xl">{message?.type === 'success' ? '🎉' : '💫'}</span>
-                    <span className="font-medium">{message?.text}</span>
+            flex items-center justify-center gap-2 border shadow-sm`}>
+                    <span className="text-xl">{message.type === 'success' ? '🎉' : '💫'}</span>
+                    <span className="font-medium">{message.text}</span>
                 </div>
             )}
         </div>
