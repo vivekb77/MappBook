@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Map, Marker } from 'react-map-gl';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
-import { MapPin } from 'lucide-react';
+import { MapPin, X } from 'lucide-react';
 
 // Types
 interface PlaceDetails {
@@ -19,12 +19,13 @@ interface PlaceDetails {
 
 interface SearchedPlaceContextType {
   searchedPlace?: PlaceDetails;
-  setSearchedPlaceDetails: (details: PlaceDetails) => void;
+  setSearchedPlaceDetails: (details: PlaceDetails | null) => void;
 }
 
 const MarkSearchedPlace = () => {
-  const { searchedPlace } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
+  const { searchedPlace, setSearchedPlaceDetails } = useContext(SearchedPlaceDetailsContext) as SearchedPlaceContextType;
   const [isMarkerVisible, setIsMarkerVisible] = useState(false);
+  const [showClearButton, setShowClearButton] = useState(false);
 
   // Add animation when marker appears
   useEffect(() => {
@@ -32,6 +33,7 @@ const MarkSearchedPlace = () => {
       setIsMarkerVisible(true);
     } else {
       setIsMarkerVisible(false);
+      setShowClearButton(false);
     }
   }, [searchedPlace]);
 
@@ -48,6 +50,16 @@ const MarkSearchedPlace = () => {
       place.latitude !== 0 &&
       place.longitude !== 0
     );
+  };
+
+  const handleMarkerClick = () => {
+    setShowClearButton(!showClearButton);
+  };
+
+  const handleClearClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering marker click
+    setSearchedPlaceDetails(null);
+    setShowClearButton(false);
   };
 
   // Return null if no valid place or coordinates
@@ -67,8 +79,21 @@ const MarkSearchedPlace = () => {
             relative flex flex-col items-center
             transform transition-all duration-300 ease-in-out
             ${isMarkerVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
+            cursor-pointer
           `}
+          onClick={handleMarkerClick}
         >
+          {/* Clear Button */}
+          {showClearButton && (
+            <button
+              onClick={handleClearClick}
+              className="absolute -top-5 -right-5 p-1 bg-white rounded-full shadow-lg 
+                       hover:bg-red-50 transition-colors duration-200"
+            >
+              <X className="w-4 h-4 text-red-500" />
+            </button>
+          )}
+
           {/* Marker Pin */}
           <div className="relative">
             <div className="absolute -inset-1 bg-yellow-500 rounded-full opacity-10 animate-pulse" />
@@ -92,11 +117,6 @@ const MarkSearchedPlace = () => {
             </span>
             <div className="absolute inset-x-0 font-bold text-xl text-gray-800 mb-1" />
           </div>
-
-          {/* Ripple Effect */}
-          {/* <div className="absolute -inset-2 pointer-events-none">
-            <div className="absolute inset-0 border-1 border-green-500 rounded-full opacity-50 animate-ping" />
-          </div> */}
         </div>
       </Marker>
     </div>
