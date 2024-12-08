@@ -56,8 +56,8 @@ const MapboxSearchPlace = () => {
   // Constants
   const MAPBOX_RETRIEVE_URL = 'https://api.mapbox.com/search/searchbox/v1/retrieve/';
   const DEBOUNCE_DELAY = 1000;
-  const FREE_TIER_LIMIT = 50;
-  const PREMIUM_TIER_LIMIT = 300;
+  const FREE_TIER_LIMIT = 100;
+  const PREMIUM_TIER_LIMIT = 500;
 
   const isLoggedIn = !!mappbookUser;
   const canSearch = isLoggedIn

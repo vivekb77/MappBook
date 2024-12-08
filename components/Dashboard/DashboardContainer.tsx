@@ -320,7 +320,8 @@ const DashboardContainer = () => {
           </a>
         </div>
 
-        <div className="text-center text-xs font-medium text-purple-400 space-x-2">
+        <DesktopRecommendationBanner />
+        {/* <div className="text-center text-xs font-medium text-purple-400 space-x-2">
           <span>Love MappBook? Share with your friends! </span>
           <button
             onClick={handleShareToFriends}
@@ -328,7 +329,7 @@ const DashboardContainer = () => {
           >
             {copyText}
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* New Bottom Section with Divider */}
@@ -402,7 +403,6 @@ const DashboardContainer = () => {
           </div>
         </div>
       </div>
-      <DesktopRecommendationBanner />
     </div >
   );
 };

@@ -72,7 +72,7 @@ const AddPlace = () => {
 
 
     const resetForm = () => {
-        setVisitStatus('visited');
+        // setVisitStatus('visited');
         if (setSearchedPlaceDetails) {
             setSearchedPlaceDetails({} as PlaceDetails);
         }

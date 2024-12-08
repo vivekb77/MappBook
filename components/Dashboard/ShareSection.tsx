@@ -200,7 +200,7 @@ const ColorSelector: React.FC<{
 }> = React.memo(({ selectedColor, onColorSelect, isSaving }) => (
     <div className="space-y-3">
         <div className="text-center text-xs font-medium text-purple-400">
-            Choose visited country fill color
+            Choose a color for visited countries!
         </div>
         <div className="flex justify-center items-center gap-3">
             {COLOR_OPTIONS.map((colorOption) => (
@@ -489,7 +489,6 @@ const ShareSection: React.FC = () => {
                                     </p>
                                     <ul className="text-sm text-gray-600 mt-2 space-y-2 ml-4">
                                         <li>• Choose a display name for your MappBook</li>
-                                        <li>• Select your preferred map style (Satellite, Light, or Dark)</li>
                                         <li>• Pick a color theme for visited countries</li>
                                     </ul>
                                 </div>
@@ -541,10 +540,10 @@ const ShareSection: React.FC = () => {
                         </div>
                     </div>
 
-                    <StyleSelector
+                    {/* <StyleSelector
                         selectedStyle={state.mapStyle}
                         onStyleSelect={handleStyleSelect}
-                    />
+                    /> */}
 
                     <ColorSelector
                         selectedColor={state.countryFillColor}
