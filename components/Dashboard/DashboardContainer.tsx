@@ -144,6 +144,12 @@ const famousPlaces = [
   }
 ];
 
+declare global {
+  interface Window {
+    rdt: any;
+  }
+}
+
 const DashboardContainer = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { mappbookUser, setMappbookUser } = useMappbookUser();
@@ -162,7 +168,7 @@ const DashboardContainer = () => {
     }
   }, [isLoaded]);
 
-  
+
   useEffect(() => {
     if (!isSignedIn && userPlaces.length === 0) {
       track('Create Map - New User Visited Create MappBook Page');
@@ -172,9 +178,9 @@ const DashboardContainer = () => {
 
   useEffect(() => {
     if (mappbookUser) {
-        setDisplayName(mappbookUser.display_name);
+      setDisplayName(mappbookUser.display_name);
     }
-}, [mappbookUser]);
+  }, [mappbookUser]);
 
   const handleLogout = async () => {
     const { success, error } = await logout();
@@ -183,7 +189,7 @@ const DashboardContainer = () => {
     }
   };
 
-  
+
   const handleShareToFriends = async () => {
     try {
       await navigator.clipboard.writeText("https://www.mappbook.com/map/43ff9fc7-43ca-425e-8da6-f5acb2ad529d");
@@ -193,6 +199,26 @@ const DashboardContainer = () => {
       // console.error('Failed to copy:', err);
     }
   };
+
+  const handleSignIn = async () => {
+    setIsLoadingSignIn(true);
+    try {
+      track('Create Map - New user tried to sign in');
+      
+      // Track Reddit conversion - ensure rdt is properly accessed
+      if (typeof window !== 'undefined') {
+        // Ensure we're calling the global rdt function correctly
+        window.rdt?.('track', 'SignUp', {});
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      window.location.href = '/sign-in';
+    } catch (error) {
+      track('RED - Create Map - New user sign in has issues');
+      window.location.href = '/sign-in';
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -253,17 +279,7 @@ const DashboardContainer = () => {
 
           <div className="space-y-4">
             <button
-              onClick={async () => {
-                setIsLoadingSignIn(true);
-                try {
-                  track('Create Map - New user tried to sign in');
-                  await new Promise(resolve => setTimeout(resolve, 300));
-                  window.location.href = '/sign-in';
-                } catch (error) {
-                  track('RED - Create Map - New user sign in has issues');
-                  window.location.href = '/sign-in';
-                }
-              }}
+              onClick={handleSignIn}
               disabled={isLoadingSignIn}
               className="w-full h-12 px-4 rounded-md
       bg-white text-gray-700 font-roboto font-medium
@@ -306,7 +322,7 @@ const DashboardContainer = () => {
           </div>
         )}
 
-        {/* <div className="text-center text-xs font-medium text-purple-400 space-x-2">
+        <div className="text-center text-xs font-medium text-purple-400 space-x-2">
           <span>Need help? / Got suggestions? </span>
 
           <a href="/contact"
@@ -316,7 +332,7 @@ const DashboardContainer = () => {
           >
             Send us a message
           </a>
-        </div> */}
+        </div>
 
         <DesktopRecommendationBanner />
         {/* <div className="text-center text-xs font-medium text-purple-400 space-x-2">
@@ -344,8 +360,8 @@ const DashboardContainer = () => {
           </div>
         </div>
 
-       <ShareSection />
-       <BuyPremium/>
+        <ShareSection />
+        <BuyPremium />
 
         {/* Pro Features Preview */}
         {isSignedIn && (<div className="text-center mt-4">
