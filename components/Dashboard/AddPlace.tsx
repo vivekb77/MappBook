@@ -1,9 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { Info, MapPin, Check } from 'lucide-react';
 import { useMappbookUser } from '@/context/UserContext';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 import { useUser } from '@clerk/nextjs';
+import MapboxSearchPlace, { MapboxSearchPlaceRef } from './MapboxSearchPlace';
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { track } from '@vercel/analytics';
 import {
@@ -37,6 +38,7 @@ interface Message {
 
 const AddPlace = () => {
     const supabase = getClerkSupabaseClient();
+    const searchPlaceRef = useRef<MapboxSearchPlaceRef>(null);
     const { isSignedIn, user } = useUser();
     const { mappbookUser } = useMappbookUser();
     const [message, setMessage] = useState<Message | null>(null);
@@ -76,6 +78,7 @@ const AddPlace = () => {
         if (setSearchedPlaceDetails) {
             setSearchedPlaceDetails({} as PlaceDetails);
         }
+        searchPlaceRef.current?.reset();
     };
 
     const createPlaceObject = () => ({
@@ -145,6 +148,7 @@ const AddPlace = () => {
 
     return (
         <div className="space-y-6">
+             <MapboxSearchPlace ref={searchPlaceRef} />
             <div className="flex items-center bg-white/80 p-2.5 rounded-xl border border-pink-100">
                 <div className="relative flex items-center justify-between w-full">
                     {/* Pill Toggle */}

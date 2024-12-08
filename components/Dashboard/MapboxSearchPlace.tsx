@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext';
 import { useMappbookUser } from '@/context/UserContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -28,13 +28,14 @@ interface PlaceDetails {
   poiCategory?: string;
   maki?: string;
 }
-
+export interface MapboxSearchPlaceRef {
+  reset: () => void;
+}
 interface SearchedPlaceContextType {
   searchedPlace?: PlaceDetails;
   setSearchedPlaceDetails: (details: PlaceDetails) => void;
 }
-
-const MapboxSearchPlace = () => {
+const MapboxSearchPlace = forwardRef<MapboxSearchPlaceRef>((props, ref) => {
   const { mappbookUser, setMappbookUser } = useMappbookUser();
   const { allPlacesCount } = useContext(MapStatsContext);
 
@@ -64,7 +65,15 @@ const MapboxSearchPlace = () => {
     ? (mappbookUser.is_premium_user && allPlacesCount < PREMIUM_TIER_LIMIT) ||
     (!mappbookUser.is_premium_user && allPlacesCount < FREE_TIER_LIMIT)
     : !hasSearched; // Allow search if user hasn't searched yet
-
+    
+    useImperativeHandle(ref, () => ({
+      reset: () => {
+        setSelectedPlace(null);
+        setSearchQuery('');
+        setSuggestions([]);
+        setError(null);
+      }
+    }));
 
   // Fetch suggestions when search query changes
   useEffect(() => {
@@ -226,8 +235,7 @@ const MapboxSearchPlace = () => {
             ))}
           </div>
         )}
-        {/* Selected Place Display */}
-        {selectedPlace && canSearch && (
+{selectedPlace && canSearch && (
           <div className="mt-3 space-y-1">
             <h2 className="text-lg font-semibold text-gray-900">
               {selectedPlace.name}
@@ -237,10 +245,12 @@ const MapboxSearchPlace = () => {
             </p>
           </div>
         )}
+
       </div>
     </div>
     </div>
   );
-};
+
+});
 
 export default MapboxSearchPlace;

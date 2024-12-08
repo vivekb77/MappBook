@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 import { useMappbookUser } from '@/context/UserContext';
 import { SignedIn, useClerk, useUser } from '@clerk/nextjs';
-import MapboxSearchPlace from './MapboxSearchPlace';
 import { logout } from '../utils/auth';
 import { Loader2 } from 'lucide-react';
 import { track } from '@vercel/analytics';
@@ -246,7 +245,6 @@ const DashboardContainer = () => {
       )}
 
       <div className="p-6 space-y-6">
-        <MapboxSearchPlace />
         <AddPlace />
 
         {/* Sign In Call to Action - Show after adding a place when not signed in */}
@@ -308,7 +306,7 @@ const DashboardContainer = () => {
           </div>
         )}
 
-        <div className="text-center text-xs font-medium text-purple-400 space-x-2">
+        {/* <div className="text-center text-xs font-medium text-purple-400 space-x-2">
           <span>Need help? / Got suggestions? </span>
 
           <a href="/contact"
@@ -318,7 +316,7 @@ const DashboardContainer = () => {
           >
             Send us a message
           </a>
-        </div>
+        </div> */}
 
         <DesktopRecommendationBanner />
         {/* <div className="text-center text-xs font-medium text-purple-400 space-x-2">

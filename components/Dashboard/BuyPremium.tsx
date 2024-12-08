@@ -63,10 +63,14 @@ const BuyPremium = () => {
             setIsLoading(false);
         }
     };
+    
+    // Only render if user is signed in AND has more than 10 total map views
+    if (!isSignedIn || !mappbookUser || mappbookUser.total_map_views <= 10) {
+        return null;
+    }
 
     return (
         <div className="w-full">
-            {isSignedIn && (
                 <button
                     onClick={handlePremiumButtonClick}
                     disabled={isLoading}
@@ -99,7 +103,6 @@ const BuyPremium = () => {
                         </>
                     )}
                 </button>
-            )}
         </div>
     );
 };
