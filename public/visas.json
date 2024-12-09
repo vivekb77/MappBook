@@ -1,0 +1,19 @@
+{
+    "stamps": [
+      {
+        "country": "USA",
+        "city": "Miami",
+        "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#6B69B5\"><path d=\"M100 10 C150 10, 190 50, 190 80 C190 110, 150 150, 100 150 C50 150, 10 110, 10 80 C10 50, 50 10, 100 10\" stroke=\"#6B69B5\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"12\">WELCOME TO</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"16\" font-weight=\"bold\">MIAMI-USA</text><path d=\"M40 70 l15 -5 l-15 5 l15 5 z\"/><path d=\"M145 70 l15 -5 l-15 5 l15 5 z\"/><circle cx=\"100\" cy=\"70\" r=\"15\" fill=\"none\" stroke=\"#6B69B5\" stroke-width=\"2\"/><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"16\">ARRIVAL</text><circle cx=\"40\" cy=\"95\" r=\"2\"/><circle cx=\"160\" cy=\"95\" r=\"2\"/></g></svg>"
+      },
+      {
+        "country": "Mexico",
+        "city": "Mexico City",
+        "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#6B69B5\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" stroke=\"#6B69B5\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"45\" text-anchor=\"middle\" font-size=\"12\">WELCOME TO</text><text x=\"100\" y=\"65\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">México</text><path d=\"M60 85 h80 l10 -5 l10 5 l-10 5 z\"/><line x1=\"20\" y1=\"100\" x2=\"180\" y2=\"100\" stroke=\"#6B69B5\" stroke-width=\"1\"/><text x=\"60\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">MEX CITY</text><text x=\"60\" y=\"135\" text-anchor=\"middle\" font-size=\"12\">20 MAY 23</text><text x=\"140\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">02 PM</text><text x=\"140\" y=\"135\" text-anchor=\"middle\" font-size=\"12\">SUNDAY</text></g></svg>"
+      },
+      {
+        "country": "Canada",
+        "city": "Toronto",
+        "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#FF4B6E\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" rx=\"10\" stroke=\"#FF4B6E\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"10\">TORONTO PEARSON AIRPORT</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">TORONTO</text><path d=\"M90 75 l10 -10 l10 10 l-10 10 z\"/><circle cx=\"60\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#FF4B6E\" stroke-width=\"1\"/><circle cx=\"140\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#FF4B6E\" stroke-width=\"1\"/><text x=\"60\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">YYZ</text><text x=\"140\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">SUN</text><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">12 JUN 2023</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"8\">www.tourjapan.com</text></g></svg>"
+      }
+    ]
+  }
