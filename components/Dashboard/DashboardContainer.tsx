@@ -322,7 +322,7 @@ const DashboardContainer = () => {
           </div>
         )}
 
-        <div className="text-center text-xs font-medium text-purple-400 space-x-2">
+        {/* <div className="text-center text-xs font-medium text-purple-400 space-x-2">
           <span>Need help? / Got suggestions? </span>
 
           <a href="/contact"
@@ -332,7 +332,7 @@ const DashboardContainer = () => {
           >
             Send us a message
           </a>
-        </div>
+        </div> */}
 
         <DesktopRecommendationBanner />
         {/* <div className="text-center text-xs font-medium text-purple-400 space-x-2">
