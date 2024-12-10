@@ -7,6 +7,8 @@ export default authMiddleware({
     "/api/stripe/webhook",
     "/terms",
     "/api/search-address",
+    "/app/(unauth)/record",
+    "/record",
     "/privacy",
     "/contact",
     "/payment-success",

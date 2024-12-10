@@ -27,8 +27,8 @@ interface PassportFlipBookProps {
 const SVGStamp: React.FC<{ svgString: string }> = ({ svgString }) => {
   return (
     <div className="w-44 h-44">
-      <div dangerouslySetInnerHTML={{ 
-        __html: svgString.replace('<svg', '<svg class="w-full h-full"') 
+      <div dangerouslySetInnerHTML={{
+        __html: svgString.replace('<svg', '<svg class="w-full h-full"')
       }} />
     </div>
   );
@@ -36,8 +36,8 @@ const SVGStamp: React.FC<{ svgString: string }> = ({ svgString }) => {
 
 
 const PassportCover = React.forwardRef<HTMLDivElement>((_, ref) => (
-  <div 
-    ref={ref} 
+  <div
+    ref={ref}
     className="relative h-full w-full rounded-xl"
     style={{
       backgroundColor: '#8B7355',
@@ -49,7 +49,7 @@ const PassportCover = React.forwardRef<HTMLDivElement>((_, ref) => (
     data-density="hard"
   >
     <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
-      <div 
+      <div
         className="text-center p-8 rounded-lg"
         style={{
           backgroundColor: 'rgba(139, 115, 85, 0.9)',
@@ -74,8 +74,8 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
     );
 
     return (
-      <div 
-        ref={ref} 
+      <div
+        ref={ref}
         className="relative h-full w-full p-8 rounded-xl"
         style={{
           backgroundColor: '#F5E6D3',
@@ -87,7 +87,7 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
           backgroundPosition: '0 0, 15px 15px',
         }}
       >
-        <div 
+        <div
           className="border-4 border-double h-full w-full p-6 rounded-lg"
           style={{
             backgroundColor: 'rgba(245, 230, 211, 0.9)',
@@ -97,7 +97,7 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
           <div className="flex flex-col items-center justify-center h-full">
             {matchingStamp ? (
               <div className="transform -rotate-12 relative">
-                <div 
+                <div
                   className="absolute inset-0 rounded-full"
                   style={{
                     backgroundColor: 'rgba(139, 115, 85, 0.1)',
@@ -105,21 +105,21 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
                   }}
                 />
                 <div className="w-64 h-64 relative">
-                  <div dangerouslySetInnerHTML={{ 
-                    __html: matchingStamp.svgCode.replace('<svg', '<svg class="w-full h-full"') 
+                  <div dangerouslySetInnerHTML={{
+                    __html: matchingStamp.svgCode.replace('<svg', '<svg class="w-full h-full"')
                   }} />
                 </div>
               </div>
             ) : (
-              <div 
+              <div
                 className="text-[#463E33] italic font-serif"
                 style={{ fontFamily: 'Garamond, serif' }}
               >
                 Future adventures await...
               </div>
             )}
-            
-            <div 
+
+            <div
               className="mt-8 text-center"
               style={{ fontFamily: 'Garamond, serif' }}
             >
@@ -165,17 +165,22 @@ const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
   // Auto-flip functionality
   const startAutoFlip = () => {
     setPageState(prev => ({ ...prev, isAutoFlipping: true }));
-    autoFlipIntervalRef.current = setInterval(() => {
+
+    const flipNextPage = () => {
       if (flipBookRef.current?.pageFlip()) {
         const current = flipBookRef.current.pageFlip().getCurrentPageIndex();
         if (current >= pageState.totalPages - 1) {
           // Reset to start when reaching the end
           flipBookRef.current.pageFlip().flip(0);
+          stopAutoFlip();
         } else {
           flipBookRef.current.pageFlip().flipNext();
+          setTimeout(flipNextPage, 3000); // Adjust timing as needed
         }
       }
-    }, 1000);
+    };
+
+    setTimeout(flipNextPage, 1000); // Initial delay
   };
 
   const stopAutoFlip = () => {
@@ -202,6 +207,13 @@ const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
     }));
   };
 
+  const containerWidth = 1080;
+  const containerHeight = 1920;
+  const aspectRatio = 1.77; // Instagram aspect ratio (1920/1080)
+
+  const bookWidth = containerWidth * 0.9; // 90% of container width
+  const bookHeight = bookWidth * aspectRatio; // maintain aspect ratio
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-4">
@@ -210,52 +222,66 @@ const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
     );
   }
 
-  return (
-    <div className="max-w-4xl mx-auto p-4">
-      <HTMLFlipBook
-        width={400}
-        height={600}
-        size="stretch"
-        minWidth={300}
-        maxWidth={500}
-        minHeight={400}
-        maxHeight={700}
-        maxShadowOpacity={0.5}
-        showCover={true}
-        mobileScrollSupport={true}
-        onFlip={handlePageFlip}
-        className="mb-8 rounded-xl"
-        ref={flipBookRef}
-        useMouseEvents={true}
-        style={{ borderRadius: '12px' }}
-      >
-        <PassportCover />
-        {locations.map((location, index) => (
-          <PassportPage
-            key={`${location.place_country}-${index}`}
-            location={location}
-            visaStamps={visaStamps} pageNumber={0}          />
-        ))}
-        <PassportCover />
-      </HTMLFlipBook>
 
-      <div className="flex justify-center gap-4 mt-8">
-        <button
-          onClick={pageState.isAutoFlipping ? stopAutoFlip : startAutoFlip}
-          className={`px-6 py-3 rounded-lg font-serif ${
-            pageState.isAutoFlipping 
-              ? 'bg-[#8B7355] hover:bg-[#9C8468]' 
-              : 'bg-[#8B7355] hover:bg-[#9C8468]'
-          } text-[#F5E6D3]`}
-          style={{ fontFamily: 'Garamond, serif' }}
+  return (
+    <div
+      data-testid="flipbook-container"
+      className="relative"
+      style={{
+        width: '1080px',
+        height: '1920px',
+        overflow: 'hidden',
+        backgroundColor: '#F5E6D3' // Match your design
+      }}
+    >
+      <div className="absolute inset-0 flex items-center justify-center">
+        <HTMLFlipBook
+          width={bookWidth}
+          height={bookHeight}
+          size="stretch"
+          minWidth={bookWidth}
+          maxWidth={bookWidth}
+          minHeight={bookHeight}
+          maxHeight={bookHeight}
+          maxShadowOpacity={0.5}
+          showCover={true}
+          mobileScrollSupport={true}
+          onFlip={handlePageFlip}
+          ref={flipBookRef}
+          useMouseEvents={true}
+          style={{
+            borderRadius: '12px',
+          }}
         >
-          {pageState.isAutoFlipping ? 'Pause Journey' : 'Begin Journey'}
-        </button>
+          <PassportCover />
+          {locations.map((location, index) => (
+            <PassportPage
+              key={`${location.place_country}-${index}`}
+              location={location}
+              visaStamps={visaStamps}
+              pageNumber={0}
+            />
+          ))}
+          <PassportCover />
+        </HTMLFlipBook>
+
+        {/* Position the button absolutely over the book */}
+        <div className="absolute bottom-40 left-1/2 transform -translate-x-1/2">
+          <button
+            onClick={pageState.isAutoFlipping ? stopAutoFlip : startAutoFlip}
+            data-testid="flip-button"
+            className="opacity-0 px-6 py-3 rounded-lg font-serif bg-[#8B7355] hover:bg-[#9C8468] text-[#F5E6D3]"
+            style={{ fontFamily: 'Garamond, serif' }}
+          >
+            {pageState.isAutoFlipping ? 'Pause Journey' : 'Begin Journey'}
+          </button>
+        </div>
       </div>
     </div>
   );
-
 };
+
+
 
 
 export default PassportFlipBook;

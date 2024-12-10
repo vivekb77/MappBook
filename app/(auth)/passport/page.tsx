@@ -1,79 +1,87 @@
+// app/record-video/page.tsx
 "use client";
-
-import type { NextPage } from 'next';
-import PassportFlipBook from '@/components/Passport/FlipBook';
 import { useState } from 'react';
+import Link from 'next/link';
 
-const Home: NextPage = () => {
+export default function RecordVideoPage() {
+  const [isRecording, setIsRecording] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  
-  const locations = [
-    {
-      "place_name": "Toronto",
-      "place_country": "Canada",
-    },
-    {
-      "place_name": "Miami",
-      "place_country": "USA",
-    },
-    {
-      "place_name": "Mexico City",
-      "place_country": "Mexico",
-    }
-    
-  ];
+  const [error, setError] = useState<string | null>(null);
 
-  const generateVideo = async () => {
-    setIsGenerating(true);
+  const triggerRecording = async () => {
     try {
-      const response = await fetch('/api/videoGenerator', {
+      setIsRecording(true);
+      setError(null);
+      setVideoUrl(null);
+
+      const response = await fetch('/api/record', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ locations }),
+        body: JSON.stringify({ locationCount: 11 }),
       });
-      
-      if (!response.ok) throw new Error('Failed to generate video');
-      
+
+      if (!response.ok) {
+        throw new Error('Failed to record video');
+      }
+
       const data = await response.json();
       setVideoUrl(data.videoUrl);
     } catch (error) {
-      console.error('Error generating video:', error);
+      // setError(error.message || 'An error occurred');
     } finally {
-      setIsGenerating(false);
+      setIsRecording(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12">
-      
-      
-      <PassportFlipBook locations={locations} />
-
-      
-      <div className="mt-8 flex gap-4">
-        <button
-          onClick={generateVideo}
-          disabled={isGenerating}
-          className="px-6 py-3 rounded-lg font-serif bg-[#8B7355] hover:bg-[#9C8468] text-[#F5E6D3] disabled:opacity-50"
-        >
-          {isGenerating ? 'Generating Video...' : 'Generate Video'}
-        </button>
-      </div>
-      
-      {videoUrl && (
-        <div className="mt-8">
-          <video 
-            controls 
-            className="max-w-xl rounded-lg shadow-lg"
-            src={videoUrl}
-          />
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+            Passport Video Recorder
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Click the button below to generate a video of your passport
+          </p>
         </div>
-      )}
+
+        <div className="mt-8 space-y-6">
+          <button
+            onClick={triggerRecording}
+            disabled={isRecording}
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isRecording ? 'Recording...' : 'Generate Video'}
+          </button>
+
+          {error && (
+            <div className="text-red-600 text-sm text-center">
+              {error}
+            </div>
+          )}
+
+          {videoUrl && (
+            <div className="space-y-4">
+              <div className="aspect-video rounded-lg overflow-hidden bg-black">
+                <video 
+                  src={videoUrl} 
+                  controls 
+                  className="w-full h-full"
+                />
+              </div>
+              <Link
+                href={videoUrl}
+                download
+                className="block w-full text-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Download Video
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
-};
-
-export default Home;
+}
