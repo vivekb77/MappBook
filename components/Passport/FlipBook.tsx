@@ -1,15 +1,47 @@
 import React from 'react';
 import HTMLFlipBook from 'react-pageflip';
+import { Loader2 } from 'lucide-react';
 
 interface Location {
-  place_name: string;
+  place_names: string[];
   place_country: string;
+  place_country_code: string;
 }
 
-interface VisaStamp {
+// Add interface for HTMLFlipBook props
+interface HTMLFlipBookProps {
+  width: number;
+  height: number;
+  size: "fixed" | "stretch";
+  minWidth: number;
+  maxWidth: number;
+  minHeight: number;
+  maxHeight: number;
+  maxShadowOpacity: number;
+  showCover: boolean;
+  mobileScrollSupport: boolean;
+  onFlip: (e: { data: number }) => void;
+  className?: string;
+  startPage?: number;
+  drawShadow?: boolean;
+  flippingTime?: number;
+  usePortrait?: boolean;
+  startZIndex?: number;
+  autoSize?: boolean;
+  clickEventForward?: boolean;
+  useMouseEvents?: boolean;
+  swipeDistance?: number;
+  showPageCorners?: boolean;
+  disableFlipByClick?: boolean;
+}
+interface Stamp {
   country: string;
-  city: string;
+  country_code: string;
   svgCode: string;
+}
+
+interface CityStamp extends Stamp {
+  city: string;
 }
 
 interface PassportPageProps {
@@ -17,23 +49,13 @@ interface PassportPageProps {
   pageNumber: number;
   isFirst?: boolean;
   isLast?: boolean;
-  visaStamps: VisaStamp[];
+  countryStamps: Stamp[];
+  cityStamps: CityStamp[];
 }
 
 interface PassportFlipBookProps {
   locations: Location[];
 }
-
-const SVGStamp: React.FC<{ svgString: string }> = ({ svgString }) => {
-  return (
-    <div className="w-44 h-44">
-      <div dangerouslySetInnerHTML={{
-        __html: svgString.replace('<svg', '<svg class="w-full h-full"')
-      }} />
-    </div>
-  );
-};
-
 
 const PassportCover = React.forwardRef<HTMLDivElement>((_, ref) => (
   <div
@@ -65,13 +87,25 @@ const PassportCover = React.forwardRef<HTMLDivElement>((_, ref) => (
   </div>
 ));
 
+
 const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
-  ({ location, visaStamps }, ref) => {
+  ({ location, countryStamps, cityStamps }, ref) => {
     if (!location) return null;
 
-    const matchingStamp = visaStamps.find(
-      stamp => stamp.country.toLowerCase() === location.place_country.toLowerCase()
+    const matchingCountryStamp = countryStamps.find(
+      stamp => stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
     );
+
+    const matchingCityStamps: CityStamp[] = location.place_names
+      .map(placeName => {
+        const cityStamp = cityStamps.find(stamp => {
+          const cityMatch = stamp.city.toLowerCase() === placeName.toLowerCase();
+          const countryMatch = stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase();
+          return cityMatch && countryMatch;
+        });
+        return cityStamp;
+      })
+      .filter((stamp): stamp is CityStamp => stamp !== undefined);
 
     return (
       <div
@@ -94,37 +128,34 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
             boxShadow: 'inset 0 0 20px rgba(139, 115, 85, 0.2)',
           }}
         >
-          <div className="flex flex-col items-center justify-center h-full">
-            {matchingStamp ? (
-              <div className="transform -rotate-12 relative">
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    backgroundColor: 'rgba(139, 115, 85, 0.1)',
-                    filter: 'blur(10px)',
-                  }}
-                />
-                <div className="w-64 h-64 relative">
-                  <div dangerouslySetInnerHTML={{
-                    __html: matchingStamp.svgCode.replace('<svg', '<svg class="w-full h-full"')
-                  }} />
+          <div className="flex flex-col h-full">
+            {matchingCountryStamp && (
+              <div className="flex justify-center mt-8">
+                <div className="w-72 h-72 relative transform -rotate-12"> {/* Increased size */}
+                  <div 
+                    className="absolute inset-0"
+                    dangerouslySetInnerHTML={{
+                      __html: matchingCountryStamp.svgCode.replace('<svg', '<svg class="w-full h-full"')
+                    }} 
+                  />
                 </div>
-              </div>
-            ) : (
-              <div
-                className="text-[#463E33] italic font-serif"
-                style={{ fontFamily: 'Garamond, serif' }}
-              >
-                Future adventures await...
               </div>
             )}
 
-            <div
-              className="mt-8 text-center"
-              style={{ fontFamily: 'Garamond, serif' }}
-            >
-              <h3 className="font-bold text-[#463E33] mb-2 text-xl">{location.place_name}</h3>
-              <p className="text-sm text-[#6B5B4B] italic">{location.place_country}</p>
+            <div className="flex-1 flex flex-wrap justify-center items-end gap-6 mt-12">
+              {matchingCityStamps.map((stamp, index) => (
+                <div 
+                  key={index}
+                  className="relative w-56 h-56 transform rotate-12"
+                >
+                  <div 
+                    className="absolute inset-0"
+                    dangerouslySetInnerHTML={{
+                      __html: stamp.svgCode.replace('<svg', '<svg class="w-full h-full"')
+                    }} 
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -133,25 +164,76 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
   }
 );
 
+
 const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
   const [pageState, setPageState] = React.useState({
     page: 0,
-    totalPages: locations.length + 4,
+    totalPages: locations.length + 2,
     isAutoFlipping: false
   });
 
-  const [visaStamps, setVisaStamps] = React.useState<VisaStamp[]>([]);
+  const [countryStamps, setCountryStamps] = React.useState<Stamp[]>([]);
+  const [cityStamps, setCityStamps] = React.useState<CityStamp[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const flipBookRef = React.useRef<any>(null);
   const autoFlipIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  // Instagram Reels / TikTok dimensions (9:16 aspect ratio)
+  const containerWidth = 1080;
+  const containerHeight = 1920;
+  
+  // Calculate book dimensions for single page view
+  // Make the book wider relative to height since we're only showing one page
+  const bookWidth = containerWidth * 0.85;  // 85% of width for single page
+  const bookHeight = bookWidth * 1.4;       // taller ratio for single page
+  
+  // Center position for the book
+  const bookTopPosition = (containerHeight - bookHeight) / 2;
+
+
+  const validLocations = React.useMemo(() => {
+    if (!countryStamps.length) return [];
+    
+    return locations.filter(location => {
+      const hasCountryStamp = countryStamps.some(
+        stamp => stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
+      );
+      
+      const hasCityStamp = location.place_names.some(placeName =>
+        cityStamps.some(stamp => 
+          stamp.city.toLowerCase() === placeName.toLowerCase() &&
+          stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
+        )
+      );
+
+      return hasCountryStamp || hasCityStamp;
+    });
+  }, [locations, countryStamps, cityStamps]);
+
+  React.useEffect(() => {
+    setPageState(prev => ({
+      ...prev,
+      totalPages: validLocations.length + 2
+    }));
+  }, [validLocations.length]);
+
   React.useEffect(() => {
     const loadStamps = async () => {
       try {
-        const response = await fetch('/visas.json');
-        if (!response.ok) throw new Error('Failed to load stamps data');
-        const data = await response.json();
-        setVisaStamps(data.stamps);
+        const [countryResponse, cityResponse] = await Promise.all([
+          fetch('/country_stamps.json'),
+          fetch('/city_stamps.json')
+        ]);
+
+        if (!countryResponse.ok || !cityResponse.ok) {
+          throw new Error('Failed to load stamps data');
+        }
+
+        const countryData = await countryResponse.json();
+        const cityData = await cityResponse.json();
+
+        setCountryStamps(countryData.country_stamps);
+        setCityStamps(cityData.city_stamps);
       } catch (err) {
         console.error('Error loading stamps:', err);
       } finally {
@@ -162,7 +244,6 @@ const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
     loadStamps();
   }, []);
 
-  // Auto-flip functionality
   const startAutoFlip = () => {
     setPageState(prev => ({ ...prev, isAutoFlipping: true }));
 
@@ -170,17 +251,16 @@ const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
       if (flipBookRef.current?.pageFlip()) {
         const current = flipBookRef.current.pageFlip().getCurrentPageIndex();
         if (current >= pageState.totalPages - 1) {
-          // Reset to start when reaching the end
           flipBookRef.current.pageFlip().flip(0);
           stopAutoFlip();
         } else {
           flipBookRef.current.pageFlip().flipNext();
-          setTimeout(flipNextPage, 3000); // Adjust timing as needed
+          setTimeout(flipNextPage, 3000);
         }
       }
     };
 
-    setTimeout(flipNextPage, 1000); // Initial delay
+    setTimeout(flipNextPage, 1000);
   };
 
   const stopAutoFlip = () => {
@@ -191,7 +271,6 @@ const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
     setPageState(prev => ({ ...prev, isAutoFlipping: false }));
   };
 
-  // Cleanup interval on unmount
   React.useEffect(() => {
     return () => {
       if (autoFlipIntervalRef.current) {
@@ -207,34 +286,32 @@ const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
     }));
   };
 
-  const containerWidth = 1080;
-  const containerHeight = 1920;
-  const aspectRatio = 1.77; // Instagram aspect ratio (1920/1080)
-
-  const bookWidth = containerWidth * 0.9; // 90% of container width
-  const bookHeight = bookWidth * aspectRatio; // maintain aspect ratio
-
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900"></div>
+      <div className="h-[1920px] w-[1080px] bg-[#F5E6D3] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 animate-spin text-purple-500" />
+          <p className="text-xl text-gray-600">Loading your passport...</p>
+        </div>
       </div>
     );
   }
 
-
   return (
-    <div
+   <div
       data-testid="flipbook-container"
       className="relative"
       style={{
-        width: '1080px',
-        height: '1920px',
+        width: `${containerWidth}px`,
+        height: `${containerHeight}px`,
         overflow: 'hidden',
-        backgroundColor: '#F5E6D3' // Match your design
+        backgroundColor: '#F5E6D3'
       }}
     >
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div 
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ marginTop: `${bookTopPosition}px` }}
+      >
         <HTMLFlipBook
           width={bookWidth}
           height={bookHeight}
@@ -249,24 +326,43 @@ const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
           onFlip={handlePageFlip}
           ref={flipBookRef}
           useMouseEvents={true}
+          className="flip-book"
+          startPage={0}
+          drawShadow={true}
+          flippingTime={1000}
+          usePortrait={true}        // Changed to true for single page
+          startZIndex={0}
+          autoSize={true}
+          clickEventForward={false}
+          swipeDistance={30}
+          showPageCorners={true}
+          disableFlipByClick={false}
           style={{
             borderRadius: '12px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
           }}
         >
           <PassportCover />
-          {locations.map((location, index) => (
+          {validLocations.map((location, index) => (
             <PassportPage
               key={`${location.place_country}-${index}`}
               location={location}
-              visaStamps={visaStamps}
-              pageNumber={0}
+              countryStamps={countryStamps}
+              cityStamps={cityStamps}
+              pageNumber={index + 1}
             />
           ))}
           <PassportCover />
         </HTMLFlipBook>
 
-        {/* Position the button absolutely over the book */}
-        <div className="absolute bottom-40 left-1/2 transform -translate-x-1/2">
+        <div 
+          className="absolute"
+          style={{
+            bottom: `${containerHeight * 0.1}px`,
+            left: '50%',
+            transform: 'translateX(-50%)'
+          }}
+        >
           <button
             onClick={pageState.isAutoFlipping ? stopAutoFlip : startAutoFlip}
             data-testid="flip-button"
@@ -280,8 +376,5 @@ const PassportFlipBook: React.FC<PassportFlipBookProps> = ({ locations }) => {
     </div>
   );
 };
-
-
-
 
 export default PassportFlipBook;

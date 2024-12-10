@@ -1,87 +1,61 @@
 // app/record-video/page.tsx
-"use client";
-import { useState } from 'react';
-import Link from 'next/link';
+"use client"
+
+import { useRef, useState } from 'react'
+import { ChevronUp } from 'lucide-react'
+import { VideoPreview } from '@/components/Passport/VideoPreview'
+import { PassportDashboard } from '@/components/Passport/PassportDashboard'
 
 export default function RecordVideoPage() {
-  const [isRecording, setIsRecording] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const triggerRecording = async () => {
-    try {
-      setIsRecording(true);
-      setError(null);
-      setVideoUrl(null);
-
-      const response = await fetch('/api/record', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ locationCount: 11 }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to record video');
-      }
-
-      const data = await response.json();
-      setVideoUrl(data.videoUrl);
-    } catch (error) {
-      // setError(error.message || 'An error occurred');
-    } finally {
-      setIsRecording(false);
-    }
-  };
+  const [isOpen, setIsOpen] = useState(false)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const sheetRef = useRef<HTMLDivElement>(null)
+  
+  const toggleSheet = () => setIsOpen(!isOpen)
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Passport Video Recorder
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Click the button below to generate a video of your passport
-          </p>
+    <div className="fixed inset-0 h-screen-dynamic overflow-hidden">
+      <div className="flex h-full w-full relative">
+        {/* Video Preview Section */}
+        <VideoPreview videoUrl={videoUrl} />
+
+        {/* Desktop Sidebar */}
+        <div className="hidden md:block w-[33%] bg-white h-full">
+          <div className="h-full p-4 overflow-y-auto">
+            <PassportDashboard onVideoUrlChange={setVideoUrl} />
+          </div>
         </div>
 
-        <div className="mt-8 space-y-6">
-          <button
-            onClick={triggerRecording}
-            disabled={isRecording}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        {/* Mobile Bottom Sheet */}
+        <div
+          ref={sheetRef}
+          className="md:hidden fixed inset-x-0 z-50 bg-white shadow-lg rounded-t-xl transform transition-transform duration-300 ease-out"
+          style={{
+            height: '60vh',
+            bottom: 0,
+            transform: `translateY(${isOpen ? '0' : '100%'})`
+          }}
+        >
+          {/* Tab Handle */}
+          <div 
+            className="absolute -top-16 left-1/2 -translate-x-1/2 w-[50%] max-w-md bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600 rounded-t-xl px-6 py-4 cursor-pointer shadow-lg hover:scale-105 transition-all"
+            onClick={toggleSheet}
           >
-            {isRecording ? 'Recording...' : 'Generate Video'}
-          </button>
-
-          {error && (
-            <div className="text-red-600 text-sm text-center">
-              {error}
+            <div className="flex items-center justify-center space-x-2">
+              <ChevronUp 
+                className={`w-8 h-8 text-white transition-transform duration-300 ${!isOpen ? 'rotate-180' : ''}`}
+              />
             </div>
-          )}
+          </div>
 
-          {videoUrl && (
-            <div className="space-y-4">
-              <div className="aspect-video rounded-lg overflow-hidden bg-black">
-                <video 
-                  src={videoUrl} 
-                  controls 
-                  className="w-full h-full"
-                />
-              </div>
-              <Link
-                href={videoUrl}
-                download
-                className="block w-full text-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-              >
-                Download Video
-              </Link>
+          {/* Scrollable Content */}
+          <div className="h-full overflow-y-auto overscroll-contain">
+            <div className="px-4 py-2">
+              <PassportDashboard onVideoUrlChange={setVideoUrl} />
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

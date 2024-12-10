@@ -7,9 +7,9 @@ import { spawn } from 'child_process';
 
 export const dynamic = 'force-dynamic';
 
-async function recordFlipBook(locationCount: number): Promise<string> {
+async function recordFlipBook(locationCount: number, mappbookUserId: string): Promise<string> {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     defaultViewport: {
       width: 1080,
       height: 1920
@@ -28,7 +28,9 @@ async function recordFlipBook(locationCount: number): Promise<string> {
     const page = await browser.newPage();
     
     await page.setViewport({ width: 1080, height: 1920 });
-    await page.goto('http://localhost:3000/record', { waitUntil: 'networkidle0' });
+    await page.goto(`http://localhost:3000/playflipbook?userId=${mappbookUserId}`, { 
+      waitUntil: 'networkidle0' 
+    });
     
     await page.waitForSelector('[data-testid="flipbook-container"]', { timeout: 10000 });
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -40,8 +42,6 @@ async function recordFlipBook(locationCount: number): Promise<string> {
 
     const elementBox = await flipBookElement.boundingBox();
     const clipArea = {
-      x: Math.max(0, elementBox.x),
-      y: Math.max(0, elementBox.y),
       width: 1080,
       height: 1920
     };
@@ -52,7 +52,6 @@ async function recordFlipBook(locationCount: number): Promise<string> {
         await page.screenshot({
           path: frameFile,
           type: 'png',
-          clip: clipArea
         });
         frameCount++;
       } catch (error) {
@@ -75,10 +74,10 @@ async function recordFlipBook(locationCount: number): Promise<string> {
       await new Promise(resolve => setTimeout(resolve, 1000 / fps));
     }
 
-    const outputPath = path.join(process.cwd(), 'public', 'generated', `passport_${Date.now()}.mp4`);
+    // Include userId in the output filename for better tracking
+    const outputPath = path.join(process.cwd(), 'public', 'generated', `passport_${mappbookUserId}_${Date.now()}.mp4`);
     
     await new Promise((resolve, reject) => {
-      // Using system ffmpeg instead of ffmpeg-static
       const ffmpegProcess = spawn('ffmpeg', [
         '-framerate', '30',
         '-i', path.join(framesDir, 'frame_%6d.png'),
@@ -113,7 +112,7 @@ async function recordFlipBook(locationCount: number): Promise<string> {
 
 export async function POST(req: NextRequest) {
   try {
-    const { locationCount } = await req.json();
+    const { locationCount, mappbook_user_id } = await req.json();
     
     if (!locationCount) {
       return NextResponse.json(
@@ -122,12 +121,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const outputPath = await recordFlipBook(parseInt(locationCount));
+    if (!mappbook_user_id) {
+      return NextResponse.json(
+        { error: 'mappbook_user_id is required' },
+        { status: 400 }
+      );
+    }
+
+    const outputPath = await recordFlipBook(parseInt(locationCount), mappbook_user_id);
     const videoUrl = `/generated/${path.basename(outputPath)}`;
 
     return NextResponse.json({ 
       success: true,
-      videoUrl
+      videoUrl,
+      userId: mappbook_user_id // Return userId for reference
     });
 
   } catch (error) {
