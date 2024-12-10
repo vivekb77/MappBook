@@ -13,7 +13,7 @@ export default function Home() {
   const [searchedPlace, setSearchedPlaceDetails] = useState<any>([])
   const [userPlaces, setAllUserPlaces] = useState<any[]>([])
   const { isLoaded, isSignedIn, user } = useUser()
-  
+
   const [isOpen, setIsOpen] = useState(false)
   const sheetRef = useRef<HTMLDivElement>(null)
 
@@ -35,8 +35,8 @@ export default function Home() {
       <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
         <div className="relative">
           <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
-          <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400" 
-               style={{ animationDirection: 'reverse' }} />
+          <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400"
+            style={{ animationDirection: 'reverse' }} />
         </div>
         <span className="text-lg font-medium text-gray-700">
           Loading MappBook
@@ -57,8 +57,8 @@ export default function Home() {
               </div>
 
               {/* Desktop Sidebar */}
-              <div className="hidden md:block w-[33%] bg-white h-full">
-                <div className="h-full p-4 overflow-y-auto">
+              <div className="hidden md:block w-[33%] h-screen-dynamic overflow-hidden">
+                <div className="h-full overflow-y-auto">
                   <DashboardContainer />
                 </div>
               </div>
@@ -76,7 +76,7 @@ export default function Home() {
                 }}
               >
                 {/* Taller Tab Handle positioned higher */}
-                <div 
+                <div
                   className="absolute -top-16 left-1/2 -translate-x-1/2 w-[50%] max-w-md
                     bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600
                     rounded-t-xl px-6 py-4 cursor-pointer shadow-lg
@@ -85,7 +85,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-center space-x-2">
                     <MapPin className="w-8 h-8 text-white" />
-                    <ChevronUp 
+                    <ChevronUp
                       className={`w-8 h-8 text-white transition-transform duration-300
                         ${!isOpen ? 'rotate-180' : ''}`}
                     />
