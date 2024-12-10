@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+@import "plyr/dist/plyr.css";
 /* Base Layer Configurations */
 @layer base {
   :root {

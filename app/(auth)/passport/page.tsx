@@ -1,4 +1,3 @@
-// app/record-video/page.tsx
 "use client"
 
 import { useRef, useState } from 'react'
@@ -17,10 +16,24 @@ export default function RecordVideoPage() {
     <div className="fixed inset-0 h-screen-dynamic overflow-hidden">
       <div className="flex h-full w-full relative">
         {/* Video Preview Section */}
-        <VideoPreview videoUrl={videoUrl} />
+        <div className="w-full md:w-[70%] h-full bg-slate-900">
+          <div className="h-full flex flex-col">
+            {/* Header */}
+            <div className="p-4 border-b border-slate-800">
+              <h2 className="text-xl font-semibold text-white">Video Preview</h2>
+            </div>
+            
+            {/* Preview Container */}
+            <div className="flex-1 flex items-center justify-center p-8">
+              <div className="rounded-lg overflow-hidden shadow-2xl bg-slate-800 max-w-full">
+                <VideoPreview videoUrl={videoUrl} />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-[33%] bg-white h-full">
+        <div className="hidden md:block w-[30%] bg-white border-l border-slate-200 h-full">
           <div className="h-full p-4 overflow-y-auto">
             <PassportDashboard onVideoUrlChange={setVideoUrl} />
           </div>

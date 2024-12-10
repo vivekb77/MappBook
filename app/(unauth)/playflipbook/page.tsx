@@ -6,7 +6,7 @@ import { track } from '@vercel/analytics';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from "@/components/utils/supabase";
 import PassportFlipBook from '@/components/Passport/FlipBook';
-
+import PageFlipBook from '@/components/Passport/DemoFlipBook';
 interface Place {
   visitedorwanttovisit: 'visited' | 'wanttovisit';
   place_country: string; 
@@ -130,6 +130,7 @@ export default function PlayFlipBook() {
   return (
     <div className="h-[1920px] w-[1080px] bg-[#F5E6D3] overflow-hidden">
       <PassportFlipBook locations={locations} />
+      {/* <PageFlipBook />; */}
     </div>
   );
 }

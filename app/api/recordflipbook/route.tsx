@@ -1,4 +1,3 @@
-// app/api/record/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 import fs from 'fs';
@@ -11,10 +10,10 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
   const browser = await puppeteer.launch({
     headless: false,
     defaultViewport: {
-      width: 1080,
-      height: 1920
+      width: 1920,
+      height: 1080
     },
-    args: ['--window-size=1080,1920']
+    args: ['--window-size=1920,1080']
   });
 
   const framesDir = path.join(process.cwd(), 'temp_frames');
@@ -27,60 +26,97 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
   try {
     const page = await browser.newPage();
     
-    await page.setViewport({ width: 1080, height: 1920 });
-    await page.goto(`http://localhost:3000/playflipbook?userId=${mappbookUserId}`, { 
+    await page.setViewport({ width: 1920, height: 1080 });
+    await page.goto(`http://localhost:3000/playflipbook?userId=${mappbookUserId}&layout=double`, { 
       waitUntil: 'networkidle0' 
     });
     
-    await page.waitForSelector('[data-testid="flipbook-container"]', { timeout: 10000 });
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Wait for both the wooden background container and flip button
+    await page.waitForSelector('[data-testid="wooden-background"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="flip-button"]', { timeout: 10000 });
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
-    const flipBookElement = await page.$('[data-testid="flipbook-container"]');
-    if (!flipBookElement) {
-      throw new Error('FlipBook element not found');
+    // Get the bounds of the wooden background container
+    const woodenElement = await page.$('[data-testid="wooden-background"]');
+    if (!woodenElement) {
+      throw new Error('Wooden background container not found');
     }
 
-    const elementBox = await flipBookElement.boundingBox();
-    const clipArea = {
-      width: 1080,
-      height: 1920
-    };
+    const woodenBounds = await woodenElement.boundingBox();
+    if (!woodenBounds) {
+      throw new Error('Could not get wooden container bounds');
+    }
 
-    const captureFrame = async () => {
-      const frameFile = path.join(framesDir, `frame_${frameCount.toString().padStart(6, '0')}.png`);
-      try {
-        await page.screenshot({
-          path: frameFile,
-          type: 'png',
-        });
-        frameCount++;
-      } catch (error) {
-        console.error('Error capturing frame:', error);
+
+ // Ensure the dimensions are even numbers for ffmpeg
+ const width = Math.floor(woodenBounds.width / 2) * 2;
+ const height = Math.floor(woodenBounds.height / 2) * 2;
+
+
+ const captureFrame = async () => {
+  const frameFile = path.join(framesDir, `frame_${frameCount.toString().padStart(6, '0')}.png`);
+  try {
+    await page.screenshot({
+      path: frameFile,
+      type: 'png',
+      clip: {
+        x: woodenBounds.x,
+        y: woodenBounds.y,
+        width: width,
+        height: height
       }
-    };
+    });
+    frameCount++;
+  } catch (error) {
+    console.error('Error capturing frame:', error);
+  }
+};
 
+    // Get the flip button
     const flipButton = await page.$('[data-testid="flip-button"]');
     if (!flipButton) {
       throw new Error('Flip button not found');
     }
+
+    // Initial capture of the cover
+    await captureFrame();
+    
+    // Click the flip button to start
     await flipButton.click();
-
-    const fps = 30;
-    const secondsPerLocation = 1;
-    const totalFrames = fps * secondsPerLocation * locationCount;
-
-    for (let i = 0; i < totalFrames; i++) {
-      await captureFrame();
-      await new Promise(resolve => setTimeout(resolve, 1000 / fps));
+    
+    // Calculate frames and timing
+    const fps = 24; // Reduced from 30 for better stability
+    const secondsPerSpread = 2;
+    const totalSpreads = Math.ceil((locationCount + 2) / 2); // +2 for covers
+    
+    // Capture frames for each spread
+    for (let spread = 0; spread < totalSpreads; spread++) {
+      // Capture frames for current spread
+      for (let i = 0; i < fps * secondsPerSpread; i++) {
+        await captureFrame();
+        await new Promise(resolve => setTimeout(resolve, 1000 / fps));
+      }
+      
+      // Click to next spread if not the last one
+      if (spread < totalSpreads - 1) {
+        await flipButton.click();
+        // Add small delay after click for animation to start
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
     }
 
-    // Include userId in the output filename for better tracking
-    const outputPath = path.join(process.cwd(), 'public', 'generated', `passport_${mappbookUserId}_${Date.now()}.mp4`);
+    // Verify we have captured frames
+    if (frameCount === 0) {
+      throw new Error('No frames were captured');
+    }
+
+    const outputPath = path.join(process.cwd(), 'public', 'generated', `passport_${mappbookUserId}_double_${Date.now()}.mp4`);
     
+    // Use a simpler FFmpeg command
     await new Promise((resolve, reject) => {
       const ffmpegProcess = spawn('ffmpeg', [
-        '-framerate', '30',
-        '-i', path.join(framesDir, 'frame_%6d.png'),
+        '-framerate', '24',
+        '-i', path.join(framesDir, 'frame_%06d.png'),
         '-c:v', 'libx264',
         '-pix_fmt', 'yuv420p',
         '-y',
@@ -102,6 +138,9 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
 
     return outputPath;
 
+  } catch (error) {
+    console.error('Detailed error:', error);
+    throw error;
   } finally {
     if (frameCount > 0) {
       fs.rmSync(framesDir, { recursive: true });
@@ -134,7 +173,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ 
       success: true,
       videoUrl,
-      userId: mappbook_user_id // Return userId for reference
+      userId: mappbook_user_id
     });
 
   } catch (error) {
