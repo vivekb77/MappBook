@@ -4,8 +4,7 @@ import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core'; 
 import fs from 'fs';
 import path from 'path';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { createFFmpeg, FFmpeg } from '@ffmpeg/ffmpeg';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,8 +33,6 @@ interface ErrorResponse {
   error: string;
 }
 
-const FFMPEG_CORE_URL = 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd';
-
 async function recordFlipBook(locationCount: number, mappbookUserId: string): Promise<string> {
   console.log('Starting recordFlipBook with:', { locationCount, mappbookUserId });
   
@@ -49,6 +46,10 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
     headless: true,
   });
 
+  // Declare ffmpeg instance at the top
+  let ffmpeg: FFmpeg | null = null;
+  let frameCount = 0;
+
   // Use /tmp directory for temporary files
   const framesDir = path.join('/tmp', `frames_${Date.now()}`);
   if (!fs.existsSync(framesDir)) {
@@ -56,7 +57,6 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
   }
 
   const outputPath = path.join('/tmp', `passport_${mappbookUserId}_${Date.now()}.mp4`);
-  let frameCount = 0;
 
   try {
     const page = await browser.newPage();
@@ -147,76 +147,161 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
     }
 
     // Initialize FFmpeg
-    const ffmpeg = new FFmpeg();
-    console.log('Loading FFmpeg...');
-    
-    // Load FFmpeg
-    await ffmpeg.load({
-      coreURL: await toBlobURL(`/ffmpeg/ffmpeg-core.js`, 'text/javascript'),
-      wasmURL: await toBlobURL(`/ffmpeg/ffmpeg-core.wasm`, 'application/wasm'),
+    ffmpeg = createFFmpeg({
+      log: true,
+      logger: ({ message }) => console.log('FFmpeg:', message),
+      corePath: require('@ffmpeg/core').corePath,
+      progress: ({ ratio }) => {
+        console.log(`FFmpeg Progress: ${(ratio * 100).toFixed(2)}%`);
+      },
     });
     
+    console.log('Loading FFmpeg...');
+    await ffmpeg.load();
     console.log('FFmpeg loaded');
 
-  // Write frames to FFmpeg virtual filesystem
-  for (let i = 0; i < frameCount; i++) {
-    const frameFile = path.join(framesDir, `frame_${i.toString().padStart(6, '0')}.png`);
-    // Read frame data as Uint8Array
-    const frameData = await fs.promises.readFile(frameFile, { encoding: null });
-    // Convert to Uint8Array explicitly if needed
-    const frameUint8Array = new Uint8Array(frameData);
-    await ffmpeg.writeFile(`frame_${i.toString().padStart(6, '0')}.png`, frameUint8Array);
-  }
+    // Process frames in batches to manage memory
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < frameCount; i += BATCH_SIZE) {
+      const batchEnd = Math.min(i + BATCH_SIZE, frameCount);
+      console.log(`Processing frames ${i} to ${batchEnd - 1}`);
+      
+      for (let j = i; j < batchEnd; j++) {
+        const frameFile = path.join(framesDir, `frame_${j.toString().padStart(6, '0')}.png`);
+        try {
+          const frameData = await fs.promises.readFile(frameFile);
+          const frameName = `frame_${j.toString().padStart(6, '0')}.png`;
+          const frameUint8Array = new Uint8Array(frameData.buffer, frameData.byteOffset, frameData.length);
+          await ffmpeg.FS('writeFile', frameName, frameUint8Array);
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error during frame processing';
+          console.error(`Error processing frame ${j}:`, error);
+          throw new Error(`Frame processing failed: ${errorMessage}`);
+        }
+      }
+    }
 
-  // Run FFmpeg command to create video
-  await ffmpeg.exec([
-    '-framerate', '24',
-    '-i', 'frame_%06d.png',
-    '-c:v', 'libx264',
-    '-pix_fmt', 'yuv420p',
-    '-y',
-    'output.mp4'
-  ]);
+    // Create concat file with error handling
+    try {
+      const concatContent = Array.from({ length: frameCount })
+        .map((_, i) => `file 'frame_${i.toString().padStart(6, '0')}.png'`)
+        .join('\n');
+      ffmpeg.FS('writeFile', 'concat.txt', new TextEncoder().encode(concatContent));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error creating concat file';
+      console.error('Error creating concat file:', error);
+      throw new Error(`Failed to create video sequence file: ${errorMessage}`);
+    }
 
-   // Read the output file from FFmpeg's virtual filesystem
-   const data = await ffmpeg.readFile('output.mp4') as Uint8Array;
+    // Run FFmpeg command with error handling
+    try {
+      await ffmpeg.run(
+        '-f', 'concat',
+        '-safe', '0',
+        '-i', 'concat.txt',
+        '-framerate', '24',
+        '-c:v', 'libx264',
+        '-pix_fmt', 'yuv420p',
+        '-preset', 'medium',
+        '-crf', '23',
+        '-y',
+        'output.mp4'
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown FFmpeg error';
+      console.error('FFmpeg encoding error:', error);
+      throw new Error(`Video encoding failed: ${errorMessage}`);
+    }
+
+    // Read output with error handling
+    let data: Uint8Array;
+    try {
+      data = new Uint8Array(ffmpeg.FS('readFile', 'output.mp4'));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error reading output';
+      console.error('Error reading output video:', error);
+      throw new Error(`Failed to read encoded video: ${errorMessage}`);
+    }
+
+    // Upload to Supabase with retry
+    let uploadAttempts = 0;
+    const MAX_UPLOAD_ATTEMPTS = 3;
     
-   // Write to temporary file as Uint8Array
-   await fs.promises.writeFile(outputPath, data);
+    while (uploadAttempts < MAX_UPLOAD_ATTEMPTS) {
+      try {
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('flipbook-videos')
+          .upload(
+            `videos/${mappbookUserId}/${path.basename(outputPath)}`,
+            data,
+            {
+              contentType: 'video/mp4',
+              cacheControl: '3600'
+            }
+          );
 
-   // Upload to Supabase Storage
-   const { data: uploadData, error: uploadError } = await supabase.storage
-     .from('flipbook-videos')
-     .upload(
-       `videos/${mappbookUserId}/${path.basename(outputPath)}`,
-       data,
-       {
-         contentType: 'video/mp4',
-         cacheControl: '3600'
-       }
-     );
+        if (uploadError) throw uploadError;
+        
+        const { data: publicUrl } = supabase.storage
+          .from('flipbook-videos')
+          .getPublicUrl(`videos/${mappbookUserId}/${path.basename(outputPath)}`);
 
-   if (uploadError) {
-     throw new Error(`Failed to upload video: ${uploadError.message}`);
-   }
+        return publicUrl.publicUrl;
+      } catch (error) {
+        uploadAttempts++;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown upload error';
+        if (uploadAttempts === MAX_UPLOAD_ATTEMPTS) {
+          throw new Error(`Upload failed after ${MAX_UPLOAD_ATTEMPTS} attempts: ${errorMessage}`);
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000 * uploadAttempts));
+      }
+    }
 
-    const { data: publicUrl } = supabase.storage
-      .from('flipbook-videos')
-      .getPublicUrl(`videos/${mappbookUserId}/${path.basename(outputPath)}`);
-
-  return publicUrl.publicUrl;
+    throw new Error('Upload failed after retries');
 
   } catch (error) {
     console.error('Detailed error:', error);
     throw error;
   } finally {
-    // Clean up temporary files
-    if (frameCount > 0) {
-      fs.rmSync(framesDir, { recursive: true });
-      if (fs.existsSync(outputPath)) {
-        fs.unlinkSync(outputPath);
+    // Clean up FFmpeg resources
+    if (ffmpeg) {
+      try {
+        // Clean up files in FFmpeg's virtual filesystem
+        ['output.mp4', 'concat.txt'].forEach(file => {
+          try {
+            // Add non-null assertion since we've checked ffmpeg exists
+            ffmpeg!.FS('unlink', file);
+          } catch (e) {
+            // Ignore errors during cleanup
+          }
+        });
+
+        // Clean up frame files
+        for (let i = 0; i < frameCount; i++) {
+          try {
+            const frameName = `frame_${i.toString().padStart(6, '0')}.png`;
+            ffmpeg!.FS('unlink', frameName);
+          } catch (e) {
+            // Ignore errors during cleanup
+          }
+        }
+      } catch (e) {
+        console.warn('Error during FFmpeg cleanup:', e);
       }
     }
+
+    // Clean up temporary files
+    if (frameCount > 0) {
+      try {
+        fs.rmSync(framesDir, { recursive: true });
+        if (fs.existsSync(outputPath)) {
+          fs.unlinkSync(outputPath);
+        }
+      } catch (e) {
+        console.warn('Error cleaning up temporary files:', e);
+      }
+    }
+
     await browser.close();
   }
 }
@@ -233,46 +318,8 @@ export async function POST(req: NextRequest) {
       throw new Error('Missing required parameters');
     }
 
-    console.log('3. Setting up Chromium');
-    const execPath = await chromium.executablePath();
-    console.log('4. Chromium executable path:', execPath);
-
-    const browser = await puppeteer.launch({
-      args: [
-        ...chromium.args,
-        '--hide-scrollbars',
-        '--disable-web-security',
-        '--no-sandbox',
-        '--disable-setuid-sandbox'
-      ],
-      defaultViewport: {
-        width: 1920,
-        height: 1080
-      },
-      executablePath: execPath,
-      headless: true,
-    });
-    console.log('5. Browser launched');
-
-    const framesDir = path.join('/tmp', `frames_${Date.now()}`);
-    fs.mkdirSync(framesDir, { recursive: true });
-    console.log('6. Temporary directory created:', framesDir);
-
-    const page = await browser.newPage();
-    console.log('7. New page created');
-
-    await page.setViewport({ width: 1920, height: 1080 });
-    const pageUrl = `${APP_URL}/playflipbook?userId=${mappbook_user_id}`;
-    console.log('8. Navigating to:', pageUrl);
-
-    await page.goto(pageUrl, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000 // Increased timeout
-    });
-    console.log('9. Page loaded');
-
     const videoUrl = await recordFlipBook(parseInt(locationCount), mappbook_user_id);
-    console.log('10. Video recording completed:', videoUrl);
+    console.log('3. Video recording completed:', videoUrl);
 
     const { error: dbError } = await supabase
       .from('FlipBook_Video')
@@ -284,11 +331,11 @@ export async function POST(req: NextRequest) {
       });
 
     if (dbError) {
-      console.error('11. Database error:', dbError);
+      console.error('4. Database error:', dbError);
       throw new Error(`Database error: ${dbError.message}`);
     }
 
-    console.log('12. Process completed successfully');
+    console.log('5. Process completed successfully');
     console.log(`Total time: ${(Date.now() - startTime)/1000}s`);
 
     return NextResponse.json({ 
@@ -306,7 +353,6 @@ export async function POST(req: NextRequest) {
       time: new Date().toISOString()
     });
 
-    // Check for specific error types
     if (error instanceof Error) {
       if (error.message.includes('net::ERR_CONNECTION_REFUSED') || 
           error.message.includes('net::ERR_NAME_NOT_RESOLVED')) {
