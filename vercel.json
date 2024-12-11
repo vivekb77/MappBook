@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/recordflipbook/route.ts": {
+      "maxDuration": 300
+    }
+  }
+}
