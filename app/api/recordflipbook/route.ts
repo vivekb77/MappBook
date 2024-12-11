@@ -1,7 +1,8 @@
 // app/api/recordflipbook/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from "@/components/utils/supabase"
-import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium';
+import puppeteer from 'puppeteer-core'; 
 import fs from 'fs';
 import path from 'path';
 import { spawn } from 'child_process';
@@ -34,13 +35,15 @@ interface ErrorResponse {
 }
 
 async function recordFlipBook(locationCount: number, mappbookUserId: string): Promise<string> {
+
   const browser = await puppeteer.launch({
-    headless: true,
+    args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
     defaultViewport: {
       width: 1920,
       height: 1080
     },
-    args: ['--window-size=1920,1080']
+    executablePath: await chromium.executablePath(),
+    headless: true,
   });
 
   const framesDir = path.join(process.cwd(), 'temp_frames');
