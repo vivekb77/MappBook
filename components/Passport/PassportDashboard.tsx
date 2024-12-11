@@ -10,7 +10,12 @@ import { useUser } from '@clerk/nextjs'
 import { useMappbookUser } from '@/context/UserContext'
 
 const DEMO_VIDEO_URL = "/generated/passport_1733795592552.mp4" // Replace with your demo video URL
-
+interface RecordFlipbookResponse {
+  success: boolean;
+  video_url?: string;
+  user_id?: string;
+  error?: string;
+}
 interface PassportDashboardProps {
   onVideoUrlChange: (url: string | null) => void
 }
@@ -39,16 +44,19 @@ export function PassportDashboard({ onVideoUrlChange }: PassportDashboardProps) 
       console.error('Sign in error:', error)
     }
   }
-
+  
   const triggerRecording = async () => {
-    if (!isSignedIn || !mappbookUser) return
+    if (!isSignedIn || !mappbookUser) {
+      setError('User must be signed in')
+      return
+    }
     
     try {
       setIsRecording(true)
       setError(null)
       setVideoUrl(null)
       onVideoUrlChange(null)
-
+  
       const response = await fetch('/api/recordflipbook', {
         method: 'POST',
         headers: {
@@ -59,16 +67,22 @@ export function PassportDashboard({ onVideoUrlChange }: PassportDashboardProps) 
           mappbook_user_id: mappbookUser.mappbook_user_id 
         }),
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to record video')
+  
+      const data: RecordFlipbookResponse = await response.json()
+  
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to record video')
       }
-
-      const data = await response.json()
-      setVideoUrl(data.videoUrl)
-      onVideoUrlChange(data.videoUrl)
+  
+      if (!data.video_url) {
+        throw new Error('No video URL returned')
+      }
+  
+      setVideoUrl(data.video_url)
+      onVideoUrlChange(data.video_url)
     } catch (error) {
-      setError('An error occurred while recording')
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while recording'
+      setError(errorMessage)
       console.error('Recording error:', error)
     } finally {
       setIsRecording(false)
