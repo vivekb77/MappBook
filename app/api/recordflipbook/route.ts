@@ -35,7 +35,6 @@ interface ErrorResponse {
 }
 
 async function recordFlipBook(locationCount: number, mappbookUserId: string): Promise<string> {
-
   const browser = await puppeteer.launch({
     args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
     defaultViewport: {
@@ -46,11 +45,13 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
     headless: true,
   });
 
-  const framesDir = path.join(process.cwd(), 'temp_frames');
+  // Use /tmp directory for temporary files
+  const framesDir = path.join('/tmp', `frames_${Date.now()}`);
   if (!fs.existsSync(framesDir)) {
-    fs.mkdirSync(framesDir);
+    fs.mkdirSync(framesDir, { recursive: true });
   }
 
+  const outputPath = path.join('/tmp', `passport_${mappbookUserId}_${Date.now()}.mp4`);
   let frameCount = 0;
 
   try {
@@ -139,8 +140,6 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
       throw new Error('No frames were captured');
     }
 
-    const outputPath = path.join(process.cwd(), 'public', 'generated', `passport_${mappbookUserId}_double_${Date.now()}.mp4`);
-    
     // Use FFmpeg to combine frames into video
     await new Promise((resolve, reject) => {
       const ffmpegProcess = spawn('ffmpeg', [
@@ -165,7 +164,31 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
       });
     });
 
-    return outputPath;
+    // Read the generated video file
+    const videoBuffer = await fs.promises.readFile(outputPath);
+
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('flipbook-videos')
+      .upload(
+        `videos/${mappbookUserId}/${path.basename(outputPath)}`,
+        videoBuffer,
+        {
+          contentType: 'video/mp4',
+          cacheControl: '3600'
+        }
+      );
+
+    if (uploadError) {
+      throw new Error(`Failed to upload video: ${uploadError.message}`);
+    }
+
+    // Get the public URL
+    const { data: publicUrl } = supabase.storage
+      .from('flipbook-videos')
+      .getPublicUrl(`videos/${mappbookUserId}/${path.basename(outputPath)}`);
+
+    return publicUrl.publicUrl;
 
   } catch (error) {
     console.error('Detailed error:', error);
@@ -174,6 +197,9 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
     // Clean up temporary files
     if (frameCount > 0) {
       fs.rmSync(framesDir, { recursive: true });
+      if (fs.existsSync(outputPath)) {
+        fs.unlinkSync(outputPath);
+      }
     }
     await browser.close();
   }
@@ -197,8 +223,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const outputPath = await recordFlipBook(parseInt(locationCount), mappbook_user_id);
-    const videoUrl = `/generated/${path.basename(outputPath)}`;
+    const videoUrl = await recordFlipBook(parseInt(locationCount), mappbook_user_id);
 
     // Store video record in Supabase
     const { error: dbError } = await supabase
