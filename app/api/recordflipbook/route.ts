@@ -35,6 +35,8 @@ interface ErrorResponse {
 }
 
 async function recordFlipBook(locationCount: number, mappbookUserId: string): Promise<string> {
+  console.log('Starting recordFlipBook with:', { locationCount, mappbookUserId });
+  
   const browser = await puppeteer.launch({
     args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
     defaultViewport: {
@@ -108,8 +110,11 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
       throw new Error('Flip button not found');
     }
 
+
     // Initial capture of the cover
+    console.log('Frame capture started');
     await captureFrame();
+    console.log('Initial frame captured');
     
     // Click the flip button to start
     await flipButton.click();
@@ -206,26 +211,58 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
 }
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+  console.log('1. Starting request processing');
+  
   try {
     const { locationCount, mappbook_user_id } = await req.json() as RequestBody;
+    console.log('2. Request body parsed:', { locationCount, mappbook_user_id });
     
-    if (!locationCount) {
-      return NextResponse.json(
-        { error: 'locationCount is required' } as ErrorResponse,
-        { status: 400 }
-      );
+    if (!locationCount || !mappbook_user_id) {
+      throw new Error('Missing required parameters');
     }
 
-    if (!mappbook_user_id) {
-      return NextResponse.json(
-        { error: 'mappbook_user_id is required' } as ErrorResponse,
-        { status: 400 }
-      );
-    }
+    console.log('3. Setting up Chromium');
+    const execPath = await chromium.executablePath();
+    console.log('4. Chromium executable path:', execPath);
+
+    const browser = await puppeteer.launch({
+      args: [
+        ...chromium.args,
+        '--hide-scrollbars',
+        '--disable-web-security',
+        '--no-sandbox',
+        '--disable-setuid-sandbox'
+      ],
+      defaultViewport: {
+        width: 1920,
+        height: 1080
+      },
+      executablePath: execPath,
+      headless: true,
+    });
+    console.log('5. Browser launched');
+
+    const framesDir = path.join('/tmp', `frames_${Date.now()}`);
+    fs.mkdirSync(framesDir, { recursive: true });
+    console.log('6. Temporary directory created:', framesDir);
+
+    const page = await browser.newPage();
+    console.log('7. New page created');
+
+    await page.setViewport({ width: 1920, height: 1080 });
+    const pageUrl = `${APP_URL}/playflipbook?userId=${mappbook_user_id}`;
+    console.log('8. Navigating to:', pageUrl);
+
+    await page.goto(pageUrl, { 
+      waitUntil: 'networkidle0',
+      timeout: 30000 // Increased timeout
+    });
+    console.log('9. Page loaded');
 
     const videoUrl = await recordFlipBook(parseInt(locationCount), mappbook_user_id);
+    console.log('10. Video recording completed:', videoUrl);
 
-    // Store video record in Supabase
     const { error: dbError } = await supabase
       .from('FlipBook_Video')
       .insert({
@@ -236,36 +273,52 @@ export async function POST(req: NextRequest) {
       });
 
     if (dbError) {
-      console.error('Database error:', dbError);
-      return NextResponse.json(
-        { error: 'Failed to save video record' } as ErrorResponse,
-        { status: 500 }
-      );
+      console.error('11. Database error:', dbError);
+      throw new Error(`Database error: ${dbError.message}`);
     }
+
+    console.log('12. Process completed successfully');
+    console.log(`Total time: ${(Date.now() - startTime)/1000}s`);
 
     return NextResponse.json({ 
       success: true,
-      video_url: videoUrl,     // Changed to match interface
-      user_id: mappbook_user_id // Changed to match interface
+      video_url: videoUrl,
+      user_id: mappbook_user_id
     } as SuccessResponse);
 
   } catch (error: unknown) {
-    // Properly type check the error
-    let errorMessage = 'Failed to record video';
-    
+    const timeTaken = (Date.now() - startTime)/1000;
+    console.error(`Failed after ${timeTaken}s with error:`, {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      time: new Date().toISOString()
+    });
+
+    // Check for specific error types
     if (error instanceof Error) {
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-      errorMessage = `Failed to record video: ${error.message}`;
-    } else {
-      console.error('Unknown error:', error);
+      if (error.message.includes('net::ERR_CONNECTION_REFUSED') || 
+          error.message.includes('net::ERR_NAME_NOT_RESOLVED')) {
+        return NextResponse.json(
+          { error: `Failed to connect to page: ${APP_URL} might be unavailable` },
+          { status: 500 }
+        );
+      }
+
+      if (error.message.includes('Protocol error')) {
+        return NextResponse.json(
+          { error: 'Browser initialization failed' },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json(
-      { error: errorMessage } as ErrorResponse,
+      { 
+        error: error instanceof Error 
+          ? `Recording failed: ${error.message}`
+          : 'An unexpected error occurred' 
+      },
       { status: 500 }
     );
   }
