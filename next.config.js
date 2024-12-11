@@ -23,6 +23,7 @@ const nextConfig = {
         test: /\.wasm$/,
         type: 'webassembly/async'
       });
+  
 
       if (!dev) {
         config.optimization.splitChunks = {

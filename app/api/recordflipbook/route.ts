@@ -150,11 +150,11 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
     ffmpeg = createFFmpeg({
       log: true,
       logger: ({ message }) => console.log('FFmpeg:', message),
-      corePath: require('@ffmpeg/core').corePath,
       progress: ({ ratio }) => {
         console.log(`FFmpeg Progress: ${(ratio * 100).toFixed(2)}%`);
-      },
+      }
     });
+    
     
     console.log('Loading FFmpeg...');
     await ffmpeg.load();
