@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 async function recordFlipBook(locationCount: number, mappbookUserId: string): Promise<string> {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     defaultViewport: {
       width: 1920,
       height: 1080
@@ -27,7 +27,7 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
     const page = await browser.newPage();
     
     await page.setViewport({ width: 1920, height: 1080 });
-    await page.goto(`http://localhost:3000/playflipbook?userId=${mappbookUserId}&layout=double`, { 
+    await page.goto(`http://localhost:3000/playflipbook?userId=${mappbookUserId}`, { 
       waitUntil: 'networkidle0' 
     });
     
@@ -85,8 +85,8 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
     await flipButton.click();
     
     // Calculate frames and timing
-    const fps = 24; // Reduced from 30 for better stability
-    const secondsPerSpread = 2;
+    const fps = 14; // Reduced from 30 for better stability
+    const secondsPerSpread = 1;
     const totalSpreads = Math.ceil((locationCount + 2) / 2); // +2 for covers
     
     // Capture frames for each spread

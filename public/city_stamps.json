@@ -9,13 +9,13 @@
     {
       "country": "Italy",
       "country_code": "IT",
-      "city": "Rome",
+      "city": "Roma",
       "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#2A7B4B\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" rx=\"10\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"10\">AEROPORTO DI FIUMICINO</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">ROMA</text><path d=\"M90 75 l10 -10 l10 10 l-10 10 z\"/><circle cx=\"60\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><circle cx=\"140\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><text x=\"60\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">FCO</text><text x=\"140\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">SAT</text><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">20 MAR 2024</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"8\">www.visitroma.com</text></g></svg>"
     },
     {
       "country": "Germany",
       "country_code": "DE",
-      "city": "Berlin",
+      "city": "Schongau",
       "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#445566\"><path d=\"M100 10 C150 10, 190 50, 190 80 C190 110, 150 150, 100 150 C50 150, 10 110, 10 80 C10 50, 50 10, 100 10\" stroke=\"#445566\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"12\">WILLKOMMEN IN</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"16\" font-weight=\"bold\">BERLIN-DEU</text><path d=\"M40 70 l15 -5 l-15 5 l15 5 z\"/><path d=\"M145 70 l15 -5 l-15 5 l15 5 z\"/><circle cx=\"100\" cy=\"70\" r=\"15\" fill=\"none\" stroke=\"#445566\" stroke-width=\"2\"/><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"16\">ARRIVAL</text><circle cx=\"40\" cy=\"95\" r=\"2\"/><circle cx=\"160\" cy=\"95\" r=\"2\"/></g></svg>"
     },
     {
@@ -23,6 +23,43 @@
       "country_code": "ES",
       "city": "Madrid",
       "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#C17817\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" stroke=\"#C17817\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"45\" text-anchor=\"middle\" font-size=\"12\">BIENVENIDOS A</text><text x=\"100\" y=\"65\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">MADRID</text><path d=\"M60 85 h80 l10 -5 l10 5 l-10 5 z\"/><line x1=\"20\" y1=\"100\" x2=\"180\" y2=\"100\" stroke=\"#C17817\" stroke-width=\"1\"/><text x=\"60\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">MAD</text><text x=\"60\" y=\"135\" text-anchor=\"middle\" font-size=\"12\">30 ENE 24</text><text x=\"140\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">09 AM</text><text x=\"140\" y=\"135\" text-anchor=\"middle\" font-size=\"12\">MONDAY</text></g></svg>"
+    },
+    {
+      "country": "Italy",
+      "country_code": "IT",
+      "city": "Milano",
+      "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#2A7B4B\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" rx=\"10\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"10\">AEROPORTO DI MALPENSA</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">MILANO</text><path d=\"M80 75 l20 -15 l20 15\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><circle cx=\"60\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><circle cx=\"140\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><text x=\"60\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">MXP</text><text x=\"140\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">MON</text><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">25 MAR 2024</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"8\">www.visitmilano.com</text></g></svg>"
+    },
+    {
+      "country": "Italy",
+      "country_code": "IT",
+      "city": "Capri",
+      "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#2A7B4B\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" rx=\"10\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"10\">AEROPORTO DI MALPENSA</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">MILANO</text><path d=\"M80 75 l20 -15 l20 15\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><circle cx=\"60\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><circle cx=\"140\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><text x=\"60\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">MXP</text><text x=\"140\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">MON</text><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">25 MAR 2024</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"8\">www.visitmilano.com</text></g></svg>"
+    },
+    {
+      "country": "Italy",
+      "country_code": "IT",
+      "city": "Venezia",
+      "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#2A7B4B\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" rx=\"10\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"10\">AEROPORTO MARCO POLO</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">VENEZIA</text><path d=\"M70 75 C85 65, 115 65, 130 75\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><circle cx=\"60\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><circle cx=\"140\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><text x=\"60\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">VCE</text><text x=\"140\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">TUE</text><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">28 MAR 2024</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"8\">www.visitvenezia.com</text></g></svg>"
+    },
+    {
+      "country": "Italy",
+      "country_code": "IT",
+      "city": "Firenze",
+      "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#2A7B4B\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" rx=\"10\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"10\">AEROPORTO AMERIGO VESPUCCI</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">FIRENZE</text><path d=\"M85 75 l15 -10 l15 10\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><circle cx=\"60\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><circle cx=\"140\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><text x=\"60\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">FLR</text><text x=\"140\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">WED</text><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">22 MAR 2024</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"8\">www.visitfirenze.com</text></g></svg>"
+    },
+    {
+      "country": "Italy",
+      "country_code": "IT",
+      "city": "Napoli",
+      "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#2A7B4B\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" rx=\"10\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"10\">AEROPORTO INTERNAZIONALE</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">NAPOLI</text><path d=\"M80 75 Q100 65 120 75\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><circle cx=\"60\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><circle cx=\"140\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><text x=\"60\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">NAP</text><text x=\"140\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">THU</text><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">18 MAR 2024</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"8\">www.visitnapoli.com</text></g></svg>"
+    },
+    {
+      "country": "Italy",
+      "country_code": "IT",
+      "city": "Bologna",
+      "svgCode": "<svg viewBox=\"0 0 200 160\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#2A7B4B\"><rect x=\"20\" y=\"20\" width=\"160\" height=\"120\" rx=\"10\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><text x=\"100\" y=\"40\" text-anchor=\"middle\" font-size=\"10\">AEROPORTO G. MARCONI</text><text x=\"100\" y=\"60\" text-anchor=\"middle\" font-size=\"18\" font-weight=\"bold\">BOLOGNA</text><path d=\"M75 75 L100 65 L125 75\" stroke=\"#2A7B4B\" stroke-width=\"2\" fill=\"none\"/><circle cx=\"60\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><circle cx=\"140\" cy=\"75\" r=\"10\" fill=\"none\" stroke=\"#2A7B4B\" stroke-width=\"1\"/><text x=\"60\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">BLQ</text><text x=\"140\" y=\"100\" text-anchor=\"middle\" font-size=\"12\">FRI</text><text x=\"100\" y=\"120\" text-anchor=\"middle\" font-size=\"12\">21 MAR 2024</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"8\">www.visitbologna.com</text></g></svg>"
     }
+
   ]
 }

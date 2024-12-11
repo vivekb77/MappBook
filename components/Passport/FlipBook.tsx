@@ -8,6 +8,35 @@ interface Location {
   place_country_code: string;
 }
 
+interface FlipBookProps {
+  width: number;
+  height: number;
+  size: "fixed" | "stretch";
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
+  drawShadow?: boolean;
+  flippingTime?: number;
+  usePortrait?: boolean;
+  startPage?: number;
+  maxShadowOpacity?: number;
+  showCover?: boolean;
+  mobileScrollSupport?: boolean;
+  onFlip?: (e: any) => void;
+  onChangeOrientation?: (e: any) => void;
+  onChangeState?: (e: any) => void;
+  className?: string;
+  style?: React.CSSProperties;
+  startZIndex?: number;
+  autoSize?: boolean;
+  clickEventForward?: boolean;
+  useMouseEvents?: boolean;
+  swipeDistance?: number;
+  showPageCorners?: boolean;
+  disableFlipByClick?: boolean;
+}
+
 
 
 interface Stamp {
@@ -30,15 +59,31 @@ interface PassportPageProps {
 const PassportCover = React.forwardRef<HTMLDivElement>((_, ref) => (
   <div 
     ref={ref}
-    className="relative h-full w-full bg-neutral-100 rounded shadow-lg"
+    className="relative h-full w-full overflow-hidden"
     data-density="hard"
   >
-    <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
-      <div className="text-center p-8 rounded-lg bg-white/90 border-4 border-double border-neutral-300">
-        <h1 className="text-3xl font-serif mb-2 text-neutral-800">
-          TRAVEL MEMORIES
+    {/* Base page with background image */}
+    <div 
+      className="absolute top-0 left-0 right-0 bottom-0 w-full h-full"
+      style={{
+        backgroundImage: 'url("/passportfrontcover.jpg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundColor: '#4A3728', // Fallback
+        boxShadow: 'inset 0 0 100px rgba(0,0,0,0.5)'
+      }}
+    >
+      {/* Darkening overlay */}
+      <div className="absolute inset-0 bg-black/30" />
+    </div>
+    
+    {/* Content */}
+    <div className="relative h-full w-full flex flex-col items-center justify-center p-8 z-10">
+      <div className="text-center p-8">
+        <h1 className="text-4xl font-serif mb-4 text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+          ITER MEMORIAE
         </h1>
-        <div className="text-sm text-neutral-600 mt-4 font-serif">
+        <div className="font-serif text-2xl text-amber-100 mt-4" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
           Anno Domini MMXXIV
         </div>
       </div>
@@ -61,19 +106,51 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
       ))
       .filter((stamp): stamp is CityStamp => stamp !== undefined);
 
+    // 10 fixed positions spread around the page (left%, top%, rotation)
+    const FIXED_POSITIONS = [
+      { left: 25, top: 25, rotation: -15 },  // Top left
+      { left: 75, top: 25, rotation: 15 },   // Top right
+      { left: 25, top: 75, rotation: 15 },   // Bottom left
+      { left: 75, top: 75, rotation: -15 },  // Bottom right
+      { left: 50, top: 20, rotation: 0 },    // Top center
+      { left: 50, top: 80, rotation: 0 },    // Bottom center
+      { left: 20, top: 50, rotation: -20 },  // Left center
+      { left: 80, top: 50, rotation: 20 },   // Right center
+      { left: 35, top: 40, rotation: 10 },   // Upper left middle
+      { left: 65, top: 60, rotation: -10 }   // Lower right middle
+    ];
+
     return (
       <div
         ref={ref}
-        className="relative h-full w-full bg-white rounded shadow-lg"
+        className="relative h-full w-full overflow-hidden"
       >
-        <div className="absolute inset-0 p-8">
-          <h2 className="text-xl font-semibold mb-4 text-neutral-800">
-            {location.place_country}
-          </h2>
-          
+        {/* Base page with background image */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'url("/passport_page.jpg")',
+            backgroundSize: '100% 100%',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center center',
+            backgroundColor: '#F5E6D3',
+            width: '100%',
+            height: '100%'
+          }}
+        />
+        
+        {/* Content container */}
+        <div className="relative h-full w-full">
+          {/* Country stamp in center */}
           {matchingCountryStamp && (
-            <div className="flex justify-center mt-4">
-              <div className="w-64 h-64 relative transform -rotate-12">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+              <div 
+                className="w-64 h-64 relative"
+                style={{
+                  filter: 'sepia(0.6) brightness(0.8)',
+                  mixBlendMode: 'multiply'
+                }}
+              >
                 <div 
                   className="absolute inset-0"
                   dangerouslySetInnerHTML={{
@@ -84,30 +161,70 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
             </div>
           )}
 
-          <div className="flex flex-wrap justify-center items-end gap-6 mt-8">
-            {matchingCityStamps.map((stamp, index) => (
+          {/* City stamps */}
+          {matchingCityStamps.map((stamp, index) => {
+            if (index >= FIXED_POSITIONS.length) return null;
+            const position = FIXED_POSITIONS[index];
+            
+            return (
               <div 
-                key={index}
-                className="relative w-48 h-48 transform rotate-12"
+                key={`${stamp.city}-${index}-${pageNumber}`}
+                className="absolute w-32 h-32"
+                style={{
+                  left: `${position.left}%`,
+                  top: `${position.top}%`,
+                  transform: `translate(-50%, -50%) rotate(${position.rotation}deg)`,
+                  filter: 'sepia(0.6) brightness(0.8)',
+                  mixBlendMode: 'multiply',
+                  zIndex: 10
+                }}
               >
                 <div 
-                  className="absolute inset-0"
+                  className="w-full h-full"
                   dangerouslySetInnerHTML={{
                     __html: stamp.svgCode.replace('<svg', '<svg class="w-full h-full"')
                   }} 
                 />
               </div>
-            ))}
-          </div>
+            );
+          })}
 
-          <div className="absolute bottom-4 right-8 text-sm text-neutral-400">
-            {pageNumber}
+          {/* Page number */}
+          <div className="absolute bottom-8 right-8 font-serif text-2xl text-amber-900 z-30">
+            {toRomanNumeral(pageNumber)}
           </div>
         </div>
       </div>
     );
   }
 );
+
+// Helper function remains the same
+const toRomanNumeral = (num: number): string => {
+  const romanNumerals = [
+    { value: 100, numeral: 'C' },
+    { value: 90, numeral: 'XC' },
+    { value: 50, numeral: 'L' },
+    { value: 40, numeral: 'XL' },
+    { value: 10, numeral: 'X' },
+    { value: 9, numeral: 'IX' },
+    { value: 5, numeral: 'V' },
+    { value: 4, numeral: 'IV' },
+    { value: 1, numeral: 'I' }
+  ];
+
+  let result = '';
+  let remaining = num;
+
+  for (const { value, numeral } of romanNumerals) {
+    while (remaining >= value) {
+      result += numeral;
+      remaining -= value;
+    }
+  }
+
+  return result;
+};
 
 const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) => {
   const [page, setPage] = React.useState(0);
@@ -163,7 +280,7 @@ const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) =>
   }, []);
 
   React.useEffect(() => {
-    setTotalPages(validLocations.length + 2);
+    setTotalPages(validLocations.length + 0);
   }, [validLocations.length]);
 
   const nextPage = () => {
@@ -194,11 +311,13 @@ const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) =>
     {/* Wooden table background with test id for recording */}
     <div 
       data-testid="wooden-background"
-      className="w-full max-w-5xl p-12 rounded-lg shadow-xl"
+      className="w-full max-w-5xl p-12 rounded-lg relative overflow-hidden"
       style={{
-        background: 'linear-gradient(45deg, #8B4513, #A0522D, #8B4513)',
-        boxShadow: 'inset 0 0 100px rgba(0,0,0,0.3)',
-        border: '1px solid #6B3511'
+        backgroundImage: 'url("/booktable.jpg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        boxShadow: 'inset 0 0 100px rgba(0,0,0,0.3)'
       }}
     >
       {/* Book container with subtle elevation */}
@@ -207,23 +326,35 @@ const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) =>
         <div className="absolute -inset-4 bg-black/20 blur-xl rounded-full"></div>
         
         <div className="relative">
-          <HTMLFlipBook
-            width={550}
-            height={733}
-            size="stretch"
-            minWidth={315}
-            maxWidth={1000}
-            minHeight={400}
-            maxHeight={1533}
-            maxShadowOpacity={0.5}
-            showCover={true}
-            mobileScrollSupport={true}
-            onFlip={(e) => setPage(e.data)}
-            onChangeOrientation={(e) => setOrientation(e.data)}
-            onChangeState={(e) => setState(e.data)}
-            className="demo-book"
-            ref={flipBook}
-          >
+        <HTMLFlipBook
+              width={550}
+              height={733}
+              size="stretch"
+              minWidth={315}
+              maxWidth={1000}
+              minHeight={400}
+              maxHeight={1533}
+              maxShadowOpacity={0.5}
+              showCover={true}
+              mobileScrollSupport={true}
+              onFlip={(e) => setPage(e.data)}
+              onChangeOrientation={(e) => setOrientation(e.data)}
+              onChangeState={(e) => setState(e.data)}
+              className="demo-book"
+              ref={flipBook}
+              style={{}}
+              startPage={0}
+              startZIndex={0}
+              drawShadow={true}
+              flippingTime={1000}
+              usePortrait={false}
+              autoSize={true}
+              clickEventForward={false}
+              useMouseEvents={true}
+              swipeDistance={0}
+              showPageCorners={true}
+              disableFlipByClick={false}
+            >
             <PassportCover />
             {validLocations.map((location, index) => (
               <PassportPage

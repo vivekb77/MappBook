@@ -55,7 +55,7 @@ export function PassportDashboard({ onVideoUrlChange }: PassportDashboardProps) 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          locationCount: 6,
+          locationCount: 4,
           mappbook_user_id: mappbookUser.mappbook_user_id 
         }),
       })
