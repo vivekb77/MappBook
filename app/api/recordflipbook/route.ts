@@ -1,11 +1,11 @@
-// app/api/recordflipbook/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from "@/components/utils/supabase"
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core'; 
 import fs from 'fs';
 import path from 'path';
-import { spawn } from 'child_process';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +33,8 @@ interface SuccessResponse {
 interface ErrorResponse {
   error: string;
 }
+
+const FFMPEG_CORE_URL = 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd';
 
 async function recordFlipBook(locationCount: number, mappbookUserId: string): Promise<string> {
   console.log('Starting recordFlipBook with:', { locationCount, mappbookUserId });
@@ -110,7 +112,6 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
       throw new Error('Flip button not found');
     }
 
-
     // Initial capture of the cover
     console.log('Frame capture started');
     await captureFrame();
@@ -145,55 +146,65 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
       throw new Error('No frames were captured');
     }
 
-    // Use FFmpeg to combine frames into video
-    await new Promise((resolve, reject) => {
-      const ffmpegProcess = spawn('ffmpeg', [
-        '-framerate', '24',
-        '-i', path.join(framesDir, 'frame_%06d.png'),
-        '-c:v', 'libx264',
-        '-pix_fmt', 'yuv420p',
-        '-y',
-        outputPath
-      ]);
-
-      ffmpegProcess.stderr.on('data', (data) => {
-        console.log(`ffmpeg: ${data}`);
-      });
-
-      ffmpegProcess.on('close', (code) => {
-        if (code === 0) {
-          resolve(outputPath);
-        } else {
-          reject(new Error(`FFmpeg process exited with code ${code}`));
-        }
-      });
+    // Initialize FFmpeg
+    const ffmpeg = new FFmpeg();
+    console.log('Loading FFmpeg...');
+    
+    // Load FFmpeg
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`/ffmpeg/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`/ffmpeg/ffmpeg-core.wasm`, 'application/wasm'),
     });
+    
+    console.log('FFmpeg loaded');
 
-    // Read the generated video file
-    const videoBuffer = await fs.promises.readFile(outputPath);
+  // Write frames to FFmpeg virtual filesystem
+  for (let i = 0; i < frameCount; i++) {
+    const frameFile = path.join(framesDir, `frame_${i.toString().padStart(6, '0')}.png`);
+    // Read frame data as Uint8Array
+    const frameData = await fs.promises.readFile(frameFile, { encoding: null });
+    // Convert to Uint8Array explicitly if needed
+    const frameUint8Array = new Uint8Array(frameData);
+    await ffmpeg.writeFile(`frame_${i.toString().padStart(6, '0')}.png`, frameUint8Array);
+  }
 
-    // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('flipbook-videos')
-      .upload(
-        `videos/${mappbookUserId}/${path.basename(outputPath)}`,
-        videoBuffer,
-        {
-          contentType: 'video/mp4',
-          cacheControl: '3600'
-        }
-      );
+  // Run FFmpeg command to create video
+  await ffmpeg.exec([
+    '-framerate', '24',
+    '-i', 'frame_%06d.png',
+    '-c:v', 'libx264',
+    '-pix_fmt', 'yuv420p',
+    '-y',
+    'output.mp4'
+  ]);
 
-    if (uploadError) {
-      throw new Error(`Failed to upload video: ${uploadError.message}`);
-    }
+   // Read the output file from FFmpeg's virtual filesystem
+   const data = await ffmpeg.readFile('output.mp4') as Uint8Array;
+    
+   // Write to temporary file as Uint8Array
+   await fs.promises.writeFile(outputPath, data);
 
-    // Get the public URL
+   // Upload to Supabase Storage
+   const { data: uploadData, error: uploadError } = await supabase.storage
+     .from('flipbook-videos')
+     .upload(
+       `videos/${mappbookUserId}/${path.basename(outputPath)}`,
+       data,
+       {
+         contentType: 'video/mp4',
+         cacheControl: '3600'
+       }
+     );
+
+   if (uploadError) {
+     throw new Error(`Failed to upload video: ${uploadError.message}`);
+   }
+
     const { data: publicUrl } = supabase.storage
       .from('flipbook-videos')
       .getPublicUrl(`videos/${mappbookUserId}/${path.basename(outputPath)}`);
 
-    return publicUrl.publicUrl;
+  return publicUrl.publicUrl;
 
   } catch (error) {
     console.error('Detailed error:', error);
