@@ -26,8 +26,8 @@ interface RequestBody {
 
 interface SuccessResponse {
   success: true;
-  videoUrl: string;
-  userId: string;
+  video_url: string;
+  user_id: string;
 }
 
 interface ErrorResponse {
@@ -245,8 +245,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ 
       success: true,
-      videoUrl,
-      userId: mappbook_user_id
+      video_url: videoUrl,     // Changed to match interface
+      user_id: mappbook_user_id // Changed to match interface
     } as SuccessResponse);
 
   } catch (error: unknown) {

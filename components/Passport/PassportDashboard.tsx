@@ -11,8 +11,8 @@ const DEMO_VIDEO_URL = "/generated/passport_1733795592552.mp4"
 
 interface RecordFlipbookResponse {
   success: boolean;
-  video_url?: string;
-  user_id?: string;
+  video_url?: string;    // Changed from videoUrl
+  user_id?: string;      // Changed from userId
   error?: string;
 }
 
@@ -88,8 +88,8 @@ export function PassportDashboard({
         throw new Error('No video URL returned')
       }
   
-      setVideoUrl(data.video_url)
-      onVideoUrlChange(data.video_url)
+      setVideoUrl(data.video_url);        // Changed from videoUrl
+      onVideoUrlChange(data.video_url);   // Changed from videoUrl
     } catch (error: unknown) {
       // Handle the error with proper type checking
       let errorMessage = 'An error occurred while recording'
