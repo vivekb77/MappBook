@@ -249,10 +249,23 @@ export async function POST(req: NextRequest) {
       userId: mappbook_user_id
     } as SuccessResponse);
 
-  } catch (error) {
-    console.error('Error in recording:', error);
+  } catch (error: unknown) {
+    // Properly type check the error
+    let errorMessage = 'Failed to record video';
+    
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      errorMessage = `Failed to record video: ${error.message}`;
+    } else {
+      console.error('Unknown error:', error);
+    }
+
     return NextResponse.json(
-      { error: 'Failed to record video' } as ErrorResponse,
+      { error: errorMessage } as ErrorResponse,
       { status: 500 }
     );
   }

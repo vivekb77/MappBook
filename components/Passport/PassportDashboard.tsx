@@ -58,6 +58,8 @@ export function PassportDashboard({
       return
     }
     
+    let response: Response | undefined
+    
     try {
       setIsRecording(true)
       setError(null)
@@ -65,7 +67,7 @@ export function PassportDashboard({
       onVideoUrlChange(null)
       onRecordingStart()
   
-      const response = await fetch('/api/recordflipbook', {
+      response = await fetch('/api/recordflipbook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,11 +90,33 @@ export function PassportDashboard({
   
       setVideoUrl(data.video_url)
       onVideoUrlChange(data.video_url)
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred while recording'
+    } catch (error: unknown) {
+      // Handle the error with proper type checking
+      let errorMessage = 'An error occurred while recording'
+      
+      if (error instanceof Error) {
+        errorMessage = error.message
+      }
+      
       setError(errorMessage)
       onRecordingError(errorMessage)
-      console.error('Recording error:', error)
+      
+      // Log detailed error information
+      console.error('Full error details:', {
+        error,
+        responseStatus: response?.status,
+        responseStatusText: response?.statusText
+      })
+  
+      // If you need to log the response text, do it separately since it's async
+      if (response) {
+        try {
+          const responseText = await response.text()
+          console.error('Response text:', responseText)
+        } catch (e) {
+          console.error('Could not get response text')
+        }
+      }
     } finally {
       setIsRecording(false)
     }
