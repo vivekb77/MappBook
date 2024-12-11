@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import { useSearchParams } from 'next/navigation';
@@ -21,6 +21,21 @@ interface Location {
 }
 
 export default function PlayFlipBook() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-full bg-[#F5E6D3] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          <p className="text-lg text-gray-600">Loading your passport...</p>
+        </div>
+      </div>
+    }>
+      <PlayFlipBookContent />
+    </Suspense>
+  );
+}
+
+function PlayFlipBookContent() {
   const searchParams = useSearchParams();
   const [locations, setLocations] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,33 +120,32 @@ export default function PlayFlipBook() {
 
   return (
     <>
-    <div className="h-screen w-full bg-[#F5E6D3] flex flex-col">
-      <div className="flex-1 overflow-hidden">
-        <PassportFlipBook locations={locations} />
+      <div className="h-screen w-full bg-[#F5E6D3] flex flex-col">
+        <div className="flex-1 overflow-hidden">
+          <PassportFlipBook locations={locations} />
+        </div>
       </div>
-      
-    </div>
-    <div className="flex-none bg-[#F5E6D3] pt-1">
-    <h2 className="text-xl font-semibold px-4 mb-1 text-gray-800">Places Visited</h2>
-    <div className="h-96 overflow-y-auto">
-      <table className="w-full border-collapse bg-white shadow-sm">
-        <thead className="bg-purple-50 sticky top-0">
-          <tr>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Country</th>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Cities</th>
-          </tr>
-        </thead>
-        <tbody>
-          {locations.map((location, index) => (
-            <tr key={location.place_country_code} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-              <td className="px-4 py-1.5 text-sm text-gray-800 font-medium border-t">{location.place_country}</td>
-              <td className="px-4 py-1.5 text-sm text-gray-600 border-t">{location.place_names.join(', ')}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  </>
+      <div className="flex-none bg-[#F5E6D3] pt-1">
+        <h2 className="text-xl font-semibold px-4 mb-1 text-gray-800">Places Visited</h2>
+        <div className="h-96 overflow-y-auto">
+          <table className="w-full border-collapse bg-white shadow-sm">
+            <thead className="bg-purple-50 sticky top-0">
+              <tr>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Country</th>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Cities</th>
+              </tr>
+            </thead>
+            <tbody>
+              {locations.map((location, index) => (
+                <tr key={location.place_country_code} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-1.5 text-sm text-gray-800 font-medium border-t">{location.place_country}</td>
+                  <td className="px-4 py-1.5 text-sm text-gray-600 border-t">{location.place_names.join(', ')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
   );
 }
