@@ -1,5 +1,3 @@
-
-
 // components/PassportDashboard.tsx
 "use client"
 
@@ -9,18 +7,26 @@ import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useMappbookUser } from '@/context/UserContext'
 
-const DEMO_VIDEO_URL = "/generated/passport_1733795592552.mp4" // Replace with your demo video URL
+const DEMO_VIDEO_URL = "/generated/passport_1733795592552.mp4"
+
 interface RecordFlipbookResponse {
   success: boolean;
   video_url?: string;
   user_id?: string;
   error?: string;
 }
+
 interface PassportDashboardProps {
   onVideoUrlChange: (url: string | null) => void
+  onRecordingStart: () => void
+  onRecordingError: (error: string) => void
 }
 
-export function PassportDashboard({ onVideoUrlChange }: PassportDashboardProps) {
+export function PassportDashboard({ 
+  onVideoUrlChange,
+  onRecordingStart,
+  onRecordingError
+}: PassportDashboardProps) {
   const { isLoaded, isSignedIn, user } = useUser()
   const { mappbookUser, setMappbookUser } = useMappbookUser()
   const [isRecording, setIsRecording] = useState(false)
@@ -28,7 +34,6 @@ export function PassportDashboard({ onVideoUrlChange }: PassportDashboardProps) 
   const [error, setError] = useState<string | null>(null)
   const [isLoadingSignIn, setIsLoadingSignIn] = useState(false)
 
-  // Set demo video when not signed in
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       setVideoUrl(DEMO_VIDEO_URL)
@@ -47,7 +52,9 @@ export function PassportDashboard({ onVideoUrlChange }: PassportDashboardProps) 
   
   const triggerRecording = async () => {
     if (!isSignedIn || !mappbookUser) {
-      setError('User must be signed in')
+      const errorMsg = 'User must be signed in'
+      setError(errorMsg)
+      onRecordingError(errorMsg)
       return
     }
     
@@ -56,6 +63,7 @@ export function PassportDashboard({ onVideoUrlChange }: PassportDashboardProps) 
       setError(null)
       setVideoUrl(null)
       onVideoUrlChange(null)
+      onRecordingStart()
   
       const response = await fetch('/api/recordflipbook', {
         method: 'POST',
@@ -83,13 +91,14 @@ export function PassportDashboard({ onVideoUrlChange }: PassportDashboardProps) 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred while recording'
       setError(errorMessage)
+      onRecordingError(errorMessage)
       console.error('Recording error:', error)
     } finally {
       setIsRecording(false)
     }
   }
 
-
+  // Loading state
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
@@ -262,4 +271,4 @@ export function PassportDashboard({ onVideoUrlChange }: PassportDashboardProps) 
       </div>
     </div>
   )
-}
+} 
