@@ -146,14 +146,15 @@ async function recordFlipBook(locationCount: number, mappbookUserId: string): Pr
       throw new Error('No frames were captured');
     }
 
-    // Initialize FFmpeg
-    ffmpeg = createFFmpeg({
-      log: true,
-      logger: ({ message }) => console.log('FFmpeg:', message),
-      progress: ({ ratio }) => {
-        console.log(`FFmpeg Progress: ${(ratio * 100).toFixed(2)}%`);
-      }
-    });
+       // Initialize FFmpeg with CDN paths
+       ffmpeg = createFFmpeg({
+        log: true,
+        logger: ({ message }) => console.log('FFmpeg:', message),
+        progress: ({ ratio }) => {
+          console.log(`FFmpeg Progress: ${(ratio * 100).toFixed(2)}%`);
+        },
+        corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+      });
     
     
     console.log('Loading FFmpeg...');
