@@ -1,27 +1,33 @@
 const crypto = require('crypto');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-
-    // Build optimizations
-    poweredByHeader: false, // Remove X-Powered-By header for security
-    compress: true, // Enable gzip compression
+    poweredByHeader: false,
+    compress: true,
     
-    // Production image optimization
     images: {
-      minimumCacheTTL: 60, // Cache optimized images for 60 seconds
-      formats: ['image/webp'], // Prefer WebP format
-      deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048], // Responsive image sizes
-      imageSizes: [16, 32, 48, 64, 96, 128, 256], // Static image sizes
+      minimumCacheTTL: 60,
+      formats: ['image/webp'],
+      deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+      imageSizes: [16, 32, 48, 64, 96, 128, 256],
     },
   
-    // Webpack optimizations
     webpack: (config, { dev, isServer }) => {
-      // Production-only optimizations
+      // Enable WebAssembly
+      config.experiments = {
+        ...config.experiments,
+        asyncWebAssembly: true,
+        layers: true
+      };
+
+      config.module.rules.push({
+        test: /\.wasm$/,
+        type: 'webassembly/async'
+      });
+
       if (!dev) {
-        // Split chunks for better caching
         config.optimization.splitChunks = {
           chunks: 'all',
-          minSize: 20000, // Minimum size in bytes for a chunk to be generated
+          minSize: 20000,
           cacheGroups: {
             default: false,
             vendors: false,
@@ -57,10 +63,8 @@ const nextConfig = {
       return config;
     },
   
-    // Enable React strict mode for better development
     reactStrictMode: true,
   
-    // Production URL configuration
     async headers() {
       return [
         {
@@ -89,86 +93,105 @@ const nextConfig = {
             {
               key: 'Referrer-Policy',
               value: 'origin-when-cross-origin'
+            },
+            {
+              key: 'Cross-Origin-Opener-Policy',
+              value: 'same-origin'
+            },
+            {
+              key: 'Cross-Origin-Embedder-Policy',
+              value: 'require-corp'
             }
           ]
         },
         {
-            source: '/:path*.js',
-            headers: [
-              {
-                key: 'Cache-Control',
-                value: 'public, max-age=31536000, immutable'
-              }
-            ]
-          },
-          {
-            source: '/:path*.css',
-            headers: [
-              {
-                key: 'Cache-Control',
-                value: 'public, max-age=31536000, immutable'
-              }
-            ]
-          },
-          {
-            source: '/(.*).(png|jpg|jpeg|svg|gif|ico|webp)',
-            headers: [
-              {
-                key: 'Cache-Control',
-                value: 'public, max-age=31536000, immutable'
-              }
-            ]
-          },
-          {
-            source: '/(.*).(woff|woff2|ttf|otf)',
-            headers: [
-              {
-                key: 'Cache-Control',
-                value: 'public, max-age=31536000, immutable'
-              }
-            ]
-          },
-          // HTML and data files - shorter cache
-          {
-            source: '/:path*.html',
-            headers: [
-              {
-                key: 'Cache-Control',
-                value: 'public, max-age=3600, must-revalidate'
-              }
-            ]
-          },
-          {
-            source: '/api/:path*',
-            headers: [
-              {
-                key: 'Cache-Control',
-                value: 'no-store, max-age=0'
-              }
-            ]
-          },
-          {
-            source: '/countries10009.geojson',
-            headers: [
-              {
-                key: 'Cache-Control',
-                value: 'public, max-age=31536000, immutable' // Cache for 1 year
-              },
-              {
-                key: 'Content-Type',
-                value: 'application/geo+json'
-              },
-              {
-                key: 'Vary',
-                value: 'Accept-Encoding'
+          source: '/:path*.wasm',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable'
+            },
+            {
+              key: 'Content-Type',
+              value: 'application/wasm'
             }
-            ]
-          }
+          ]
+        },
+        {
+          source: '/:path*.js',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable'
+            }
+          ]
+        },
+        {
+          source: '/:path*.css',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable'
+            }
+          ]
+        },
+        {
+          source: '/(.*).(png|jpg|jpeg|svg|gif|ico|webp)',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable'
+            }
+          ]
+        },
+        {
+          source: '/(.*).(woff|woff2|ttf|otf)',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable'
+            }
+          ]
+        },
+        {
+          source: '/:path*.html',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=3600, must-revalidate'
+            }
+          ]
+        },
+        {
+          source: '/api/:path*',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'no-store, max-age=0'
+            }
+          ]
+        },
+        {
+          source: '/countries10009.geojson',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable'
+            },
+            {
+              key: 'Content-Type',
+              value: 'application/geo+json'
+            },
+            {
+              key: 'Vary',
+              value: 'Accept-Encoding'
+            }
+          ]
+        }
       ];
     },
   
-    // Output configuration
-    output: 'standalone', // Creates a standalone build that's more portable
+    output: 'standalone',
   };
   
   module.exports = nextConfig
