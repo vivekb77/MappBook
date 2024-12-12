@@ -63,18 +63,34 @@ async function processFramesWithFFmpeg(
   }
 
   try {
-    // Construct the FFmpeg command - removed quotes around ffmpeg path as they can cause issues
-    const ffmpegCommand = `${ffmpeg} -framerate ${fps} -i "${path.join(framesDir, 'frame_%06d.png')}" -c:v libx264 -pix_fmt yuv420p -crf 23 "${outputPath}"`;
+    // Log the FFmpeg path for debugging
+    console.log('FFmpeg path:', ffmpeg);
+
+    // Use the full path to the frames with proper escaping
+    const inputPath = path.join(framesDir, 'frame_%06d.png').replace(/(\s+)/g, '\\$1');
+    
+    // Construct the FFmpeg command with proper path escaping
+    const ffmpegCommand = [
+      ffmpeg,
+      '-framerate', fps.toString(),
+      '-i', inputPath,
+      '-c:v', 'libx264',
+      '-pix_fmt', 'yuv420p',
+      '-crf', '23',
+      outputPath
+    ].join(' ');
     
     console.log('Executing FFmpeg command:', ffmpegCommand);
     
     const { stdout, stderr } = await execAsync(ffmpegCommand, {
       env: {
         ...process.env,
+        PATH: `${process.env.PATH}:${path.dirname(ffmpeg)}`,
         LD_LIBRARY_PATH: process.env.LD_LIBRARY_PATH 
-          ? `${process.env.LD_LIBRARY_PATH}:/var/task/node_modules/ffmpeg-static/lib` 
-          : '/var/task/node_modules/ffmpeg-static/lib'
-      }
+          ? `${process.env.LD_LIBRARY_PATH}:${path.join(path.dirname(ffmpeg), 'lib')}`
+          : path.join(path.dirname(ffmpeg), 'lib')
+      },
+      maxBuffer: 1024 * 1024 * 10 // 10MB buffer
     });
     
     if (stderr) {
@@ -90,10 +106,13 @@ async function processFramesWithFFmpeg(
     if (error instanceof Error) {
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
+      // Log the type of error for debugging
+      console.error('Error type:', error.constructor.name);
     }
     throw error;
   }
 }
+
 
 
 async function recordFlipBook(
