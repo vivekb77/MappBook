@@ -3,19 +3,16 @@ import type { NextRequest } from 'next/server';
 import { supabase } from '@/components/utils/supabase';
 import chromium from '@sparticuz/chromium';
 import puppeteer, { Page } from 'puppeteer-core';
-
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import ffmpeg from 'ffmpeg-static';
-const execAsync = promisify(exec);
 import fs from 'fs';
-import { chmod } from 'fs/promises';
 
 
 // Environment variables
 const APP_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
+const execAsync = promisify(exec);
 export const config = {
   runtime: 'nodejs',
   maxDuration: 300,
@@ -51,19 +48,6 @@ const getChromiumOptions = async () => {
 };
 
 
-async function makeFFmpegExecutable(): Promise<void> {
-  if (!ffmpeg) {
-    throw new Error('FFmpeg binary not found');
-  }
-
-  // Make FFmpeg executable in Vercel environment
-  try {
-    await chmod(ffmpeg, '755');
-  } catch (error) {
-    console.error('Failed to make FFmpeg executable:', error);
-    throw error;
-  }
-}
 async function processFramesWithFFmpeg(
   framesDir: string,
   outputPath: string,
@@ -79,15 +63,19 @@ async function processFramesWithFFmpeg(
   }
 
   try {
-    // Ensure FFmpeg is executable
-    await makeFFmpegExecutable();
-
-    // Construct the FFmpeg command using the ffmpeg-static path
-    const ffmpegCommand = `"${ffmpeg}" -framerate ${fps} -i "${path.join(framesDir, 'frame_%06d.png')}" -c:v libx264 -pix_fmt yuv420p -crf 23 "${outputPath}"`;
+    // Construct the FFmpeg command - removed quotes around ffmpeg path as they can cause issues
+    const ffmpegCommand = `${ffmpeg} -framerate ${fps} -i "${path.join(framesDir, 'frame_%06d.png')}" -c:v libx264 -pix_fmt yuv420p -crf 23 "${outputPath}"`;
     
     console.log('Executing FFmpeg command:', ffmpegCommand);
     
-    const { stdout, stderr } = await execAsync(ffmpegCommand);
+    const { stdout, stderr } = await execAsync(ffmpegCommand, {
+      env: {
+        ...process.env,
+        LD_LIBRARY_PATH: process.env.LD_LIBRARY_PATH 
+          ? `${process.env.LD_LIBRARY_PATH}:/var/task/node_modules/ffmpeg-static/lib` 
+          : '/var/task/node_modules/ffmpeg-static/lib'
+      }
+    });
     
     if (stderr) {
       console.log('FFmpeg stderr (not necessarily an error):', stderr);
@@ -99,9 +87,14 @@ async function processFramesWithFFmpeg(
 
   } catch (error) {
     console.error('FFmpeg processing failed:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     throw error;
   }
 }
+
 
 async function recordFlipBook(
   locationCount: number,
