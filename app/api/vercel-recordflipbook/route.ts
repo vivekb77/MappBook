@@ -8,13 +8,18 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import ffmpeg from 'fluent-ffmpeg';
-
-// Set FFmpeg path to the static binary
-ffmpeg.setFfmpegPath('/var/task/node_modules/ffmpeg-static/ffmpeg');
+// Import ffmpeg-static properly
+import ffmpegStatic from 'ffmpeg-static';
 
 // Environment variables
 const APP_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 const execAsync = promisify(exec);
+
+// Set the FFmpeg path
+if (ffmpegStatic) {
+  console.log('Setting FFmpeg path to:', ffmpegStatic);
+  ffmpeg.setFfmpegPath(ffmpegStatic);
+}
 
 // Helper function to get browser options for Vercel environment
 const getChromiumOptions = async () => {
@@ -56,11 +61,21 @@ async function processFramesWithFFmpeg(
 
   try {
     console.log('Processing frames with FFmpeg...');
-    const inputPath = path.join(framesDir, 'frame_%06d.png');
+    console.log('Input directory:', framesDir);
+    console.log('Output path:', outputPath);
+    console.log('FPS:', fps);
+
+    const inputPattern = path.join(framesDir, 'frame_%06d.png');
+    console.log('Input pattern:', inputPattern);
 
     return new Promise((resolve, reject) => {
+      if (!ffmpegStatic) {
+        reject(new Error('FFmpeg path not found'));
+        return;
+      }
+
       ffmpeg()
-        .input(inputPath)
+        .input(inputPattern)
         .inputFPS(fps)
         .videoCodec('libx264')
         .outputOptions([
@@ -74,12 +89,16 @@ async function processFramesWithFFmpeg(
         .on('progress', (progress) => {
           console.log('Processing: ' + progress.percent + '% done');
         })
+        .on('stderr', (stderrLine) => {
+          console.log('FFmpeg stderr:', stderrLine);
+        })
         .on('end', () => {
           console.log('FFmpeg processing finished');
           resolve();
         })
-        .on('error', (err) => {
+        .on('error', (err, stdout, stderr) => {
           console.error('FFmpeg error:', err);
+          console.error('FFmpeg stderr:', stderr);
           reject(err);
         })
         .run();
@@ -90,7 +109,6 @@ async function processFramesWithFFmpeg(
     throw error;
   }
 }
-
 
 
 async function recordFlipBook(
