@@ -29,6 +29,7 @@
     "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
     "eslint-config-next": "^15.0.1",
+    "ffmpeg-static": "^5.2.0",
     "lucide-react": "^0.454.0",
     "mapbox-gl": "^2.15.0",
     "micro": "^10.0.1",

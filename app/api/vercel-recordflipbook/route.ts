@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-
+import ffmpeg from 'ffmpeg-static';
 const execAsync = promisify(exec);
 
 
@@ -23,6 +23,8 @@ export const config = {
 
 // Helper function to get browser options for Vercel environment
 const getChromiumOptions = async () => {
+  console.log('Setting up browser options for Vercel environment');
+  
   const executablePath = await chromium.executablePath();
 
   return {
@@ -48,117 +50,149 @@ const getChromiumOptions = async () => {
 };
 
 // Helper function to process frames with FFmpeg
-async function setupFFmpeg(): Promise<string> {
-  const ffmpegPath = '/tmp/ffmpeg';
-
-  try {
-    // Use a small, static FFmpeg binary
-    const ffmpegUrl = 'https://edge.ffmpeg.org/ffmpeg-static-linux-x64';
-    console.log('Downloading FFmpeg...');
-    
-    await execAsync(`curl -L ${ffmpegUrl} -o ${ffmpegPath}`);
-    await execAsync(`chmod +x ${ffmpegPath}`);
-    
-    return ffmpegPath;
-  } catch (error) {
-    console.error('FFmpeg setup failed:', error);
-    throw error;
-  }
-}
-
 async function processFramesWithFFmpeg(
   framesDir: string,
   outputPath: string,
   fps: number
 ): Promise<void> {
+  // Verify paths are within /tmp
+  if (!framesDir.startsWith('/tmp/') || !outputPath.startsWith('/tmp/')) {
+    throw new Error('Input and output paths must be within /tmp directory');
+  }
+
   try {
-    const ffmpegPath = await setupFFmpeg();
+    // Use pre-installed ffmpeg from dependency
+    const ffmpegCommand = `"${ffmpeg}" -framerate ${fps} -i "${framesDir}/frame_%06d.png" -c:v libx264 -pix_fmt yuv420p -crf 23 "${outputPath}"`;
     
-    // Use a more optimized FFmpeg command
-    const ffmpegCommand = `${ffmpegPath} -y -framerate ${fps} -pattern_type glob -i "${framesDir}/*.png" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -crf 28 "${outputPath}"`;
-    
-    console.log('Executing FFmpeg command:', ffmpegCommand);
     const { stdout, stderr } = await execAsync(ffmpegCommand);
-    
-    if (stdout) console.log('FFmpeg stdout:', stdout);
-    if (stderr) console.log('FFmpeg stderr:', stderr);
+    console.log('FFmpeg stdout:', stdout);
+    console.log('FFmpeg stderr:', stderr);
     
   } catch (error) {
     console.error('FFmpeg processing failed:', error);
     throw error;
   }
 }
-
 async function recordFlipBook(
   locationCount: number,
   mappbookUserId: string
 ): Promise<string> {
-  console.log('Starting recordFlipBook...');
+  console.log('Starting recordFlipBook in Vercel environment');
   
   const browserOptions = await getChromiumOptions();
-  console.log('Browser options configured:', browserOptions);
-  
   const browser = await puppeteer.launch(browserOptions);
   
+  // Use Vercel's /tmp directory
   const framesDir = `/tmp/frames_${Date.now()}`;
   const videoPath = `/tmp/video_${Date.now()}.mp4`;
   let frameCount = 0;
-  let page;
+  let page: Page;
 
   try {
-    fs.mkdirSync(framesDir, { recursive: true });
-    
+    // Create frames directory
+    if (!fs.existsSync(framesDir)) {
+      fs.mkdirSync(framesDir, { recursive: true });
+    }
+
     page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080 });
 
-    const pageUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/playflipbook?userId=${mappbookUserId}`;
-    await page.goto(pageUrl, { waitUntil: ['networkidle0'] });
-    
-    console.log('Waiting for page elements...');
-    const woodenElement = await page.waitForSelector('[data-testid="wooden-background"]');
-    const flipButton = await page.waitForSelector('[data-testid="flip-button"]');
-    
-    if (!woodenElement || !flipButton) throw new Error('Required elements not found');
+    page.on('console', (msg) => console.log('Browser console:', msg.text()));
+
+    const pageUrl = `${APP_URL}/playflipbook?userId=${mappbookUserId}`;
+    console.log('Navigating to:', pageUrl);
+
+    await page.goto(pageUrl, {
+      waitUntil: ['networkidle0', 'load', 'domcontentloaded'],
+      timeout: 30000,
+    });
+
+    // Initial wait for page to stabilize
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    const woodenElement = await page.waitForSelector(
+      '[data-testid="wooden-background"]',
+      {
+        timeout: 10000,
+        visible: true,
+      }
+    );
+
+    if (!woodenElement) {
+      throw new Error('Wooden background element not found');
+    }
+
+    const flipButton = await page.waitForSelector(
+      '[data-testid="flip-button"]',
+      {
+        timeout: 10000,
+        visible: true,
+      }
+    );
+
+    if (!flipButton) {
+      throw new Error('Flip button not found');
+    }
 
     const woodenBounds = await woodenElement.boundingBox();
-    if (!woodenBounds) throw new Error('Could not get element bounds');
+    if (!woodenBounds) {
+      throw new Error('Could not get wooden container bounds');
+    }
 
     const width = Math.floor(woodenBounds.width / 2) * 2;
     const height = Math.floor(woodenBounds.height / 2) * 2;
+
+    const captureFrame = async (): Promise<void> => {
+      const frameFile = path.join(
+        framesDir,
+        `frame_${frameCount.toString().padStart(6, '0')}.png`
+      );
+      try {
+        await page.screenshot({
+          path: frameFile,
+          type: 'png',
+          clip: {
+            x: woodenBounds.x,
+            y: woodenBounds.y,
+            width,
+            height,
+          },
+        });
+        frameCount++;
+      } catch (error) {
+        console.error('Error capturing frame:', error);
+        throw error;
+      }
+    };
+
+    await captureFrame();
 
     const fps = 24;
     const secondsPerSpread = 1;
     const totalSpreads = Math.ceil((locationCount + 2) / 2);
 
-    console.log('Capturing frames...');
     for (let spread = 0; spread < totalSpreads; spread++) {
+      console.log(`Processing spread ${spread + 1}/${totalSpreads}`);
+
       for (let i = 0; i < fps * secondsPerSpread; i++) {
-        const frameFile = path.join(framesDir, `frame_${frameCount.toString().padStart(6, '0')}.png`);
-        
-        await page.screenshot({
-          path: frameFile,
-          type: 'png',
-          clip: { x: woodenBounds.x, y: woodenBounds.y, width, height }
-        });
-        
-        frameCount++;
-        await new Promise(resolve => setTimeout(resolve, 1000 / fps));
+        await captureFrame();
+        await new Promise((resolve) => setTimeout(resolve, 1000 / fps));
       }
 
       if (spread < totalSpreads - 1) {
         await flipButton.click();
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       }
     }
 
-    console.log('Processing frames into video...');
+    console.log('Creating video from frames using FFmpeg...');
     await processFramesWithFFmpeg(framesDir, videoPath, fps);
 
-    console.log('Uploading to Supabase...');
-    const videoBuffer = await fs.promises.readFile(videoPath);
+    console.log('Uploading video to Supabase Storage...');
     const videoFileName = `flipbook_${mappbookUserId}_${Date.now()}.mp4`;
+    const videoBuffer = await fs.promises.readFile(videoPath);
     
-    const { error: uploadError } = await supabase
+    const { data: uploadData, error: uploadError } = await supabase
       .storage
       .from('flipbook-videos')
       .upload(videoFileName, videoBuffer, {
@@ -166,25 +200,39 @@ async function recordFlipBook(
         upsert: true
       });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      throw new Error(`Failed to upload video: ${uploadError.message}`);
+    }
 
-    const { data: { publicUrl } } = supabase
+    const { data: { publicUrl: videoUrl } } = supabase
       .storage
       .from('flipbook-videos')
       .getPublicUrl(videoFileName);
 
-    return publicUrl;
+    return videoUrl;
 
+  } catch (error) {
+    console.error('Error in recordFlipBook:', error);
+    throw error;
   } finally {
-    // Cleanup
-    if (fs.existsSync(framesDir)) fs.rmSync(framesDir, { recursive: true });
-    if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
+    try {
+      if (fs.existsSync(framesDir)) {
+        fs.rmSync(framesDir, { recursive: true });
+      }
+      if (fs.existsSync(videoPath)) {
+        fs.unlinkSync(videoPath);
+      }
+    } catch (cleanupError) {
+      console.error('Cleanup error:', cleanupError);
+    }
+
     await browser.close();
   }
 }
 
-
 export async function POST(req: NextRequest) {
+  console.log('Starting Vercel function processing');
+
   try {
     const { locationCount, mappbook_user_id } = await req.json();
 
@@ -209,7 +257,9 @@ export async function POST(req: NextRequest) {
         is_deleted: false,
       });
 
-    if (dbError) throw dbError;
+    if (dbError) {
+      throw new Error(`Database error: ${dbError.message}`);
+    }
 
     return new Response(
       JSON.stringify({
