@@ -3,13 +3,14 @@ import type { NextRequest } from 'next/server';
 import { supabase } from '@/components/utils/supabase';
 import chromium from '@sparticuz/chromium';
 import puppeteer, { Page } from 'puppeteer-core';
-import fs from 'fs';
+
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import ffmpeg from 'ffmpeg-static';
 const execAsync = promisify(exec);
-
+import fs from 'fs';
+import { chmod } from 'fs/promises';
 
 
 // Environment variables
@@ -49,7 +50,20 @@ const getChromiumOptions = async () => {
   };
 };
 
-// Helper function to process frames with FFmpeg
+
+async function makeFFmpegExecutable(): Promise<void> {
+  if (!ffmpeg) {
+    throw new Error('FFmpeg binary not found');
+  }
+
+  // Make FFmpeg executable in Vercel environment
+  try {
+    await chmod(ffmpeg, '755');
+  } catch (error) {
+    console.error('Failed to make FFmpeg executable:', error);
+    throw error;
+  }
+}
 async function processFramesWithFFmpeg(
   framesDir: string,
   outputPath: string,
@@ -60,19 +74,35 @@ async function processFramesWithFFmpeg(
     throw new Error('Input and output paths must be within /tmp directory');
   }
 
+  if (!ffmpeg) {
+    throw new Error('FFmpeg binary not found');
+  }
+
   try {
-    // Use pre-installed ffmpeg from dependency
-    const ffmpegCommand = `"${ffmpeg}" -framerate ${fps} -i "${framesDir}/frame_%06d.png" -c:v libx264 -pix_fmt yuv420p -crf 23 "${outputPath}"`;
+    // Ensure FFmpeg is executable
+    await makeFFmpegExecutable();
+
+    // Construct the FFmpeg command using the ffmpeg-static path
+    const ffmpegCommand = `"${ffmpeg}" -framerate ${fps} -i "${path.join(framesDir, 'frame_%06d.png')}" -c:v libx264 -pix_fmt yuv420p -crf 23 "${outputPath}"`;
+    
+    console.log('Executing FFmpeg command:', ffmpegCommand);
     
     const { stdout, stderr } = await execAsync(ffmpegCommand);
-    console.log('FFmpeg stdout:', stdout);
-    console.log('FFmpeg stderr:', stderr);
     
+    if (stderr) {
+      console.log('FFmpeg stderr (not necessarily an error):', stderr);
+    }
+    
+    if (stdout) {
+      console.log('FFmpeg stdout:', stdout);
+    }
+
   } catch (error) {
     console.error('FFmpeg processing failed:', error);
     throw error;
   }
 }
+
 async function recordFlipBook(
   locationCount: number,
   mappbookUserId: string
