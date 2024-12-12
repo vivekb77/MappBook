@@ -8,17 +8,90 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import ffmpeg from 'fluent-ffmpeg';
-// Import ffmpeg-static properly
 import ffmpegStatic from 'ffmpeg-static';
 
 // Environment variables
 const APP_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 const execAsync = promisify(exec);
 
+// Set FFmpeg path explicitly for Vercel environment
+const FFMPEG_PATH = process.env.VERCEL 
+  ? path.join(process.cwd(), 'node_modules/ffmpeg-static/ffmpeg')
+  : (ffmpegStatic || path.join(process.cwd(), 'node_modules/ffmpeg-static/ffmpeg'));
+
+if (!FFMPEG_PATH) {
+  throw new Error('FFmpeg path not found');
+}
+
 // Set the FFmpeg path
-if (ffmpegStatic) {
-  console.log('Setting FFmpeg path to:', ffmpegStatic);
-  ffmpeg.setFfmpegPath(ffmpegStatic);
+console.log('Setting FFmpeg path to:', FFMPEG_PATH);
+ffmpeg.setFfmpegPath(FFMPEG_PATH);
+
+async function processFramesWithFFmpeg(
+  framesDir: string,
+  outputPath: string,
+  fps: number
+): Promise<void> {
+  // Verify paths are within /tmp
+  if (!framesDir.startsWith('/tmp/') || !outputPath.startsWith('/tmp/')) {
+    throw new Error('Input and output paths must be within /tmp directory');
+  }
+
+  try {
+    console.log('Processing frames with FFmpeg...');
+    console.log('Input directory:', framesDir);
+    console.log('Output path:', outputPath);
+    console.log('FPS:', fps);
+    console.log('Using FFmpeg path:', FFMPEG_PATH);
+
+    const inputPattern = path.join(framesDir, 'frame_%06d.png');
+    console.log('Input pattern:', inputPattern);
+
+    return new Promise((resolve, reject) => {
+      // Create a new FFmpeg command
+      const command = ffmpeg()
+        .input(inputPattern)
+        .inputFPS(fps)
+        .videoCodec('libx264')
+        .outputOptions([
+          '-pix_fmt yuv420p',
+          '-crf 23'
+        ])
+        .output(outputPath);
+
+      // Add event handlers
+      command
+        .on('start', (commandLine) => {
+          console.log('FFmpeg command:', commandLine);
+        })
+        .on('progress', (progress) => {
+          console.log('Processing: ' + progress.percent + '% done');
+        })
+        .on('stderr', (stderrLine) => {
+          console.log('FFmpeg stderr:', stderrLine);
+        })
+        .on('end', () => {
+          console.log('FFmpeg processing finished');
+          resolve();
+        })
+        .on('error', (err, stdout, stderr) => {
+          console.error('FFmpeg error:', err);
+          console.error('FFmpeg stderr:', stderr);
+          reject(err);
+        });
+
+      // Run the command
+      command.run();
+    });
+
+  } catch (error) {
+    console.error('FFmpeg processing failed:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    throw error;
+  }
 }
 
 // Helper function to get browser options for Vercel environment
@@ -48,67 +121,6 @@ const getChromiumOptions = async () => {
     headless: true as const,
   };
 };
-
-async function processFramesWithFFmpeg(
-  framesDir: string,
-  outputPath: string,
-  fps: number
-): Promise<void> {
-  // Verify paths are within /tmp
-  if (!framesDir.startsWith('/tmp/') || !outputPath.startsWith('/tmp/')) {
-    throw new Error('Input and output paths must be within /tmp directory');
-  }
-
-  try {
-    console.log('Processing frames with FFmpeg...');
-    console.log('Input directory:', framesDir);
-    console.log('Output path:', outputPath);
-    console.log('FPS:', fps);
-
-    const inputPattern = path.join(framesDir, 'frame_%06d.png');
-    console.log('Input pattern:', inputPattern);
-
-    return new Promise((resolve, reject) => {
-      if (!ffmpegStatic) {
-        reject(new Error('FFmpeg path not found'));
-        return;
-      }
-
-      ffmpeg()
-        .input(inputPattern)
-        .inputFPS(fps)
-        .videoCodec('libx264')
-        .outputOptions([
-          '-pix_fmt yuv420p',
-          '-crf 23'
-        ])
-        .output(outputPath)
-        .on('start', (commandLine) => {
-          console.log('FFmpeg command:', commandLine);
-        })
-        .on('progress', (progress) => {
-          console.log('Processing: ' + progress.percent + '% done');
-        })
-        .on('stderr', (stderrLine) => {
-          console.log('FFmpeg stderr:', stderrLine);
-        })
-        .on('end', () => {
-          console.log('FFmpeg processing finished');
-          resolve();
-        })
-        .on('error', (err, stdout, stderr) => {
-          console.error('FFmpeg error:', err);
-          console.error('FFmpeg stderr:', stderr);
-          reject(err);
-        })
-        .run();
-    });
-
-  } catch (error) {
-    console.error('FFmpeg processing failed:', error);
-    throw error;
-  }
-}
 
 
 async function recordFlipBook(
