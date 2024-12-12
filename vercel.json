@@ -4,6 +4,5 @@
       "memory": 3008,
       "maxDuration": 300
     }
-  },
-   "installCommand": "npm install && node api/vercel-recordflipbook/ffmpeg.js"
+  }
 }

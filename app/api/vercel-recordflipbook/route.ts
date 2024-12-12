@@ -1,4 +1,4 @@
-// app/api/vercel-flipbook/route.ts
+// app/api/vercel-recordflipbook/route.ts
 import type { NextRequest } from 'next/server';
 import { supabase } from '@/components/utils/supabase';
 import chromium from '@sparticuz/chromium';
@@ -8,11 +8,12 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 
+// Import FFmpeg from the installer package
+import ffmpeg from '@ffmpeg-installer/ffmpeg';
 
 // Environment variables
 const APP_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 const execAsync = promisify(exec);
-
 
 // Helper function to get browser options for Vercel environment
 const getChromiumOptions = async () => {
@@ -42,63 +43,60 @@ const getChromiumOptions = async () => {
   };
 };
 
-
-// Use the FFmpeg binary from the Lambda layer
-const ffmpegPath = process.env.LAMBDA_TASK_ROOT 
-  ? path.join(process.env.LAMBDA_TASK_ROOT, 'ffmpeg') 
-  : '/opt/ffmpeg/ffmpeg';
-
-  
-  // Use the FFmpeg binary from the Lambda layer
+// Use FFmpeg from the installer package
 async function processFramesWithFFmpeg(
-framesDir: string,
-outputPath: string,
-fps: number
+  framesDir: string,
+  outputPath: string,
+  fps: number
 ): Promise<void> {
-// Verify paths are within /tmp
-if (!framesDir.startsWith('/tmp/') || !outputPath.startsWith('/tmp/')) {
-  throw new Error('Input and output paths must be within /tmp directory');
-}
-
-try {
-  console.log('Using FFmpeg path:', ffmpegPath);
-
-  // Use the full path to the frames with proper escaping
-  const inputPath = path.join(framesDir, 'frame_%06d.png').replace(/(\s+)/g, '\\$1');
-  
-  // Construct the FFmpeg command with proper path escaping
-  const ffmpegCommand = [
-    ffmpegPath,
-    '-framerate', fps.toString(),
-    '-i', inputPath,
-    '-c:v', 'libx264',
-    '-pix_fmt', 'yuv420p',
-    '-crf', '23',
-    outputPath
-  ].join(' ');
-  
-  console.log('Executing FFmpeg command:', ffmpegCommand);
-  
-  const { stdout, stderr } = await execAsync(ffmpegCommand, {
-    maxBuffer: 1024 * 1024 * 10 // 10MB buffer
-  });
-  
-  if (stderr) {
-    console.log('FFmpeg stderr (not necessarily an error):', stderr);
-  }
-  
-  if (stdout) {
-    console.log('FFmpeg stdout:', stdout);
+  // Verify paths are within /tmp
+  if (!framesDir.startsWith('/tmp/') || !outputPath.startsWith('/tmp/')) {
+    throw new Error('Input and output paths must be within /tmp directory');
   }
 
-} catch (error) {
-  console.error('FFmpeg processing failed:', error);
-  if (error instanceof Error) {
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
+  try {
+    console.log('Using FFmpeg path:', ffmpeg.path);
+
+    // Use the full path to the frames with proper escaping
+    const inputPath = path.join(framesDir, 'frame_%06d.png').replace(/(\s+)/g, '\\$1');
+    
+    // Construct the FFmpeg command with proper path escaping
+    const ffmpegCommand = [
+      ffmpeg.path,
+      '-framerate', fps.toString(),
+      '-i', inputPath,
+      '-c:v', 'libx264',
+      '-pix_fmt', 'yuv420p',
+      '-crf', '23',
+      outputPath
+    ].join(' ');
+    
+    console.log('Executing FFmpeg command:', ffmpegCommand);
+    
+    const { stdout, stderr } = await execAsync(ffmpegCommand, {
+      maxBuffer: 1024 * 1024 * 10, // 10MB buffer
+      env: {
+        ...process.env,
+        LD_LIBRARY_PATH: ffmpeg.path.split('/').slice(0, -1).join('/'),
+      }
+    });
+    
+    if (stderr) {
+      console.log('FFmpeg stderr (not necessarily an error):', stderr);
+    }
+    
+    if (stdout) {
+      console.log('FFmpeg stdout:', stdout);
+    }
+
+  } catch (error) {
+    console.error('FFmpeg processing failed:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    throw error;
   }
-  throw error;
-}
 }
 
 
