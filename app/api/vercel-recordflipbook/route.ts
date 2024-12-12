@@ -15,16 +15,14 @@ const execAsync = promisify(exec);
 // Environment variables
 const APP_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-// Configure for Vercel Pro
 export const config = {
-  runtime: 'nodejs',  // Changed from edge to nodejs
-  maxDuration: 300    // 5 minutes
+  runtime: 'nodejs',
+  maxDuration: 300,
+  memory: 3008 // Maximum memory allocation
 };
 
 // Helper function to get browser options for Vercel environment
 const getChromiumOptions = async () => {
-  console.log('Setting up browser options for Vercel environment');
-  
   const executablePath = await chromium.executablePath();
 
   return {
@@ -97,12 +95,10 @@ async function recordFlipBook(
 ): Promise<string> {
   console.log('Starting recordFlipBook...');
   
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath(),
-    headless: true,
-    defaultViewport: { width: 1920, height: 1080 }
-  });
+  const browserOptions = await getChromiumOptions();
+  console.log('Browser options configured:', browserOptions);
+  
+  const browser = await puppeteer.launch(browserOptions);
   
   const framesDir = `/tmp/frames_${Date.now()}`;
   const videoPath = `/tmp/video_${Date.now()}.mp4`;
