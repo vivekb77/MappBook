@@ -6,18 +6,13 @@ import puppeteer, { Page } from 'puppeteer-core';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import ffmpeg from 'ffmpeg-static';
 import fs from 'fs';
 
 
 // Environment variables
 const APP_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 const execAsync = promisify(exec);
-export const config = {
-  runtime: 'nodejs',
-  maxDuration: 300,
-  memory: 3008 // Maximum memory allocation
-};
+
 
 // Helper function to get browser options for Vercel environment
 const getChromiumOptions = async () => {
@@ -48,69 +43,62 @@ const getChromiumOptions = async () => {
 };
 
 
+// Use the FFmpeg binary from the Lambda layer
+const ffmpegPath = process.env.LAMBDA_TASK_ROOT 
+  ? path.join(process.env.LAMBDA_TASK_ROOT, 'ffmpeg') 
+  : '/opt/ffmpeg/ffmpeg';
+
+  
+  // Use the FFmpeg binary from the Lambda layer
 async function processFramesWithFFmpeg(
-  framesDir: string,
-  outputPath: string,
-  fps: number
+framesDir: string,
+outputPath: string,
+fps: number
 ): Promise<void> {
-  // Verify paths are within /tmp
-  if (!framesDir.startsWith('/tmp/') || !outputPath.startsWith('/tmp/')) {
-    throw new Error('Input and output paths must be within /tmp directory');
+// Verify paths are within /tmp
+if (!framesDir.startsWith('/tmp/') || !outputPath.startsWith('/tmp/')) {
+  throw new Error('Input and output paths must be within /tmp directory');
+}
+
+try {
+  console.log('Using FFmpeg path:', ffmpegPath);
+
+  // Use the full path to the frames with proper escaping
+  const inputPath = path.join(framesDir, 'frame_%06d.png').replace(/(\s+)/g, '\\$1');
+  
+  // Construct the FFmpeg command with proper path escaping
+  const ffmpegCommand = [
+    ffmpegPath,
+    '-framerate', fps.toString(),
+    '-i', inputPath,
+    '-c:v', 'libx264',
+    '-pix_fmt', 'yuv420p',
+    '-crf', '23',
+    outputPath
+  ].join(' ');
+  
+  console.log('Executing FFmpeg command:', ffmpegCommand);
+  
+  const { stdout, stderr } = await execAsync(ffmpegCommand, {
+    maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+  });
+  
+  if (stderr) {
+    console.log('FFmpeg stderr (not necessarily an error):', stderr);
+  }
+  
+  if (stdout) {
+    console.log('FFmpeg stdout:', stdout);
   }
 
-  if (!ffmpeg) {
-    throw new Error('FFmpeg binary not found');
+} catch (error) {
+  console.error('FFmpeg processing failed:', error);
+  if (error instanceof Error) {
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
   }
-
-  try {
-    // Log the FFmpeg path for debugging
-    console.log('FFmpeg path:', ffmpeg);
-
-    // Use the full path to the frames with proper escaping
-    const inputPath = path.join(framesDir, 'frame_%06d.png').replace(/(\s+)/g, '\\$1');
-    
-    // Construct the FFmpeg command with proper path escaping
-    const ffmpegCommand = [
-      ffmpeg,
-      '-framerate', fps.toString(),
-      '-i', inputPath,
-      '-c:v', 'libx264',
-      '-pix_fmt', 'yuv420p',
-      '-crf', '23',
-      outputPath
-    ].join(' ');
-    
-    console.log('Executing FFmpeg command:', ffmpegCommand);
-    
-    const { stdout, stderr } = await execAsync(ffmpegCommand, {
-      env: {
-        ...process.env,
-        PATH: `${process.env.PATH}:${path.dirname(ffmpeg)}`,
-        LD_LIBRARY_PATH: process.env.LD_LIBRARY_PATH 
-          ? `${process.env.LD_LIBRARY_PATH}:${path.join(path.dirname(ffmpeg), 'lib')}`
-          : path.join(path.dirname(ffmpeg), 'lib')
-      },
-      maxBuffer: 1024 * 1024 * 10 // 10MB buffer
-    });
-    
-    if (stderr) {
-      console.log('FFmpeg stderr (not necessarily an error):', stderr);
-    }
-    
-    if (stdout) {
-      console.log('FFmpeg stdout:', stdout);
-    }
-
-  } catch (error) {
-    console.error('FFmpeg processing failed:', error);
-    if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      // Log the type of error for debugging
-      console.error('Error type:', error.constructor.name);
-    }
-    throw error;
-  }
+  throw error;
+}
 }
 
 
