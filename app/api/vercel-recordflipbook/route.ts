@@ -7,9 +7,10 @@ import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
+import ffmpeg from 'fluent-ffmpeg';
 
-// Import FFmpeg from the installer package
-import ffmpeg from '@ffmpeg-installer/ffmpeg';
+// Set FFmpeg path to the static binary
+ffmpeg.setFfmpegPath('/var/task/node_modules/ffmpeg-static/ffmpeg');
 
 // Environment variables
 const APP_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
@@ -43,7 +44,6 @@ const getChromiumOptions = async () => {
   };
 };
 
-// Use FFmpeg from the installer package
 async function processFramesWithFFmpeg(
   framesDir: string,
   outputPath: string,
@@ -55,46 +55,38 @@ async function processFramesWithFFmpeg(
   }
 
   try {
-    console.log('Using FFmpeg path:', ffmpeg.path);
+    console.log('Processing frames with FFmpeg...');
+    const inputPath = path.join(framesDir, 'frame_%06d.png');
 
-    // Use the full path to the frames with proper escaping
-    const inputPath = path.join(framesDir, 'frame_%06d.png').replace(/(\s+)/g, '\\$1');
-    
-    // Construct the FFmpeg command with proper path escaping
-    const ffmpegCommand = [
-      ffmpeg.path,
-      '-framerate', fps.toString(),
-      '-i', inputPath,
-      '-c:v', 'libx264',
-      '-pix_fmt', 'yuv420p',
-      '-crf', '23',
-      outputPath
-    ].join(' ');
-    
-    console.log('Executing FFmpeg command:', ffmpegCommand);
-    
-    const { stdout, stderr } = await execAsync(ffmpegCommand, {
-      maxBuffer: 1024 * 1024 * 10, // 10MB buffer
-      env: {
-        ...process.env,
-        LD_LIBRARY_PATH: ffmpeg.path.split('/').slice(0, -1).join('/'),
-      }
+    return new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(inputPath)
+        .inputFPS(fps)
+        .videoCodec('libx264')
+        .outputOptions([
+          '-pix_fmt yuv420p',
+          '-crf 23'
+        ])
+        .output(outputPath)
+        .on('start', (commandLine) => {
+          console.log('FFmpeg command:', commandLine);
+        })
+        .on('progress', (progress) => {
+          console.log('Processing: ' + progress.percent + '% done');
+        })
+        .on('end', () => {
+          console.log('FFmpeg processing finished');
+          resolve();
+        })
+        .on('error', (err) => {
+          console.error('FFmpeg error:', err);
+          reject(err);
+        })
+        .run();
     });
-    
-    if (stderr) {
-      console.log('FFmpeg stderr (not necessarily an error):', stderr);
-    }
-    
-    if (stdout) {
-      console.log('FFmpeg stdout:', stdout);
-    }
 
   } catch (error) {
     console.error('FFmpeg processing failed:', error);
-    if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-    }
     throw error;
   }
 }
