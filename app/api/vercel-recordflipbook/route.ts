@@ -54,24 +54,35 @@ async function processFramesWithFFmpeg(
   outputPath: string,
   fps: number
 ): Promise<void> {
-  // Vercel's /tmp directory is the only writable directory
-  const ffmpegPath = '/tmp/ffmpeg';
-  
-  // Download and set up FFmpeg in /tmp
-  await execAsync(`curl -L https://github.com/eugeneware/ffmpeg-static/releases/download/b4.4.0/linux-x64 -o ${ffmpegPath}`);
-  await execAsync(`chmod +x ${ffmpegPath}`);
-  
-  const ffmpegCommand = `${ffmpegPath} -framerate ${fps} -i ${framesDir}/frame_%06d.png -c:v libx264 -pix_fmt yuv420p -crf 23 ${outputPath}`;
-  
   try {
-    await execAsync(ffmpegCommand);
+    // Download static FFmpeg binary directly
+    const ffmpegPath = '/tmp/ffmpeg';
+    console.log('Downloading FFmpeg...');
+    
+    await execAsync(
+      `curl -L https://github.com/eugeneware/ffmpeg-static/releases/download/b4.4.0/linux-x64 > ${ffmpegPath}`
+    );
+    
+    // Make it executable
+    await execAsync(`chmod +x ${ffmpegPath}`);
+    
+    // Execute FFmpeg command with proper quoting and error handling
+    console.log('Running FFmpeg command...');
+    const ffmpegCommand = `"${ffmpegPath}" -framerate ${fps} -i "${framesDir}/frame_%06d.png" -c:v libx264 -pix_fmt yuv420p -crf 23 "${outputPath}"`;
+    
+    const { stdout, stderr } = await execAsync(ffmpegCommand);
+    console.log('FFmpeg stdout:', stdout);
+    console.log('FFmpeg stderr:', stderr);
     console.log('FFmpeg processing completed successfully');
+    
+    // Cleanup
+    await execAsync(`rm -f ${ffmpegPath}`);
+    
   } catch (error) {
     console.error('FFmpeg processing failed:', error);
     throw error;
   }
 }
-
 async function recordFlipBook(
   locationCount: number,
   mappbookUserId: string
