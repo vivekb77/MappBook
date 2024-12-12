@@ -1,6 +1,7 @@
 {
   "functions": {
-    "app/api/recordflipbook/route.ts": {
+    "api/recordflipbook/route.ts": {
+      "memory": 3008,
       "maxDuration": 300
     }
   }
