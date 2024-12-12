@@ -21,8 +21,9 @@ export default authMiddleware({
 
 export const config = {
   matcher: [
-    "/((?!.+\\.[\\w]+$|_next).*)",
+    // Exclude explicitly public routes to prevent unnecessary auth enforcement
+    "/((?!playflipbook|api/stripe/webhook|terms|privacy|contact|payment-success|map|passport|api/search-address|api/recordflipbook).*)",
     "/",
     "/(api|trpc)(.*)"
-  ]
+  ],
 };
