@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useMappbookUser } from '@/context/UserContext'
 
-const DEMO_VIDEO_URL = "/generated/passport_1733795592552.mp4"
+const DEMO_VIDEO_URL = "https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_8536b4e2-0eb6-4dc1-8131-078f97597357_1733992544237.mp4"
 
 interface RecordFlipbookResponse {
   success: boolean;
@@ -67,7 +67,7 @@ export function PassportDashboard({
       onVideoUrlChange(null)
       onRecordingStart()
   
-      response = await fetch('/api/recordflipbook', {
+      response = await fetch('/api/vercel-recordflipbook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,6 +90,7 @@ export function PassportDashboard({
   
       setVideoUrl(data.video_url);        // Changed from videoUrl
       onVideoUrlChange(data.video_url);   // Changed from videoUrl
+      console.log(videoUrl)
     } catch (error: unknown) {
       // Handle the error with proper type checking
       let errorMessage = 'An error occurred while recording'

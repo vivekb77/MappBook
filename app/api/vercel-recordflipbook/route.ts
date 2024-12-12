@@ -1,53 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
+// app/api/vercel-flipbook/route.ts
+import type { NextRequest } from 'next/server';
 import { supabase } from '@/components/utils/supabase';
 import chromium from '@sparticuz/chromium';
-import puppeteer, { Page, PuppeteerLaunchOptions } from 'puppeteer-core';
+import puppeteer, { Page } from 'puppeteer-core';
 import fs from 'fs';
 import path from 'path';
-
-
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
-export const dynamic = 'force-dynamic';
 const execAsync = promisify(exec);
+
+
 
 // Environment variables
 const APP_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-interface RequestBody {
-  locationCount: string;
-  mappbook_user_id: string;
-}
+export const config = {
+  runtime: 'edge', // this is a pre-requisite
+  regions: ['iad1'], // only execute this function in Virginia, US
+};
 
-interface SuccessResponse {
-  success: true;
-  video_url: string;
-  user_id: string;
-}
-
-interface ErrorResponse {
-  error: string;
-}
-
-// Helper function to get browser options
-const getChromiumOptions = async (): Promise<PuppeteerLaunchOptions> => {
-  const isDev = process.env.NODE_ENV === 'development';
-  console.log('Environment:', isDev ? 'development' : 'production');
-
-  if (isDev) {
-    return {
-      args: ['--hide-scrollbars', '--disable-web-security'],
-      defaultViewport: {
-        width: 1920,
-        height: 1080,
-      },
-      executablePath:
-        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-      headless: false as const,
-    };
-  }
-
+// Helper function to get browser options for Vercel environment
+const getChromiumOptions = async () => {
+  console.log('Setting up browser options for Vercel environment');
+  
   const executablePath = await chromium.executablePath();
 
   return {
@@ -69,7 +45,6 @@ const getChromiumOptions = async (): Promise<PuppeteerLaunchOptions> => {
     },
     executablePath,
     headless: true as const,
-    // ignoreHTTPSErrors: true
   };
 };
 
@@ -79,7 +54,14 @@ async function processFramesWithFFmpeg(
   outputPath: string,
   fps: number
 ): Promise<void> {
-  const ffmpegCommand = `ffmpeg -framerate ${fps} -i ${framesDir}/frame_%06d.png -c:v libx264 -pix_fmt yuv420p -crf 23 ${outputPath}`;
+  // Vercel's /tmp directory is the only writable directory
+  const ffmpegPath = '/tmp/ffmpeg';
+  
+  // Download and set up FFmpeg in /tmp
+  await execAsync(`curl -L https://github.com/eugeneware/ffmpeg-static/releases/download/b4.4.0/linux-x64 -o ${ffmpegPath}`);
+  await execAsync(`chmod +x ${ffmpegPath}`);
+  
+  const ffmpegCommand = `${ffmpegPath} -framerate ${fps} -i ${framesDir}/frame_%06d.png -c:v libx264 -pix_fmt yuv420p -crf 23 ${outputPath}`;
   
   try {
     await execAsync(ffmpegCommand);
@@ -94,13 +76,14 @@ async function recordFlipBook(
   locationCount: number,
   mappbookUserId: string
 ): Promise<string> {
-  console.log('Starting recordFlipBook with:', { locationCount, mappbookUserId });
+  console.log('Starting recordFlipBook in Vercel environment');
   
   const browserOptions = await getChromiumOptions();
   const browser = await puppeteer.launch(browserOptions);
   
-  const framesDir = path.join('/tmp', `frames_${Date.now()}`);
-  const videoPath = path.join('/tmp', `video_${Date.now()}.mp4`);
+  // Use Vercel's /tmp directory
+  const framesDir = `/tmp/frames_${Date.now()}`;
+  const videoPath = `/tmp/video_${Date.now()}.mp4`;
   let frameCount = 0;
   let page: Page;
 
@@ -110,14 +93,11 @@ async function recordFlipBook(
       fs.mkdirSync(framesDir, { recursive: true });
     }
 
-    // Create and setup page
     page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080 });
 
-    // Enable debug logging
     page.on('console', (msg) => console.log('Browser console:', msg.text()));
 
-    // Navigate to page
     const pageUrl = `${APP_URL}/playflipbook?userId=${mappbookUserId}`;
     console.log('Navigating to:', pageUrl);
 
@@ -126,13 +106,9 @@ async function recordFlipBook(
       timeout: 30000,
     });
 
-    console.log('Page loaded, waiting for elements...');
-
     // Initial wait for page to stabilize
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    // Wait for elements
-    console.log('Waiting for wooden background...');
     const woodenElement = await page.waitForSelector(
       '[data-testid="wooden-background"]',
       {
@@ -145,7 +121,6 @@ async function recordFlipBook(
       throw new Error('Wooden background element not found');
     }
 
-    console.log('Waiting for flip button...');
     const flipButton = await page.waitForSelector(
       '[data-testid="flip-button"]',
       {
@@ -158,17 +133,14 @@ async function recordFlipBook(
       throw new Error('Flip button not found');
     }
 
-    // Get element bounds
     const woodenBounds = await woodenElement.boundingBox();
     if (!woodenBounds) {
       throw new Error('Could not get wooden container bounds');
     }
 
-    // Ensure dimensions are even
     const width = Math.floor(woodenBounds.width / 2) * 2;
     const height = Math.floor(woodenBounds.height / 2) * 2;
 
-    // Capture frame function
     const captureFrame = async (): Promise<void> => {
       const frameFile = path.join(
         framesDir,
@@ -192,25 +164,20 @@ async function recordFlipBook(
       }
     };
 
-    // Initial capture
-    console.log('Capturing initial frame...');
     await captureFrame();
 
-    // Process all spreads
-    const fps = 24; // Increased FPS for smoother video
+    const fps = 24;
     const secondsPerSpread = 1;
     const totalSpreads = Math.ceil((locationCount + 2) / 2);
 
     for (let spread = 0; spread < totalSpreads; spread++) {
       console.log(`Processing spread ${spread + 1}/${totalSpreads}`);
 
-      // Capture frames for current spread
       for (let i = 0; i < fps * secondsPerSpread; i++) {
         await captureFrame();
         await new Promise((resolve) => setTimeout(resolve, 1000 / fps));
       }
 
-      // Move to next spread if not the last one
       if (spread < totalSpreads - 1) {
         await flipButton.click();
         await new Promise((resolve) => setTimeout(resolve, 200));
@@ -236,20 +203,17 @@ async function recordFlipBook(
       throw new Error(`Failed to upload video: ${uploadError.message}`);
     }
 
-    // Get public URL for the uploaded video
     const { data: { publicUrl: videoUrl } } = supabase
       .storage
       .from('flipbook-videos')
       .getPublicUrl(videoFileName);
 
-    console.log('Video processing and upload completed:', videoUrl);
     return videoUrl;
 
   } catch (error) {
     console.error('Error in recordFlipBook:', error);
     throw error;
   } finally {
-    // Cleanup
     try {
       if (fs.existsSync(framesDir)) {
         fs.rmSync(framesDir, { recursive: true });
@@ -266,15 +230,16 @@ async function recordFlipBook(
 }
 
 export async function POST(req: NextRequest) {
-  const startTime = Date.now();
-  console.log('Starting request processing');
+  console.log('Starting Vercel function processing');
 
   try {
-    const { locationCount, mappbook_user_id } =
-      (await req.json()) as RequestBody;
+    const { locationCount, mappbook_user_id } = await req.json();
 
     if (!locationCount || !mappbook_user_id) {
-      throw new Error('Missing required parameters');
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameters' }),
+        { status: 400 }
+      );
     }
 
     const videoUrl = await recordFlipBook(
@@ -282,33 +247,34 @@ export async function POST(req: NextRequest) {
       mappbook_user_id
     );
 
-    const { error: dbError } = await supabase.from('FlipBook_Video').insert({
-      mappbook_user_id,
-      video_url: videoUrl,
-      location_count: locationCount,
-      is_deleted: false,
-    });
+    const { error: dbError } = await supabase
+      .from('FlipBook_Video')
+      .insert({
+        mappbook_user_id,
+        video_url: videoUrl,
+        location_count: locationCount,
+        is_deleted: false,
+      });
 
     if (dbError) {
       throw new Error(`Database error: ${dbError.message}`);
     }
 
-    console.log(`Process completed in ${(Date.now() - startTime) / 1000}s`);
+    return new Response(
+      JSON.stringify({
+        success: true,
+        video_url: videoUrl,
+        user_id: mappbook_user_id,
+      }),
+      { status: 200 }
+    );
 
-    return NextResponse.json({
-      success: true,
-      video_url: videoUrl,
-      user_id: mappbook_user_id,
-    } as SuccessResponse);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Process failed:', error);
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'An unexpected error occurred',
-      },
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      }),
       { status: 500 }
     );
   }
