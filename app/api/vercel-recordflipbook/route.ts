@@ -55,34 +55,43 @@ async function processFramesWithFFmpeg(
   fps: number
 ): Promise<void> {
   try {
-    // Download static FFmpeg binary directly
-    const ffmpegPath = '/tmp/ffmpeg';
+    // Download a static FFmpeg binary
+    const ffmpegUrl = 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz';
+    const ffmpegDir = '/tmp/ffmpeg-dir';
+    const ffmpegTarPath = '/tmp/ffmpeg.tar.xz';
+    
     console.log('Downloading FFmpeg...');
+    await execAsync(`curl -L ${ffmpegUrl} -o ${ffmpegTarPath}`);
     
-    await execAsync(
-      `curl -L https://github.com/eugeneware/ffmpeg-static/releases/download/b4.4.0/linux-x64 > ${ffmpegPath}`
-    );
+    // Create directory for FFmpeg
+    await execAsync(`mkdir -p ${ffmpegDir}`);
     
-    // Make it executable
+    // Extract FFmpeg
+    console.log('Extracting FFmpeg...');
+    await execAsync(`tar xf ${ffmpegTarPath} -C ${ffmpegDir} --strip-components=1`);
+    
+    // Make FFmpeg executable
+    const ffmpegPath = `${ffmpegDir}/ffmpeg`;
     await execAsync(`chmod +x ${ffmpegPath}`);
     
-    // Execute FFmpeg command with proper quoting and error handling
+    // Execute FFmpeg command
     console.log('Running FFmpeg command...');
-    const ffmpegCommand = `"${ffmpegPath}" -framerate ${fps} -i "${framesDir}/frame_%06d.png" -c:v libx264 -pix_fmt yuv420p -crf 23 "${outputPath}"`;
+    const ffmpegCommand = `${ffmpegPath} -framerate ${fps} -i "${framesDir}/frame_%06d.png" -c:v libx264 -pix_fmt yuv420p -crf 23 "${outputPath}"`;
     
     const { stdout, stderr } = await execAsync(ffmpegCommand);
     console.log('FFmpeg stdout:', stdout);
     console.log('FFmpeg stderr:', stderr);
     console.log('FFmpeg processing completed successfully');
     
-    // Cleanup
-    await execAsync(`rm -f ${ffmpegPath}`);
+    // Cleanup FFmpeg files
+    await execAsync(`rm -rf ${ffmpegDir} ${ffmpegTarPath}`);
     
   } catch (error) {
     console.error('FFmpeg processing failed:', error);
     throw error;
   }
 }
+
 async function recordFlipBook(
   locationCount: number,
   mappbookUserId: string
