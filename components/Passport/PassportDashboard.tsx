@@ -67,7 +67,7 @@ export function PassportDashboard({
       onVideoUrlChange(null)
       onRecordingStart()
   
-      response = await fetch('/api/vercel-recordflipbook', {
+      response = await fetch('/api/digital-ocean-video-processing', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
