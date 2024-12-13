@@ -1,0 +1,33 @@
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+README.md
+.vscode
+*.log
+
+
+
+# LOCAL
+# docker build -t flipbook-processor-local .
+# docker run -p 3000:3000 --env-file local.env flipbook-processor-local
+
+# docker run -p 3000:3000 \
+#   --env-file local.env \
+#   flipbook-processor-local \
+#   node -e "require('./index.js').main({locationCount: 5, mappbook_user_id: '8536b4e2-0eb6-4dc1-8131-078f97597357'})"
+
+  
+# PROD
+# launch Docker Desktop
+# //cd serverless
+# # Build the image
+# docker build -t registry.digitalocean.com/mappbook-registry/flipbook-processor:latest .
+
+# # Push the image
+# docker push registry.digitalocean.com/mappbook-registry/flipbook-processor:latest
+
+
+# //invoke the function
+# //doctl serverless functions invoke flipbook/process-video -p locationCount:10 -p mappbook_user_id:43ff9fc7-43ca-425e-8da6-f5acb2ad529d
