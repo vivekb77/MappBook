@@ -6,13 +6,20 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useMappbookUser } from '@/context/UserContext'
+import { getClerkSupabaseClient } from "@/components/utils/supabase";
 
-const DEMO_VIDEO_URL = "https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_8536b4e2-0eb6-4dc1-8131-078f97597357_1733992544237.mp4"
+const DEMO_VIDEO_URL = ""
+
+interface Location {
+  place_names: string[];
+  place_country: string;
+  place_country_code: string;
+}
 
 interface RecordFlipbookResponse {
   success: boolean;
-  video_url?: string;    // Changed from videoUrl
-  user_id?: string;      // Changed from userId
+  video_url?: string;
+  user_id?: string;
   error?: string;
 }
 
@@ -22,17 +29,19 @@ interface PassportDashboardProps {
   onRecordingError: (error: string) => void
 }
 
-export function PassportDashboard({ 
+export function PassportDashboard({
   onVideoUrlChange,
   onRecordingStart,
   onRecordingError
 }: PassportDashboardProps) {
+  const supabase = getClerkSupabaseClient();
   const { isLoaded, isSignedIn, user } = useUser()
   const { mappbookUser, setMappbookUser } = useMappbookUser()
   const [isRecording, setIsRecording] = useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoadingSignIn, setIsLoadingSignIn] = useState(false)
+  const [locations, setLocations] = useState<Location[]>([])
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -40,6 +49,41 @@ export function PassportDashboard({
       onVideoUrlChange(DEMO_VIDEO_URL)
     }
   }, [isLoaded, isSignedIn, onVideoUrlChange])
+
+  const fetchUserPlaces = async (userId: string) => {
+    try {
+
+      const { data, error: fetchError } = await supabase
+        .from('Mappbook_User_Places')
+        .select('visitedorwanttovisit,place_country,place_country_code,isRemoved,place_name')
+        .eq('mappbook_user_id', userId)
+        .eq('visitedorwanttovisit', 'visited')
+        .is('isRemoved', false);
+
+      if (fetchError) throw new Error('Failed to fetch places');
+
+      const countryGroups = data?.reduce((acc: { [key: string]: { places: string[], countryCode: string } }, place) => {
+        if (place.place_name === place.place_country) return acc;
+        if (!acc[place.place_country]) {
+          acc[place.place_country] = { places: [], countryCode: place.place_country_code };
+        }
+        acc[place.place_country].places.push(place.place_name);
+        return acc;
+      }, {});
+
+      const formattedLocations: Location[] = Object.entries(countryGroups || {}).map(([country, data]) => ({
+        place_names: data.places,
+        place_country: country,
+        place_country_code: data.countryCode
+      }));
+
+      setLocations(formattedLocations);
+      return formattedLocations;
+    } catch (err) {
+      console.error('Error fetching places:', err);
+      throw err;
+    }
+  };
 
   const handleSignIn = async () => {
     setIsLoadingSignIn(true)
@@ -49,7 +93,7 @@ export function PassportDashboard({
       console.error('Sign in error:', error)
     }
   }
-  
+
   const triggerRecording = async () => {
     if (!isSignedIn || !mappbookUser) {
       const errorMsg = 'User must be signed in'
@@ -57,9 +101,9 @@ export function PassportDashboard({
       onRecordingError(errorMsg)
       return
     }
-    
+
     let response: Response | undefined
-    
+
     try {
       setIsRecording(true)
       setError(null)
@@ -67,49 +111,50 @@ export function PassportDashboard({
       onVideoUrlChange(null)
       onRecordingStart()
 
+      // Fetch locations before making the API call
+      const userLocations = await fetchUserPlaces(mappbookUser.mappbook_user_id)
+      console.log(`Getting video for ${userLocations.length} locations`)
+
       response = await fetch('/api/call-lambda', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          locationCount: 10,
+          locationCount: userLocations.length,
           mappbook_user_id: mappbookUser.mappbook_user_id
         }),
       })
-  
+
       const data: RecordFlipbookResponse = await response.json()
-  
+
       if (!response.ok || !data.success) {
         throw new Error(data.error || 'Failed to record video')
       }
-  
+
       if (!data.video_url) {
         throw new Error('No video URL returned')
       }
-  
-      setVideoUrl(data.video_url);        // Changed from videoUrl
-      onVideoUrlChange(data.video_url);   // Changed from videoUrl
+
+      setVideoUrl(data.video_url)
+      onVideoUrlChange(data.video_url)
       console.log(videoUrl)
     } catch (error: unknown) {
-      // Handle the error with proper type checking
       let errorMessage = 'An error occurred while recording'
-      
+
       if (error instanceof Error) {
         errorMessage = error.message
       }
-      
+
       setError(errorMessage)
       onRecordingError(errorMessage)
-      
-      // Log detailed error information
+
       console.error('Full error details:', {
         error,
         responseStatus: response?.status,
         responseStatusText: response?.statusText
       })
-  
-      // If you need to log the response text, do it separately since it's async
+
       if (response) {
         try {
           const responseText = await response.text()
@@ -122,6 +167,7 @@ export function PassportDashboard({
       setIsRecording(false)
     }
   }
+
 
   // Loading state
   if (!isLoaded) {
@@ -227,7 +273,7 @@ export function PassportDashboard({
                   Currently showing a demo video. Sign in to create your own!
                 </p>
               </div>
-              
+
               <button
                 onClick={handleSignIn}
                 disabled={isLoadingSignIn}
