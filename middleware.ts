@@ -8,6 +8,7 @@ export default authMiddleware({
     "/terms",
     "/api/search-address",
     "/api/recordflipbook",
+    "/api/get-assets",
     "/passport",
     "/playflipbook",
     "/privacy",
@@ -21,9 +22,10 @@ export default authMiddleware({
 
 export const config = {
   matcher: [
-    // Exclude explicitly public routes to prevent unnecessary auth enforcement
-    "/((?!playflipbook|api/stripe/webhook|terms|privacy|contact|payment-success|map|passport|api/search-address|api/recordflipbook).*)",
-    "/",
-    "/(api|trpc)(.*)"
-  ],
+    // Only match routes that should be protected
+    "/profile/:path*",
+    "/dashboard/:path*",
+    "/settings/:path*",
+    "/api/((?!get-assets|stripe/webhook|search-address|recordflipbook).)*"  // Match all API routes except the public ones
+  ]
 };
