@@ -5,9 +5,9 @@ import { useUser } from '@clerk/nextjs'
 import { useMappbookUser } from '@/context/UserContext'
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import VideoHistory from './VideoHistory'
+import DemoVideos from './DemoVideos'
 import { logout } from '../utils/auth';
 
-const DEMO_VIDEO_URL = "https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_8536b4e2-0eb6-4dc1-8131-078f97597357_1734258979420.mp4"
 
 interface Location {
   place_names: string[];
@@ -43,13 +43,6 @@ export function PassportDashboard({
   const [error, setError] = useState<string | null>(null)
   const [isLoadingSignIn, setIsLoadingSignIn] = useState(false)
   const [locations, setLocations] = useState<Location[]>([])
-
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      setVideoUrl(DEMO_VIDEO_URL)
-      onVideoUrlChange(DEMO_VIDEO_URL)
-    }
-  }, [isLoaded, isSignedIn, onVideoUrlChange])
 
 
   const handleLogout = async () => {
@@ -248,26 +241,16 @@ export function PassportDashboard({
                   {isRecording ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Recording video...</span>
+                      <span>Processing video...</span>
                     </>
                   ) : (
                     <>
                       <Video className="w-5 h-5" />
-                      <span>Generate Video</span>
+                      <span>Create Video</span>
                     </>
                   )}
                 </button>
 
-                {videoUrl && videoUrl !== DEMO_VIDEO_URL && (
-                  <Link
-                    href={videoUrl}
-                    download
-                    className="w-full h-12 px-4 rounded-md bg-gradient-to-r from-pink-400 to-purple-400 text-white font-medium hover:shadow-md transform transition-all duration-300 flex items-center justify-center gap-3"
-                  >
-                    <Download className="w-5 h-5" />
-                    <span>Download Video</span>
-                  </Link>
-                )}
                 {/* Add the VideoHistory component with onVideoSelect prop */}
                 {mappbookUser && (
                   <VideoHistory
@@ -275,9 +258,12 @@ export function PassportDashboard({
                     onVideoSelect={handleVideoSelect}
                   />
                 )}
+
+                <DemoVideos onVideoSelect={handleVideoSelect} />
               </>
             ) : (
               <div className="space-y-4">
+                <DemoVideos onVideoSelect={handleVideoSelect} />
                 <div className="p-4 rounded-md bg-purple-50 border border-purple-100">
                   <p className="text-sm text-purple-600 text-center font-medium">
                     Currently showing a demo video. Sign in to create your own!
@@ -333,36 +319,37 @@ export function PassportDashboard({
 
 
       {/* Footer moved to the bottom */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white/50">
-        <div className="px-6 pb-6">
-          <div className="pt-4 border-t border-pink-100/50">
-            <div className="flex items-center justify-center gap-4 text-xs">
-              <a href="/contact" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
-                Contact
+      <div className="absolute bottom-0 left-0 right-0 bg-white/100">
+      <div className="px-6 pb-6">
+        <div className="pt-4 border-t border-pink-100">
+          <div className="flex items-center justify-center gap-4 text-xs">
+            <a href="/contact" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
+              Contact
+            </a>
+            <span className="text-gray-300">•</span>
+            {isSignedIn ? (
+              <button onClick={handleLogout} className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
+                Logout
+              </button>
+            ) : (
+              <a href="/sign-in" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
+                Sign In
               </a>
-              <span className="text-gray-300">•</span>
-              {isSignedIn ? (
-                <button onClick={handleLogout} className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
-                  Logout
-                </button>
-              ) : (
-                <a href="/sign-in" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
-                  Sign In
-                </a>
-              )}
-              <span className="text-gray-300">•</span>
-
-              <a href="/terms" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
-                Terms
-              </a>
-              <span className="text-gray-300">•</span>
-              <a href="/privacy" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
-                Privacy
-              </a>
-            </div>
+            )}
+            <span className="text-gray-300">•</span>
+            <a href="/terms" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
+              Terms
+            </a>
+            <span className="text-gray-300">•</span>
+            <a href="/privacy" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
+              Privacy
+            </a>
           </div>
         </div>
       </div>
+    </div>
+
+
     </div>
   )
 }

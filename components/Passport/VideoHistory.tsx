@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Video, ChevronDown, Loader2, Clock, Download, Share2, X } from 'lucide-react';
+import { Video, ChevronDown, Loader2, Clock, Download, Share2, X, Trash2 } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface VideoHistoryItem {
   id: string;
@@ -29,6 +39,8 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
   const [page, setPage] = useState(1);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [videoToDelete, setVideoToDelete] = useState<VideoHistoryItem | null>(null);
   const supabase = getClerkSupabaseClient();
   const PAGE_SIZE = 5;
 
@@ -82,6 +94,45 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
     }
   };
 
+  const handleDelete = async (video: VideoHistoryItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setVideoToDelete(video);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!videoToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('FlipBook_Video')
+        .update({ is_deleted: true })
+        .eq('id', videoToDelete.id);
+
+      if (error) throw error;
+
+      setVideos(prev => prev.filter(v => v.id !== videoToDelete.id));
+      showToast('Video deleted successfully');
+
+      // If the deleted video was selected, select the first remaining video
+      if (selectedVideoId === videoToDelete.id) {
+        const remainingVideos = videos.filter(v => v.id !== videoToDelete.id);
+        if (remainingVideos.length > 0) {
+          setSelectedVideoId(remainingVideos[0].id);
+          onVideoSelect(remainingVideos[0].video_url);
+        } else {
+          setSelectedVideoId(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      showToast('Failed to delete video. Please try again.', 'error');
+    } finally {
+      setDeleteDialogOpen(false);
+      setVideoToDelete(null);
+    }
+  };
+
   useEffect(() => {
     fetchVideos();
   }, [page]);
@@ -106,7 +157,7 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
     onVideoSelect(video.video_url);
   };
 
-  const handleDownload = async (videoUrl: string, e: React.MouseEvent) => {
+  const handleDownload = async (videoUrl: string, created_at: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       const response = await fetch(videoUrl);
@@ -116,7 +167,7 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'video.mp4';
+      a.download = `Mappbook-Adventure-Passport-${formatDate(created_at)}.mp4`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -131,10 +182,10 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
 
   const handleShare = async (videoId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const shareUrl = `mappbook.com/passport${videoId}`;
+    const shareUrl = `https://mappbook.com/passport/${videoId}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
-      showToast('Share link copied to clipboard!');
+      showToast('Link copied to clipboard!');
     } catch (error) {
       console.error('Error copying to clipboard:', error);
       showToast('Failed to copy share link. Please try again.', 'error');
@@ -162,7 +213,7 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
   return (
     <div className="relative mt-6 bg-white/80 rounded-lg overflow-hidden border border-gray-100">
       <div className="p-4 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-700">Previous Videos</h3>
+        <h3 className="text-sm font-semibold text-gray-700">Your Videos</h3>
       </div>
       
       <ScrollArea className="h-[300px]">
@@ -183,13 +234,12 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
                 <div className="flex-grow min-w-0 text-left">
                   <p className={`text-sm font-medium truncate
                     ${selectedVideoId === video.id ? 'text-purple-600' : 'text-gray-700'}`}>
-                    {video.location_count} Location{video.location_count !== 1 ? 's' : ''}
+                    {video.location_count} Countries{video.location_count !== 1 ? 's' : ''}
                   </p>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                     <Clock className="w-3 h-3" />
                     <span>{formatDate(video.created_at)}</span>
-                    <span>•</span>
-                    <span>{formatTime(video.created_at)}</span>
+
                   </div>
                 </div>
               </button>
@@ -198,7 +248,7 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={(e) => handleDownload(video.video_url, e)}
+                  onClick={(e) => handleDownload(video.video_url, video.created_at, e)}
                   className="h-8 w-8 p-0"
                 >
                   <Download className="h-4 w-4" />
@@ -210,6 +260,14 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
                   className="h-8 w-8 p-0"
                 >
                   <Share2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => handleDelete(video, e)}
+                  className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -234,7 +292,25 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
         </div>
       </ScrollArea>
 
-      {/* Custom Toast Container */}
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Video</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this video? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Toast Container */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map(toast => (
           <div

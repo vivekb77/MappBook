@@ -53,12 +53,11 @@ export default function RecordVideoPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Desktop Layout */}
-      <div className="hidden md:flex w-full h-screen">
+      {/* Desktop Layout (Large Screens) */}
+      <div className="hidden lg:flex w-full h-screen">
         {/* Video Preview - Left Side (70%) */}
-        <div className="w-[70%] bg-slate-900 p-4">
+        <div className="w-[60%] bg-slate-900 p-4">
           <div className="h-full flex flex-col">
-            <h2 className="text-xl font-semibold text-white mb-4">Video Preview</h2>
             <div className="flex-1 flex items-center justify-center">
               <div className="rounded-lg overflow-hidden shadow-2xl bg-slate-800 max-w-full">
                 {videoState.loading ? (
@@ -78,7 +77,7 @@ export default function RecordVideoPage() {
         </div>
 
         {/* Passport Dashboard - Right Side (30%) */}
-        <div className="w-[30%] bg-white border-l border-slate-200 p-4 overflow-y-auto">
+        <div className="w-[40%] bg-white border-l border-slate-200 p-4 overflow-y-auto">
           <PassportDashboard 
             onVideoUrlChange={handleVideoUrlChange}
             onRecordingStart={handleRecordingStart}
@@ -87,18 +86,17 @@ export default function RecordVideoPage() {
         </div>
       </div>
 
-      {/* Mobile Layout */}
-      <div className="md:hidden flex flex-col min-h-screen">
-        {/* Video Preview - Top */}
-        <div className="bg-slate-900 p-4">
-          <h2 className="text-xl font-semibold text-white mb-4">Video Preview</h2>
+      {/* Mobile & Tablet Layout (Small and Medium Screens) */}
+      <div className="lg:hidden relative min-h-screen">
+        {/* Fixed Video Preview at Top */}
+        <div className="sticky top-0 z-10 bg-slate-900 p-4 border-b border-slate-700">
           <div className="rounded-lg overflow-hidden shadow-2xl bg-slate-800">
             {videoState.loading ? (
-              <div className="flex items-center justify-center h-[200px] w-full bg-slate-800">
+              <div className="flex items-center justify-center h-[200px] md:h-[300px] w-full bg-slate-800">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
               </div>
             ) : videoState.error ? (
-              <div className="flex items-center justify-center h-[200px] w-full bg-slate-800 text-red-400 p-4 text-center">
+              <div className="flex items-center justify-center h-[200px] md:h-[300px] w-full bg-slate-800 text-red-400 p-4 text-center">
                 {videoState.error}
               </div>
             ) : (
@@ -107,8 +105,8 @@ export default function RecordVideoPage() {
           </div>
         </div>
 
-        {/* Passport Dashboard - Bottom */}
-        <div className="flex-1 bg-white p-4 overflow-y-auto">
+        {/* Scrollable Dashboard Content */}
+        <div className="bg-white min-h-screen pb-16 md:px-8">
           <PassportDashboard 
             onVideoUrlChange={handleVideoUrlChange}
             onRecordingStart={handleRecordingStart}
