@@ -66,15 +66,15 @@ export function PassportDashboard({
       setVideoUrl(null)
       onVideoUrlChange(null)
       onRecordingStart()
-  
-      response = await fetch('/api/digital-ocean-video-processing', {
+
+      response = await fetch('/api/call-lambda', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          locationCount: 4,
-          mappbook_user_id: mappbookUser.mappbook_user_id 
+        body: JSON.stringify({
+          locationCount: 10,
+          mappbook_user_id: mappbookUser.mappbook_user_id
         }),
       })
   
