@@ -258,12 +258,40 @@ export function PassportDashboard({
     }
   };
 
+  const checkVideoProcessingStatus = async (userId: string): Promise<boolean> => {
+    try {
+      const { data, error: supabaseError } = await supabase
+        .from('MappBook_Users')
+        .select('is_video_processing')
+        .eq('mappbook_user_id', userId)
+        .single();
+  
+      if (supabaseError) {
+        throw supabaseError;
+      }
+  
+      return data?.is_video_processing || false;
+    } catch (error) {
+      console.error('Error checking video processing status:', error);
+      return false;
+    }
+  };
+
   const triggerRecording = async () => {
     if (!isSignedIn || !mappbookUser) {
       const errorMsg = 'User must be signed in'
       setError(errorMsg)
       onRecordingError(errorMsg)
       return
+    }
+
+    // Check current processing status
+    const isProcessing = await checkVideoProcessingStatus(mappbookUser.mappbook_user_id);
+    if (isProcessing) {
+      const errorMsg = 'Your Adventure Passport is already being processed. Please wait for it to complete.';
+      setError(errorMsg);
+      onRecordingError(errorMsg);
+      return;
     }
 
     let response: Response | undefined
@@ -276,9 +304,8 @@ export function PassportDashboard({
       onRecordingStart()
 
       const userLocations = await fetchUserPlaces(mappbookUser.mappbook_user_id)
-      console.log("Getting video for" + JSON.stringify(userLocations))
 
-      response = await fetch('/api/call-lambdacc', {
+      response = await fetch('/api/call-lambda', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -322,7 +349,7 @@ export function PassportDashboard({
       if (response) {
         try {
           const responseText = await response.text()
-          console.error('Response text:', responseText)
+          // console.error('Response text:', responseText)
         } catch (e) {
           console.error('Could not get response text')
         }
@@ -330,7 +357,7 @@ export function PassportDashboard({
     } finally {
       setIsRecording(false)
     }
-  }
+}
 
   const handleVideoSelect = (url: string) => {
     onVideoUrlChange(url);
