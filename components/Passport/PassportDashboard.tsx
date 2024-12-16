@@ -518,7 +518,7 @@ export function PassportDashboard({
 
                   {!isPassportVideoPremiumUser &&
                     <div className="text-left text-xs font-medium text-red-600">
-                      Adventure Passport with only 3 countries will be created as free user. Add credits to generate Passport with all your visited Countries and Cities.
+                      As a free user, your Adventure Passport will be created with 5 countries. Add credits to get your Passport with all your visited Countries.
                     </div>
                   }
 
@@ -530,7 +530,7 @@ export function PassportDashboard({
                     {isRecording ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>Processing Passport...</span>
+                        <span>Processing Passport</span>
                       </>
                     ) : (
                       <>
@@ -539,6 +539,11 @@ export function PassportDashboard({
                       </>
                     )}
                   </button>
+                  {isRecording &&
+                  <div className="text-center text-xs font-medium text-green-600">
+                    Passport processing might take 2 - 3 minutes
+                  </div>
+                }
 
                   {mappbookUser && (
                     <VideoHistory

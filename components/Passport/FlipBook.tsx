@@ -279,7 +279,9 @@ const PassportFlipBook: React.FC<{
     '/api/get-assets?type=images&name=passportfrontcover.jpg',
     '/api/get-assets?type=images&name=passportfrontinside.jpg',
     '/api/get-assets?type=images&name=passportbackinside.jpg',
-    '/api/get-assets?type=images&name=passportbackcover.jpg'
+    '/api/get-assets?type=images&name=passportbackcover.jpg',
+    '/api/get-assets?type=images&name=booktable.jpg', 
+    '/api/get-assets?type=images&name=passport_page.jpg'
   ];
 
   const validLocations = React.useMemo(() => {
@@ -455,7 +457,7 @@ const PassportFlipBook: React.FC<{
               startPage={0}
               startZIndex={0}
               drawShadow={true}
-              flippingTime={1000}
+              flippingTime={2000}
               usePortrait={false}
               autoSize={true}
               clickEventForward={false}
