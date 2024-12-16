@@ -60,7 +60,7 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
       setIsDownloading(true);
       const response = await fetch(videoUrl);
       if (!response.ok) throw new Error('Network response was not ok');
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -70,7 +70,7 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       showToast('Video download started');
     } catch (error) {
       console.error('Error downloading video:', error);
@@ -98,13 +98,13 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
         <span className="text-sm font-semibold text-gray-700">Example Videos</span>
         <span className="text-xs text-purple-500 font-medium">📖</span>
       </div>
-      
+
       <div className="p-2 max-h-[300px] overflow-y-auto">
         {DEMO_VIDEOS.map((video) => (
           <div
             key={video.id}
             className={`w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md transition-colors
-              ${selectedVideoId === video.id ? 'bg-purple-50' : ''}`}
+        ${selectedVideoId === video.id ? 'bg-purple-50' : ''}`}
           >
             <button
               onClick={() => {
@@ -116,12 +116,17 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
               <span className="w-16 h-16 bg-purple-100 rounded flex items-center justify-center flex-shrink-0">
                 <Video className={`w-6 h-6 ${selectedVideoId === video.id ? 'text-purple-600' : 'text-purple-500'}`} />
               </span>
-              <span className={`flex-grow min-w-0 text-sm font-medium truncate
-                ${selectedVideoId === video.id ? 'text-purple-600' : 'text-gray-700'}`}>
-                {video.location_count} Countries{video.location_count !== 1 ? 's' : ''}
-              </span>
+              <div className="flex-grow min-w-0">
+                <p className={`text-sm font-medium truncate
+            ${selectedVideoId === video.id ? 'text-purple-600' : 'text-gray-700'}`}>
+                  Adventure Passport
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {video.location_count} Countries{video.location_count !== 1 ? 's' : ''}
+                </p>
+              </div>
             </button>
-            
+
             <div className="flex items-center gap-2 flex-shrink-0">
               <Button
                 variant="ghost"
@@ -131,7 +136,6 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
                 disabled={isDownloading}
               >
                 <Download className="h-4 w-4" />
-                
               </Button>
               <Button
                 variant="ghost"
@@ -145,7 +149,6 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
           </div>
         ))}
       </div>
-
       {/* Toast Messages */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map(toast => (

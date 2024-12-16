@@ -114,7 +114,6 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
       setVideos(prev => prev.filter(v => v.id !== videoToDelete.id));
       showToast('Video deleted successfully');
 
-      // If the deleted video was selected, select the first remaining video
       if (selectedVideoId === videoToDelete.id) {
         const remainingVideos = videos.filter(v => v.id !== videoToDelete.id);
         if (remainingVideos.length > 0) {
@@ -234,12 +233,14 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
                 <div className="flex-grow min-w-0 text-left">
                   <p className={`text-sm font-medium truncate
                     ${selectedVideoId === video.id ? 'text-purple-600' : 'text-gray-700'}`}>
+                    Adventure Passport
+                  </p>
+                  <p className="text-xs text-gray-500">
                     {video.location_count} Countries{video.location_count !== 1 ? 's' : ''}
                   </p>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                     <Clock className="w-3 h-3" />
                     <span>{formatDate(video.created_at)}</span>
-
                   </div>
                 </div>
               </button>

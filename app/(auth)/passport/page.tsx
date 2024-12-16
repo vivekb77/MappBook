@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { ChevronUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
+
 const VideoPreview = dynamic(
   () => import('@/components/Passport/VideoPreview').then(mod => mod.VideoPreview),
   { ssr: false }
@@ -78,7 +79,7 @@ export default function RecordVideoPage() {
 
         {/* Passport Dashboard - Right Side (30%) */}
         <div className="w-[40%] bg-white border-l border-slate-200 p-4 overflow-y-auto">
-          <PassportDashboard 
+          <PassportDashboard
             onVideoUrlChange={handleVideoUrlChange}
             onRecordingStart={handleRecordingStart}
             onRecordingError={handleRecordingError}
@@ -107,7 +108,7 @@ export default function RecordVideoPage() {
 
         {/* Scrollable Dashboard Content */}
         <div className="bg-white min-h-screen pb-16 md:px-8">
-          <PassportDashboard 
+          <PassportDashboard
             onVideoUrlChange={handleVideoUrlChange}
             onRecordingStart={handleRecordingStart}
             onRecordingError={handleRecordingError}
