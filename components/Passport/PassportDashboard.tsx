@@ -1,18 +1,41 @@
-import { Video, Loader2, Download } from 'lucide-react'
-import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { Video, Loader2, Download, Pencil, Check, X, Globe2 } from 'lucide-react'
+import { useState, useEffect, useReducer } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useMappbookUser } from '@/context/UserContext'
-import { getClerkSupabaseClient } from "@/components/utils/supabase";
+import { getClerkSupabaseClient } from "@/components/utils/supabase"
 import VideoHistory from './VideoHistory'
 import DemoVideos from './DemoVideos'
-import { logout } from '../utils/auth';
+import VisitedPlacesPopUp from './VisitedPlacesPopUp';
+import { logout } from '../utils/auth'
+import React from 'react'
 
 interface Location {
   place_names: string[];
   place_country: string;
   place_country_code: string;
 }
+
+const MAX_NAME_LENGTH = 25;
+
+interface ShareState {
+  displayName: string | null;
+  showLink: boolean;
+  isEditing: boolean;
+  nameInput: string;
+  asyncState: {
+    isSaving: boolean;
+    error: string | null;
+  };
+}
+
+type ShareAction =
+  | { type: 'SET_DISPLAY_NAME'; payload: string }
+  | { type: 'TOGGLE_SHARE' }
+  | { type: 'START_EDITING' }
+  | { type: 'CANCEL_EDITING' }
+  | { type: 'SET_NAME_INPUT'; payload: string }
+  | { type: 'SET_SAVING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null };
 
 interface RecordFlipbookResponse {
   success: boolean;
@@ -22,10 +45,83 @@ interface RecordFlipbookResponse {
 }
 
 interface PassportDashboardProps {
-  onVideoUrlChange: (url: string | null) => void
-  onRecordingStart: () => void
-  onRecordingError: (error: string) => void
+  onVideoUrlChange: (url: string | null) => void;
+  onRecordingStart: () => void;
+  onRecordingError: (error: string) => void;
 }
+
+interface NameEditorProps {
+  displayName: string | null;
+  isEditing: boolean;
+  nameInput: string;
+  isSaving: boolean;
+  error: string | null;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onNameChange: (value: string) => void;
+}
+
+const NameEditor: React.FC<NameEditorProps> = ({
+  displayName,
+  isEditing,
+  nameInput,
+  isSaving,
+  error,
+  onEdit,
+  onSave,
+  onCancel,
+  onNameChange,
+}) => {
+  if (!isEditing) {
+    return (
+      <div className="flex items-center justify-between">
+        <span className="text-gray-700">{displayName || 'MappBook User'}</span>
+        <button
+          onClick={onEdit}
+          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <Pencil className="w-5 h-5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={nameInput}
+          onChange={(e) => onNameChange(e.target.value)}
+          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+          placeholder="Enter your name"
+          maxLength={MAX_NAME_LENGTH}
+          disabled={isSaving}
+        />
+        <button
+          onClick={onSave}
+          disabled={isSaving}
+          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSaving ? (
+            <span className="inline-block animate-spin">↻</span>
+          ) : (
+            <Check className="w-5 h-5" />
+          )}
+        </button>
+        <button
+          onClick={onCancel}
+          disabled={isSaving}
+          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
+};
 
 export function PassportDashboard({
   onVideoUrlChange,
@@ -35,11 +131,22 @@ export function PassportDashboard({
   const supabase = getClerkSupabaseClient();
   const { isLoaded, isSignedIn, user } = useUser()
   const { mappbookUser, setMappbookUser } = useMappbookUser()
+  const [passportDisplayName, setPassportDisplayName] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false)
+
+  const [passportVideoCredits, setPassportVideoCredits] = useState<number | undefined>(undefined)
+  const [isPassportVideoPremiumUser, setIPassportVideoPremiumUser] = useState<boolean>(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoadingSignIn, setIsLoadingSignIn] = useState(false)
   const [locations, setLocations] = useState<Location[]>([])
+
+  const sanitizeInput = (input: string): string => {
+    return input
+      .trim()
+      .replace(/[<>&'"]/g, '')
+      .slice(0, MAX_NAME_LENGTH);
+  };
 
   const handleLogout = async () => {
     const { success, error } = await logout();
@@ -47,6 +154,72 @@ export function PassportDashboard({
       // track('RED - Create Map - Logout failed');
     }
   };
+
+  const handleSignIn = async () => {
+    setIsLoadingSignIn(true)
+    try {
+      window.location.href = '/sign-in'
+    } catch (error) {
+      console.error('Sign in error:', error)
+    }
+  }
+
+  useEffect(() => {
+    if (mappbookUser) {
+      setPassportDisplayName(mappbookUser.display_name);
+      setIPassportVideoPremiumUser(mappbookUser.is_passport_video_premium_user)
+      setPassportVideoCredits(mappbookUser.passport_video_credits)
+      dispatch({ type: 'SET_DISPLAY_NAME', payload: mappbookUser.display_name });
+    }
+  }, [mappbookUser]);
+
+
+  const shareReducer = (state: ShareState, action: ShareAction): ShareState => {
+    switch (action.type) {
+      case 'SET_DISPLAY_NAME':
+        return { ...state, displayName: action.payload };
+      case 'TOGGLE_SHARE':
+        return { ...state, showLink: !state.showLink };
+      case 'START_EDITING':
+        return {
+          ...state,
+          isEditing: true,
+          nameInput: state.displayName || '',
+        };
+      case 'CANCEL_EDITING':
+        return {
+          ...state,
+          isEditing: false,
+          nameInput: '',
+          asyncState: { ...state.asyncState, error: null },
+        };
+      case 'SET_NAME_INPUT':
+        return { ...state, nameInput: action.payload };
+      case 'SET_SAVING':
+        return {
+          ...state,
+          asyncState: { ...state.asyncState, isSaving: action.payload },
+        };
+      case 'SET_ERROR':
+        return {
+          ...state,
+          asyncState: { ...state.asyncState, error: action.payload },
+        };
+      default:
+        return state;
+    }
+  };
+
+  const [state, dispatch] = useReducer(shareReducer, {
+    displayName: mappbookUser?.display_name || null,
+    showLink: false,
+    isEditing: false,
+    nameInput: '',
+    asyncState: {
+      isSaving: false,
+      error: null,
+    },
+  });
 
   const fetchUserPlaces = async (userId: string) => {
     try {
@@ -68,11 +241,14 @@ export function PassportDashboard({
         return acc;
       }, {});
 
-      const formattedLocations: Location[] = Object.entries(countryGroups || {}).map(([country, data]) => ({
-        place_names: data.places,
-        place_country: country,
-        place_country_code: data.countryCode
-      }));
+      const formattedLocations: Location[] = Object.entries(countryGroups || {})
+        .map(([country, data]) => ({
+          place_names: data.places,
+          place_country: country,
+          place_country_code: data.countryCode
+        }))
+        .sort((a, b) => b.place_names.length - a.place_names.length); // Sort by number of places in descending order
+
 
       setLocations(formattedLocations);
       return formattedLocations;
@@ -81,15 +257,6 @@ export function PassportDashboard({
       throw err;
     }
   };
-
-  const handleSignIn = async () => {
-    setIsLoadingSignIn(true)
-    try {
-      window.location.href = '/sign-in'
-    } catch (error) {
-      console.error('Sign in error:', error)
-    }
-  }
 
   const triggerRecording = async () => {
     if (!isSignedIn || !mappbookUser) {
@@ -109,16 +276,18 @@ export function PassportDashboard({
       onRecordingStart()
 
       const userLocations = await fetchUserPlaces(mappbookUser.mappbook_user_id)
-      console.log(`Getting video for ${userLocations.length} locations`)
+      console.log("Getting video for" + JSON.stringify(userLocations))
 
-      response = await fetch('/api/call-lambda', {
+      response = await fetch('/api/call-lambdacc', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           locationCount: userLocations.length,
-          mappbook_user_id: mappbookUser.mappbook_user_id
+          mappbook_user_id: mappbookUser.mappbook_user_id,
+          passport_display_name: passportDisplayName,
+          is_passport_video_premium_user: isPassportVideoPremiumUser
         }),
       })
 
@@ -131,10 +300,9 @@ export function PassportDashboard({
       if (!data.video_url) {
         throw new Error('No video URL returned')
       }
-
+      setPassportVideoCredits((prev) => (prev ?? 0) - 1)
       setVideoUrl(data.video_url)
       onVideoUrlChange(data.video_url)
-      console.log(videoUrl)
     } catch (error: unknown) {
       let errorMessage = 'An error occurred while recording'
 
@@ -185,6 +353,43 @@ export function PassportDashboard({
     )
   }
 
+  const saveName = async () => {
+    const sanitizedName = sanitizeInput(state.nameInput);
+
+    if (!sanitizedName) {
+      dispatch({ type: 'SET_ERROR', payload: 'Name cannot be empty' });
+      return;
+    }
+
+    if (!mappbookUser) {
+      dispatch({ type: 'SET_ERROR', payload: 'User not found' });
+      return;
+    }
+
+    try {
+      dispatch({ type: 'SET_SAVING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
+
+      const { error } = await supabase
+        .from('MappBook_Users')
+        .update({ display_name: sanitizedName })
+        .eq('mappbook_user_id', mappbookUser.mappbook_user_id)
+        .single();
+
+      if (error) throw error;
+      setPassportDisplayName(sanitizedName)
+      dispatch({ type: 'SET_DISPLAY_NAME', payload: sanitizedName });
+      dispatch({ type: 'CANCEL_EDITING' });
+    } catch (err) {
+      dispatch({
+        type: 'SET_ERROR',
+        payload: 'Failed to save name. Please try again.',
+      });
+    } finally {
+      dispatch({ type: 'SET_SAVING', payload: false });
+    }
+  };
+
   return (
     <div className="relative bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-xl shadow-lg border border-pink-100/50 backdrop-blur-sm flex flex-col min-h-full">
       {/* Main content wrapper with padding bottom for footer */}
@@ -200,51 +405,110 @@ export function PassportDashboard({
             </h1>
           </div>
           <p className="text-xs font-medium text-purple-400">
-            Adventure Passport 🌎 🗺️
+            Adventure Passport 🌎
           </p>
         </div>
 
         {/* User info section */}
-        {isSignedIn && (
-          <div className="p-4 border-b border-pink-100/50 bg-white/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 text-white flex items-center justify-center font-medium shadow-inner">
-                  {user?.firstName?.[0] || user?.emailAddresses[0].emailAddress[0].toUpperCase()}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-gray-700">
-                    {user?.firstName || user?.emailAddresses[0].emailAddress}
-                  </span>
-                  <span className="text-xs text-purple-500 font-medium">
-                    Travel Creator ✈️
-                  </span>
-                </div>
+        {isSignedIn && mappbookUser && (<div className="p-4 border-b border-pink-100/50 bg-white/30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 
+            text-white flex items-center justify-center font-medium shadow-inner">
+                {passportDisplayName?.[0].toUpperCase() || 'MappBook User'?.[0].toUpperCase()}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold text-gray-700">
+                  {passportDisplayName || 'MappBook User'}
+                </span>
+                <span className="text-xs text-purple-500 font-medium">
+                  {mappbookUser.is_premium_user ? 'Premium Travel Creator' : 'Travel Creator'} ✈️
+                </span>
               </div>
             </div>
           </div>
+
+        </div>
         )}
 
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-2 space-y-6">
+          <div className="text-left text-l font-bold text-purple-400">
+                      Create an adventure Passport from all your visited Countries and Cities.
+                    </div>
             <div className="space-y-4">
-              {isSignedIn ? (
+              {isSignedIn && mappbookUser ? (
                 <>
+                  <div className="space-y-4">
+
+                    <div className="text-left text-xs font-medium text-purple-400">
+                      Your Passport title? This will be printed on Front Cover.
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <NameEditor
+                        displayName={state.displayName}
+                        isEditing={state.isEditing}
+                        nameInput={state.nameInput}
+                        isSaving={state.asyncState.isSaving}
+                        error={state.asyncState.error}
+                        onEdit={() => dispatch({ type: 'START_EDITING' })}
+                        onSave={saveName}
+                        onCancel={() => dispatch({ type: 'CANCEL_EDITING' })}
+                        onNameChange={(value) =>
+                          dispatch({ type: 'SET_NAME_INPUT', payload: value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <VisitedPlacesPopUp
+                      fetchUserPlaces={fetchUserPlaces}
+                      userId={mappbookUser.mappbook_user_id}
+                    />
+
+                    <button
+                      className="p-2 rounded-xl bg-white/80 text-purple-500 hover:bg-purple-50 transition-colors duration-300 disabled:opacity-50"
+                      onClick={() => window.open('https://mappbook.com', '_blank')}
+                    >
+                      <div className="flex flex-col items-center">
+                        <div className="flex items-center gap-2">
+                          <Globe2 className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            Add Places
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+
+
+                  </div>
+
+                  <div className="text-left text-xs font-medium text-red-600">
+                    {passportVideoCredits} Credits Remaining
+                  </div>
+
+                  {!isPassportVideoPremiumUser &&
+                    <div className="text-left text-xs font-medium text-red-600">
+                      Adventure Passport with only 3 countries will be created as free user. Add credits to generate Passport with all your visited Countries and Cities.
+                    </div>
+                  }
+
                   <button
                     onClick={triggerRecording}
-                    disabled={isRecording}
+                    disabled={isRecording || !passportVideoCredits || passportVideoCredits <= 0}
                     className="w-full h-12 px-4 rounded-md bg-white text-gray-700 font-medium border border-gray-200 hover:bg-gray-50 hover:shadow-md transform transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {isRecording ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>Processing video...</span>
+                        <span>Processing Video...</span>
                       </>
                     ) : (
                       <>
                         <Video className="w-5 h-5" />
-                        <span>Create Video</span>
+                        <span>Create Passport Video</span>
                       </>
                     )}
                   </button>
@@ -263,7 +527,7 @@ export function PassportDashboard({
                   <DemoVideos onVideoSelect={handleVideoSelect} />
                   <div className="p-4 rounded-md bg-purple-50 border border-purple-100">
                     <p className="text-sm text-purple-600 text-center font-medium">
-                      Currently showing a demo video. Sign in to create your own!
+                      These are demo Adventure Passport videos. Sign in to create your own with your visited Countries and Cities!
                     </p>
                   </div>
 
@@ -343,9 +607,9 @@ export function PassportDashboard({
             </div>
           </div>
         </div>
-        </div>
+      </div>
 
 
-</div>
-)
+    </div>
+  )
 }
