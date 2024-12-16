@@ -8,6 +8,11 @@ interface Location {
   place_country_code: string;
 }
 
+interface PassportFlipBookProps {
+  locations: Location[];
+  passportDisplayName?: string | null;
+}
+
 interface FlipBookProps {
   width: number;
   height: number;
@@ -37,8 +42,6 @@ interface FlipBookProps {
   disableFlipByClick?: boolean;
 }
 
-
-
 interface Stamp {
   country: string;
   country_code: string;
@@ -56,9 +59,13 @@ interface PassportPageProps {
   cityStamps: CityStamp[];
 }
 
-const PassportCover = React.forwardRef<HTMLDivElement, { 
-  position: 'frontCover' | 'frontInside' | 'backInside' | 'backCover'
+const PassportCover = React.forwardRef<HTMLDivElement, {
+  position: 'frontCover' | 'frontInside' | 'backInside' | 'backCover';
+  passportDisplayName?: string;
+  
 }>((props, ref) => {
+
+  
   // Get image path based on position
   const getImagePath = () => {
     switch (props.position) {
@@ -79,13 +86,13 @@ const PassportCover = React.forwardRef<HTMLDivElement, {
   const showTitle = props.position === 'frontCover';
 
   return (
-    <div 
+    <div
       ref={ref}
       className="relative h-full w-full overflow-hidden"
       data-density="hard"
     >
       {/* Base page with background image */}
-      <div 
+      <div
         className="absolute top-0 left-0 right-0 bottom-0 w-full h-full"
         style={{
           backgroundImage: `url("${getImagePath()}")`,
@@ -98,24 +105,26 @@ const PassportCover = React.forwardRef<HTMLDivElement, {
         {/* Darkening overlay */}
         <div className="absolute inset-0 bg-black/30" />
       </div>
-      
+
       {/* Content - Only show on front cover */}
       {showTitle && (
         <div className="relative h-full w-full flex flex-col items-center justify-center p-8 z-10">
-          <div className="text-center p-8">
-            <h1 className="text-4xl font-serif mb-4 text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              ITER MEMORIAE
-            </h1>
-            <div className="font-serif text-2xl text-amber-100 mt-4" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              Anno Domini MMXXIV
-            </div>
+        <div className="text-center p-8 space-y-8">
+          <div className="font-serif text-2xl text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+            Adventure Passport
           </div>
+          <div className="font-serif text-xs text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+            of
+          </div>
+          <h1 className="text-4xl font-serif text-amber-100 break-words max-w-md leading-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+            {props.passportDisplayName || 'ROMAN EMPIRE'}
+          </h1>
         </div>
+      </div>
       )}
     </div>
   );
 });
-
 
 const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
   ({ location, countryStamps, cityStamps, pageNumber }, ref) => {
@@ -126,7 +135,7 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
     );
 
     const matchingCityStamps = location.place_names
-      .map(placeName => cityStamps.find(stamp => 
+      .map(placeName => cityStamps.find(stamp =>
         stamp.city.toLowerCase() === placeName.toLowerCase() &&
         stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
       ))
@@ -152,7 +161,7 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
         className="relative h-full w-full overflow-hidden"
       >
         {/* Base page with background image */}
-        <div 
+        <div
           className="absolute inset-0"
           style={{
             backgroundImage: 'url("/api/get-assets?type=images&name=passport_page.jpg")',
@@ -164,24 +173,24 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
             height: '100%'
           }}
         />
-        
+
         {/* Content container */}
         <div className="relative h-full w-full">
           {/* Country stamp in center */}
           {matchingCountryStamp && (
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-              <div 
+              <div
                 className="w-64 h-64 relative"
                 style={{
                   filter: 'sepia(0.6) brightness(0.8)',
                   mixBlendMode: 'multiply'
                 }}
               >
-                <div 
+                <div
                   className="absolute inset-0"
                   dangerouslySetInnerHTML={{
                     __html: matchingCountryStamp.svgCode.replace('<svg', '<svg class="w-full h-full"')
-                  }} 
+                  }}
                 />
               </div>
             </div>
@@ -191,9 +200,9 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
           {matchingCityStamps.map((stamp, index) => {
             if (index >= FIXED_POSITIONS.length) return null;
             const position = FIXED_POSITIONS[index];
-            
+
             return (
-              <div 
+              <div
                 key={`${stamp.city}-${index}-${pageNumber}`}
                 className="absolute w-32 h-32"
                 style={{
@@ -205,11 +214,11 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
                   zIndex: 10
                 }}
               >
-                <div 
+                <div
                   className="w-full h-full"
                   dangerouslySetInnerHTML={{
                     __html: stamp.svgCode.replace('<svg', '<svg class="w-full h-full"')
-                  }} 
+                  }}
                 />
               </div>
             );
@@ -225,7 +234,7 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
   }
 );
 
-// Helper function remains the same
+// Helper function for Roman numerals
 const toRomanNumeral = (num: number): string => {
   const romanNumerals = [
     { value: 100, numeral: 'C' },
@@ -252,7 +261,10 @@ const toRomanNumeral = (num: number): string => {
   return result;
 };
 
-const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) => {
+const PassportFlipBook: React.FC<{
+  locations: Location[];
+  passportDisplayName?: string;
+}> = ({ locations, passportDisplayName }) => {
   const [page, setPage] = React.useState(0);
   const [totalPages, setTotalPages] = React.useState(0);
   const [orientation, setOrientation] = React.useState('landscape');
@@ -272,14 +284,14 @@ const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) =>
 
   const validLocations = React.useMemo(() => {
     if (!countryStamps.length) return [];
-    
+
     // First filter valid locations
     const filtered = locations.filter(location => {
       const hasCountryStamp = countryStamps.some(
         stamp => stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
       );
       const hasCityStamp = location.place_names.some(placeName =>
-        cityStamps.some(stamp => 
+        cityStamps.some(stamp =>
           stamp.city.toLowerCase() === placeName.toLowerCase() &&
           stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
         )
@@ -300,10 +312,10 @@ const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) =>
       acc[countryCode].locations.push(location);
       acc[countryCode].totalPlaces += location.place_names.length;
       return acc;
-    }, {} as Record<string, { 
-      locations: Location[], 
+    }, {} as Record<string, {
+      locations: Location[],
       totalPlaces: number,
-      country: string 
+      country: string
     }>);
 
     // Sort countries by total places (descending) and alphabetically for ties
@@ -321,18 +333,15 @@ const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) =>
 
     // If we have an odd number of locations, add an empty location to maintain even pages
     if (sortedLocations.length % 2 !== 0) {
-      sortedLocations.push({ 
-        place_names: [], 
-        place_country: "", 
-        place_country_code: "" 
+      sortedLocations.push({
+        place_names: [],
+        place_country: "",
+        place_country_code: ""
       });
     }
 
     return sortedLocations;
   }, [locations, countryStamps, cityStamps]);
-
-
-
 
   React.useEffect(() => {
     const loadAllResources = async () => {
@@ -375,7 +384,6 @@ const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) =>
     loadAllResources();
   }, []);
 
-
   React.useEffect(() => {
     setTotalPages(validLocations.length + 0);
   }, [validLocations.length]);
@@ -392,27 +400,27 @@ const PassportFlipBook: React.FC<{ locations: Location[] }> = ({ locations }) =>
     }
   };
 
-// Update loading check
-if (isLoading || !imagesLoaded) {
-  return (
-    <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
-          <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400"
-            style={{ animationDirection: 'reverse' }} />
+  // Update loading check
+  if (isLoading || !imagesLoaded) {
+    return (
+      <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
+            <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400"
+              style={{ animationDirection: 'reverse' }} />
+          </div>
+          <span className="text-lg font-medium text-gray-700">
+            Loading 🌎 📘
+          </span>
         </div>
-        <span className="text-lg font-medium text-gray-700">
-          Loading 🌎 📘
-        </span>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
-return (
+  return (
     <div className="flex flex-col items-center gap-8 p-8 min-h-screen bg-neutral-100" data-testid="flipbook-container">
-      <div 
+      <div
         data-testid="wooden-background"
         className="w-full max-w-5xl p-12 rounded-lg relative overflow-hidden"
         style={{
@@ -425,7 +433,7 @@ return (
       >
         <div className="relative">
           <div className="absolute -inset-4 bg-black/20 blur-xl rounded-full"></div>
-          
+
           <div className="relative">
             <HTMLFlipBook
               width={550}
@@ -456,7 +464,7 @@ return (
               showPageCorners={true}
               disableFlipByClick={false}
             >
-              <PassportCover position="frontCover" />
+              <PassportCover position="frontCover" passportDisplayName={passportDisplayName ?? undefined} />
               <PassportCover position="frontInside" />
               {validLocations.map((location, index) => (
                 <PassportPage

@@ -24,17 +24,17 @@ export default function PlayFlipBook() {
   return (
     <Suspense fallback={
       <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
-          <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400"
-            style={{ animationDirection: 'reverse' }} />
+        <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
+            <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400"
+              style={{ animationDirection: 'reverse' }} />
+          </div>
+          <span className="text-lg font-medium text-gray-700">
+            Loading 🌎 📘
+          </span>
         </div>
-        <span className="text-lg font-medium text-gray-700">
-          Loading 🌎 📘
-        </span>
       </div>
-    </div>
     }>
       <PlayFlipBookContent />
     </Suspense>
@@ -53,6 +53,7 @@ function PlayFlipBookContent() {
         setIsLoading(true);
         setError(null);
         const userId = searchParams.get('userId');
+        const isPassportVideoPremiumUser = searchParams.get('isPremium') === 'true';
         if (!userId) throw new Error('User ID is required');
 
         const { data, error: fetchError } = await supabase
@@ -76,13 +77,59 @@ function PlayFlipBookContent() {
           return acc;
         }, {});
 
-        const formattedLocations: Location[] = Object.entries(countryGroups || {}).map(([country, data]) => ({
+        let formattedLocations: Location[] = Object.entries(countryGroups || {}).map(([country, data]) => ({
           place_names: data.places,
           place_country: country,
           place_country_code: data.countryCode
         }));
 
-        setLocations(formattedLocations);
+        // Group and sort locations
+        const locationGroups = formattedLocations.reduce((acc, location) => {
+          const countryCode = location.place_country_code;
+          if (!acc[countryCode]) {
+            acc[countryCode] = {
+              locations: [],
+              totalPlaces: 0,
+              country: location.place_country
+            };
+          }
+          acc[countryCode].locations.push(location);
+          acc[countryCode].totalPlaces += location.place_names.length;
+          return acc;
+        }, {} as Record<string, {
+          locations: Location[],
+          totalPlaces: number,
+          country: string
+        }>);
+
+        // Sort countries by total places and alphabetically for ties
+        let sortedLocations = Object.values(locationGroups)
+          .sort((a, b) => {
+            const placeDiff = b.totalPlaces - a.totalPlaces;
+            if (placeDiff === 0) {
+              return a.country.localeCompare(b.country);
+            }
+            return placeDiff;
+          })
+          .flatMap(group => group.locations);
+
+        // Limit to 5 locations for non-premium users
+        if (!isPassportVideoPremiumUser) {
+          sortedLocations = sortedLocations.slice(0, 7);
+        }
+
+        // Ensure even number of locations
+        if (sortedLocations.length % 2 !== 0) {
+          sortedLocations.push({
+            place_names: [],
+            place_country: "",
+            place_country_code: ""
+          });
+        }
+
+        setLocations(sortedLocations);
+
+        console.log(JSON.stringify(locations))
       } catch (err) {
         console.error('Error fetching places:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -129,12 +176,14 @@ function PlayFlipBookContent() {
       </div>
     );
   }
-
+  const passportDisplayName = searchParams.get('displayname');
   return (
     <>
       <div className="h-screen w-full bg-[#F5E6D3] flex flex-col">
         <div className="flex-1 overflow-hidden">
-          <PassportFlipBook locations={locations} />
+          {/* <PassportFlipBook locations={locations} /> */}
+          <PassportFlipBook locations={locations}
+            passportDisplayName={passportDisplayName ?? undefined} />
         </div>
       </div>
       <div className="flex-none bg-[#F5E6D3] pt-1">
