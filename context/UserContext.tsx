@@ -8,6 +8,9 @@ export type MappBookUser = {
     display_name : string;
     map_style: string;
     country_fill_color : string;
+    is_passport_video_premium_user:boolean;
+    passport_video_premium_start_date:Date;
+    passport_video_credits: number
   };
 
 interface UserContextType {
