@@ -21,6 +21,21 @@ export async function POST(request: Request) {
       throw new Error('mappbook_user_id is required');
     }
 
+    // First check credits availability
+    const { data: userData, error: fetchError } = await supabase
+      .from('MappBook_Users')
+      .select('passport_video_credits')
+      .eq('mappbook_user_id', mappbookUserId)
+      .single();
+
+    if (fetchError) {
+      throw fetchError;
+    }
+
+    if (!userData || userData.passport_video_credits <= 0) {
+      throw new Error('Insufficient credits');
+    }
+
     // Set processing flag to true at start
     const { error: updateStartError } = await supabase
       .from('MappBook_Users')
@@ -45,14 +60,21 @@ export async function POST(request: Request) {
 
     const data = await lambdaResponse.json();
 
-    // Set processing flag to false on success
+    if (!data.success) {
+      throw new Error(data.error || 'Lambda function failed');
+    }
+
+    // On success: Set processing flag to false AND decrement credits
     const { error: updateEndError } = await supabase
       .from('MappBook_Users')
-      .update({ is_video_processing: false })
+      .update({ 
+        is_video_processing: false,
+        passport_video_credits: userData.passport_video_credits - 1
+      })
       .eq('mappbook_user_id', mappbookUserId);
 
     if (updateEndError) {
-      console.error('Error updating processing flag after success:', updateEndError);
+      console.error('Error updating processing flag and credits after success:', updateEndError);
     }
 
     return NextResponse.json(data);

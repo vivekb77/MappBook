@@ -530,7 +530,7 @@ export function PassportDashboard({
                     {isRecording ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>Processing Video...</span>
+                        <span>Processing Passport...</span>
                       </>
                     ) : (
                       <>
