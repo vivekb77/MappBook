@@ -101,7 +101,7 @@ export default function RecordVideoPage() {
                 {videoState.error}
               </div>
             ) : (
-              <VideoPreview videoUrl={videoState.url} />
+              <VideoPreview videoUrl={videoState.url}/>
             )}
           </div>
         </div>

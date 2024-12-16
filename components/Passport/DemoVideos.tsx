@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Video, Download, Share2, Loader2 } from 'lucide-react';
+import { Video, Download, Share2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface DemoVideo {
@@ -15,7 +15,7 @@ interface DemoVideosProps {
 }
 
 interface Toast {
-  id: number;
+  id: string;
   message: string;
   type: 'success' | 'error';
 }
@@ -38,21 +38,32 @@ const DEMO_VIDEOS: DemoVideo[] = [
   }
 ];
 
+let toastCounter = 0;
+
 export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
-  const [selectedVideoId, setSelectedVideoId] = React.useState(() => {
-    onVideoSelect(DEMO_VIDEOS[0].video_url);
-    return DEMO_VIDEOS[0].id;
-  });
+  const [selectedVideoId, setSelectedVideoId] = React.useState(DEMO_VIDEOS[0].id);
   const [toasts, setToasts] = React.useState<Toast[]>([]);
   const [isDownloading, setIsDownloading] = React.useState(false);
+  const initialRenderRef = React.useRef(true);
 
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    const id = Date.now();
+  // Handle initial video selection only once
+  React.useEffect(() => {
+    if (initialRenderRef.current) {
+      const selectedVideo = DEMO_VIDEOS.find(video => video.id === selectedVideoId);
+      if (selectedVideo) {
+        onVideoSelect(selectedVideo.video_url);
+      }
+      initialRenderRef.current = false;
+    }
+  }, [selectedVideoId, onVideoSelect]);
+
+  const showToast = React.useCallback((message: string, type: 'success' | 'error' = 'success') => {
+    const id = `toast-${++toastCounter}`;
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(toast => toast.id !== id));
     }, 3000);
-  };
+  }, []);
 
   const handleDownload = async (videoUrl: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -63,14 +74,18 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
+      
+      // Create link without appending to document
       const a = document.createElement('a');
+      a.style.display = 'none';
       a.href = url;
-      a.download = 'Mappbook-Adventure-Passport-demo.mp4';
-      document.body.appendChild(a);
+      a.download = 'Mappbook-Adventure-Passport-Demo-Video.mp4';
+      
+      // Trigger download using click() directly
       a.click();
+      
+      // Clean up
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
       showToast('Video download started');
     } catch (error) {
       console.error('Error downloading video:', error);
@@ -80,7 +95,7 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
     }
   };
 
-  const handleShare = async (videoId: string, e: React.MouseEvent) => {
+  const handleShare = React.useCallback(async (videoId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const shareUrl = `https://mappbook.com/passport/${videoId}`;
     try {
@@ -90,13 +105,20 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
       console.error('Error copying to clipboard:', error);
       showToast('Failed to copy share link. Please try again.', 'error');
     }
-  };
+  }, [showToast]);
+
+  const handleVideoSelect = React.useCallback((videoId: string) => {
+    setSelectedVideoId(videoId);
+    const selectedVideo = DEMO_VIDEOS.find(video => video.id === videoId);
+    if (selectedVideo) {
+      onVideoSelect(selectedVideo.video_url);
+    }
+  }, [onVideoSelect]);
 
   return (
     <div className="mt-6 bg-white/80 rounded-lg border border-gray-100">
       <div className="p-4 border-b border-gray-100 flex items-center justify-between">
         <span className="text-sm font-semibold text-gray-700">Example Videos</span>
-        <span className="text-xs text-purple-500 font-medium">📖</span>
       </div>
 
       <div className="p-2 max-h-[300px] overflow-y-auto">
@@ -104,13 +126,10 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
           <div
             key={video.id}
             className={`w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md transition-colors
-        ${selectedVideoId === video.id ? 'bg-purple-50' : ''}`}
+              ${selectedVideoId === video.id ? 'bg-purple-50' : ''}`}
           >
             <button
-              onClick={() => {
-                setSelectedVideoId(video.id);
-                onVideoSelect(video.video_url);
-              }}
+              onClick={() => handleVideoSelect(video.id)}
               className="flex items-center gap-3 flex-grow min-w-0 text-left"
             >
               <span className="w-16 h-16 bg-purple-100 rounded flex items-center justify-center flex-shrink-0">
@@ -118,11 +137,11 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
               </span>
               <div className="flex-grow min-w-0">
                 <p className={`text-sm font-medium truncate
-            ${selectedVideoId === video.id ? 'text-purple-600' : 'text-gray-700'}`}>
+                  ${selectedVideoId === video.id ? 'text-purple-600' : 'text-gray-700'}`}>
                   Adventure Passport
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {video.location_count} Countries{video.location_count !== 1 ? 's' : ''}
+                  {video.location_count} {video.location_count === 1 ? 'Country' : 'Countries'}
                 </p>
               </div>
             </button>
@@ -149,7 +168,7 @@ export default function DemoVideos({ onVideoSelect }: DemoVideosProps) {
           </div>
         ))}
       </div>
-      {/* Toast Messages */}
+      
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map(toast => (
           <div

@@ -23,12 +23,18 @@ interface Location {
 export default function PlayFlipBook() {
   return (
     <Suspense fallback={
-      <div className="h-screen w-full bg-[#F5E6D3] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-          <p className="text-lg text-gray-600">Loading your passport...</p>
+      <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-50">
+      <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
+          <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400"
+            style={{ animationDirection: 'reverse' }} />
         </div>
+        <span className="text-lg font-medium text-gray-700">
+          Loading 🌎 📘
+        </span>
       </div>
+    </div>
     }>
       <PlayFlipBookContent />
     </Suspense>
@@ -90,13 +96,19 @@ function PlayFlipBookContent() {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-full bg-[#F5E6D3] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-          <p className="text-lg text-gray-600">Loading your passport...</p>
+      <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
+            <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400"
+              style={{ animationDirection: 'reverse' }} />
+          </div>
+          <span className="text-lg font-medium text-gray-700">
+            Loading 🌎 📘
+          </span>
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {

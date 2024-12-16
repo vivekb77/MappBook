@@ -15,64 +15,65 @@ export function VideoPreview({ videoUrl }: VideoPreviewProps) {
   const [duration, setDuration] = useState(0)
   const [showControls, setShowControls] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout>()
+  const [videoDimensions, setVideoDimensions] = useState({ width: 0, height: 0 })
+
+ // Update time and duration
+ const handleTimeUpdate = () => {
+  if (videoRef.current) {
+    setCurrentTime(videoRef.current.currentTime || 0)
+  }
+}
+
+const handleLoadedMetadata = () => {
   
-   // Update time and duration
-   const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime || 0)
+  if (videoRef.current) {
+    setDuration(videoRef.current.duration || 0)
+    setCurrentTime(0)
+  }
+}
+
+useEffect(() => {
+  const video = videoRef.current
+  if (!video) return
+
+  video.addEventListener('timeupdate', handleTimeUpdate)
+  video.addEventListener('loadedmetadata', handleLoadedMetadata)
+
+  return () => {
+    video.removeEventListener('timeupdate', handleTimeUpdate)
+    video.removeEventListener('loadedmetadata', handleLoadedMetadata)
+  }
+}, [])
+
+useEffect(() => {
+  if (videoUrl) {
+    setIsLoading(true)
+    const video = document.createElement('video')
+    video.src = videoUrl
+    
+    video.onloadedmetadata = () => {
+      setIsLoading(false)
+      if (videoRef.current) {
+        setDuration(videoRef.current.duration)
+      }
+    }
+
+    video.onerror = () => {
+      console.error('Error loading video:', video.error)
+      setIsLoading(false)
     }
   }
-
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration || 0)
-      setCurrentTime(0)
-    }
-  }
-
+}, [videoUrl])
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-
-    video.addEventListener('timeupdate', handleTimeUpdate)
-    video.addEventListener('loadedmetadata', handleLoadedMetadata)
-
-    return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate)
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (videoUrl) {
-      setIsLoading(true)
-      const video = document.createElement('video')
-      video.src = videoUrl
-      
-      video.onloadedmetadata = () => {
-        setIsLoading(false)
-        if (videoRef.current) {
-          setDuration(videoRef.current.duration)
-        }
-      }
-
-      video.onerror = () => {
-        console.error('Error loading video:', video.error)
-        setIsLoading(false)
-      }
-    }
-  }, [videoUrl])
-
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
     const handleEnded = () => setIsPlaying(false)
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime)
     }
+
     const handleLoadedMetadata = () => {
       setDuration(video.duration)
     }
@@ -94,11 +95,9 @@ export function VideoPreview({ videoUrl }: VideoPreviewProps) {
 
   const handleMouseMove = () => {
     setShowControls(true)
-    
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
-
     timeoutRef.current = setTimeout(() => {
       setShowControls(false)
     }, 2000)
@@ -156,12 +155,10 @@ export function VideoPreview({ videoUrl }: VideoPreviewProps) {
     }
   }
 
-  const baseStyles = "w-[1024px] h-[714px] max-w-[calc(100vw-2rem)] max-h-[calc((100vw-2rem)*0.697)]"
-  
   if (!videoUrl) {
     return (
       <div className="flex justify-center">
-        <div className={`${baseStyles} bg-slate-800/50 rounded-lg flex items-center justify-center`}>
+        <div className="bg-slate-800/50 rounded-lg flex items-center justify-center" style={{ width: '100%', height: '100%' }}>
           <div className="flex flex-col items-center justify-center">
             <Video className="w-12 h-12 md:w-16 md:h-16 opacity-50" />
             <p className="text-base md:text-lg font-medium mt-4 text-gray-400">No video selected</p>
@@ -171,26 +168,30 @@ export function VideoPreview({ videoUrl }: VideoPreviewProps) {
     )
   }
 
- return (
+  return (
     <div className="flex justify-center">
       <div 
-        className={`${baseStyles} bg-slate-950 rounded-lg overflow-hidden relative`}
+        className="bg-slate-950 rounded-lg overflow-hidden relative"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
+        style={{
+          width: videoDimensions.width || '100%',
+          height: videoDimensions.height || '100%'
+        }}
       >
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex flex-col items-center justify-center">
               <Video className="w-12 h-12 md:w-16 md:h-16 opacity-50 animate-pulse" />
-              <p className="text-base md:text-lg font-medium mt-4 text-gray-400">Loading video...</p>
+              <p className="text-base md:text-lg font-medium mt-4 text-gray-400">Loading video</p>
             </div>
           </div>
         ) : (
           <div className="relative w-full h-full" onClick={togglePlay}>
             <video
               ref={videoRef}
-              className="w-full h-full rounded-lg object-contain"
+              className="w-full h-full object-contain"
               src={videoUrl}
               playsInline
               controls={false}

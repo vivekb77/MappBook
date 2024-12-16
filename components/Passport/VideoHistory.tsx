@@ -299,7 +299,7 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Video</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this video? This action cannot be undone.
+              Are you sure you want to delete this video?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
