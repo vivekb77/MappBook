@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getClerkSupabaseClient } from "@/components/utils/supabase";
+import { track } from '@vercel/analytics/server';
 import { getSupabaseAdmin } from '@/components/utils/supabase-admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -12,7 +12,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 export async function POST(request: Request) {
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
-  
+
   if (!signature) {
     return NextResponse.json(
       { error: 'No stripe signature found' },
@@ -38,44 +38,66 @@ export async function POST(request: Request) {
 
   try {
     if (event.type === 'checkout.session.completed') {
-        
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.userId;
-
-      // Calculate quantity based on total amount
-      const quantity = Math.round(session.amount_total! / 1000);
-
-      // console.log("Session metadata: ", JSON.stringify(session));
-      // console.log("Calculated quantity: ", quantity);
 
       if (!userId) {
         throw new Error('No userId found in session metadata');
       }
 
+      // Determine which product was purchased based on the price ID or product ID
+      const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+      const priceId = lineItems.data[0]?.price?.id;
+
       const supabase = getSupabaseAdmin();
 
-      const { data, error } = await supabase
-        .rpc('update_premium_user_fcb5e877d4ee', {
-          m_user_id: userId,
-          quantity: quantity,
-        });
-      
+      if (priceId === process.env.STRIPE_PRICE_ID_PASSPORT) {
+        // Handle Passport credits
+
+        const credit_quantity = Math.round(session.amount_total! * 0.02);
+
+        const { data, error } = await supabase
+          .rpc('add_passport_credits_fcb5e877d4ee', {
+            m_user_id: userId,
+            quantity: credit_quantity,
+          });
+
         if (error) {
+          await track('RED - Passport webhook- Error adding passport credits');
+          console.error('Error adding passport credits:', error);
+          throw error;
+        }
+      } else if (priceId === process.env.STRIPE_PRICE_ID) {
+        if (session.payment_status !== 'paid') {
+          throw new Error('Payment not completed');
+        }
+        const views_quantity = Math.round(session.amount_total! / 1000);
+
+        const { data, error } = await supabase
+          .rpc('update_premium_user_fcb5e877d4ee', {
+            m_user_id: userId,
+            quantity: views_quantity,
+          });
+
+        if (error) {
+          await track('RED - webhook- Error adding mappbook views');
           console.error('Error updating premium user:', error);
         } else {
           // console.log('Successfully updated premium user status', data);
         }
+      }
+
     }
-
     return NextResponse.json({ success: true });
-  } catch (err) {
-    
-    return NextResponse.json(
-      { error: 'Error processing webhook' + err},
-      { status: 500 }
-    );
   }
-
+    
+ catch (err) {
+  await track('RED - webhook- Error processing webhook');
+  console.error('Error processing webhook:', err);
+  return NextResponse.json(
+    { error: 'Error processing webhook: ' + err },
+    { status: 500 }
+  );
 }
-
+}
 // stripe listen --forward-to localhost:3000/api/stripe/webhook

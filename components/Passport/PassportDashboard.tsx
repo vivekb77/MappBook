@@ -5,6 +5,7 @@ import { useMappbookUser } from '@/context/UserContext'
 import { getClerkSupabaseClient } from "@/components/utils/supabase"
 import VideoHistory from './VideoHistory'
 import DemoVideos from './DemoVideos'
+import AddCredits from './AddCredits'
 import VisitedPlacesPopUp from './VisitedPlacesPopUp';
 import { logout } from '../utils/auth'
 import React from 'react'
@@ -563,7 +564,7 @@ export function PassportDashboard({
                       onVideoSelect={handleVideoSelect}
                     />
                   )}
-
+<AddCredits/>
                   <DemoVideos onVideoSelect={handleVideoSelect} />
                 </>
               ) : (
