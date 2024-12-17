@@ -306,12 +306,12 @@ export function PassportDashboard({
 
       const userLocations = await fetchUserPlaces(mappbookUser.mappbook_user_id)
 
-      if (userLocations.length < 3) { 
+      if (userLocations.length < 3) {
         const errorMsg = 'Add at least 3 countries to create your Adventure Passport. Click Add Places button to add your adventures and come back here to create your Adventure Passport!';
         setError(errorMsg);
         onRecordingError(errorMsg);
         return;
-    }
+      }
 
       response = await fetch('/api/call-lambda', {
         method: 'POST',
@@ -469,8 +469,8 @@ export function PassportDashboard({
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-2 space-y-6">
-            <div className="text-left text-l font-bold text-purple-400">
-              Create an adventure Passport from all your visited Countries and Cities.
+            <div className="mt-4 text-center text-l font-bold text-purple-400">
+              Create an adventure Passport for all your visited Countries
             </div>
             <div className="space-y-4">
               {isSignedIn && mappbookUser ? (
@@ -505,7 +505,7 @@ export function PassportDashboard({
 
                     <button
                       className="p-2 rounded-xl bg-white/80 text-purple-500 hover:bg-purple-50 transition-colors duration-300 disabled:opacity-50"
-                      onClick={() => window.open('https://mappbook.com', '_blank')}
+                      onClick={() => window.open('/', '_blank')}
                     >
                       <div className="flex flex-col items-center">
                         <div className="flex items-center gap-2">
@@ -564,7 +564,7 @@ export function PassportDashboard({
                       onVideoSelect={handleVideoSelect}
                     />
                   )}
-<AddCredits/>
+                  <AddCredits />
                   <DemoVideos onVideoSelect={handleVideoSelect} />
                 </>
               ) : (

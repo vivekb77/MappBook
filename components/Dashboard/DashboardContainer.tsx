@@ -3,7 +3,7 @@ import { AllUserPlacesContext } from "@/context/AllUserPlacesContext";
 import { useMappbookUser } from '@/context/UserContext';
 import { SignedIn, useClerk, useUser } from '@clerk/nextjs';
 import { logout } from '../utils/auth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import DesktopRecommendationBanner from './DesktopRecommendationBanner';
 import StatsPopUp from './StatsPopUp';
@@ -361,63 +361,109 @@ const DashboardContainer = () => {
             </div>
           </div>
 
-          <ShareSection />
-          <BuyPremium />
 
-          {/* Pro Features Preview */}
-          {isSignedIn && (<div className="text-center mt-4">
-            <div className="text-xs font-medium text-purple-400 flex items-center justify-center gap-2">
-              <span>✨ Add Unlimited Places</span>
-              <span>•</span>
-              <span>🎨 Share your MappBook</span>
-              <span>•</span>
-              <span>📊 See Stats</span>
+          <div className="w-full">
+          <div className="text-left text-l font-bold text-purple-400">
+              Create an adventure Passport for all your visited Countries
             </div>
-          </div>)}
-        </div>
-      </div>
-      <div className="mt-4 pt-4 border-t border-pink-100/50 px-6 pb-6">
-        <div className="flex items-center justify-center gap-4 text-xs">
-          <a
-            href="/contact"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
-          >
-            Contact
-          </a>
-          <span className="text-gray-300">•</span>
-          {isSignedIn ? (
-            <button onClick={handleLogout} className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
-              Logout
+            <button
+              onClick={() => window.open('passport', '_blank')}
+              className={`w-full py-3 px-4 rounded-xl font-medium mt-6
+                        ${mappbookUser
+                  ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400'
+                  : 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400'
+                } text-white shadow-lg hover:scale-[1.02]
+                        transform transition-all duration-300
+                        flex items-center justify-center gap-2 relative
+                        overflow-hidden group`}
+              aria-label=''
+            >
+              <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span className="font-semibold">
+                    Adventure Passport
+                  </span>
+                  
+                  <span className="bg-white/30 text-xs py-0.5 px-2 rounded-full ml-2">
+                  🌎
+                  </span>
+
+                </>
+              )}
             </button>
-          ) : (
-            <a href="/sign-in" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
-              Sign In
-            </a>
-          )}
-          <span className="text-gray-300">•</span>
-          <a
-            href="/terms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
-          >
-            Terms
-          </a>
-          <span className="text-gray-300">•</span>
-          <a
-            href="/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
-          >
-            Privacy
-          </a>
+          </div>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-pink-200/50"></div>
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-gradient-to-r from-pink-50 via-purple-50 to-blue-50 px-4">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+              </span>
+            </div>
+          </div>
+
+            <ShareSection />
+            <BuyPremium />
+
+            {/* Pro Features Preview */}
+            {isSignedIn && (<div className="text-center mt-4">
+              <div className="text-xs font-medium text-purple-400 flex items-center justify-center gap-2">
+                <span>✨ Add Unlimited Places</span>
+                <span>•</span>
+                <span>🎨 Share your MappBook</span>
+                <span>•</span>
+                <span>📊 See Stats</span>
+              </div>
+            </div>)}
+          </div>
         </div>
-      </div>
-    </div >
-  );
+        <div className="mt-4 pt-4 border-t border-pink-100/50 px-6 pb-6">
+          <div className="flex items-center justify-center gap-4 text-xs">
+            <a
+              href="/contact"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+            >
+              Contact
+            </a>
+            <span className="text-gray-300">•</span>
+            {isSignedIn ? (
+              <button onClick={handleLogout} className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
+                Logout
+              </button>
+            ) : (
+              <a href="/sign-in" className="text-gray-500 hover:text-purple-500 transition-colors duration-300">
+                Sign In
+              </a>
+            )}
+            <span className="text-gray-300">•</span>
+            <a
+              href="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+            >
+              Terms
+            </a>
+            <span className="text-gray-300">•</span>
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-purple-500 transition-colors duration-300"
+            >
+              Privacy
+            </a>
+          </div>
+        </div>
+      </div >
+      );
 };
 
-export default DashboardContainer;
+      export default DashboardContainer;

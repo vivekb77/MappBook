@@ -499,7 +499,7 @@ const PassportFlipBook: React.FC<{
               startPage={0}
               startZIndex={0}
               drawShadow={true}
-              flippingTime={2000}
+              flippingTime={4000}
               usePortrait={false}
               autoSize={true}
               clickEventForward={false}
