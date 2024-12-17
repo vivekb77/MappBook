@@ -254,14 +254,14 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
                 >
                   <Download className="h-4 w-4" />
                 </Button>
-                <Button
+                {/* <Button
                   variant="ghost"
                   size="sm"
                   onClick={(e) => handleShare(video.id, e)}
                   className="h-8 w-8 p-0"
                 >
                   <Share2 className="h-4 w-4" />
-                </Button>
+                </Button> */}
                 <Button
                   variant="ghost"
                   size="sm"

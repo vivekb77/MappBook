@@ -265,11 +265,11 @@ export function PassportDashboard({
         .select('is_video_processing')
         .eq('mappbook_user_id', userId)
         .single();
-  
+
       if (supabaseError) {
         throw supabaseError;
       }
-  
+
       return data?.is_video_processing || false;
     } catch (error) {
       console.error('Error checking video processing status:', error);
@@ -278,6 +278,7 @@ export function PassportDashboard({
   };
 
   const triggerRecording = async () => {
+    setIsRecording(true)
     if (!isSignedIn || !mappbookUser) {
       const errorMsg = 'User must be signed in'
       setError(errorMsg)
@@ -297,13 +298,19 @@ export function PassportDashboard({
     let response: Response | undefined
 
     try {
-      setIsRecording(true)
       setError(null)
       setVideoUrl(null)
       onVideoUrlChange(null)
       onRecordingStart()
 
       const userLocations = await fetchUserPlaces(mappbookUser.mappbook_user_id)
+
+      if (userLocations.length < 3) { 
+        const errorMsg = 'Add at least 3 countries to create your Adventure Passport. Click Add Places button to add your adventures and come back here to create your Adventure Passport!';
+        setError(errorMsg);
+        onRecordingError(errorMsg);
+        return;
+    }
 
       response = await fetch('/api/call-lambda', {
         method: 'POST',
@@ -357,7 +364,7 @@ export function PassportDashboard({
     } finally {
       setIsRecording(false)
     }
-}
+  }
 
   const handleVideoSelect = (url: string) => {
     onVideoUrlChange(url);
@@ -461,9 +468,9 @@ export function PassportDashboard({
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-2 space-y-6">
-          <div className="text-left text-l font-bold text-purple-400">
-                      Create an adventure Passport from all your visited Countries and Cities.
-                    </div>
+            <div className="text-left text-l font-bold text-purple-400">
+              Create an adventure Passport from all your visited Countries and Cities.
+            </div>
             <div className="space-y-4">
               {isSignedIn && mappbookUser ? (
                 <>
@@ -518,7 +525,7 @@ export function PassportDashboard({
 
                   {!isPassportVideoPremiumUser &&
                     <div className="text-left text-xs font-medium text-red-600">
-                      As a free user, your Adventure Passport will be created with 5 countries. Add credits to get your Passport with all your visited Countries.
+                      As a free user, your Adventure Passport will be created with 5 countries. Add credits to get your Passport stamped with all your visited Countries.
                     </div>
                   }
 
@@ -540,10 +547,15 @@ export function PassportDashboard({
                     )}
                   </button>
                   {isRecording &&
-                  <div className="text-center text-xs font-medium text-green-600">
-                    Passport processing might take 2 - 3 minutes
-                  </div>
-                }
+                    <div className="text-center text-xs font-medium text-green-600">
+                      Passport processing might take 2 - 3 minutes
+                    </div>
+                  }
+                  {error && (
+                    <div className="p-4 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm">
+                      {error}
+                    </div>
+                  )}
 
                   {mappbookUser && (
                     <VideoHistory
@@ -600,11 +612,6 @@ export function PassportDashboard({
                 </div>
               )}
 
-              {error && (
-                <div className="p-4 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm">
-                  {error}
-                </div>
-              )}
             </div>
           </div>
         </div>
