@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       ],
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success-passport?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/passport`,
       customer_email: userEmail,
       metadata: {
         userId: userId.toString(), // Ensure userId is a string
