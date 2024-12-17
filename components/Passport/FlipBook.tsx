@@ -62,10 +62,7 @@ interface PassportPageProps {
 const PassportCover = React.forwardRef<HTMLDivElement, {
   position: 'frontCover' | 'frontInside' | 'backInside' | 'backCover';
   passportDisplayName?: string;
-  
 }>((props, ref) => {
-
-  
   // Get image path based on position
   const getImagePath = () => {
     switch (props.position) {
@@ -82,8 +79,22 @@ const PassportCover = React.forwardRef<HTMLDivElement, {
     }
   };
 
+  // Get quote based on position
+  const getQuote = () => {
+    switch (props.position) {
+      case 'frontInside':
+        return '"Civis Romanus sum" \n\n - I am a Roman citizen';
+      case 'backInside':
+        return '"SPQR - Senatus Populusque Romanus" \n\n - The Senate and People of Rome';
+      default:
+        return '';
+    }
+  };
+
   // Only show title on front cover
   const showTitle = props.position === 'frontCover';
+  const showBackTitle = props.position === 'backCover';
+  const showQuote = ['frontInside', 'backInside'].includes(props.position);
 
   return (
     <div
@@ -106,21 +117,52 @@ const PassportCover = React.forwardRef<HTMLDivElement, {
         <div className="absolute inset-0 bg-black/30" />
       </div>
 
-      {/* Content - Only show on front cover */}
+      {/* Content - Front Cover */}
       {showTitle && (
         <div className="relative h-full w-full flex flex-col items-center justify-center p-8 z-10">
-        <div className="text-center p-8 space-y-8">
-          <div className="font-serif text-2xl text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-            Adventure Passport
+          <div className="text-center p-8 space-y-8">
+            <div className="font-serif text-2xl text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              Adventure Passport
+            </div>
+            <div className="font-serif text-xs text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              of
+            </div>
+            <h1 className="text-4xl font-serif text-amber-100 break-words max-w-md leading-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              {props.passportDisplayName || 'ROMAN EMPIRE'}
+            </h1>
           </div>
-          <div className="font-serif text-xs text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-            of
-          </div>
-          <h1 className="text-4xl font-serif text-amber-100 break-words max-w-md leading-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-            {props.passportDisplayName || 'ROMAN EMPIRE'}
-          </h1>
         </div>
-      </div>
+      )}
+
+      {/* Content - Back Cover Title */}
+      {showBackTitle && (
+        <div className="relative h-full w-full flex flex-col items-center justify-center p-8 z-10">
+          <div className="text-center">
+            <h1 className="text-4xl font-serif text-amber-100 break-words max-w-md leading-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              MIGHTY ROMAN EMPIRE
+            </h1>
+          </div>
+        </div>
+      )}
+
+      {/* Quotes for Inside Covers */}
+      {showQuote && (
+        <div className="relative h-full w-full flex flex-col items-center justify-center p-8 z-10">
+          <div className="text-center max-w-lg">
+            <p className="font-serif text-2xl text-amber-100 whitespace-pre-line leading-relaxed" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              {getQuote()}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Branding - Only on front and back covers */}
+      {(props.position === 'frontCover' || props.position === 'backCover') && (
+        <div className="absolute bottom-6 right-6 z-10">
+          <p className="font-serif text-sm text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+            Created using MappBook.com
+          </p>
+        </div>
       )}
     </div>
   );
