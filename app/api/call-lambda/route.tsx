@@ -10,8 +10,12 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+// Timeout duration in milliseconds (5 minutes)
+const TIMEOUT_DURATION = 5 * 60 * 1000;
+
 export async function POST(request: Request) {
   let mappbookUserId: string | null = null;
+  let abortController: AbortController | null = null;
   
   try {
     const body = await request.json();
@@ -46,38 +50,56 @@ export async function POST(request: Request) {
       throw updateStartError;
     }
 
-    // Call Lambda function
-    const lambdaResponse = await fetch(
-      'https://ahxobop3yrfa3rdi7fpevevrna0okbrz.lambda-url.us-east-1.on.aws/',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body)
+    // Create AbortController for timeout
+    abortController = new AbortController();
+    const timeoutId = setTimeout(() => {
+      abortController?.abort();
+    }, TIMEOUT_DURATION);
+
+    try {
+      // Call Lambda function with timeout
+      const lambdaResponse = await fetch(
+        'https://ahxobop3yrfa3rdi7fpevevrna0okbrz.lambda-url.us-east-1.on.aws/',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+          signal: abortController.signal
+        }
+      );
+
+      clearTimeout(timeoutId);
+      const data = await lambdaResponse.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Lambda function failed');
       }
-    );
 
-    const data = await lambdaResponse.json();
+      // On success: Set processing flag to false AND decrement credits
+      const { error: updateEndError } = await supabase
+        .from('MappBook_Users')
+        .update({ 
+          is_video_processing: false,
+          passport_video_credits: userData.passport_video_credits - 1
+        })
+        .eq('mappbook_user_id', mappbookUserId);
 
-    if (!data.success) {
-      throw new Error(data.error || 'Lambda function failed');
+      if (updateEndError) {
+        console.error('Error updating processing flag and credits after success:', updateEndError);
+      }
+
+      return NextResponse.json(data);
+
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out after 5 minutes');
+      }
+      throw error;
     }
-
-    // On success: Set processing flag to false AND decrement credits
-    const { error: updateEndError } = await supabase
-      .from('MappBook_Users')
-      .update({ 
-        is_video_processing: false,
-        passport_video_credits: userData.passport_video_credits - 1
-      })
-      .eq('mappbook_user_id', mappbookUserId);
-
-    if (updateEndError) {
-      console.error('Error updating processing flag and credits after success:', updateEndError);
-    }
-
-    return NextResponse.json(data);
 
   } catch (error: any) {
     // Ensure processing flag is set to false on error
