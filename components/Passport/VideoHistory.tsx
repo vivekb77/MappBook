@@ -221,18 +221,18 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
             <div
               key={video.id}
               className={`w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md transition-colors group mb-2
-                ${selectedVideoId === video.id ? 'bg-purple-50' : ''}`}
+                ${selectedVideoId === video.id ? 'bg-purple-100' : ''}`}
             >
               <button
                 onClick={() => handleVideoSelect(video)}
                 className="flex-grow flex items-center gap-3 min-w-0"
               >
                 <div className="w-16 h-16 bg-purple-100 rounded flex items-center justify-center flex-shrink-0">
-                  <Video className={`w-6 h-6 ${selectedVideoId === video.id ? 'text-purple-600' : 'text-purple-500'}`} />
+                  <Video className={`w-6 h-6 ${selectedVideoId === video.id ? 'text-purple-700' : 'text-purple-500'}`} />
                 </div>
                 <div className="flex-grow min-w-0 text-left">
                   <p className={`text-sm font-medium truncate
-                    ${selectedVideoId === video.id ? 'text-purple-600' : 'text-gray-700'}`}>
+                    ${selectedVideoId === video.id ? 'text-purple-700' : 'text-gray-700'}`}>
                     Adventure Passport
                   </p>
                   <p className="text-xs text-gray-500">
@@ -240,7 +240,7 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
                   </p>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                     <Clock className="w-3 h-3" />
-                    <span>{formatDate(video.created_at)}</span>
+                    <span>{formatDate(video.created_at)} at {formatTime(video.created_at)}</span>
                   </div>
                 </div>
               </button>
@@ -254,7 +254,7 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
                 >
                   <Download className="h-4 w-4" />
                 </Button>
-                {/* <Button
+                 {/* <Button
                   variant="ghost"
                   size="sm"
                   onClick={(e) => handleShare(video.id, e)}
@@ -293,7 +293,6 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
         </div>
       </ScrollArea>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -311,7 +310,6 @@ const VideoHistory = ({ userId, onVideoSelect }: VideoHistoryProps) => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Toast Container */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map(toast => (
           <div

@@ -134,7 +134,7 @@ export function PassportDashboard({
   const { mappbookUser, setMappbookUser } = useMappbookUser()
   const [passportDisplayName, setPassportDisplayName] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false)
-
+  const [videoHistoryKey, setVideoHistoryKey] = useState(0);
   const [passportVideoCredits, setPassportVideoCredits] = useState<number | undefined>(undefined)
   const [isPassportVideoPremiumUser, setIPassportVideoPremiumUser] = useState<boolean>(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
@@ -338,6 +338,8 @@ export function PassportDashboard({
       setPassportVideoCredits((prev) => (prev ?? 0) - 1)
       setVideoUrl(data.video_url)
       onVideoUrlChange(data.video_url)
+      // Increment the key to force VideoHistory refresh
+      setVideoHistoryKey(prev => prev + 1);
     } catch (error: unknown) {
       let errorMessage = 'An error occurred while recording'
 
@@ -560,6 +562,7 @@ export function PassportDashboard({
 
                   {mappbookUser && (
                     <VideoHistory
+                      key={videoHistoryKey}
                       userId={mappbookUser.mappbook_user_id}
                       onVideoSelect={handleVideoSelect}
                     />
