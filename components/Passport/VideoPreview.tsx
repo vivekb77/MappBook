@@ -44,7 +44,7 @@ export function VideoPreview({
     if (isProcessing && currentLocation) {
       const timer = setTimeout(() => {
         onLocationProcessed?.(currentLocation)
-      }, 7000)
+      }, 10000)
 
       return () => clearTimeout(timer)
     }
@@ -251,7 +251,7 @@ export function VideoPreview({
           <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mb-4 md:mb-6" />
           <p className="text-base md:text-lg font-medium text-white mb-2 md:mb-4 text-center">
             {currentLocation
-              ? <>Stamping Visa of <span className="text-yellow-600 font-bold">{currentLocation}</span> to your Passport</>
+              ? <>Stamping Visa of <span className="text-yellow-600 font-bold">{currentLocation}</span> on your Passport</>
               : 'Processing your Adventure Passport'}
           </p>
           {remainingCount > 0 && (

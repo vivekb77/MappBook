@@ -69,11 +69,16 @@ function PlayFlipBookContent() {
         }
 
         const countryGroups = data?.reduce((acc: { [key: string]: { places: string[], countryCode: string } }, place) => {
-          if (place.place_name === place.place_country) return acc;
+          // Initialize the country entry if it doesn't exist
           if (!acc[place.place_country]) {
             acc[place.place_country] = { places: [], countryCode: place.place_country_code };
           }
-          acc[place.place_country].places.push(place.place_name);
+          
+          // Only add the place if it's different from the country
+          if (place.place_name !== place.place_country) {
+            acc[place.place_country].places.push(place.place_name);
+          }
+          
           return acc;
         }, {});
 
