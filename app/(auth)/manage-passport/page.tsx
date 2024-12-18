@@ -147,7 +147,7 @@ const TravelStampsPage = () => {
                           {!stampErrors.has(countryCode) && (
                             <div className="w-48 h-48 relative">
                               <img
-                                src={`/stamps/${countryCode}.png`}
+                                src={`/stamps/${countryCode.toUpperCase()}.png`}
                                 alt={`${country.country} stamp`}
                                 className="w-full h-full object-contain"
                                 onError={() => handleStampError(countryCode)}

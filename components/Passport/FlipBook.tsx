@@ -248,7 +248,7 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
                 }}
               >
                 <img
-                  src={`/stamps/${location.place_country_code.toLowerCase()}.png`}
+                  src={`/stamps/${location.place_country_code.toUpperCase()}.png`}
                   alt={`${location.place_country_code} stamp`}
                   className="w-full h-full"
                   onError={() => setCountryStampError(true)}
@@ -519,7 +519,7 @@ const PassportFlipBook: React.FC<{
               startPage={0}
               startZIndex={0}
               drawShadow={true}
-              flippingTime={1000}
+              flippingTime={4000}
               usePortrait={false}
               autoSize={true}
               clickEventForward={false}
