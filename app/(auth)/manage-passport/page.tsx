@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import { UserButton } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface CityStamp {
   country: string;
@@ -15,7 +16,6 @@ interface CityStamp {
 interface CountryStamp {
   country: string;
   country_code: string;
-  svgCode: string;
 }
 
 const TravelStampsPage = () => {
@@ -25,15 +25,8 @@ const TravelStampsPage = () => {
   const [cityStamps, setCityStamps] = useState<CityStamp[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stampErrors, setStampErrors] = useState<Set<string>>(new Set());
 
-  // Handle authentication check
-//   useEffect(() => {
-//     if (isLoaded && !isSignedIn) {
-//       router.push('/sign-in');
-//     }
-//   }, [isLoaded, isSignedIn, router]);
-
-  // Fetch data only when authenticated
   useEffect(() => {
     const fetchData = async () => {
       if (!isSignedIn) return;
@@ -63,7 +56,10 @@ const TravelStampsPage = () => {
     fetchData();
   }, [isSignedIn]);
 
-  // Show loading state while checking auth or loading data
+  const handleStampError = (countryCode: string) => {
+    setStampErrors(prev => new Set(Array.from(prev).concat(countryCode)));
+  };
+
   if (!isLoaded || (isSignedIn && loading)) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-gray-50">
@@ -83,7 +79,6 @@ const TravelStampsPage = () => {
     );
   }
 
-  // Don't render anything if not signed in (will redirect)
   if (!isSignedIn) {
     return null;
   }
@@ -107,7 +102,6 @@ const TravelStampsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation Bar */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -120,7 +114,6 @@ const TravelStampsPage = () => {
         </div>
       </nav>
 
-      {/* Main Content */}
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -128,6 +121,7 @@ const TravelStampsPage = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">#</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Country</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Country Stamp</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Cities</th>
@@ -135,18 +129,35 @@ const TravelStampsPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {countryStamps.map((country) => {
+                  {countryStamps.map((country, index) => {
                     const citiesInCountry = cityStamps.filter(
                       city => city.country_code === country.country_code
                     );
+                    const countryCode = country.country_code.toLowerCase();
 
                     return (
                       <tr key={country.country_code} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
+                          {index + 1}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {country.country} / {country.country_code}
                         </td>
                         <td className="px-6 py-4">
-                          <StampImage svgCode={country.svgCode} />
+                          {!stampErrors.has(countryCode) && (
+                            <div className="w-48 h-48 relative">
+                              <img
+                                src={`/stamps/${countryCode}.png`}
+                                alt={`${country.country} stamp`}
+                                className="w-full h-full object-contain"
+                                onError={() => handleStampError(countryCode)}
+                                style={{
+                                  filter: 'sepia(0.6) brightness(0.8)',
+                                  mixBlendMode: 'multiply'
+                                }}
+                              />
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {citiesInCountry.map(city => city.city).join(', ')}

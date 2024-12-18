@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { Loader2 } from 'lucide-react';
 
@@ -99,7 +99,7 @@ const PassportCover = React.forwardRef<HTMLDivElement, {
   return (
     <div
       ref={ref}
-      className="relative h-full w-full overflow-hidden"
+      className="relative h-full w-full overflow-hidden rounded-3xl"
       data-density="hard"
     >
       {/* Base page with background image */}
@@ -168,20 +168,13 @@ const PassportCover = React.forwardRef<HTMLDivElement, {
   );
 });
 
+
+
 const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
-  ({ location, countryStamps, cityStamps, pageNumber }, ref) => {
+  ({ location, cityStamps, pageNumber }, ref) => {
     if (!location) return null;
 
-    const matchingCountryStamp = countryStamps.find(
-      stamp => stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
-    );
-
-    const matchingCityStamps = location.place_names
-      .map(placeName => cityStamps.find(stamp =>
-        stamp.city.toLowerCase() === placeName.toLowerCase() &&
-        stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
-      ))
-      .filter((stamp): stamp is CityStamp => stamp !== undefined);
+    const [countryStampError, setCountryStampError] = useState(false);
 
     // 10 fixed positions spread around the page (left%, top%, rotation)
     const FIXED_POSITIONS = [
@@ -197,14 +190,40 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
       { left: 65, top: 60, rotation: -10 }   // Lower right middle
     ];
 
+    const processedCities = new Set<string>();
+    
+    const matchingCityStamps = location.place_names
+      .map(placeName => {
+        // Convert to lowercase for consistent comparison
+        const lowerPlaceName = placeName.toLowerCase();
+        
+        // If we've already processed this city, skip it
+        if (processedCities.has(lowerPlaceName)) {
+          return undefined;
+        }
+        
+        const stamp = cityStamps.find(stamp =>
+          stamp.city.toLowerCase() === lowerPlaceName &&
+          stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
+        );
+        
+        // If we found a stamp, mark this city as processed
+        if (stamp) {
+          processedCities.add(lowerPlaceName);
+        }
+        
+        return stamp;
+      })
+      .filter((stamp): stamp is CityStamp => stamp !== undefined);
+      
     return (
       <div
         ref={ref}
-        className="relative h-full w-full overflow-hidden"
+        className="relative h-full w-full overflow-hidden rounded-3xl"
       >
         {/* Base page with background image */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 rounded-3xl"
           style={{
             backgroundImage: 'url("/api/get-assets?type=images&name=passport_page.jpg")',
             backgroundSize: '100% 100%',
@@ -219,7 +238,7 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
         {/* Content container */}
         <div className="relative h-full w-full">
           {/* Country stamp in center */}
-          {matchingCountryStamp && (
+          {!countryStampError && (
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
               <div
                 className="w-64 h-64 relative"
@@ -228,11 +247,11 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
                   mixBlendMode: 'multiply'
                 }}
               >
-                <div
-                  className="absolute inset-0"
-                  dangerouslySetInnerHTML={{
-                    __html: matchingCountryStamp.svgCode.replace('<svg', '<svg class="w-full h-full"')
-                  }}
+                <img
+                  src={`/stamps/${location.place_country_code.toLowerCase()}.png`}
+                  alt={`${location.place_country_code} stamp`}
+                  className="w-full h-full"
+                  onError={() => setCountryStampError(true)}
                 />
               </div>
             </div>
@@ -275,6 +294,7 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
     );
   }
 );
+
 
 // Helper function for Roman numerals
 const toRomanNumeral = (num: number): string => {
@@ -499,7 +519,7 @@ const PassportFlipBook: React.FC<{
               startPage={0}
               startZIndex={0}
               drawShadow={true}
-              flippingTime={2500}
+              flippingTime={1000}
               usePortrait={false}
               autoSize={true}
               clickEventForward={false}

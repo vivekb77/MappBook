@@ -439,9 +439,9 @@ export function PassportDashboard({
               MappBook
             </h1>
           </div>
-          <p className="text-xs font-medium text-purple-400">
+          {/* <p className="text-xs font-medium text-purple-400">
             Adventure Passport 🌎
-          </p>
+          </p> */}
         </div>
 
         {/* User info section */}
