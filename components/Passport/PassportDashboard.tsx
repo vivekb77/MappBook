@@ -229,27 +229,32 @@ export function PassportDashboard({
         .eq('mappbook_user_id', userId)
         .eq('visitedorwanttovisit', 'visited')
         .is('isRemoved', false);
-
+  
       if (fetchError) throw new Error('Failed to fetch places');
-
+  
       const countryGroups = data?.reduce((acc: { [key: string]: { places: string[], countryCode: string } }, place) => {
-        if (place.place_name === place.place_country) return acc;
+        // Initialize the country entry if it doesn't exist
         if (!acc[place.place_country]) {
           acc[place.place_country] = { places: [], countryCode: place.place_country_code };
         }
-        acc[place.place_country].places.push(place.place_name);
+        
+        // Only add the place_name if it's different from the country name
+        // This prevents duplicate entries while still keeping the country in the list
+        if (place.place_name !== place.place_country) {
+          acc[place.place_country].places.push(place.place_name);
+        }
+        
         return acc;
       }, {});
-
+  
       const formattedLocations: Location[] = Object.entries(countryGroups || {})
         .map(([country, data]) => ({
           place_names: data.places,
           place_country: country,
           place_country_code: data.countryCode
         }))
-        .sort((a, b) => b.place_names.length - a.place_names.length); // Sort by number of places in descending order
-
-
+        .sort((a, b) => b.place_names.length - a.place_names.length);
+  
       setLocations(formattedLocations);
       return formattedLocations;
     } catch (err) {

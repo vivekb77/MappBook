@@ -20,8 +20,8 @@ interface PassportDashboardProps {
   onRecordingError: (error: string) => void;
 }
 
-export function VideoPreview({ 
-  videoUrl, 
+export function VideoPreview({
+  videoUrl,
   isProcessing = false,
   currentLocation,
   remainingCount = 0,
@@ -38,38 +38,50 @@ export function VideoPreview({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout>()
   const [videoDimensions, setVideoDimensions] = useState({ width: 0, height: 0 })
-  const [isMobile, setIsMobile] = useState(false)
+
 
   useEffect(() => {
     if (isProcessing && currentLocation) {
       const timer = setTimeout(() => {
         onLocationProcessed?.(currentLocation)
-      }, 5000)
-      
+      }, 7000)
+
       return () => clearTimeout(timer)
     }
   }, [isProcessing, currentLocation, onLocationProcessed])
 
-  // Check if device is mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
 
   // Auto-play when videoUrl changes
   useEffect(() => {
     if (videoUrl && videoRef.current) {
       setIsLoading(true)
       setHasEnded(false)
-      videoRef.current.play()
-        .then(() => {
-          setIsPlaying(true)
-        })
-        .catch(error => console.error('Auto-play failed:', error))
+
+      // Wait for video to be ready before attempting to play
+      const handleCanPlay = () => {
+        videoRef.current?.play()
+          .then(() => {
+            setIsPlaying(true)
+            setIsLoading(false)
+          })
+          .catch(error => {
+            console.error('Auto-play failed:', error)
+            setIsPlaying(false)
+            setIsLoading(false)
+          })
+      }
+
+      // Add event listener for canplay event
+      videoRef.current.addEventListener('canplay', handleCanPlay)
+
+      // Cleanup
+      return () => {
+        videoRef.current?.removeEventListener('canplay', handleCanPlay)
+        // Cancel any pending play requests when cleaning up
+        if (videoRef.current?.played) {
+          videoRef.current.pause()
+        }
+      }
     }
   }, [videoUrl])
 
@@ -216,30 +228,35 @@ export function VideoPreview({
     }
   }
 
+
+  // Empty state (no video)
   if (!videoUrl && !isProcessing) {
     return (
-      <div className="flex items-center justify-center h-[400px] w-[600px] bg-slate-800">
-        <div className="flex flex-col items-center">
-          <Video className="w-12 h-12 md:w-16 md:h-16 opacity-50" />
-          <p className="text-base md:text-lg font-medium mt-4 text-gray-400">No video selected</p>
+      <div className="flex items-center justify-center w-full aspect-video max-w-[600px] min-h-[250px] bg-slate-800 rounded-lg">
+        <div className="flex flex-col items-center px-4">
+          <Video className="w-10 h-10 md:w-16 md:h-16 opacity-50" />
+          <p className="text-sm md:text-base lg:text-lg font-medium mt-4 text-gray-400 text-center">
+            No video selected
+          </p>
         </div>
       </div>
     )
   }
 
+  // Processing state
   if (isProcessing) {
     return (
-      <div className="flex items-center justify-center h-[400px] w-[600px] bg-slate-800">
-        <div className="flex flex-col items-center">
-          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mb-6" />
-          <p className="text-lg font-medium text-white mb-4">
-            {currentLocation 
-              ? `Stamping Visa of ${currentLocation} to your passport` 
+      <div className="flex items-center justify-center w-full aspect-video max-w-[600px] min-h-[250px] bg-slate-800 rounded-lg">
+        <div className="flex flex-col items-center px-4">
+          <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mb-4 md:mb-6" />
+          <p className="text-base md:text-lg font-medium text-white mb-2 md:mb-4 text-center">
+            {currentLocation
+              ? <>Stamping Visa of <span className="text-yellow-600 font-bold">{currentLocation}</span> to your Passport</>
               : 'Processing your Adventure Passport'}
           </p>
           {remainingCount > 0 && (
-            <p className="text-sm text-gray-300">
-              {remainingCount} countries remaining
+            <p className="text-xs md:text-sm text-gray-300 text-center">
+              {remainingCount} Countries remaining
             </p>
           )}
         </div>
@@ -264,9 +281,9 @@ export function VideoPreview({
         <div className="relative w-full h-full" onClick={togglePlay}>
           {isLoading && (
             <div className="absolute inset-0 z-10">
-              <img 
-               src="videothumbnail.jpg" 
-              alt="Video thumbnail"
+              <img
+                src="videothumbnail.jpg"
+                alt="Video thumbnail"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -274,7 +291,7 @@ export function VideoPreview({
               </div>
             </div>
           )}
-          
+
           <video
             ref={videoRef}
             className="w-full h-full object-contain"
