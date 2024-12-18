@@ -3,11 +3,30 @@
 import { Video, Play, Pause, Repeat, Maximize, Minimize } from 'lucide-react'
 import { useEffect, useState, useRef } from 'react'
 
+
 interface VideoPreviewProps {
   videoUrl: string | null
+  isProcessing?: boolean
+  currentLocation?: string
+  remainingCount?: number
+  onLocationProcessed?: (location: string) => void
 }
 
-export function VideoPreview({ videoUrl }: VideoPreviewProps) {
+
+// Update PassportDashboard props interface
+interface PassportDashboardProps {
+  onVideoUrlChange: (url: string | null) => void;
+  onRecordingStart: (locations: Location[]) => void;
+  onRecordingError: (error: string) => void;
+}
+
+export function VideoPreview({ 
+  videoUrl, 
+  isProcessing = false,
+  currentLocation,
+  remainingCount = 0,
+  onLocationProcessed
+}: VideoPreviewProps) {
   const [isLoading, setIsLoading] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -20,6 +39,16 @@ export function VideoPreview({ videoUrl }: VideoPreviewProps) {
   const timeoutRef = useRef<NodeJS.Timeout>()
   const [videoDimensions, setVideoDimensions] = useState({ width: 0, height: 0 })
   const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    if (isProcessing && currentLocation) {
+      const timer = setTimeout(() => {
+        onLocationProcessed?.(currentLocation)
+      }, 5000)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [isProcessing, currentLocation, onLocationProcessed])
 
   // Check if device is mobile
   useEffect(() => {
@@ -187,33 +216,37 @@ export function VideoPreview({ videoUrl }: VideoPreviewProps) {
     }
   }
 
-  if (!videoUrl) {
+  if (!videoUrl && !isProcessing) {
     return (
-      <div className="flex justify-center">
-        <div
-          className={`bg-slate-800/50 rounded-lg flex items-center justify-center ${isMobile ? 'hidden' : ''}`}
-          style={{
-            width: videoDimensions.width || '640px',
-            height: videoDimensions.height || '360px',
-            minWidth: '320px',
-            minHeight: '180px'
-          }}
-        >
-          <div className="relative w-full h-full">
-            <img 
-              src="videothumbnail.jpg" 
-              alt="Video thumbnail"
-              className="w-full h-full object-cover rounded-lg"
-            />
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50">
-              <Video className="w-12 h-12 md:w-16 md:h-16 opacity-50" />
-              <p className="text-base md:text-lg font-medium mt-4 text-gray-400">No video selected</p>
-            </div>
-          </div>
+      <div className="flex items-center justify-center h-[400px] w-[600px] bg-slate-800">
+        <div className="flex flex-col items-center">
+          <Video className="w-12 h-12 md:w-16 md:h-16 opacity-50" />
+          <p className="text-base md:text-lg font-medium mt-4 text-gray-400">No video selected</p>
         </div>
       </div>
     )
   }
+
+  if (isProcessing) {
+    return (
+      <div className="flex items-center justify-center h-[400px] w-[600px] bg-slate-800">
+        <div className="flex flex-col items-center">
+          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mb-6" />
+          <p className="text-lg font-medium text-white mb-4">
+            {currentLocation 
+              ? `Stamping Visa of ${currentLocation} to your passport` 
+              : 'Processing your Adventure Passport'}
+          </p>
+          {remainingCount > 0 && (
+            <p className="text-sm text-gray-300">
+              {remainingCount} countries remaining
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
 
   return (
     <div className="flex justify-center">
@@ -245,7 +278,7 @@ export function VideoPreview({ videoUrl }: VideoPreviewProps) {
           <video
             ref={videoRef}
             className="w-full h-full object-contain"
-            src={videoUrl}
+            src={videoUrl || undefined}
             playsInline
             controls={false}
             onTimeUpdate={handleTimeUpdate}

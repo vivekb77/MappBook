@@ -15,6 +15,11 @@ interface Location {
   place_country: string;
   place_country_code: string;
 }
+interface PassportDashboardProps {
+  onVideoUrlChange: (url: string | null) => void;
+  onRecordingStart: (locations: Location[]) => void;
+  onRecordingError: (error: string) => void;
+}
 
 const MAX_NAME_LENGTH = 25;
 
@@ -43,12 +48,6 @@ interface RecordFlipbookResponse {
   video_url?: string;
   user_id?: string;
   error?: string;
-}
-
-interface PassportDashboardProps {
-  onVideoUrlChange: (url: string | null) => void;
-  onRecordingStart: () => void;
-  onRecordingError: (error: string) => void;
 }
 
 interface NameEditorProps {
@@ -302,7 +301,6 @@ export function PassportDashboard({
       setError(null)
       setVideoUrl(null)
       onVideoUrlChange(null)
-      onRecordingStart()
 
       const userLocations = await fetchUserPlaces(mappbookUser.mappbook_user_id)
 
@@ -312,6 +310,9 @@ export function PassportDashboard({
         onRecordingError(errorMsg);
         return;
       }
+
+      // Pass locations to parent for processing animation
+      onRecordingStart(userLocations)
 
       response = await fetch('/api/call-lambda', {
         method: 'POST',
