@@ -47,7 +47,9 @@ function PlayFlipBookContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+
+
+useEffect(() => {
     const fetchUserPlaces = async () => {
       try {
         setIsLoading(true);
@@ -55,6 +57,16 @@ function PlayFlipBookContent() {
         const userId = searchParams.get('userId');
         const isPassportVideoPremiumUser = searchParams.get('isPremium') === 'true';
         if (!userId) throw new Error('User ID is required');
+
+        // Fetch stamp data first
+        const stampResponse = await fetch('/api/get-assets?type=json&name=country_stamps.json');
+        const stampData = await stampResponse.json();
+        
+        // Create stamp lookup map
+        const countryStampMap = stampData.country_stamps.reduce((acc: { [key: string]: boolean }, stamp: any) => {
+          acc[stamp.country_code] = stamp.isStampPresent === "Yes";
+          return acc;
+        }, {});
 
         const { data, error: fetchError } = await supabase
           .from('Mappbook_User_Places')
@@ -69,16 +81,18 @@ function PlayFlipBookContent() {
         }
 
         const countryGroups = data?.reduce((acc: { [key: string]: { places: string[], countryCode: string } }, place) => {
-          // Initialize the country entry if it doesn't exist
-          if (!acc[place.place_country]) {
-            acc[place.place_country] = { places: [], countryCode: place.place_country_code };
+          // Only process if country has a stamp available
+          if (countryStampMap[place.place_country_code]) {
+            // Initialize the country entry if it doesn't exist
+            if (!acc[place.place_country]) {
+              acc[place.place_country] = { places: [], countryCode: place.place_country_code };
+            }
+            
+            // Only add the place if it's different from the country
+            if (place.place_name !== place.place_country) {
+              acc[place.place_country].places.push(place.place_name);
+            }
           }
-          
-          // Only add the place if it's different from the country
-          if (place.place_name !== place.place_country) {
-            acc[place.place_country].places.push(place.place_name);
-          }
-          
           return acc;
         }, {});
 
@@ -133,8 +147,7 @@ function PlayFlipBookContent() {
         }
 
         setLocations(sortedLocations);
-
-        console.log(JSON.stringify(locations))
+        console.log("locations to stamp - "+sortedLocations.length);
       } catch (err) {
         console.error('Error fetching places:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -145,6 +158,8 @@ function PlayFlipBookContent() {
     };
     fetchUserPlaces();
   }, [searchParams]);
+
+
 
   if (isLoading) {
     return (

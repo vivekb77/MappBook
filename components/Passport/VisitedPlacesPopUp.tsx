@@ -57,7 +57,7 @@ const VisitedPlacesPopUp = ({ fetchUserPlaces, userId }: VisitedPlacesPopUpProps
               <Globe2 className="w-4 h-4" />
             )}
             <span className="text-sm font-medium">
-              Travel Log
+              Available Stamps
             </span>
           </div>
         </div>
@@ -70,7 +70,10 @@ const VisitedPlacesPopUp = ({ fetchUserPlaces, userId }: VisitedPlacesPopUpProps
               Your Travel Adventures
             </DialogTitle>
             <p className="text-center text-gray-600 mt-2">
-              Your adventure passport will be created with these Countries
+              Your adventure passport will be created with virtual visas of these Countries
+            </p>
+            <p className="text-xs text-center text-gray-600 mt-2">
+              Please note: Some of the countries in your visited list won't show here as Visa stamps are currently available for select countries only. We're continuously working to expand our collection of virtual visa stamps.
             </p>
           </DialogHeader>
 

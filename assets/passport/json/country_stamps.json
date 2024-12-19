@@ -3,983 +3,983 @@
     {
       "country": "Afghanistan",
       "country_code": "AF",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Albania",
       "country_code": "AL",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Algeria",
       "country_code": "DZ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Andorra",
       "country_code": "AD",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Angola",
       "country_code": "AO",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Antigua and Barbuda",
       "country_code": "AG",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Argentina",
       "country_code": "AR",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Armenia",
       "country_code": "AM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Australia",
       "country_code": "AU",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Austria",
       "country_code": "AT",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Azerbaijan",
       "country_code": "AZ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Bahamas",
       "country_code": "BS",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Bahrain",
       "country_code": "BH",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Bangladesh",
       "country_code": "BD",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Barbados",
       "country_code": "BB",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Belarus",
       "country_code": "BY",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Belgium",
       "country_code": "BE",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Belize",
       "country_code": "BZ",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Benin",
       "country_code": "BJ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Bhutan",
       "country_code": "BT",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Bolivia",
       "country_code": "BO",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Bosnia and Herzegovina",
       "country_code": "BA",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Botswana",
       "country_code": "BW",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Brazil",
       "country_code": "BR",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Brunei",
       "country_code": "BN",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Bulgaria",
       "country_code": "BG",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Burkina Faso",
       "country_code": "BF",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Burundi",
       "country_code": "BI",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Cabo Verde",
       "country_code": "CV",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Cambodia",
       "country_code": "KH",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Cameroon",
       "country_code": "CM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Canada",
       "country_code": "CA",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Central African Republic",
       "country_code": "CF",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Chad",
       "country_code": "TD",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Chile",
       "country_code": "CL",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "China",
       "country_code": "CN",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Colombia",
       "country_code": "CO",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Comoros",
       "country_code": "KM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Congo",
       "country_code": "CG",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Costa Rica",
       "country_code": "CR",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Croatia",
       "country_code": "HR",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Cuba",
       "country_code": "CU",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Cyprus",
       "country_code": "CY",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Czech Republic",
       "country_code": "CZ",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Democratic Republic of the Congo",
       "country_code": "CD",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Denmark",
       "country_code": "DK",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Djibouti",
       "country_code": "DJ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Dominica",
       "country_code": "DM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Dominican Republic",
       "country_code": "DO",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Ecuador",
       "country_code": "EC",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Egypt",
       "country_code": "EG",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "El Salvador",
       "country_code": "SV",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Equatorial Guinea",
       "country_code": "GQ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Eritrea",
       "country_code": "ER",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Estonia",
       "country_code": "EE",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Eswatini",
       "country_code": "SZ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Ethiopia",
       "country_code": "ET",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Fiji",
       "country_code": "FJ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Finland",
       "country_code": "FI",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "France",
       "country_code": "FR",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Gabon",
       "country_code": "GA",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Gambia",
       "country_code": "GM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Georgia",
       "country_code": "GE",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Germany",
       "country_code": "DE",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Ghana",
       "country_code": "GH",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Greece",
       "country_code": "GR",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Grenada",
       "country_code": "GD",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Guatemala",
       "country_code": "GT",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Guinea",
       "country_code": "GN",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Guinea-Bissau",
       "country_code": "GW",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Guyana",
       "country_code": "GY",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Haiti",
       "country_code": "HT",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Honduras",
       "country_code": "HN",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Hungary",
       "country_code": "HU",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Iceland",
       "country_code": "IS",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "India",
       "country_code": "IN",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Indonesia",
       "country_code": "ID",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Iran",
       "country_code": "IR",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Iraq",
       "country_code": "IQ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Ireland",
       "country_code": "IE",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Israel",
       "country_code": "IL",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Italy",
       "country_code": "IT",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Jamaica",
       "country_code": "JM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Japan",
       "country_code": "JP",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Jordan",
       "country_code": "JO",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Kazakhstan",
       "country_code": "KZ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Kenya",
       "country_code": "KE",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Kiribati",
       "country_code": "KI",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Kosovo",
       "country_code": "XK",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Kuwait",
       "country_code": "KW",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Kyrgyzstan",
       "country_code": "KG",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Laos",
       "country_code": "LA",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Latvia",
       "country_code": "LV",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Lebanon",
       "country_code": "LB",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Lesotho",
       "country_code": "LS",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Liberia",
       "country_code": "LR",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Libya",
       "country_code": "LY",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Liechtenstein",
       "country_code": "LI",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Lithuania",
       "country_code": "LT",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Luxembourg",
       "country_code": "LU",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Madagascar",
       "country_code": "MG",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Malawi",
       "country_code": "MW",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Malaysia",
       "country_code": "MY",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Maldives",
       "country_code": "MV",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Mali",
       "country_code": "ML",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Malta",
       "country_code": "MT",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Marshall Islands",
       "country_code": "MH",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Mauritania",
       "country_code": "MR",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Mauritius",
       "country_code": "MU",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Mexico",
       "country_code": "MX",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Micronesia",
       "country_code": "FM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Moldova",
       "country_code": "MD",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     
     {
       "country": "Monaco",
       "country_code": "MC",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Mongolia",
       "country_code": "MN",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Montenegro",
       "country_code": "ME",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Morocco",
       "country_code": "MA",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Mozambique",
       "country_code": "MZ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Myanmar",
       "country_code": "MM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Namibia",
       "country_code": "NA",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Nauru",
       "country_code": "NR",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Nepal",
       "country_code": "NP",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Netherlands",
       "country_code": "NL",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "New Zealand",
       "country_code": "NZ",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Nicaragua",
       "country_code": "NI",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Niger",
       "country_code": "NE",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Nigeria",
       "country_code": "NG",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "North Korea",
       "country_code": "KP",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "North Macedonia",
       "country_code": "MK",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Norway",
       "country_code": "NO",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Oman",
       "country_code": "OM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Pakistan",
       "country_code": "PK",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Palau",
       "country_code": "PW",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Palestine",
       "country_code": "PS",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Panama",
       "country_code": "PA",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Papua New Guinea",
       "country_code": "PG",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Paraguay",
       "country_code": "PY",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Peru",
       "country_code": "PE",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Philippines",
       "country_code": "PH",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Poland",
       "country_code": "PL",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Portugal",
       "country_code": "PT",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Qatar",
       "country_code": "QA",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Romania",
       "country_code": "RO",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Russia",
       "country_code": "RU",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Rwanda",
       "country_code": "RW",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Saint Kitts and Nevis",
       "country_code": "KN",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Saint Lucia",
       "country_code": "LC",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Saint Vincent and the Grenadines",
       "country_code": "VC",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Samoa",
       "country_code": "WS",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "San Marino",
       "country_code": "SM",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Sao Tome and Principe",
       "country_code": "ST",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Saudi Arabia",
       "country_code": "SA",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Senegal",
       "country_code": "SN",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Serbia",
       "country_code": "RS",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Seychelles",
       "country_code": "SC",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Sierra Leone",
       "country_code": "SL",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Singapore",
       "country_code": "SG",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Slovakia",
       "country_code": "SK",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Slovenia",
       "country_code": "SI",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Solomon Islands",
       "country_code": "SB",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Somalia",
       "country_code": "SO",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "South Africa",
       "country_code": "ZA",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "South Korea",
       "country_code": "KR",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "South Sudan",
       "country_code": "SS",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Spain",
       "country_code": "ES",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Sri Lanka",
       "country_code": "LK",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Sudan",
       "country_code": "SD",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Suriname",
       "country_code": "SR",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Sweden",
       "country_code": "SE",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Switzerland",
       "country_code": "CH",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Syria",
       "country_code": "SY",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Taiwan",
       "country_code": "TW",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Tajikistan",
       "country_code": "TJ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Tanzania",
       "country_code": "TZ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Thailand",
       "country_code": "TH",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Timor-Leste",
       "country_code": "TL",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Togo",
       "country_code": "TG",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Tonga",
       "country_code": "TO",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Trinidad and Tobago",
       "country_code": "TT",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Tunisia",
       "country_code": "TN",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Turkey",
       "country_code": "TR",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Turkmenistan",
       "country_code": "TM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Tuvalu",
       "country_code": "TV",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Uganda",
       "country_code": "UG",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Ukraine",
       "country_code": "UA",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "United Arab Emirates",
       "country_code": "AE",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "United Kingdom",
       "country_code": "GB",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "United States",
       "country_code": "US",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Uruguay",
       "country_code": "UY",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Uzbekistan",
       "country_code": "UZ",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Vanuatu",
       "country_code": "VU",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Vatican City",
       "country_code": "VA",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Venezuela",
       "country_code": "VE",
-      "svgCode": ""
+      "isStampPresent": "Yes"
     },
     {
       "country": "Vietnam",
       "country_code": "VN",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Yemen",
       "country_code": "YE",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Zambia",
       "country_code": "ZM",
-      "svgCode": ""
+      "isStampPresent": "No"
     },
     {
       "country": "Zimbabwe",
       "country_code": "ZW",
-      "svgCode": ""
+      "isStampPresent": "No"
     }
   ]
 }

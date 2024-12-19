@@ -223,30 +223,43 @@ export function PassportDashboard({
 
   const fetchUserPlaces = async (userId: string) => {
     try {
+      // Fetch places from database
       const { data, error: fetchError } = await supabase
         .from('Mappbook_User_Places')
         .select('visitedorwanttovisit,place_country,place_country_code,isRemoved,place_name')
         .eq('mappbook_user_id', userId)
         .eq('visitedorwanttovisit', 'visited')
         .is('isRemoved', false);
-  
+
       if (fetchError) throw new Error('Failed to fetch places');
-  
+
+      // Fetch stamp data
+      const stampResponse = await fetch('/api/get-assets?type=json&name=country_stamps.json');
+      const stampData = await stampResponse.json();
+      
+      // Create a map of countries with stamps for faster lookup
+      const countryStampMap = stampData.country_stamps.reduce((acc: { [key: string]: boolean }, stamp: any) => {
+        acc[stamp.country_code] = stamp.isStampPresent === "Yes";
+        return acc;
+      }, {});
+
       const countryGroups = data?.reduce((acc: { [key: string]: { places: string[], countryCode: string } }, place) => {
-        // Initialize the country entry if it doesn't exist
-        if (!acc[place.place_country]) {
-          acc[place.place_country] = { places: [], countryCode: place.place_country_code };
-        }
-        
-        // Only add the place_name if it's different from the country name
-        // This prevents duplicate entries while still keeping the country in the list
-        if (place.place_name !== place.place_country) {
-          acc[place.place_country].places.push(place.place_name);
+        // Only process countries that have stamps available
+        if (countryStampMap[place.place_country_code]) {
+          // Initialize the country entry if it doesn't exist
+          if (!acc[place.place_country]) {
+            acc[place.place_country] = { places: [], countryCode: place.place_country_code };
+          }
+          
+          // Only add the place_name if it's different from the country name
+          if (place.place_name !== place.place_country) {
+            acc[place.place_country].places.push(place.place_name);
+          }
         }
         
         return acc;
       }, {});
-  
+
       const formattedLocations: Location[] = Object.entries(countryGroups || {})
         .map(([country, data]) => ({
           place_names: data.places,
@@ -254,8 +267,9 @@ export function PassportDashboard({
           place_country_code: data.countryCode
         }))
         .sort((a, b) => b.place_names.length - a.place_names.length);
-  
+
       setLocations(formattedLocations);
+      console.log("locations to stamp - "+formattedLocations.length);
       return formattedLocations;
     } catch (err) {
       console.error('Error fetching places:', err);
