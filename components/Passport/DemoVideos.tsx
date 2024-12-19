@@ -19,22 +19,24 @@ interface Toast {
   message: string;
   type: 'success' | 'error';
 }
-
+// 4450ca17-f694-45e0-81e9-d011fd849f43 24 Colt Bennett 
+      // e0647ddc-90e9-4c87-b44a-e2b118aa8491 22 Rachel
+      // 0ab98e46-14c4-4e06-bcdd-da05c9f6fc63 16 Sheldon Cooper
 const DEMO_VIDEOS: DemoVideo[] = [
   {
-    id: 'b0211393-415f-4274-9e03-772e45c4970c',
-    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_43ff9fc7-43ca-425e-8da6-f5acb2ad529d_1734589977045.mp4',
-    location_count: 14
+    id: '3f94fcf9-0556-46f6-abe7-49a1d20e79ca',
+    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_4450ca17-f694-45e0-81e9-d011fd849f43_1734592093234.mp4',
+    location_count: 24
   },
   {
-    id: 'b0211393-415f-4274-9e03-772e45c4970c',
-    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_43ff9fc7-43ca-425e-8da6-f5acb2ad529d_1734589977045.mp4',
-    location_count: 14
+    id: 'bfc12d56-cc1b-4dd2-8196-b4611681f9aa',
+    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_e0647ddc-90e9-4c87-b44a-e2b118aa8491_1734592506787.mp4',
+    location_count: 22
   },
   {
-    id: 'b0211393-415f-4274-9e03-772e45c4970c',
-    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_43ff9fc7-43ca-425e-8da6-f5acb2ad529d_1734589977045.mp4',
-    location_count: 14
+    id: 'b379b45c-21c0-47d1-ae30-776f954b6177',
+    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_0ab98e46-14c4-4e06-bcdd-da05c9f6fc63_1734592848228.mp4',
+    location_count: 16
   }
 ];
 
