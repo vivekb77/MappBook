@@ -1,0 +1,98 @@
+# Travel Stamp Creation Guidelines
+
+## Base Structure
+1. Each stamp should use SVG with viewBox='0 0 200 200'
+2. Use double-border design:
+   - Outer border: stroke-width='4'
+   - Inner border: stroke-width='2'
+   - Inner border slightly smaller than outer border
+
+## Basic Shapes (Choose One Per Stamp)
+1. Hexagon: `<polygon points='20,100 60,20 140,20 180,100 140,180 60,180'>`
+2. Circle: `<circle cx='100' cy='100' r='80'>`
+3. Rounded Rectangle: `<rect x='30' y='30' width='140' height='140' rx='20'>`
+4. Octagon: `<path d='M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z'>`
+5. Ellipse: `<ellipse cx='100' cy='100' rx='90' ry='70'>`
+6. Diamond: `<polygon points='100,20 180,100 100,180 20,100'>`
+
+## Text Elements
+1. City Name:
+   ```svg
+   <text x='100' y='110' text-anchor='middle' font-size='24' font-weight='bold'>CITY</text>
+   ```
+2. Country Name:
+   ```svg
+   <text x='100' y='80' text-anchor='middle' font-size='14'>COUNTRY</text>
+   ```
+3. Additional Text (bottom):
+   ```svg
+   <text x='100' y='130' text-anchor='middle' font-size='10'>EXTRA INFO</text>
+   ```
+
+## Decorative Elements (Add 3-5 Per Stamp)
+
+### 1. Airplane Variations
+```svg
+<!-- Simple airplane -->
+<path d='M40,50 l10,5 l10,-5 l5,8 l5,-8' stroke='color' fill='none'/>
+
+<!-- Arrow-style plane -->
+<path d='M40,100 l12,-8 l-4,8 l4,8 z' fill='color'/>
+
+<!-- Curved wing plane -->
+<path d='M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5' fill='color'/>
+```
+
+### 2. Star Variations
+```svg
+<!-- Different star symbols -->
+<text font-size='12-20'>★</text>  <!-- Solid star -->
+<text font-size='12-20'>✦</text>  <!-- Open star -->
+<text font-size='12-20'>⋆</text>  <!-- Light star -->
+<text font-size='12-20'>✯</text>  <!-- Curved star -->
+```
+
+### 3. Compass Elements
+```svg
+<circle cx='50' cy='140' r='15' fill='none' stroke='color'/>
+<path d='M50,125 v30 M35,140 h30' stroke='color'/>
+<path d='M45,135 l5,5 l5,-5 M45,145 l5,-5 l5,5' stroke='color'/>
+```
+
+### 4. Wave Patterns
+```svg
+<!-- Simple waves -->
+<path d='M30,100 q20,-20 40,0 q20,20 40,0' stroke='color' fill='none'/>
+
+<!-- Ornamental waves -->
+<path d='M120,40 q10,-10 20,0 q10,10 20,0' stroke='color' fill='none'/>
+```
+
+## Color Schemes
+Create contrasting pairs for outer/inner elements:
+1. Green: #2d6a4f / #40916c
+2. Orange: #e85d04 / #faa307
+3. Purple: #7209b7 / #b5179e
+4. Blue: #3a0ca3 / #4895ef
+5. Teal: #006466 / #0b525b
+6. Red: #9d0208 / #dc2f02
+
+## Assembly Guidelines
+1. Start with the base shape (outer border)
+2. Add inner border slightly smaller
+3. Place city name and country text
+4. Add 1-2 airplane elements
+5. Add 2-3 star variations
+6. Include at least one wave or ornamental pattern
+7. Add compass or additional decorative elements
+8. Include extra text (arrival/departure, date, etc.)
+9. Ensure even distribution of elements around the stamp
+
+## Tips
+1. Always use odd numbers of decorative elements (3, 5, 7)
+2. Balance elements across the stamp
+3. Vary size and style of similar elements
+4. Use both filled and outline elements
+5. Keep text centered and aligned
+6. Maintain consistent stroke widths
+7. Leave enough space between elements

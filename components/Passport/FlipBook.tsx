@@ -85,7 +85,36 @@ const PassportCover = React.forwardRef<HTMLDivElement, {
       case 'frontInside':
         return '"Civis Romanus sum" \n\n - I am a Roman citizen';
       case 'backInside':
-        return '"SPQR - Senatus Populusque Romanus" \n\n - The Senate and People of Rome';
+        return (
+          <div className="text-center space-y-8">
+            <div className="font-cinzel text-lg text-stone-100" style={{
+              letterSpacing: '0.1em',
+              lineHeight: '2',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}>
+              Datum Romae<br />
+              Sub Sigillo Imperii<br />
+              Ex Auctoritate Imperatoris
+            </div>
+
+            <div className="font-cinzel text-sm text-stone-100 mt-12 max-w-md" style={{
+              letterSpacing: '0.05em',
+              lineHeight: '1.8',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}>
+              This document must be presented upon request to any official of the Empire.
+              The bearer is granted safe passage throughout all territories under Roman rule.
+              Let it be known that any who hinder the bearer's journey shall answer to Imperial law.
+            </div>
+
+            <div className="font-trajan text-base text-stone-100 mt-16" style={{
+              letterSpacing: '0.15em',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}>
+              PAX ROMANA
+            </div>
+          </div>
+        );
       default:
         return '';
     }
@@ -119,43 +148,55 @@ const PassportCover = React.forwardRef<HTMLDivElement, {
 
       {/* Content - Front Cover */}
       {showTitle && (
-        <div className="relative h-full w-full flex flex-col items-center justify-center p-8 z-10">
-          <div className="text-center p-8 space-y-8">
-            <div className="font-serif text-2xl text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              Adventure Passport
-            </div>
-            <div className="font-serif text-xs text-amber-100" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              of
-            </div>
-            <h1 className="text-4xl font-serif text-amber-100 break-words max-w-md leading-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              {props.passportDisplayName || 'ROMAN EMPIRE'}
-            </h1>
+        <div className="relative h-full w-full flex flex-col items-center justify-center p-8 z-10">      <div className="text-center p-8 space-y-8">
+          <div className="font-trajan text-3xl text-stone-100" style={{
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+            letterSpacing: '0.2em'
+          }}>
+            Adventure Passport
           </div>
+          <div className="font-cinzel text-sm text-stone-200" style={{
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+            letterSpacing: '0.15em'
+          }}>
+            Of
+          </div>
+          <h1 className="text-5xl font-trajan text-stone-100 break-words max-w-md leading-tight" style={{
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+            letterSpacing: '0.25em'
+          }}>
+            {props.passportDisplayName || 'IMPERIVM ROMANVM'}
+          </h1>
+        </div>
         </div>
       )}
-
       {/* Content - Back Cover Title */}
       {showBackTitle && (
-        <div className="relative h-full w-full flex flex-col items-center justify-center p-8 z-10">
-          <div className="text-center">
-            <h1 className="text-4xl font-serif text-amber-100 break-words max-w-md leading-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              MIGHTY ROMAN EMPIRE
+        <div className="relative h-full w-full flex flex-col items-center justify-center p-28 z-10">
+          <div className="text-center space-y-12">
+            <h1 className="text-x font-trajan text-stone-100 break-words max-w-md leading-tight" style={{
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              letterSpacing: '0.2em'
+            }}>
+             
             </h1>
           </div>
         </div>
       )}
-
       {/* Quotes for Inside Covers */}
       {showQuote && (
         <div className="relative h-full w-full flex flex-col items-center justify-center p-8 z-10">
           <div className="text-center max-w-lg">
-            <p className="font-serif text-2xl text-amber-100 whitespace-pre-line leading-relaxed" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              {getQuote()}
-            </p>
+            {typeof getQuote() === 'string' ? (
+              <p className="font-serif text-2xl text-amber-100 whitespace-pre-line leading-relaxed" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+                {getQuote()}
+              </p>
+            ) : (
+              getQuote()
+            )}
           </div>
         </div>
       )}
-
       {/* Branding - Only on front and back covers */}
       {(props.position === 'frontCover' || props.position === 'backCover') && (
         <div className="absolute bottom-6 right-6 z-10">
@@ -191,31 +232,31 @@ const PassportPage = React.forwardRef<HTMLDivElement, PassportPageProps>(
     ];
 
     const processedCities = new Set<string>();
-    
+
     const matchingCityStamps = location.place_names
       .map(placeName => {
         // Convert to lowercase for consistent comparison
         const lowerPlaceName = placeName.toLowerCase();
-        
+
         // If we've already processed this city, skip it
         if (processedCities.has(lowerPlaceName)) {
           return undefined;
         }
-        
+
         const stamp = cityStamps.find(stamp =>
           stamp.city.toLowerCase() === lowerPlaceName &&
           stamp.country_code.toLowerCase() === location.place_country_code.toLowerCase()
         );
-        
+
         // If we found a stamp, mark this city as processed
         if (stamp) {
           processedCities.add(lowerPlaceName);
         }
-        
+
         return stamp;
       })
       .filter((stamp): stamp is CityStamp => stamp !== undefined);
-      
+
     return (
       <div
         ref={ref}
@@ -342,7 +383,7 @@ const PassportFlipBook: React.FC<{
     '/api/get-assets?type=images&name=passportfrontinside.jpg',
     '/api/get-assets?type=images&name=passportbackinside.jpg',
     '/api/get-assets?type=images&name=passportbackcover.jpg',
-    '/api/get-assets?type=images&name=booktable.jpg', 
+    '/api/get-assets?type=images&name=booktable.jpg',
     '/api/get-assets?type=images&name=passport_page.jpg'
   ];
 
