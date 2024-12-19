@@ -160,7 +160,7 @@ const TravelStampsPage = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {citiesInCountry.map(city => city.city).join(', ')}
+                          {/* {citiesInCountry.map(city => city.city).join(', ')} */}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex flex-col gap-4">

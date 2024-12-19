@@ -22,19 +22,19 @@ interface Toast {
 
 const DEMO_VIDEOS: DemoVideo[] = [
   {
-    id: 'c1c77d31-7485-47ca-855a-b5d2555cd8e6',
-    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_8536b4e2-0eb6-4dc1-8131-078f97597357_1734258979420.mp4',
-    location_count: 12
+    id: 'b0211393-415f-4274-9e03-772e45c4970c',
+    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_43ff9fc7-43ca-425e-8da6-f5acb2ad529d_1734589977045.mp4',
+    location_count: 14
   },
   {
-    id: 'fb1fd4e3-6052-4e96-bc24-5f224a12cc80',
-    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_8536b4e2-0eb6-4dc1-8131-078f97597357_1734258979420.mp4',
-    location_count: 8
+    id: 'b0211393-415f-4274-9e03-772e45c4970c',
+    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_43ff9fc7-43ca-425e-8da6-f5acb2ad529d_1734589977045.mp4',
+    location_count: 14
   },
   {
-    id: '2ad570bb-b09a-4386-a279-3bc7a208401d',
-    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_8536b4e2-0eb6-4dc1-8131-078f97597357_1734250042604.mp4',
-    location_count: 15
+    id: 'b0211393-415f-4274-9e03-772e45c4970c',
+    video_url: 'https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/flipbook-videos/flipbook_43ff9fc7-43ca-425e-8da6-f5acb2ad529d_1734589977045.mp4',
+    location_count: 14
   }
 ];
 

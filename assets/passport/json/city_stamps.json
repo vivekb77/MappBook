@@ -601,6 +601,814 @@
       "country_code": "IS",
       "city": "Reykjavik",
       "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">REYKJAVIK</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">ICELAND</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">HALLGRÍMSKIRKJA</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "New York",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><polygon points=\"25,100 62,25 138,25 175,100 138,175 62,175\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">★</text><text x=\"160\" y=\"140\" font-size=\"12\" fill=\"#4895ef\">⋆</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">NEW YORK</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">EMPIRE STATE</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Los Angeles",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">LOS ANGELES</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">HOLLYWOOD</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Chicago",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">CHICAGO</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">WINDY CITY</text></svg>"
+    },
+    {
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Toronto",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">TORONTO</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">CANADA</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">CN TOWER</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Houston",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">HOUSTON</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">SPACE CITY</text></svg>"
+    },
+    {
+      "country": "Mexico",
+      "country_code": "MX",
+      "city": "Mexico City",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#9d0208\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#dc2f02\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"24\" font-weight=\"bold\">MEXICO CITY</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"14\">MEXICO</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#dc2f02\" font-size=\"10\">ZÓCALO</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Phoenix",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">PHOENIX</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">VALLEY OF THE SUN</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Philadelphia",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">PHILADELPHIA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">LIBERTY BELL</text></svg>"
+    },
+    {
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Montreal",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">MONTREAL</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">CANADA</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">MONT ROYAL</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "San Antonio",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">SAN ANTONIO</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">THE ALAMO</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "San Diego",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#2d6a4f\" fill=\"none\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#40916c\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">SAN DIEGO</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">BALBOA PARK</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Dallas",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><polygon points=\"25,100 62,25 138,25 175,100 138,175 62,175\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">DALLAS</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">BIG D</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "San Jose",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">SAN JOSE</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">SILICON VALLEY</text></svg>"
+    },
+    {
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Vancouver",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">VANCOUVER</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">CANADA</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">STANLEY PARK</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Austin",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">AUSTIN</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">LIVE MUSIC CAPITAL</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Jacksonville",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#dc2f02\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"24\" font-weight=\"bold\">JACKSONVILLE</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#dc2f02\" font-size=\"10\">RIVER CITY</text></svg>"
+    },
+    {
+      "country": "Mexico",
+      "country_code": "MX",
+      "city": "Guadalajara",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">GUADALAJARA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">MEXICO</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">PEARL OF THE WEST</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "San Francisco",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">SAN FRANCISCO</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">GOLDEN GATE</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Columbus",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">COLUMBUS</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">THE ARCH CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Fort Worth",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">FORT WORTH</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">COWTOWN</text></svg>"
+    },
+
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Charlotte",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"25,100 62,25 138,25 175,100 138,175 62,175\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">CHARLOTTE</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">QUEEN CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Detroit",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">DETROIT</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">MOTOR CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "El Paso",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">EL PASO</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">SUN CITY</text></svg>"
+    },
+    {
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Calgary",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">CALGARY</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">CANADA</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">STAMPEDE CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Memphis",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">MEMPHIS</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">HOME OF THE BLUES</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Boston",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#dc2f02\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"24\" font-weight=\"bold\">BOSTON</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#dc2f02\" font-size=\"10\">FREEDOM TRAIL</text></svg>"
+    },
+    {
+      "country": "Mexico",
+      "country_code": "MX",
+      "city": "Monterrey",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">MONTERREY</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">MEXICO</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">CERRO DE LA SILLA</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Seattle",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">SEATTLE</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">SPACE NEEDLE</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Denver",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">DENVER</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">MILE HIGH CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Washington DC",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">WASHINGTON DC</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">CAPITAL CITY</text></svg>"
+    },
+
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Nashville",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">NASHVILLE</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">MUSIC CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Portland",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"25,100 62,25 138,25 175,100 138,175 62,175\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">PORTLAND</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">ROSE CITY</text></svg>"
+    },
+    {
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Edmonton",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">EDMONTON</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">CANADA</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">FESTIVAL CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Oklahoma City",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">OKLAHOMA CITY</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">THE BIG FRIENDLY</text></svg>"
+    },
+    {
+      "country": "Mexico",
+      "country_code": "MX",
+      "city": "Puebla",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">PUEBLA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">MEXICO</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">CITY OF ANGELS</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Las Vegas",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#dc2f02\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"24\" font-weight=\"bold\">LAS VEGAS</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#dc2f02\" font-size=\"10\">SIN CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Milwaukee",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">MILWAUKEE</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">CREAM CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Albuquerque",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">ALBUQUERQUE</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">DUKE CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Tucson",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">TUCSON</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">OLD PUEBLO</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Fresno",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">FRESNO</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">ASH TREE</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Sacramento",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><polygon points=\"25,100 62,25 138,25 175,100 138,175 62,175\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">SACRAMENTO</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">CITY OF TREES</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Kansas City",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">KANSAS CITY</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">CITY OF FOUNTAINS</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Mesa",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#0b525b\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">MESA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">VALLEY OF THE SUN</text></svg>"
+    },
+    {
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Ottawa",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">OTTAWA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">CANADA</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">CAPITAL CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Atlanta",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">ATLANTA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">THE ATL</text></svg>"
+    },
+    {
+      "country": "Mexico",
+      "country_code": "MX",
+      "city": "Tijuana",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#dc2f02\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"24\" font-weight=\"bold\">TIJUANA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"14\">MEXICO</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#dc2f02\" font-size=\"10\">BORDER CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Long Beach",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">LONG BEACH</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">THE LBC</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Omaha",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">OMAHA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">GATEWAY TO THE WEST</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Miami",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">MIAMI</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">MAGIC CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Oakland",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">OAKLAND</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">THE TOWN</text></svg>"
+    },
+
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Minneapolis",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><polygon points=\"25,100 62,25 138,25 175,100 138,175 62,175\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">MINNEAPOLIS</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">CITY OF LAKES</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Tulsa",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">TULSA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">OIL CAPITAL</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Arlington",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">ARLINGTON</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">ENTERTAINMENT DISTRICT</text></svg>"
+    },
+    {
+      "country": "Mexico",
+      "country_code": "MX",
+      "city": "Ecatepec",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">ECATEPEC</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">MEXICO</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">WIND HILL</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "New Orleans",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">NEW ORLEANS</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">THE BIG EASY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Wichita",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#dc2f02\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"24\" font-weight=\"bold\">WICHITA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#dc2f02\" font-size=\"10\">AIR CAPITAL</text></svg>"
+    },
+    {
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Quebec City",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">QUEBEC CITY</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">CANADA</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">LA VIEILLE CAPITALE</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Cleveland",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">CLEVELAND</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">FOREST CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Bakersfield",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">BAKERSFIELD</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">COUNTRY MUSIC CAPITAL</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Tampa",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">TAMPA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">CIGAR CITY</text></svg>"
+    },
+
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Aurora",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"25,100 62,25 138,25 175,100 138,175 62,175\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">AURORA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">GATEWAY TO THE ROCKIES</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Honolulu",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">HONOLULU</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">CROSSROADS OF THE PACIFIC</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Anaheim",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">ANAHEIM</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">CITY OF KINDNESS</text></svg>"
+    },
+    {
+      "country": "Mexico",
+      "country_code": "MX",
+      "city": "Leon",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">LEON</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">MEXICO</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">SHOE CAPITAL</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Santa Ana",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#006466\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#0b525b\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"24\" font-weight=\"bold\">SANTA ANA</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#006466\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#0b525b\" font-size=\"10\">GOLDEN CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "St. Louis",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#dc2f02\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"24\" font-weight=\"bold\">ST. LOUIS</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#9d0208\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#dc2f02\" font-size=\"10\">GATEWAY TO THE WEST</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Pittsburgh",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#7209b7\">⋆</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#b5179e\">✯</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"24\" font-weight=\"bold\">PITTSBURGH</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#7209b7\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#b5179e\" font-size=\"10\">STEEL CITY</text></svg>"
+    },
+    {
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Winnipeg",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#2d6a4f\">✯</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#40916c\">★</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"24\" font-weight=\"bold\">WINNIPEG</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#2d6a4f\" font-size=\"14\">CANADA</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#40916c\" font-size=\"10\">GATEWAY TO THE WEST</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Cincinnati",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><path d=\"M25,100 L62,45 L138,45 L175,100 L138,155 L62,155 Z\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#e85d04\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#faa307\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"24\" font-weight=\"bold\">CINCINNATI</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#e85d04\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#faa307\" font-size=\"10\">QUEEN CITY</text></svg>"
+    },
+    {
+      "country": "United States",
+      "country_code": "US",
+      "city": "Henderson",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><polygon points=\"100,25 175,100 100,175 25,100\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"150\" y=\"70\" font-size=\"20\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"140\" font-size=\"15\" fill=\"#4895ef\">✦</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"24\" font-weight=\"bold\">HENDERSON</text><text x=\"100\" y=\"80\" text-anchor=\"middle\" fill=\"#3a0ca3\" font-size=\"14\">UNITED STATES</text><text x=\"100\" y=\"130\" text-anchor=\"middle\" fill=\"#4895ef\" font-size=\"10\">AMERICA'S PREMIER COMMUNITY</text></svg>"
+    },
+
+    {
+      "country": "Japan",
+      "country_code": "JP",
+      "city": "Tokyo",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#4895ef\" transform=\"rotate(-30, 160, 70)\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#4895ef\">✦</text><text x=\"40\" y=\"140\" font-size=\"12\" fill=\"#3a0ca3\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#4895ef\" fill=\"none\" stroke-width=\"1.5\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">JAPAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">TOKYO</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">EST. 1868</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Shanghai",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"160\" font-size=\"14\" fill=\"#dc2f02\">✦</text><path d=\"M30,100 q20,-20 40,0 q20,20 40,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">SHANGHAI</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">PEARL OF THE ORIENT</text></svg>"
+    },
+    {
+      "country": "India",
+      "country_code": "IN",
+      "city": "Mumbai",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#0b525b\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#006466\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#0b525b\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">INDIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">MUMBAI</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">GATEWAY OF INDIA</text></svg>"
+    },
+    {
+      "country": "South Korea",
+      "country_code": "KR",
+      "city": "Seoul",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#b5179e\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#b5179e\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">SOUTH KOREA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">SEOUL</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">SOUL OF ASIA</text></svg>"
+    },
+    {
+      "country": "Singapore",
+      "country_code": "SG",
+      "city": "Singapore",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#faa307\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#e85d04\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#faa307\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">SINGAPORE</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#e85d04\">SINGAPORE</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">LION CITY</text></svg>"
+    },
+    {
+      "country": "Thailand",
+      "country_code": "TH",
+      "city": "Bangkok",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#40916c\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">THAILAND</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#2d6a4f\">BANGKOK</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">CITY OF ANGELS</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Beijing",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#4895ef\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">BEIJING</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">NORTHERN CAPITAL</text></svg>"
+    },
+    {
+      "country": "Japan",
+      "country_code": "JP",
+      "city": "Osaka",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#0b525b\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#006466\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#0b525b\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">JAPAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">OSAKA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">KITCHEN OF JAPAN</text></svg>"
+    },
+    {
+      "country": "India",
+      "country_code": "IN",
+      "city": "Delhi",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#dc2f02\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">INDIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">DELHI</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">HEART OF INDIA</text></svg>"
+    },
+
+    {
+      "country": "Malaysia",
+      "country_code": "MY",
+      "city": "Kuala Lumpur",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#faa307\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#e85d04\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#faa307\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">MALAYSIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#e85d04\">KUALA LUMPUR</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">CITY OF LIGHTS</text></svg>"
+    },
+    {
+      "country": "Indonesia",
+      "country_code": "ID",
+      "city": "Jakarta",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#b5179e\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#b5179e\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">INDONESIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">JAKARTA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">BIG DURIAN</text></svg>"
+    },
+    {
+      "country": "Vietnam",
+      "country_code": "VN",
+      "city": "Ho Chi Minh City",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#40916c\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#2d6a4f\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#40916c\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">VIETNAM</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"20\" font-weight=\"bold\" fill=\"#2d6a4f\">HO CHI MINH</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">PEARL OF THE FAR EAST</text></svg>"
+    },
+    {
+      "country": "Philippines",
+      "country_code": "PH",
+      "city": "Manila",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#4895ef\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">PHILIPPINES</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">MANILA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">PEARL OF THE ORIENT</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Guangzhou",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#0b525b\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#006466\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#0b525b\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">GUANGZHOU</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">FLOWER CITY</text></svg>"
+    },
+    {
+      "country": "Pakistan",
+      "country_code": "PK",
+      "city": "Karachi",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#dc2f02\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">PAKISTAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">KARACHI</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">CITY OF LIGHTS</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Shenzhen",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#e85d04\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#faa307\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#e85d04\">SHENZHEN</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">SILICON VALLEY OF ASIA</text></svg>"
+    },
+    {
+      "country": "Japan",
+      "country_code": "JP",
+      "city": "Nagoya",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#b5179e\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#7209b7\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#b5179e\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">JAPAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">NAGOYA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">INDUSTRIAL HEART</text></svg>"
+    },
+    {
+      "country": "India",
+      "country_code": "IN",
+      "city": "Bangalore",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#40916c\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">INDIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#2d6a4f\">BANGALORE</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">SILICON VALLEY OF INDIA</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Chengdu",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#4895ef\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#4895ef\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">CHENGDU</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">LAND OF ABUNDANCE</text></svg>"
+    },
+    {
+      "country": "Taiwan",
+      "country_code": "TW",
+      "city": "Taipei",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#0b525b\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#006466\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#0b525b\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">TAIWAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">TAIPEI</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">CITY OF AZALEAS</text></svg>"
+    },
+    {
+      "country": "South Korea",
+      "country_code": "KR",
+      "city": "Busan",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#dc2f02\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#9d0208\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#dc2f02\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">SOUTH KOREA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">BUSAN</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">MARITIME CAPITAL</text></svg>"
+    },
+    {
+      "country": "India",
+      "country_code": "IN",
+      "city": "Kolkata",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#b5179e\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#b5179e\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">INDIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">KOLKATA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">CITY OF JOY</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Tianjin",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#faa307\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#e85d04\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#faa307\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#e85d04\">TIANJIN</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">DIAMOND OF BOHAI</text></svg>"
+    },
+    {
+      "country": "Vietnam",
+      "country_code": "VN",
+      "city": "Hanoi",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#40916c\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">VIETNAM</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#2d6a4f\">HANOI</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">CITY OF LAKES</text></svg>"
+    },
+    {
+      "country": "Pakistan",
+      "country_code": "PK",
+      "city": "Lahore",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#4895ef\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">PAKISTAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">LAHORE</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">CITY OF GARDENS</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Wuhan",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#0b525b\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#006466\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#0b525b\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">WUHAN</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">CITY OF RIVERS</text></svg>"
+    },
+    {
+      "country": "Thailand",
+      "country_code": "TH",
+      "city": "Chiang Mai",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#dc2f02\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">THAILAND</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">CHIANG MAI</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">ROSE OF THE NORTH</text></svg>"
+    },
+
+    {
+      "country": "India",
+      "country_code": "IN",
+      "city": "Chennai",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#b5179e\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#7209b7\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#b5179e\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">INDIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">CHENNAI</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">GATEWAY OF SOUTH</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Chongqing",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#40916c\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#2d6a4f\">CHONGQING</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">MOUNTAIN CITY</text></svg>"
+    },
+    {
+      "country": "Indonesia",
+      "country_code": "ID",
+      "city": "Surabaya",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#faa307\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#e85d04\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#faa307\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">INDONESIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#e85d04\">SURABAYA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">CITY OF HEROES</text></svg>"
+    },
+    {
+      "country": "South Korea",
+      "country_code": "KR",
+      "city": "Incheon",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#4895ef\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">SOUTH KOREA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">INCHEON</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">GATEWAY TO SEOUL</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Xi'an",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#0b525b\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#006466\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#0b525b\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">XI'AN</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">ETERNAL CITY</text></svg>"
+    },
+    {
+      "country": "Philippines",
+      "country_code": "PH",
+      "city": "Quezon City",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#dc2f02\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">PHILIPPINES</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"20\" font-weight=\"bold\" fill=\"#9d0208\">QUEZON CITY</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">CITY OF STARS</text></svg>"
+    },
+    {
+      "country": "Japan",
+      "country_code": "JP",
+      "city": "Sapporo",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#b5179e\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#b5179e\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">JAPAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">SAPPORO</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">NORTHERN STAR</text></svg>"
+    },
+    {
+      "country": "India",
+      "country_code": "IN",
+      "city": "Hyderabad",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#40916c\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#2d6a4f\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#40916c\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">INDIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#2d6a4f\">HYDERABAD</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">CITY OF PEARLS</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Hangzhou",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#e85d04\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#faa307\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#e85d04\">HANGZHOU</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">PARADISE ON EARTH</text></svg>"
+    },
+
+    {
+      "country": "Bangladesh",
+      "country_code": "BD",
+      "city": "Dhaka",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#4895ef\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">BANGLADESH</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">DHAKA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">CITY OF MOSQUES</text></svg>"
+    },
+    {
+      "country": "Malaysia",
+      "country_code": "MY",
+      "city": "Penang",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#0b525b\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#006466\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#0b525b\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">MALAYSIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">PENANG</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">PEARL OF THE ORIENT</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Nanjing",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#dc2f02\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">NANJING</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">ANCIENT CAPITAL</text></svg>"
+    },
+    {
+      "country": "Pakistan",
+      "country_code": "PK",
+      "city": "Islamabad",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#b5179e\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#7209b7\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#b5179e\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">PAKISTAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">ISLAMABAD</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">CITY OF PEACE</text></svg>"
+    },
+    {
+      "country": "Japan",
+      "country_code": "JP",
+      "city": "Fukuoka",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#40916c\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">JAPAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#2d6a4f\">FUKUOKA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">GATEWAY TO ASIA</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Shenyang",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#faa307\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#e85d04\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#faa307\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#e85d04\">SHENYANG</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">NORTHERN PEARL</text></svg>"
+    },
+    {
+      "country": "South Korea",
+      "country_code": "KR",
+      "city": "Daegu",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#4895ef\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#3a0ca3\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#4895ef\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">SOUTH KOREA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">DAEGU</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">COLORFUL CITY</text></svg>"
+    },
+    {
+      "country": "India",
+      "country_code": "IN",
+      "city": "Ahmedabad",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#0b525b\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#006466\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#0b525b\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">INDIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">AHMEDABAD</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">MANCHESTER OF INDIA</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Qingdao",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#dc2f02\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#9d0208\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#dc2f02\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">QINGDAO</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">SAILING CITY</text></svg>"
+    },
+
+    {
+      "country": "Philippines",
+      "country_code": "PH",
+      "city": "Davao",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#40916c\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#2d6a4f\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#40916c\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">PHILIPPINES</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#2d6a4f\">DAVAO</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">CROWN OF MINDANAO</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Dalian",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#b5179e\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#b5179e\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">DALIAN</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">ROMANTIC CITY</text></svg>"
+    },
+    {
+      "country": "Indonesia",
+      "country_code": "ID",
+      "city": "Bandung",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#faa307\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#e85d04\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#faa307\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">INDONESIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#e85d04\">BANDUNG</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">PARIS OF JAVA</text></svg>"
+    },
+    {
+      "country": "Taiwan",
+      "country_code": "TW",
+      "city": "Kaohsiung",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#4895ef\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">TAIWAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">KAOHSIUNG</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">HARBOR CAPITAL</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Jinan",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#0b525b\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#006466\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#0b525b\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">JINAN</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">CITY OF SPRINGS</text></svg>"
+    },
+    {
+      "country": "India",
+      "country_code": "IN",
+      "city": "Pune",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#dc2f02\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#9d0208\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#dc2f02\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">INDIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">PUNE</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">OXFORD OF THE EAST</text></svg>"
+    },
+    {
+      "country": "Japan",
+      "country_code": "JP",
+      "city": "Kawasaki",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#b5179e\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#b5179e\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">JAPAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">KAWASAKI</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">INDUSTRIAL HEART</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Zhengzhou",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#40916c\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#2d6a4f\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#40916c\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#2d6a4f\">ZHENGZHOU</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">GATEWAY OF CHINA</text></svg>"
+    },
+    {
+      "country": "Malaysia",
+      "country_code": "MY",
+      "city": "Johor Bahru",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#faa307\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#e85d04\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#faa307\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">MALAYSIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"20\" font-weight=\"bold\" fill=\"#e85d04\">JOHOR BAHRU</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">SOUTHERN GATEWAY</text></svg>"
+    },
+
+    {
+      "country": "South Korea",
+      "country_code": "KR",
+      "city": "Daejeon",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#4895ef\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#4895ef\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">SOUTH KOREA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">DAEJEON</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">SCIENCE CITY</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Changsha",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#0b525b\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#006466\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#0b525b\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">CHANGSHA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">STAR OF XIANG</text></svg>"
+    },
+    {
+      "country": "Vietnam",
+      "country_code": "VN",
+      "city": "Hai Phong",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#dc2f02\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#9d0208\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#dc2f02\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">VIETNAM</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">HAI PHONG</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">PORT CITY</text></svg>"
+    },
+    {
+      "country": "Thailand",
+      "country_code": "TH",
+      "city": "Pattaya",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><ellipse cx=\"100\" cy=\"100\" rx=\"90\" ry=\"70\" fill=\"none\" stroke=\"#7209b7\" stroke-width=\"4\"/><ellipse cx=\"100\" cy=\"100\" rx=\"85\" ry=\"65\" fill=\"none\" stroke=\"#b5179e\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#b5179e\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#7209b7\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#b5179e\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#7209b7\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#7209b7\">THAILAND</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#7209b7\">PATTAYA</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#b5179e\">RESORT CITY</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Kunming",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"20,100 60,20 140,20 180,100 140,180 60,180\" fill=\"none\" stroke=\"#2d6a4f\" stroke-width=\"4\"/><polygon points=\"30,100 65,30 135,30 170,100 135,170 65,170\" fill=\"none\" stroke=\"#40916c\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#40916c\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#2d6a4f\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#40916c\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#2d6a4f\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#2d6a4f\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#2d6a4f\">KUNMING</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#40916c\">SPRING CITY</text></svg>"
+    },
+    {
+      "country": "India",
+      "country_code": "IN",
+      "city": "Surat",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"#e85d04\" stroke-width=\"4\"/><circle cx=\"100\" cy=\"100\" r=\"75\" fill=\"none\" stroke=\"#faa307\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#faa307\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#e85d04\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#faa307\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#e85d04\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e85d04\">INDIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#e85d04\">SURAT</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#faa307\">DIAMOND CITY</text></svg>"
+    },
+    {
+      "country": "China",
+      "country_code": "CN",
+      "city": "Ningbo",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><path d=\"M20,100 L60,40 L140,40 L180,100 L140,160 L60,160 Z\" fill=\"none\" stroke=\"#3a0ca3\" stroke-width=\"4\"/><path d=\"M30,100 L65,45 L135,45 L170,100 L135,155 L65,155 Z\" fill=\"none\" stroke=\"#4895ef\" stroke-width=\"2\"/><path d=\"M40,50 l10,5 l10,-5 l5,8 l5,-8\" stroke=\"#4895ef\" fill=\"none\"/><text x=\"160\" y=\"50\" font-size=\"16\" fill=\"#3a0ca3\">★</text><text x=\"40\" y=\"150\" font-size=\"14\" fill=\"#4895ef\">✦</text><path d=\"M120,40 q10,-10 20,0 q10,10 20,0\" stroke=\"#3a0ca3\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#3a0ca3\">CHINA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#3a0ca3\">NINGBO</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#4895ef\">PORT OF KINGS</text></svg>"
+    },
+    {
+      "country": "Indonesia",
+      "country_code": "ID",
+      "city": "Medan",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><polygon points=\"100,20 180,100 100,180 20,100\" fill=\"none\" stroke=\"#006466\" stroke-width=\"4\"/><polygon points=\"100,30 170,100 100,170 30,100\" fill=\"none\" stroke=\"#0b525b\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#0b525b\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#006466\">★</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#0b525b\">✦</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#006466\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#006466\">INDONESIA</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#006466\">MEDAN</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#0b525b\">GATEWAY TO SUMATRA</text></svg>"
+    },
+    {
+      "country": "Japan",
+      "country_code": "JP",
+      "city": "Kobe",
+      "svgCode": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 200\"><rect x=\"30\" y=\"30\" width=\"140\" height=\"140\" rx=\"20\" fill=\"none\" stroke=\"#9d0208\" stroke-width=\"4\"/><rect x=\"35\" y=\"35\" width=\"130\" height=\"130\" rx=\"15\" fill=\"none\" stroke=\"#dc2f02\" stroke-width=\"2\"/><path d=\"M160,70 c-10,0 -15,5 -15,5 l15,-15 l15,15 c0,0 -5,-5 -15,-5\" fill=\"#dc2f02\"/><text x=\"50\" y=\"60\" font-size=\"16\" fill=\"#9d0208\">✯</text><text x=\"150\" y=\"140\" font-size=\"14\" fill=\"#dc2f02\">⋆</text><path d=\"M70,155 q15,-15 30,0 q15,15 30,0\" stroke=\"#9d0208\" fill=\"none\"/><text x=\"100\" y=\"80\" text-anchor=\"middle\" font-size=\"14\" fill=\"#9d0208\">JAPAN</text><text x=\"100\" y=\"110\" text-anchor=\"middle\" font-size=\"24\" font-weight=\"bold\" fill=\"#9d0208\">KOBE</text><text x=\"100\" y=\"135\" text-anchor=\"middle\" font-size=\"10\" fill=\"#dc2f02\">PORT OF HARMONY</text></svg>"
     }
   ]
 }
