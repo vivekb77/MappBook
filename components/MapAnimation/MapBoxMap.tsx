@@ -66,7 +66,7 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: 0,
   latitude: 0,
   zoom: CONFIG.map.drone.INITIAL_ZOOM,
-  pitch: 20,
+  pitch: 0,
   bearing: 0,
 };
 
@@ -128,8 +128,24 @@ const MapboxMap: React.FC = () => {
     setPoints(prev => [...prev, {
       ...pointData,
       altitude: CONFIG.map.drone.MIN_ALTITUDE,
-      index: prev.length + 1
+      index: prev.length + 1,
+      originalPosition: {
+        longitude: pointData.longitude,
+        latitude: pointData.latitude
+      }
     }]);
+  };
+
+  const handlePointMove = (index: number, longitude: number, latitude: number) => {
+    setPoints(prev => {
+      const newPoints = [...prev];
+      newPoints[index] = {
+        ...newPoints[index],
+        longitude,
+        latitude
+      };
+      return newPoints;
+    });
   };
 
   const handleAltitudeChange = (index: number, altitude: number) => {
@@ -139,7 +155,7 @@ const MapboxMap: React.FC = () => {
       return newPoints;
     });
   };
-
+  
   const resetPoints = () => {
     setPoints([]);
     setErrorMessage("");
@@ -152,8 +168,21 @@ const MapboxMap: React.FC = () => {
 
   const handleAnimationCancel = () => {
     setIsAnimating(false);
-    // setPoints([]);
+
     setAnimationProgress(0);
+  };
+
+  const handlePointRemove = (index: number) => {
+    setPoints(prev => {
+      const newPoints = [...prev];
+      newPoints.splice(index, 1);
+      // Update indices for remaining points
+      return newPoints.map((point, i) => ({
+        ...point,
+        index: i + 1
+      }));
+    });
+    setErrorMessage("");
   };
 
   return (
@@ -176,14 +205,14 @@ const MapboxMap: React.FC = () => {
         onClick={handleMapClick}
         mapStyle={CONFIG.map.styles.satellite}
         style={{ width: '100%', height: '100%' }}
-        // projection="globe"
       >
         <MapMarkers
           points={points}
           isAnimating={isAnimating}
           viewState={viewState}
           CONFIG={CONFIG}
-          onAddPoint={handleAddPoint}
+          onPointMove={handlePointMove}
+
           onError={setErrorMessage}
         />
       </Map>
@@ -193,13 +222,14 @@ const MapboxMap: React.FC = () => {
         <AltitudeTimeline 
           points={points}
           onAltitudeChange={handleAltitudeChange}
+          onPointRemove={handlePointRemove}
           isAnimating={isAnimating}
           animationProgress={animationProgress}
         />
       )}
 
       {/* Controls */}
-      <div className="absolute bottom-4 right-4 space-y-2">
+      <div className="absolute bottom-48 right-4 space-y-2">
         <div className="flex flex-col items-end space-y-2">
           <div className="flex space-x-2">
             {points.length > 0 && !isAnimating && (

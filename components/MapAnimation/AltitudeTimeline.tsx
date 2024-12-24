@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 
 interface Point {
   longitude: number;
@@ -20,13 +21,15 @@ const CONFIG = {
 interface AltitudeTimelineProps {
   points: Point[];
   onAltitudeChange: (index: number, altitude: number) => void;
+  onPointRemove: (index: number) => void;
   isAnimating?: boolean;
   animationProgress?: number;
 }
 
 export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({ 
   points, 
-  onAltitudeChange, 
+  onAltitudeChange,
+  onPointRemove, 
   isAnimating = false, 
   animationProgress = 0 
 }) => {
@@ -55,6 +58,11 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
     setDraggingPoint(null);
   };
 
+  const handleDeletePoint = (index: number) => {
+    if (isAnimating) return;
+    onPointRemove(index);
+  };
+
   useEffect(() => {
     if (draggingPoint !== null && !isAnimating) {
       document.addEventListener('mouseup', handleMouseUp);
@@ -69,9 +77,14 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
   return (
     <div 
       ref={timelineRef}
-      className="absolute bottom-20 left-1/2 -translate-x-1/2 w-4/5 h-32 bg-black/50 rounded-lg p-4"
+      className="absolute bottom-12 left-1/2 -translate-x-1/2 w-4/5 h-32 bg-black/50 rounded-lg p-4"
       onMouseMove={handleMouseMove}
     >
+      {/* Title text */}
+      <div className="absolute -top-8 left-4 text-white text-sm font-medium">
+        Select altitude for the footage
+      </div>
+
       {/* Grid lines */}
       <div className="absolute inset-0 flex flex-col justify-between p-4">
         {Array.from({ length: 6 }).map((_, i) => (
@@ -79,17 +92,6 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
             key={i}
             className="w-full h-px bg-white/20"
           />
-        ))}
-      </div>
-      
-      {/* Altitude markers */}
-      <div className="absolute left-2 inset-y-4 flex flex-col justify-between text-white text-xs">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i}>
-            {(CONFIG.map.drone.MAX_ALTITUDE - 
-              (i * (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE) / 5)
-            ).toFixed(1)} km
-          </div>
         ))}
       </div>
 
@@ -129,23 +131,42 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
           return (
             <div
               key={i}
-              className={`absolute w-4 h-4 -ml-2 -mt-2 rounded-full ${
-                isAnimating 
-                  ? 'bg-white/50 cursor-not-allowed' 
-                  : 'bg-white cursor-pointer hover:bg-blue-100'
-              }`}
+              className="absolute"
               style={{
                 left: `${x}%`,
                 top: `${y}%`
               }}
-              onMouseDown={handleMouseDown(i)}
             >
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-white text-xs whitespace-nowrap">
-                {point.altitude.toFixed(2)} km
+              {/* Point */}
+              <div
+                className={`relative flex items-center justify-center w-6 h-6 -ml-2 -mt-2 rounded-full ${
+                  isAnimating 
+                    ? 'bg-white/50 cursor-not-allowed' 
+                    : 'bg-white cursor-pointer hover:bg-blue-100'
+                }`}
+                onMouseDown={handleMouseDown(i)}
+              >
+                {/* Altitude value */}
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-white text-xs whitespace-nowrap">
+                  {point.altitude.toFixed(2)} km
+                </div>
+                
+                {/* Number in center */}
+                <span className="text-[10px] font-bold text-gray-600">
+                  {i + 1}
+                </span>
               </div>
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-white text-xs">
-                {point.index}
-              </div>
+
+              {/* Delete button */}
+              <button
+                className={`absolute -bottom-8 left-1/2 -translate-x-1/2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 
+                  ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
+                onClick={() => handleDeletePoint(i)}
+                disabled={isAnimating}
+                title={isAnimating ? "Cannot delete while animating" : "Delete point"}
+              >
+                <X className="w-3 h-3" />
+              </button>
             </div>
           );
         })}
