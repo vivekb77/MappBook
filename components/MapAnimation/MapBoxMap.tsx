@@ -27,6 +27,19 @@ const CONFIG = {
   }
 };
 
+// Helper function to calculate distance between points
+const calculateDistance = (point1: Point, point2: Point): number => {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
+  const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(point1.latitude * Math.PI / 180) * Math.cos(point2.latitude * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
 interface Point {
   longitude: number;
   latitude: number;
@@ -53,7 +66,7 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: 0,
   latitude: 0,
   zoom: CONFIG.map.drone.INITIAL_ZOOM,
-  pitch: 0,
+  pitch: 20,
   bearing: 0,
 };
 
@@ -65,11 +78,50 @@ const MapboxMap: React.FC = () => {
   const [animationProgress, setAnimationProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
+  const validatePoint = (newPoint: PointData): string | null => {
+    if (isAnimating) {
+      return "Cannot add points while animating";
+    }
+
+    if (viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM) {
+      return `Please zoom in to level ${CONFIG.map.drone.REQUIRED_ZOOM} or higher`;
+    }
+
+    if (points.length >= CONFIG.map.drone.MAX_POINTS) {
+      return `Maximum ${CONFIG.map.drone.MAX_POINTS} points allowed`;
+    }
+
+    if (points.length > 0) {
+      const lastPoint = points[points.length - 1];
+      const distance = calculateDistance(
+        lastPoint, 
+        { ...newPoint, altitude: 0, index: 0 }
+      );
+      
+      if (distance > CONFIG.map.drone.POINT_RADIUS_KM) {
+        return `New point must be within ${CONFIG.map.drone.POINT_RADIUS_KM}km of last point`;
+      }
+    }
+
+    return null;
+  };
+
   const handleMapClick = (event: any) => {
-    if (isAnimating) return;
-    setErrorMessage("");
     const { lng, lat } = event.lngLat;
-    handleAddPoint({ longitude: lng, latitude: lat, zoom: viewState.zoom });
+    const pointData = { 
+      longitude: lng, 
+      latitude: lat, 
+      zoom: viewState.zoom 
+    };
+
+    const error = validatePoint(pointData);
+    if (error) {
+      setErrorMessage(error);
+      return;
+    }
+
+    setErrorMessage("");
+    handleAddPoint(pointData);
   };
 
   const handleAddPoint = (pointData: PointData) => {
@@ -100,7 +152,7 @@ const MapboxMap: React.FC = () => {
 
   const handleAnimationCancel = () => {
     setIsAnimating(false);
-    setPoints([]);
+    // setPoints([]);
     setAnimationProgress(0);
   };
 
@@ -124,7 +176,7 @@ const MapboxMap: React.FC = () => {
         onClick={handleMapClick}
         mapStyle={CONFIG.map.styles.satellite}
         style={{ width: '100%', height: '100%' }}
-        projection="globe"
+        // projection="globe"
       >
         <MapMarkers
           points={points}

@@ -34,21 +34,9 @@ interface MapMarkersProps {
       };
     };
   };
-onAddPoint: (pointData: { longitude: number; latitude: number; zoom: number }) => void;
+  onAddPoint: (pointData: { longitude: number; latitude: number; zoom: number }) => void;
   onError: (message: string) => void;
 }
-
-const calculateDistance = (point1: Point, point2: Point): number => {
-  const R = 6371; // Earth's radius in kilometers
-  const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
-  const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(point1.latitude * Math.PI / 180) * Math.cos(point2.latitude * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-};
 
 const createCircleGeoJson = (center: Point, radiusKm: number): GeoJSONFeature => {
   const points = 64;
@@ -110,41 +98,8 @@ const CustomMarker: React.FC<{ index: number }> = ({ index }) => {
 export const MapMarkers: React.FC<MapMarkersProps> = ({
   points,
   isAnimating,
-  viewState,
-  CONFIG,
-  onAddPoint,
-  onError
+  CONFIG
 }) => {
-    const validateAndAddPoint = (longitude: number, latitude: number, zoom: number) => {
-        if (isAnimating) return;
-        
-        if (viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM) {
-          onError(`Please zoom in to level ${CONFIG.map.drone.REQUIRED_ZOOM} or higher`);
-          return;
-        }
-      
-        if (points.length >= CONFIG.map.drone.MAX_POINTS) {
-          onError(`Maximum ${CONFIG.map.drone.MAX_POINTS} points allowed`);
-          return;
-        }
-        
-        const pointData = {
-          longitude,
-          latitude,
-          zoom
-        };
-      
-        if (points.length > 0) {
-          const distance = calculateDistance(points[points.length - 1], { ...pointData, altitude: 0, index: 0 });
-          if (distance > CONFIG.map.drone.POINT_RADIUS_KM) {
-            onError(`New point must be within ${CONFIG.map.drone.POINT_RADIUS_KM}km of last point`);
-            return;
-          }
-        }
-      
-        onAddPoint(pointData);
-      };
-
   const pathGeoJson = points.length > 0 ? createPathGeoJson(points) : null;
   const circleGeoJson = points.length > 0 ? createCircleGeoJson(points[points.length - 1], CONFIG.map.drone.POINT_RADIUS_KM) : null;
 
