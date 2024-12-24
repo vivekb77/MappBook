@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from "@/components/utils/supabase";
-import PassportFlipBook from '@/components/Passport/FlipBook';
+import PassportFlipBook from '@/components/Dashboard/FlipBook';
 
 interface Place {
   visitedorwanttovisit: 'visited' | 'wanttovisit';

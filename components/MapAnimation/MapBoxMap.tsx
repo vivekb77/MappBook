@@ -2,10 +2,13 @@ import React, { useRef, useState } from "react";
 import { Map, MapRef } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Download, Save, X } from "lucide-react";
 import MapMarkers from './MarkPoints';
+import { useUser } from '@clerk/nextjs'
+import { useMappbookUser } from '@/context/UserContext'
 import AltitudeTimeline from './AltitudeTimeline';
 import FlightAnimation from './FlightAnimation';
+import { getClerkSupabaseClient } from "@/components/utils/supabase"
 
 const CONFIG = {
   map: {
@@ -27,16 +30,17 @@ const CONFIG = {
   }
 };
 
+
 // Helper function to calculate distance between points
 const calculateDistance = (point1: Point, point2: Point): number => {
   const R = 6371; // Earth's radius in kilometers
   const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
   const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(point1.latitude * Math.PI / 180) * Math.cos(point2.latitude * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(point1.latitude * Math.PI / 180) * Math.cos(point2.latitude * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
 
@@ -77,6 +81,11 @@ const MapboxMap: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationProgress, setAnimationProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isSaving, setIsSaving] = useState(false);
+  const supabase = getClerkSupabaseClient();
+  const { isLoaded, isSignedIn, user } = useUser()
+  const { mappbookUser, setMappbookUser } = useMappbookUser()
+
 
   const validatePoint = (newPoint: PointData): string | null => {
     if (isAnimating) {
@@ -94,10 +103,10 @@ const MapboxMap: React.FC = () => {
     if (points.length > 0) {
       const lastPoint = points[points.length - 1];
       const distance = calculateDistance(
-        lastPoint, 
+        lastPoint,
         { ...newPoint, altitude: 0, index: 0 }
       );
-      
+
       if (distance > CONFIG.map.drone.POINT_RADIUS_KM) {
         return `New point must be within ${CONFIG.map.drone.POINT_RADIUS_KM}km of last point`;
       }
@@ -108,10 +117,10 @@ const MapboxMap: React.FC = () => {
 
   const handleMapClick = (event: any) => {
     const { lng, lat } = event.lngLat;
-    const pointData = { 
-      longitude: lng, 
-      latitude: lat, 
-      zoom: viewState.zoom 
+    const pointData = {
+      longitude: lng,
+      latitude: lat,
+      zoom: viewState.zoom
     };
 
     const error = validatePoint(pointData);
@@ -155,7 +164,7 @@ const MapboxMap: React.FC = () => {
       return newPoints;
     });
   };
-  
+
   const resetPoints = () => {
     setPoints([]);
     setErrorMessage("");
@@ -185,12 +194,70 @@ const MapboxMap: React.FC = () => {
     setErrorMessage("");
   };
 
+
+  const handleSaveAndExport = async () => {
+    if (points.length === 0) {
+      // showMessage("No points to save", "error");
+      return false;
+    }
+
+    setIsSaving(true);
+    try {
+      if (!mappbookUser?.mappbook_user_id) {
+        throw new Error('Invalid user ID');
+      }
+
+      const { data, error } = await supabase
+        .from('Animation_Data')
+        .insert([{
+          location_data: points, 
+          mappbook_user_id: mappbookUser.mappbook_user_id
+        }])
+        .select();
+
+      if (error) throw error;
+
+      if (data?.[0]) {
+        // showMessage("Flight path saved successfully!", "success");
+        return true;
+      }
+      return false;
+
+    } catch (err) {
+      return false;
+
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+
+
   return (
     <div className="relative w-full h-full">
-      {/* Map stats display */}
-      <div className="absolute top-4 right-4 bg-black/50 text-white p-4 rounded space-y-2 font-mono text-sm z-50">
-        <div>Longitude: {viewState.longitude.toFixed(6)}°</div>
-        <div>Latitude: {viewState.latitude.toFixed(6)}°</div>
+      {/* MappBook Logo */}
+      <div className="absolute top-4 left-4 z-50">
+        <div className="bg-white/90 p-2 rounded-lg shadow-lg hover:bg-white transition-colors">
+          <span className="font-bold text-xl text-blue-600">MappBook</span>
+        </div>
+      </div>
+
+      {/* Save/Export Buttons */}
+      <div className="absolute top-4 right-4 z-50 flex space-x-2">
+        <Button
+          onClick={handleSaveAndExport}
+          disabled={points.length === 0}
+          className="bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Save & Export
+        </Button>
+      </div>
+
+      {/* Map stats display - moved down to accommodate new buttons */}
+      <div className="absolute top-20 right-4 bg-black/50 text-white p-4 rounded space-y-2 font-mono text-sm z-50">
+        {/* <div>Longitude: {viewState.longitude.toFixed(6)}°</div>
+      <div>Latitude: {viewState.latitude.toFixed(6)}°</div> */}
         <div>Zoom: {viewState.zoom.toFixed(2)}</div>
         <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
         <div>Bearing: {viewState.bearing.toFixed(2)}°</div>
@@ -219,7 +286,7 @@ const MapboxMap: React.FC = () => {
 
       {/* Altitude Timeline */}
       {points.length > 0 && (
-        <AltitudeTimeline 
+        <AltitudeTimeline
           points={points}
           onAltitudeChange={handleAltitudeChange}
           onPointRemove={handlePointRemove}
@@ -241,7 +308,7 @@ const MapboxMap: React.FC = () => {
                 Reset Points
               </Button>
             )}
-            
+
             <FlightAnimation
               points={points}
               isAnimating={isAnimating}
@@ -252,18 +319,18 @@ const MapboxMap: React.FC = () => {
               onAnimationProgress={setAnimationProgress}
             />
           </div>
-          
+
           <div className="text-white bg-black/50 p-2 rounded text-right">
             {errorMessage ? (
               <span className="text-red-400">{errorMessage}</span>
             ) : (
               <>
-                {viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM && 
+                {viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM &&
                   `Zoom in to level ${CONFIG.map.drone.REQUIRED_ZOOM} to start marking points`}
                 {viewState.zoom >= CONFIG.map.drone.REQUIRED_ZOOM && (
                   <>
                     {points.length === 0 && 'Click to place first point'}
-                    {points.length > 0 && !isAnimating && 
+                    {points.length > 0 && !isAnimating &&
                       `Place point ${points.length + 1} within yellow circle (${points.length}/${CONFIG.map.drone.MAX_POINTS})`}
                     {isAnimating && 'In flight...'}
                   </>

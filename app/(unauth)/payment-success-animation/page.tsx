@@ -22,7 +22,7 @@ function PaymentStatus() {
 
     const verifyPayment = async () => {
       try {
-        const response = await fetch('/api/stripe-passport/verify-session', {
+        const response = await fetch('/api/stripe-animation/verify-session', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -45,8 +45,8 @@ function PaymentStatus() {
     verifyPayment();
   }, [searchParams]);
 
-  const handleBackToPassport = () => {
-    router.push('/passport');
+  const handleBackToAnimation = () => {
+    router.push('/create');
   };
 
   if (status === 'loading') {
@@ -74,12 +74,12 @@ function PaymentStatus() {
           Thank you for adding Credits! Your account has been updated with additional Credits.
         </p>
         <button
-          onClick={handleBackToPassport}
+          onClick={handleBackToAnimation}
           className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-purple-500 hover:bg-purple-600 
           text-white rounded-xl transition-colors duration-200"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Adventure Passport
+          Back to Animation
         </button>
       </div>
     );
@@ -97,12 +97,12 @@ function PaymentStatus() {
         {error || 'Failed to verify payment'}
       </p>
       <button
-        onClick={handleBackToPassport}
+        onClick={handleBackToAnimation}
         className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-purple-500 hover:bg-purple-600 
         text-white rounded-xl transition-colors duration-200"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Adventure Passport
+        Back to Animation
       </button>
     </div>
   );

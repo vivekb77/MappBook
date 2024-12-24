@@ -10,15 +10,15 @@ export default function UserCheck({ children }: { children: React.ReactNode }) {
   const { user: clerkUser } = useClerkUser();
   const { setMappbookUser } = useMappbookUser();
   const supabase = getClerkSupabaseClient();
-  
+
   useEffect(() => {
     if (!userId || !clerkUser) return;
-  
+
     const checkAndCreateUser = async () => {
       try {
         const { data: existingUser, error: fetchError } = await supabase
           .from('MappBook_Users')
-          .select('mappbook_user_id, is_premium_user, total_map_views, map_views_left, display_name, map_style, country_fill_color,is_passport_video_premium_user,passport_video_credits,passport_video_premium_start_date')
+          .select('mappbook_user_id, is_premium_user, total_map_views, map_views_left, display_name, country_fill_color,animation_credits')
           .eq('clerk_user_id', userId)
           .single();
 

@@ -34,19 +34,19 @@ export async function POST(request: Request) {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success-passport?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/passport`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success-animation?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/create`,
       customer_email: userEmail,
       metadata: {
         userId: userId.toString(), // Ensure userId is a string
       },
     });
-    await track('Passport - Checkout session created', {
+    await track('Animation - Checkout session created', {
       userId: userId.toString(),
     });
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    await track('RED - Passport - Error creating checkout session');
+    await track('RED - Animation - Error creating checkout session');
     console.error('Error creating checkout session:', err);
     return NextResponse.json(
       { error: 'Error creating checkout session' },

@@ -38,7 +38,7 @@ export default function MapPage() {
      {/* Button - Right below error */}
      <div className="w-full max-w-md px-4">
        <Button 
-         onClick={() => router.push('/')}
+         onClick={() => router.push('/mymappbook')}
          className="w-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
            text-white hover:from-pink-500 hover:via-purple-500 hover:to-blue-500
            shadow-lg rounded-full px-6 py-3"
