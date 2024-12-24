@@ -62,7 +62,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
       const end = start + PAGE_SIZE - 1;
 
       const { data, error, count } = await supabase
-        .from('Animaton_Video')
+        .from('Animation_Video')
         .select('*', { count: 'exact' })
         .eq('mappbook_user_id', userId)
         .eq('is_deleted', false)
@@ -103,7 +103,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
 
     try {
       const { error } = await supabase
-        .from('Animaton_Video')
+        .from('Animation_Video')
         .update({ is_deleted: true })
         .eq('animation_video_id', videoToDelete.id);
 

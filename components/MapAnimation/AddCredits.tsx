@@ -58,45 +58,43 @@ const AddCredits = () => {
             }
         } catch (err) {
             console.error('Error initiating checkout:', err);
-            // setError(err.message || 'An unexpected error occurred');
         } finally {
             setIsLoading(false);
         }
     };
-
 
     return (
         <div className="w-full">
             <button
                 onClick={handleAddCreditsButtonClick}
                 disabled={isLoading}
-                className={`w-full py-3 px-4 rounded-xl font-medium mt-6
-                        ${mappbookUser
-                        ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400'
-                        : 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400'
-                    } text-white shadow-lg hover:scale-[1.02]
-                        transform transition-all duration-300
-                        flex items-center justify-center gap-2 relative
-                        overflow-hidden group
-                        ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                className={`
+                    w-full py-3 px-4 rounded-lg font-medium
+                    bg-blue-500 hover:bg-blue-600
+                    text-white shadow-sm
+                    transform transition-all duration-300
+                    flex items-center justify-center gap-2
+                    relative overflow-hidden
+                    ${isLoading ? 'opacity-75 cursor-not-allowed' : 'hover:scale-[1.02]'}
+                `}
                 aria-label='Add Credits'
             >
-                <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
                 {isLoading ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                    <>
+                    <div className="flex items-center gap-2">
                         <span className="font-semibold">
                             Add Credits
                         </span>
-                        {(
-                            <span className="bg-white/30 text-xs py-0.5 px-2 rounded-full ml-2">
-                                50% OFF
-                            </span>
-                        )}
-                    </>
+                        <span className="bg-blue-400/30 text-xs py-1 px-3 rounded-full border border-white/20">
+                            50% OFF
+                        </span>
+                    </div>
                 )}
             </button>
+            {error && (
+                <p className="mt-2 text-sm text-red-500">{error}</p>
+            )}
         </div>
     );
 };

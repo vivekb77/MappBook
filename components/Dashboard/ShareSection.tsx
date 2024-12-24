@@ -16,7 +16,6 @@ import {
 interface MappbookUser {
     mappbook_user_id: string;
     display_name: string;
-    map_style: string;
     country_fill_color: string;
 }
 
@@ -289,7 +288,7 @@ const ShareSection: React.FC = () => {
             showLink: false,
             isEditing: false,
             nameInput: '',
-            mapStyle: mappbookUser?.map_style || 'satellite',
+            mapStyle: 'satellite',
             countryFillColor: mappbookUser?.country_fill_color || COLOR_OPTIONS[0].rgba,
             asyncState: {
                 isSaving: false,
@@ -301,7 +300,6 @@ const ShareSection: React.FC = () => {
     // Initialize state from mappbookUser
     useEffect(() => {
         if (mappbookUser) {
-            dispatch({ type: 'SET_MAP_STYLE', payload: mappbookUser.map_style });
             dispatch({
                 type: 'SET_COUNTRY_FILL_COLOR',
                 payload: mappbookUser.country_fill_color,

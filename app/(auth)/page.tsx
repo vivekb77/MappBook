@@ -1,100 +1,78 @@
-"use client"
+import React from 'react';
+import { Camera, Globe, Map, Video } from 'lucide-react';
+import Link from 'next/link';
 
-import { useState, useRef, useEffect } from 'react'
-import Dashboard from '@/components/MapAnimation/Dashboard'
-import MapboxMap from '@/components/MapAnimation/MapBoxMap'
-import { MapPin, ChevronUp, Loader2 } from 'lucide-react'
-import { useUser } from '@clerk/nextjs'
-
-export default function Home() {
-  const { isLoaded, isSignedIn, user } = useUser()
-
-  const [isOpen, setIsOpen] = useState(false)
-  const sheetRef = useRef<HTMLDivElement>(null)
-
-  const toggleSheet = () => setIsOpen(!isOpen)
-
-  // Prevent automatic scroll adjustment on input focus
-  useEffect(() => {
-    const inputs = sheetRef.current?.querySelectorAll('input')
-    inputs?.forEach(input => {
-      input.addEventListener('focus', (e) => {
-        e.preventDefault()
-        input.focus({ preventScroll: true })
-      })
-    })
-  }, [])
-
-  if (!isLoaded) return (
-    <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
-          <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400"
-            style={{ animationDirection: 'reverse' }} />
-        </div>
-        <span className="text-lg font-medium text-gray-700">
-          Loading MappBook
-        </span>
-      </div>
-    </div>
-  )
-
+const LandingPage = () => {
   return (
-    <div className="fixed inset-0 h-screen-dynamic overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+      {/* Navigation */}
+      <nav className="p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="text-2xl font-bold text-blue-500">MappBook</div>
+        </div>
+      </nav>
 
-            <div className="flex h-full w-full relative">
-              {/* Map Section */}
-              <div className="flex-1 h-full w-full md:w-[67%] touch-none">
-                <MapboxMap />
-              </div>
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="text-center max-w-4xl mx-auto">
+          <h1 className="text-5xl font-bold mb-6">
+            Create Stunning Drone-Like Footage Using Maps
+          </h1>
+          <p className="text-xl text-gray-300 mb-8">
+            Transform your map exploration into cinematic experiences. No drone required.
+          </p>
+          <Link href="/create">
+            <button className="px-8 py-4 bg-blue-500 rounded-lg text-lg font-semibold hover:bg-blue-600 transition">
+              Start Creating
+            </button>
+          </Link>
+        </div>
+      </section>
 
-              {/* Desktop Sidebar */}
-              <div className="hidden md:block w-[33%] h-screen-dynamic overflow-hidden">
-                <div className="h-full overflow-y-auto">
-                  <Dashboard />
-                </div>
-              </div>
+      {/* Features */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <FeatureCard 
+            icon={<Globe className="w-12 h-12 text-blue-500" />}
+            title="Global Coverage"
+            description="Access detailed maps from anywhere in the world"
+          />
+          <FeatureCard 
+            icon={<Camera className="w-12 h-12 text-blue-500" />}
+            title="Cinematic Paths"
+            description="Design smooth camera movements and transitions"
+          />
+          <FeatureCard 
+            icon={<Video className="w-12 h-12 text-blue-500" />}
+            title="Easy Export"
+            description="Export your creations in high quality video formats"
+          />
+        </div>
+      </section>
 
-              {/* Mobile Bottom Sheet */}
-              <div
-                ref={sheetRef}
-                className="md:hidden fixed inset-x-0 z-50 
-                  bg-white shadow-lg rounded-t-xl transform
-                  transition-transform duration-300 ease-out"
-                style={{
-                  height: '60vh',
-                  bottom: 0,
-                  transform: `translateY(${isOpen ? '0' : '100%'})`
-                }}
-              >
-                {/* Taller Tab Handle positioned higher */}
-                <div
-                  className="absolute -top-12 left-1/2 -translate-x-1/2 w-[50%] max-w-md
-                    bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600
-                    rounded-t-xl px-6 py-4 cursor-pointer shadow-lg
-                    hover:scale-105 transition-all"
-                  onClick={toggleSheet}
-                >
-                  <div className="flex items-center justify-center space-x-2">
-                    <ChevronUp
-                      className={`w-8 h-8 text-white transition-transform duration-300
-                        ${!isOpen ? 'rotate-180' : ''}`}
-                    />
-                  </div>
-                </div>
-
-                {/* Scrollable Content */}
-                <div className="h-full overflow-y-auto overscroll-contain">
-                  <div className="px-4 py-2">
-                    <Dashboard />
-                  </div>
-                </div>
-              </div>
+      {/* Demo Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="bg-gray-800 rounded-xl p-8">
+          <div className="aspect-video bg-gray-700 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <Map className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+              <p className="text-gray-400">Preview your creation here</p>
             </div>
-
-
-
+          </div>
+        </div>
+      </section>
     </div>
-  )
-}
+  );
+};
+
+const FeatureCard = ({ icon, title, description }) => {
+  return (
+    <div className="bg-gray-800 p-6 rounded-xl text-center">
+      <div className="mb-4 flex justify-center">{icon}</div>
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <p className="text-gray-300">{description}</p>
+    </div>
+  );
+};
+
+export default LandingPage;

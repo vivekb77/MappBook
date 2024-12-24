@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID_PASSPORT,
+          price: process.env.STRIPE_PRICE_ID_ANIMATION,
           adjustable_quantity: {
             enabled: true,
             minimum: 1,
