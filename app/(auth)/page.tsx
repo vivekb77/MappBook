@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import DashboardContainer from '@/components/Dashboard/DashboardContainer'
-import MapboxMap from '@/components/Map/MapBoxMap'
+import MapboxMap from '@/components/MapAnimation/MapBoxMap'
 import { SearchedPlaceDetailsContext } from '@/context/SearchedPlaceDetailsContext'
 import { AllUserPlacesContext } from '@/context/AllUserPlacesContext'
 import { MapStatsProvider } from '@/context/MapStatsContext'
