@@ -199,13 +199,14 @@ const MapboxMap: React.FC = () => {
     if (points.length === 0) {
       return false;
     }
-  
+    
     setIsSaving(true);
     try {
       if (!mappbookUser?.mappbook_user_id) {
         throw new Error('Invalid user ID');
       }
-      // First save to Supabase
+      
+      // Save to Animation_Data table
       const { data, error } = await supabase
         .from('Animation_Data')
         .insert([{
@@ -215,41 +216,16 @@ const MapboxMap: React.FC = () => {
         .select();
   
       if (error) throw error;
-  
-      // Start the render
-      const response = await fetch('/api/remotion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ points }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to start render');
-      }
-  
-      const { renderId, bucketName } = await response.json();
-      console.log(renderId)
-  
-      // Poll for progress (you might want to implement this differently)
-      const checkProgress = async () => {
-        const progressResponse = await fetch(`/api/remotion?renderId=${renderId}&bucketName=${bucketName}`);
-        const progress = await progressResponse.json();
-        
-        if (progress.done) {
-          // Handle completion - e.g., show download link
-          const videoUrl = progress.outputUrl;
-          // Update UI with video URL
-        } else if (progress.error) {
-          throw new Error(progress.error);
-        } else {
-          // Continue polling
-          setTimeout(checkProgress, 5000);
-        }
+      
+      // Emit event to VideoHistory component with animation data ID
+      const eventDetail = {
+        animationDataId: data[0].animation_data_id,
+        points: points,
+        userId: mappbookUser.mappbook_user_id
       };
-  
-      checkProgress();
+      
+      const event = new CustomEvent('startVideoRender', { detail: eventDetail });
+      window.dispatchEvent(event);
   
       return true;
     } catch (err) {
@@ -279,7 +255,7 @@ const MapboxMap: React.FC = () => {
           className="bg-blue-500 hover:bg-blue-600 text-white"
         >
           <Download className="w-4 h-4 mr-2" />
-          Save & Export
+          Export
         </Button>
       </div>
 

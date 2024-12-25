@@ -31,6 +31,12 @@ interface Toast {
   type: 'success' | 'error';
 }
 
+interface RenderEventDetail {
+  animationDataId: string;
+  points: any[];
+  userId: string;
+}
+
 const VideoHistory = ({ userId }: VideoHistoryProps) => {
   const [videos, setVideos] = useState<VideoHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,6 +48,115 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
   const [videoToDelete, setVideoToDelete] = useState<VideoHistoryItem | null>(null);
   const supabase = getClerkSupabaseClient();
   const PAGE_SIZE = 5;
+ 
+
+  const [renderingStatus, setRenderingStatus] = useState<string>('');
+
+  useEffect(() => {
+    let isSubscribed = true; 
+    const handleVideoRender = async (event: Event) => {
+      if (!isSubscribed) return;
+      const customEvent = event as CustomEvent<RenderEventDetail>;
+      const { animationDataId, points, userId } = customEvent.detail;
+      setRenderingStatus('starting');
+      
+      try {
+        // Start the render
+        const response = await fetch('/api/remotion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ points }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to start render');
+        }
+
+        const { renderId, bucketName } = await response.json();
+        
+        // Start polling for progress
+        const checkProgress = async () => {
+          try {
+            const progressResponse = await fetch(`/api/remotion?renderId=${renderId}&bucketName=${bucketName}`);
+            const progress = await progressResponse.json();
+            
+            if (progress.done) {
+              // Save video URL to Animation_Video table
+              const { error } = await supabase
+                .from('Animation_Video')
+                .insert([{
+                  video_url: progress.outputFile,
+                  mappbook_user_id: userId,
+                  animation_data_id: animationDataId,
+                  location_count: points.length,
+                  video_cost: progress.costs.accruedSoFar
+                }]);
+
+              if (error) throw error;
+
+              setRenderingStatus('complete');
+              showToast('Video created successfully!');
+              setPage(1);
+              await fetchVideos();
+              return; // Stop polling by returning immediately
+            } else if (progress.error) {
+              throw new Error(progress.error);
+            } else {
+              setRenderingStatus('rendering');
+              setTimeout(checkProgress, 20000);
+            }
+          } catch (error) {
+            console.error('Progress check error:', error);
+            setRenderingStatus('error');
+            showToast('Error during video rendering', 'error');
+          }
+        };
+
+
+        await checkProgress();
+      } catch (error) {
+        console.error('Render error:', error);
+        setRenderingStatus('error');
+        showToast('Failed to create video', 'error');
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('startVideoRender', handleVideoRender);
+
+    return () => {
+      isSubscribed = false;  // Mark as unmounted
+      window.removeEventListener('startVideoRender', handleVideoRender);
+    };
+  }, [userId]);
+
+// Add rendering status display to UI
+const renderStatusDisplay = () => {
+  if (!renderingStatus || renderingStatus === 'complete') return null;
+
+  return (
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 
+      bg-white shadow-lg rounded-lg p-4 flex items-center gap-3">
+      {renderingStatus === 'starting' && (
+        <>
+          <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+          <span>Preparing video render...</span>
+        </>
+      )}
+      {renderingStatus === 'rendering' && (
+        <>
+          <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+          <span>Rendering video...</span>
+        </>
+      )}
+    </div>
+  );
+};
+
+
+
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now();
@@ -197,6 +312,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
 
   return (
     <div className="relative mt-6 bg-white/80 rounded-lg overflow-hidden border border-gray-100">
+      {renderStatusDisplay()}
       <div className="p-4 border-b border-gray-100">
         <h3 className="text-sm font-semibold text-gray-700">Your Videos</h3>
       </div>
@@ -219,10 +335,10 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
                 <div className="flex-grow min-w-0 text-left">
                   <p className={`text-sm font-medium truncate
                     ${selectedVideoId === video.id ? 'text-purple-700' : 'text-gray-700'}`}>
-                    Adventure Passport
+                    Drone Footage
                   </p>
                   <p className="text-xs text-gray-500">
-                    {video.location_count} Countries{video.location_count !== 1 ? 's' : ''}
+                    {video.location_count} Point{video.location_count !== 1 ? 's' : ''}
                   </p>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                     <Clock className="w-3 h-3" />
