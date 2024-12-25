@@ -2,13 +2,12 @@ import React, { useRef, useState } from "react";
 import { Map, MapRef } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Button } from "@/components/ui/button";
-import { Download, Save, X } from "lucide-react";
 import MapMarkers from './MarkPoints';
-import { useUser } from '@clerk/nextjs'
-import { useMappbookUser } from '@/context/UserContext'
 import AltitudeTimeline from './AltitudeTimeline';
 import FlightAnimation from './FlightAnimation';
-import { getClerkSupabaseClient } from "@/components/utils/supabase"
+import ExportButton from "./Export";
+import { X } from "lucide-react";
+import InfoPopUp from "./InfoPopUp";
 
 const CONFIG = {
   map: {
@@ -81,10 +80,6 @@ const MapboxMap: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationProgress, setAnimationProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [isSaving, setIsSaving] = useState(false);
-  const supabase = getClerkSupabaseClient();
-  const { isLoaded, isSignedIn, user } = useUser()
-  const { mappbookUser, setMappbookUser } = useMappbookUser()
 
 
   const validatePoint = (newPoint: PointData): string | null => {
@@ -195,49 +190,6 @@ const MapboxMap: React.FC = () => {
   };
 
 
-  const handleExport = async () => {
-    if (points.length === 0) {
-      return false;
-    }
-    
-    setIsSaving(true);
-    try {
-      if (!mappbookUser?.mappbook_user_id) {
-        throw new Error('Invalid user ID');
-      }
-      
-      // Save to Animation_Data table
-      const { data, error } = await supabase
-        .from('Animation_Data')
-        .insert([{
-          location_data: points, 
-          mappbook_user_id: mappbookUser.mappbook_user_id
-        }])
-        .select();
-  
-      if (error) throw error;
-      
-      // Emit event to VideoHistory component with animation data ID
-      const eventDetail = {
-        animationDataId: data[0].animation_data_id,
-        points: points,
-        userId: mappbookUser.mappbook_user_id
-      };
-      
-      const event = new CustomEvent('startVideoRender', { detail: eventDetail });
-      window.dispatchEvent(event);
-  
-      return true;
-    } catch (err) {
-      console.error('Export error:', err);
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-
-
   return (
     <div className="relative w-full h-full">
       {/* MappBook Logo */}
@@ -247,17 +199,8 @@ const MapboxMap: React.FC = () => {
         </div>
       </div>
 
-      {/* Save/Export Buttons */}
-      <div className="absolute top-4 right-4 z-50 flex space-x-2">
-        <Button
-          onClick={handleExport}
-          disabled={points.length === 0}
-          className="bg-blue-500 hover:bg-blue-600 text-white"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export
-        </Button>
-      </div>
+      {/* Export Buttons */}
+      <ExportButton points={points} />
 
       {/* Map stats display - moved down to accommodate new buttons */}
       <div className="absolute top-20 right-4 bg-black/50 text-white p-4 rounded space-y-2 font-mono text-sm z-50">
@@ -299,6 +242,8 @@ const MapboxMap: React.FC = () => {
           animationProgress={animationProgress}
         />
       )}
+
+      <InfoPopUp/>
 
       {/* Controls */}
       <div className="absolute bottom-48 right-4 space-y-2">

@@ -3,6 +3,8 @@ import { Video, ChevronDown, Loader2, Clock, Download, Share2, X, Trash2 } from 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { Button } from "@/components/ui/button";
+import { Player } from '@remotion/player';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,12 +17,11 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface VideoHistoryItem {
-  id: string;
+  animation_video_id: string;  // Updated from 'id'
   video_url: string;
   location_count: number;
   created_at: string;
 }
-
 interface VideoHistoryProps {
   userId: string;
 }
@@ -29,12 +30,6 @@ interface Toast {
   id: number;
   message: string;
   type: 'success' | 'error';
-}
-
-interface RenderEventDetail {
-  animationDataId: string;
-  points: any[];
-  userId: string;
 }
 
 const VideoHistory = ({ userId }: VideoHistoryProps) => {
@@ -48,115 +43,8 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
   const [videoToDelete, setVideoToDelete] = useState<VideoHistoryItem | null>(null);
   const supabase = getClerkSupabaseClient();
   const PAGE_SIZE = 5;
- 
-
-  const [renderingStatus, setRenderingStatus] = useState<string>('');
-
-  useEffect(() => {
-    let isSubscribed = true; 
-    const handleVideoRender = async (event: Event) => {
-      if (!isSubscribed) return;
-      const customEvent = event as CustomEvent<RenderEventDetail>;
-      const { animationDataId, points, userId } = customEvent.detail;
-      setRenderingStatus('starting');
-      
-      try {
-        // Start the render
-        const response = await fetch('/api/remotion', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ points }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to start render');
-        }
-
-        const { renderId, bucketName } = await response.json();
-        
-        // Start polling for progress
-        const checkProgress = async () => {
-          try {
-            const progressResponse = await fetch(`/api/remotion?renderId=${renderId}&bucketName=${bucketName}`);
-            const progress = await progressResponse.json();
-            
-            if (progress.done) {
-              // Save video URL to Animation_Video table
-              const { error } = await supabase
-                .from('Animation_Video')
-                .insert([{
-                  video_url: progress.outputFile,
-                  mappbook_user_id: userId,
-                  animation_data_id: animationDataId,
-                  location_count: points.length,
-                  video_cost: progress.costs.accruedSoFar
-                }]);
-
-              if (error) throw error;
-
-              setRenderingStatus('complete');
-              showToast('Video created successfully!');
-              setPage(1);
-              await fetchVideos();
-              return; // Stop polling by returning immediately
-            } else if (progress.error) {
-              throw new Error(progress.error);
-            } else {
-              setRenderingStatus('rendering');
-              setTimeout(checkProgress, 20000);
-            }
-          } catch (error) {
-            console.error('Progress check error:', error);
-            setRenderingStatus('error');
-            showToast('Error during video rendering', 'error');
-          }
-        };
-
-
-        await checkProgress();
-      } catch (error) {
-        console.error('Render error:', error);
-        setRenderingStatus('error');
-        showToast('Failed to create video', 'error');
-      }
-    };
-
-    // Add event listener
-    window.addEventListener('startVideoRender', handleVideoRender);
-
-    return () => {
-      isSubscribed = false;  // Mark as unmounted
-      window.removeEventListener('startVideoRender', handleVideoRender);
-    };
-  }, [userId]);
-
-// Add rendering status display to UI
-const renderStatusDisplay = () => {
-  if (!renderingStatus || renderingStatus === 'complete') return null;
-
-  return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 
-      bg-white shadow-lg rounded-lg p-4 flex items-center gap-3">
-      {renderingStatus === 'starting' && (
-        <>
-          <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
-          <span>Preparing video render...</span>
-        </>
-      )}
-      {renderingStatus === 'rendering' && (
-        <>
-          <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
-          <span>Rendering video...</span>
-        </>
-      )}
-    </div>
-  );
-};
-
-
-
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<VideoHistoryItem | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now();
@@ -166,9 +54,27 @@ const renderStatusDisplay = () => {
     }, 3000);
   };
 
+  useEffect(() => {
+    fetchVideos();
+  }, [page]);
+
+
+  // Listen for video creation events
+  useEffect(() => {
+    const handleVideoCreated = () => {
+      // Reset to first page and refetch
+      setPage(1);
+      fetchVideos();
+    };
+
+    window.addEventListener('videoCreated', handleVideoCreated);
+    return () => window.removeEventListener('videoCreated', handleVideoCreated);
+  }, []);
+
   const removeToast = (id: number) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
+
 
   const fetchVideos = async () => {
     try {
@@ -188,13 +94,13 @@ const renderStatusDisplay = () => {
 
       if (data) {
         setHasMore(count ? start + PAGE_SIZE < count : false);
-        
+
         if (page === 1) {
           setVideos(data);
         } else {
           setVideos(prev => [...prev, ...data]);
         }
-        
+
         if (!selectedVideoId && data.length > 0) {
           setSelectedVideoId(data[0].animation_video_id);
         }
@@ -207,33 +113,43 @@ const renderStatusDisplay = () => {
     }
   };
 
-  const handleDelete = async (video: VideoHistoryItem, e: React.MouseEvent) => {
+  const handleDelete = async (
+    video: VideoHistoryItem,
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     e.stopPropagation();
+
+    if (!video.animation_video_id) {
+      showToast('Invalid video selected', 'error');
+      return;
+    }
+
     setVideoToDelete(video);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (!videoToDelete) return;
+    if (!videoToDelete?.animation_video_id) {
+      showToast('Invalid video selected', 'error');
+      return;
+    }
 
     try {
       const { error } = await supabase
         .from('Animation_Video')
         .update({ is_deleted: true })
-        .eq('animation_video_id', videoToDelete.id);
+        .eq('animation_video_id', videoToDelete.animation_video_id);
 
       if (error) throw error;
 
-      setVideos(prev => prev.filter(v => v.id !== videoToDelete.id));
+      // Update local state
+      setVideos(prev => prev.filter(v => v.animation_video_id !== videoToDelete.animation_video_id));
       showToast('Video deleted successfully');
 
-      if (selectedVideoId === videoToDelete.id) {
-        const remainingVideos = videos.filter(v => v.id !== videoToDelete.id);
-        if (remainingVideos.length > 0) {
-          setSelectedVideoId(remainingVideos[0].id);
-        } else {
-          setSelectedVideoId(null);
-        }
+      // Update selected video if needed
+      if (selectedVideoId === videoToDelete.animation_video_id) {
+        const remainingVideos = videos.filter(v => v.animation_video_id !== videoToDelete.animation_video_id);
+        setSelectedVideoId(remainingVideos.length > 0 ? remainingVideos[0].animation_video_id : null);
       }
     } catch (error) {
       console.error('Error deleting video:', error);
@@ -244,9 +160,6 @@ const renderStatusDisplay = () => {
     }
   };
 
-  useEffect(() => {
-    fetchVideos();
-  }, [page]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -264,29 +177,87 @@ const renderStatusDisplay = () => {
   };
 
   const handleVideoSelect = (video: VideoHistoryItem) => {
-    setSelectedVideoId(video.id);
+    setSelectedVideoId(video.animation_video_id);
+    setSelectedVideo(video);
+    setIsVideoModalOpen(true);
   };
 
-  const handleDownload = async (videoUrl: string, created_at: string, e: React.MouseEvent) => {
+  const handleDownload = async (
+    videoUrl: string,
+    created_at: string,
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     e.stopPropagation();
+    let downloadLink: HTMLAnchorElement | null = null;
+
     try {
-      const response = await fetch(videoUrl);
-      if (!response.ok) throw new Error('Network response was not ok');
-      
+      // Add no-cors mode and necessary headers
+      const response = await fetch(videoUrl, {
+        mode: 'cors',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+
+      if (!response.ok && response.status !== 0) { // Status 0 is normal for opaque responses
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // For opaque responses, redirect to the video URL directly
+      if (response.status === 0 || response.type === 'opaque') {
+        downloadLink = document.createElement('a');
+        downloadLink.href = videoUrl;
+        downloadLink.target = '_blank';
+        downloadLink.download = `Mappbook-Animation-${formatDate(created_at)}.mp4`;
+        downloadLink.rel = 'noopener noreferrer';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        showToast('Video download started');
+        return;
+      }
+
+      // If CORS is allowed, proceed with blob download
       const blob = await response.blob();
+      if (!blob) {
+        throw new Error('Failed to create blob from video');
+      }
+
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Mappbook-Animation-${formatDate(created_at)}.mp4`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
+      downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = `Mappbook-Animation-${formatDate(created_at)}.mp4`;
+      downloadLink.rel = 'noopener noreferrer';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
       showToast('Video download started');
     } catch (error) {
       console.error('Error downloading video:', error);
-      showToast('Failed to download video. Please try again.', 'error');
+      // Try direct download as fallback
+      try {
+        downloadLink = document.createElement('a');
+        downloadLink.href = videoUrl;
+        downloadLink.target = '_blank';
+        downloadLink.download = `Mappbook-Animation-${formatDate(created_at)}.mp4`;
+        downloadLink.rel = 'noopener noreferrer';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        showToast('Video download started');
+      } catch (fallbackError) {
+        showToast('Failed to download video. Please try again.', 'error');
+      }
+    } finally {
+      if (downloadLink) {
+        // Clean up
+        setTimeout(() => {
+          if (downloadLink) {
+            if (downloadLink.href.startsWith('blob:')) {
+              URL.revokeObjectURL(downloadLink.href);
+            }
+            document.body.removeChild(downloadLink);
+          }
+        }, 100);
+      }
     }
   };
 
@@ -312,33 +283,32 @@ const renderStatusDisplay = () => {
 
   return (
     <div className="relative mt-6 bg-white/80 rounded-lg overflow-hidden border border-gray-100">
-      {renderStatusDisplay()}
       <div className="p-4 border-b border-gray-100">
         <h3 className="text-sm font-semibold text-gray-700">Your Videos</h3>
       </div>
-      
+
       <ScrollArea className="h-[300px]">
         <div className="p-2">
           {videos.map((video) => (
             <div
-              key={video.id}
+              key={video.animation_video_id}
               className={`w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md transition-colors group mb-2
-                ${selectedVideoId === video.id ? 'bg-purple-100' : ''}`}
+                ${selectedVideoId === video.animation_video_id ? 'bg-purple-100' : ''}`}
             >
               <button
                 onClick={() => handleVideoSelect(video)}
                 className="flex-grow flex items-center gap-3 min-w-0"
               >
                 <div className="w-16 h-16 bg-purple-100 rounded flex items-center justify-center flex-shrink-0">
-                  <Video className={`w-6 h-6 ${selectedVideoId === video.id ? 'text-purple-700' : 'text-purple-500'}`} />
+                  <Video className={`w-6 h-6 ${selectedVideoId === video.animation_video_id ? 'text-purple-700' : 'text-purple-500'}`} />
                 </div>
                 <div className="flex-grow min-w-0 text-left">
                   <p className={`text-sm font-medium truncate
-                    ${selectedVideoId === video.id ? 'text-purple-700' : 'text-gray-700'}`}>
-                    Drone Footage
+                    ${selectedVideoId === video.animation_video_id ? 'text-purple-700' : 'text-gray-700'}`}>
+                    Footage
                   </p>
                   <p className="text-xs text-gray-500">
-                    {video.location_count} Point{video.location_count !== 1 ? 's' : ''}
+                    {video.location_count} Points{video.location_count !== 1 ? 's' : ''}
                   </p>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                     <Clock className="w-3 h-3" />
@@ -346,7 +316,7 @@ const renderStatusDisplay = () => {
                   </div>
                 </div>
               </button>
-              
+
               <div className="flex items-center gap-2 flex-shrink-0">
                 <Button
                   variant="ghost"
@@ -356,7 +326,7 @@ const renderStatusDisplay = () => {
                 >
                   <Download className="h-4 w-4" />
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -368,7 +338,7 @@ const renderStatusDisplay = () => {
               </div>
             </div>
           ))}
-          
+
           {hasMore && (
             <button
               onClick={loadMore}
@@ -404,6 +374,48 @@ const renderStatusDisplay = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add Video Modal */}
+      {isVideoModalOpen && selectedVideo && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 w-[80vw] max-w-4xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Footage</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsVideoModalOpen(false)}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="relative aspect-video">
+              <Player
+                component={() => (
+                  <video
+                    src={selectedVideo.video_url}
+                    controls
+                    className="w-full h-full"
+                  />
+                )}
+                durationInFrames={1000}
+                compositionWidth={1920}
+                compositionHeight={1080}
+                fps={30}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                }}
+              />
+            </div>
+            <div className="mt-4 text-sm text-gray-500">
+              <p>{selectedVideo.location_count} Points{selectedVideo.location_count !== 1 ? 's' : ''}</p>
+              <p>Created on {formatDate(selectedVideo.created_at)} at {formatTime(selectedVideo.created_at)}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map(toast => (
