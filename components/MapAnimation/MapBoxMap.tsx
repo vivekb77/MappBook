@@ -195,18 +195,17 @@ const MapboxMap: React.FC = () => {
   };
 
 
-  const handleSaveAndExport = async () => {
+  const handleExport = async () => {
     if (points.length === 0) {
-      // showMessage("No points to save", "error");
       return false;
     }
-
+  
     setIsSaving(true);
     try {
       if (!mappbookUser?.mappbook_user_id) {
         throw new Error('Invalid user ID');
       }
-
+      // First save to Supabase
       const { data, error } = await supabase
         .from('Animation_Data')
         .insert([{
@@ -214,18 +213,48 @@ const MapboxMap: React.FC = () => {
           mappbook_user_id: mappbookUser.mappbook_user_id
         }])
         .select();
-
+  
       if (error) throw error;
-
-      if (data?.[0]) {
-        // showMessage("Flight path saved successfully!", "success");
-        return true;
+  
+      // Start the render
+      const response = await fetch('/api/remotion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ points }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to start render');
       }
-      return false;
-
+  
+      const { renderId, bucketName } = await response.json();
+      console.log(renderId)
+  
+      // Poll for progress (you might want to implement this differently)
+      const checkProgress = async () => {
+        const progressResponse = await fetch(`/api/remotion?renderId=${renderId}&bucketName=${bucketName}`);
+        const progress = await progressResponse.json();
+        
+        if (progress.done) {
+          // Handle completion - e.g., show download link
+          const videoUrl = progress.outputUrl;
+          // Update UI with video URL
+        } else if (progress.error) {
+          throw new Error(progress.error);
+        } else {
+          // Continue polling
+          setTimeout(checkProgress, 5000);
+        }
+      };
+  
+      checkProgress();
+  
+      return true;
     } catch (err) {
+      console.error('Export error:', err);
       return false;
-
     } finally {
       setIsSaving(false);
     }
@@ -245,7 +274,7 @@ const MapboxMap: React.FC = () => {
       {/* Save/Export Buttons */}
       <div className="absolute top-4 right-4 z-50 flex space-x-2">
         <Button
-          onClick={handleSaveAndExport}
+          onClick={handleExport}
           disabled={points.length === 0}
           className="bg-blue-500 hover:bg-blue-600 text-white"
         >
