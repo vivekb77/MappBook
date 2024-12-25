@@ -127,18 +127,13 @@ const DashboardContainer = () => {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-            <div className="p-6">
-              <div className="w-full">
-                {mappbookUser && (
-                  <VideoHistory
-                    userId={mappbookUser.mappbook_user_id}
-                  />
-                )}
-                <AddCredits />
-              </div>
-            </div>
-          </div>
+          {mappbookUser && (
+            <VideoHistory
+              userId={mappbookUser.mappbook_user_id}
+            />
+          )}
+
+          <AddCredits />
         </div>
       </div>
 

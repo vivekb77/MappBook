@@ -12,7 +12,7 @@ interface Point {
 const CONFIG = {
   map: {
     drone: {
-      MIN_ALTITUDE: 0.5,
+      MIN_ALTITUDE: 0,
       MAX_ALTITUDE: 1
     },
   }
@@ -26,12 +26,12 @@ interface AltitudeTimelineProps {
   animationProgress?: number;
 }
 
-export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({ 
-  points, 
+export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
+  points,
   onAltitudeChange,
-  onPointRemove, 
-  isAnimating = false, 
-  animationProgress = 0 
+  onPointRemove,
+  isAnimating = false,
+  animationProgress = 0
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
@@ -48,9 +48,9 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
     const height = rect.height;
     const y = e.clientY - rect.top;
     const normalizedY = Math.max(0, Math.min(1, 1 - y / height));
-    const altitude = CONFIG.map.drone.MIN_ALTITUDE + 
+    const altitude = CONFIG.map.drone.MIN_ALTITUDE +
       (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE) * normalizedY;
-    
+
     onAltitudeChange(draggingPoint, altitude);
   };
 
@@ -75,20 +75,20 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
   }, [draggingPoint, isAnimating]);
 
   return (
-    <div 
+    <div
       ref={timelineRef}
       className="absolute bottom-12 left-1/2 -translate-x-1/2 w-4/5 h-32 bg-black/50 rounded-lg p-4"
       onMouseMove={handleMouseMove}
     >
       {/* Title text */}
       <div className="absolute -top-8 left-4 text-white text-sm font-medium">
-        Select altitude for the footage
+        Hold & Drag points to set altitude
       </div>
 
       {/* Grid lines */}
       <div className="absolute inset-0 flex flex-col justify-between p-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div 
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
             key={i}
             className="w-full h-px bg-white/20"
           />
@@ -102,11 +102,11 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
           {points.slice(0, -1).map((point, i) => {
             const startX = (i / (points.length - 1)) * 100;
             const endX = ((i + 1) / (points.length - 1)) * 100;
-            const startY = ((CONFIG.map.drone.MAX_ALTITUDE - point.altitude) / 
+            const startY = ((CONFIG.map.drone.MAX_ALTITUDE - point.altitude) /
               (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE)) * 100;
-            const endY = ((CONFIG.map.drone.MAX_ALTITUDE - points[i + 1].altitude) / 
+            const endY = ((CONFIG.map.drone.MAX_ALTITUDE - points[i + 1].altitude) /
               (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE)) * 100;
-            
+
             return (
               <line
                 key={i}
@@ -125,9 +125,9 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
         {/* Points */}
         {points.map((point, i) => {
           const x = (i / (points.length - 1)) * 100;
-          const y = ((CONFIG.map.drone.MAX_ALTITUDE - point.altitude) / 
+          const y = ((CONFIG.map.drone.MAX_ALTITUDE - point.altitude) /
             (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE)) * 100;
-          
+
           return (
             <div
               key={i}
@@ -139,20 +139,22 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
             >
               {/* Point */}
               <div
-                className={`relative flex items-center justify-center w-6 h-6 -ml-2 -mt-2 rounded-full ${
-                  isAnimating 
-                    ? 'bg-white/50 cursor-not-allowed' 
+                className={`relative flex items-center justify-center w-8 h-8 -ml-2 -mt-2 rounded-full select-none ${isAnimating
+                    ? 'bg-white/50 cursor-not-allowed'
                     : 'bg-white cursor-pointer hover:bg-blue-100'
-                }`}
-                onMouseDown={handleMouseDown(i)}
+                  }`}
+                onMouseDown={(e) => {
+                  e.preventDefault(); // Prevent text selection
+                  handleMouseDown(i)(e);
+                }}
               >
                 {/* Altitude value */}
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-white text-xs whitespace-nowrap">
-                  {point.altitude.toFixed(2)} km
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-white text-xs whitespace-nowrap select-none">
+                  {point.altitude.toFixed(2)}
                 </div>
-                
+
                 {/* Number in center */}
-                <span className="text-[10px] font-bold text-gray-600">
+                <span className="text-[10px] font-bold text-gray-600 select-none">
                   {i + 1}
                 </span>
               </div>
@@ -176,9 +178,9 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
       {isAnimating && points.length > 0 && (
         <>
           <div className="absolute bottom-0 inset-x-8 h-2 bg-black/30">
-            <div 
+            <div
               className="absolute inset-y-0 left-0 bg-blue-500"
-              style={{ 
+              style={{
                 width: `${animationProgress * 100}%`
               }}
             />

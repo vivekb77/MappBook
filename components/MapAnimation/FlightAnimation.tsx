@@ -56,8 +56,8 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
   const startDroneAnimation = useCallback(() => {
     if (points.length < 2) return;
     
-    const SEGMENT_DURATION = 3000; // 3 seconds per segment
-    const INITIAL_ROTATION_DURATION = 2000; // 2 seconds for initial rotation
+    const SEGMENT_DURATION = 8000; // 3 seconds per segment
+    const INITIAL_ROTATION_DURATION = 8000; // 2 seconds for initial rotation
     
     onAnimationStart();
     const startTime = Date.now();

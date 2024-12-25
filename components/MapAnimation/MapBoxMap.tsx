@@ -6,7 +6,7 @@ import MapMarkers from './MarkPoints';
 import AltitudeTimeline from './AltitudeTimeline';
 import FlightAnimation from './FlightAnimation';
 import ExportButton from "./Export";
-import { X } from "lucide-react";
+import { Compass, X } from "lucide-react";
 import InfoPopUp from "./InfoPopUp";
 
 const CONFIG = {
@@ -15,13 +15,13 @@ const CONFIG = {
       satellite: "mapbox://styles/mapbox/satellite-streets-v12",
     },
     drone: {
-      ROTATION_DURATION: 10000,
-      FLIGHT_DURATION: 20000,
-      INITIAL_ZOOM: 2,
-      FLIGHT_ZOOM: 19,
+      ROTATION_DURATION: 0, //not used
+      FLIGHT_DURATION: 0, //not used
+      INITIAL_ZOOM: 1,
+      FLIGHT_ZOOM: 16,
       PITCH: 80,
-      POINT_RADIUS_KM: 0.5,
-      REQUIRED_ZOOM: 12,
+      POINT_RADIUS_KM: 5,
+      REQUIRED_ZOOM: 10,
       MAX_POINTS: 10,
       MIN_ALTITUDE: 0.5,
       MAX_ALTITUDE: 1
@@ -247,30 +247,7 @@ const MapboxMap: React.FC = () => {
 
       {/* Controls */}
       <div className="absolute bottom-48 right-4 space-y-2">
-        <div className="flex flex-col items-end space-y-2">
-          <div className="flex space-x-2">
-            {points.length > 0 && !isAnimating && (
-              <Button
-                onClick={resetPoints}
-                className="bg-red-500 text-white hover:bg-red-600"
-              >
-                <X className="w-4 h-4 mr-2" />
-                Reset Points
-              </Button>
-            )}
-
-            <FlightAnimation
-              points={points}
-              isAnimating={isAnimating}
-              CONFIG={CONFIG}
-              onAnimationStart={handleAnimationStart}
-              onAnimationCancel={handleAnimationCancel}
-              onViewStateChange={setViewState}
-              onAnimationProgress={setAnimationProgress}
-            />
-          </div>
-
-          <div className="text-white bg-black/50 p-2 rounded text-right">
+      <div className="text-white bg-black/50 p-2 rounded text-right">
             {errorMessage ? (
               <span className="text-red-400">{errorMessage}</span>
             ) : (
@@ -288,8 +265,44 @@ const MapboxMap: React.FC = () => {
               </>
             )}
           </div>
+        <div className="flex flex-col items-end space-y-2">
+          <div className="flex space-x-2">
+            {points.length > 0 && !isAnimating && (
+              <Button
+                onClick={resetPoints}
+                className="bg-red-500 text-white hover:bg-red-600"
+              >
+                {/* <X className="w-4 h-4 mr-2" /> */}
+                Clear Points
+              </Button>
+            )}
+
+            <FlightAnimation
+              points={points}
+              isAnimating={isAnimating}
+              CONFIG={CONFIG}
+              onAnimationStart={handleAnimationStart}
+              onAnimationCancel={handleAnimationCancel}
+              onViewStateChange={setViewState}
+              onAnimationProgress={setAnimationProgress}
+            />
+          </div>
+
+         
         </div>
       </div>
+      {/* North Button */}
+      <button
+        onClick={() => setViewState(prev => ({
+          ...prev,
+          pitch: 0,
+          bearing: 0
+        }))}
+        className="absolute bottom-[25%] right-[1%] bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-colors"
+        title="Look North"
+      >
+        <Compass className="w-6 h-6 text-blue-600" />
+      </button>
     </div>
   );
 };
