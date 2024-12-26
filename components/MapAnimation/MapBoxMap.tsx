@@ -49,6 +49,7 @@ interface Point {
   altitude: number;
   zoom?: number;
   index: number;
+  label?: string;
 }
 
 interface PointData {
@@ -227,9 +228,15 @@ const MapboxMap: React.FC = () => {
           viewState={viewState}
           CONFIG={CONFIG}
           onPointMove={handlePointMove}
-
           onError={setErrorMessage}
+          onUpdatePointLabel={(index: number, label: string) => {
+            const newPoints = [...points];
+            newPoints[index] = { ...newPoints[index], label };
+            setPoints(newPoints);
+          }}
         />
+
+
       </Map>
 
       {/* Altitude Timeline */}
@@ -243,28 +250,28 @@ const MapboxMap: React.FC = () => {
         />
       )}
 
-      <InfoPopUp/>
+      <InfoPopUp />
 
       {/* Controls */}
       <div className="absolute bottom-48 right-4 space-y-2">
-      <div className="text-white bg-black/50 p-2 rounded text-right">
-            {errorMessage ? (
-              <span className="text-red-400">{errorMessage}</span>
-            ) : (
-              <>
-                {viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM &&
-                  `Zoom in to level ${CONFIG.map.drone.REQUIRED_ZOOM} to start marking points`}
-                {viewState.zoom >= CONFIG.map.drone.REQUIRED_ZOOM && (
-                  <>
-                    {points.length === 0 && 'Click to place first point'}
-                    {points.length > 0 && !isAnimating &&
-                      `Place point ${points.length + 1} within yellow circle (${points.length}/${CONFIG.map.drone.MAX_POINTS})`}
-                    {isAnimating && 'In flight...'}
-                  </>
-                )}
-              </>
-            )}
-          </div>
+        <div className="text-white bg-black/50 p-2 rounded text-right">
+          {errorMessage ? (
+            <span className="text-red-400">{errorMessage}</span>
+          ) : (
+            <>
+              {viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM &&
+                `Zoom in to level ${CONFIG.map.drone.REQUIRED_ZOOM} to start marking points`}
+              {viewState.zoom >= CONFIG.map.drone.REQUIRED_ZOOM && (
+                <>
+                  {points.length === 0 && 'Click to place first point'}
+                  {points.length > 0 && !isAnimating &&
+                    `Place point ${points.length + 1} within yellow circle (${points.length}/${CONFIG.map.drone.MAX_POINTS})`}
+                  {isAnimating && 'In flight...'}
+                </>
+              )}
+            </>
+          )}
+        </div>
         <div className="flex flex-col items-end space-y-2">
           <div className="flex space-x-2">
             {points.length > 0 && !isAnimating && (
@@ -288,7 +295,7 @@ const MapboxMap: React.FC = () => {
             />
           </div>
 
-         
+
         </div>
       </div>
       {/* North Button */}
