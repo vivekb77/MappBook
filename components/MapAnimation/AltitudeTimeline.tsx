@@ -1,5 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+
+// Add distance calculation function
+const calculateDistance = (point1: Point, point2: Point): number => {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
+  const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(point1.latitude * Math.PI / 180) * Math.cos(point2.latitude * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
 
 interface Point {
   longitude: number;
@@ -17,6 +29,9 @@ const CONFIG = {
     },
   }
 };
+
+const INITIAL_ROTATION_DURATION = 8000; // 8 seconds for initial rotation
+const SPEED_KM_PER_SECOND = 0.125; // 450 km/h = 0.125 km/s
 
 interface AltitudeTimelineProps {
   points: Point[];
@@ -36,6 +51,55 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
   const timelineRef = useRef<HTMLDivElement>(null);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
 
+  // Calculate cumulative distances and total distance
+  const calculateDistances = () => {
+    const distances: number[] = [0];
+    let totalDistance = 0;
+    
+    for (let i = 1; i < points.length; i++) {
+      const segmentDistance = calculateDistance(points[i-1], points[i]);
+      totalDistance += segmentDistance;
+      distances.push(totalDistance);
+    }
+    
+    return { distances, totalDistance };
+  };
+
+  // Calculate segment durations based on distances
+  const calculateSegmentDurations = () => {
+    const durations: number[] = [];
+    const MIN_SEGMENT_DURATION = 3000; // Minimum 3 seconds per segment
+    
+    for (let i = 0; i < points.length - 1; i++) {
+      const distance = calculateDistance(points[i], points[i + 1]);
+      const duration = Math.max(MIN_SEGMENT_DURATION, distance / SPEED_KM_PER_SECOND * 1000);
+      durations.push(duration);
+    }
+    
+    return durations;
+  };
+
+  // Calculate actual progress considering initial rotation and distances
+  const calculateActualProgress = () => {
+    if (!isAnimating || points.length < 2) return 0;
+    
+    const { distances, totalDistance } = calculateDistances();
+    const durations = calculateSegmentDurations();
+    const totalDuration = durations.reduce((sum, d) => sum + d, 0);
+    
+    // If we're still in initial rotation, return 0
+    if (animationProgress * (totalDuration + INITIAL_ROTATION_DURATION) < INITIAL_ROTATION_DURATION) {
+      return 0;
+    }
+
+    // Calculate progress based on time after initial rotation
+    const timeAfterRotation = animationProgress * (totalDuration + INITIAL_ROTATION_DURATION) - INITIAL_ROTATION_DURATION;
+    const flightProgress = timeAfterRotation / totalDuration;
+    
+    return Math.min(1, Math.max(0, flightProgress));
+  };
+
+  // Rest of the component functions remain the same...
   const handleMouseDown = (index: number) => (e: React.MouseEvent) => {
     if (isAnimating) return;
     setDraggingPoint(index);
@@ -58,11 +122,6 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
     setDraggingPoint(null);
   };
 
-  const handleDeletePoint = (index: number) => {
-    if (isAnimating) return;
-    onPointRemove(index);
-  };
-
   useEffect(() => {
     if (draggingPoint !== null && !isAnimating) {
       document.addEventListener('mouseup', handleMouseUp);
@@ -74,8 +133,8 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
     };
   }, [draggingPoint, isAnimating]);
 
-  // Calculate adjusted progress that only starts after point 1
-  const adjustedProgress = Math.max(0, (animationProgress * (points.length - 1) - 1) / (points.length - 2));
+  const actualProgress = calculateActualProgress();
+  const { distances, totalDistance } = calculateDistances();
 
   return (
     <div
@@ -83,9 +142,9 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
       className="absolute bottom-12 left-1/2 -translate-x-1/2 w-4/5 h-32 bg-black/50 rounded-lg p-4"
       onMouseMove={handleMouseMove}
     >
-      {/* Title text */}
-      <div className="absolute -top-8 left-4 text-white text-sm font-medium">
-        Hold & Drag points to set altitude
+      {/* Title text with total distance */}
+      <div className="absolute -top-8 left-4 text-white text-sm font-medium flex gap-4">
+        <span>Hold & Drag points to set altitude</span>
       </div>
 
       {/* Grid lines */}
@@ -103,8 +162,8 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
         <svg className="absolute inset-0 w-full h-full">
           {/* Connecting lines */}
           {points.slice(0, -1).map((point, i) => {
-            const startX = (i / (points.length - 1)) * 100;
-            const endX = ((i + 1) / (points.length - 1)) * 100;
+            const startX = (distances[i] / totalDistance) * 100;
+            const endX = (distances[i + 1] / totalDistance) * 100;
             const startY = ((CONFIG.map.drone.MAX_ALTITUDE - point.altitude) /
               (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE)) * 100;
             const endY = ((CONFIG.map.drone.MAX_ALTITUDE - points[i + 1].altitude) /
@@ -125,22 +184,25 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
           })}
 
           {/* Animation Progress Line */}
-          {isAnimating && points.length > 1 && adjustedProgress > 0 && (
+          {isAnimating && points.length > 1 && actualProgress > 0 && (
             <>
               {points.slice(0, -1).map((point, i) => {
-                const startX = (i / (points.length - 1)) * 100;
-                const endX = ((i + 1) / (points.length - 1)) * 100;
+                const startX = (distances[i] / totalDistance) * 100;
+                const endX = (distances[i + 1] / totalDistance) * 100;
                 const startY = ((CONFIG.map.drone.MAX_ALTITUDE - point.altitude) /
                   (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE)) * 100;
                 const endY = ((CONFIG.map.drone.MAX_ALTITUDE - points[i + 1].altitude) /
                   (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE)) * 100;
                 
-                // Only show segments up to the current progress
-                const segmentProgress = Math.min(1, Math.max(0, 
-                  (adjustedProgress * (points.length - 2) - i) / 1
-                ));
+                const currentProgress = actualProgress * totalDistance;
+                const segmentStart = distances[i];
+                const segmentEnd = distances[i + 1];
                 
-                if (segmentProgress <= 0) return null;
+                if (currentProgress <= segmentStart) return null;
+                
+                const segmentProgress = Math.min(1, 
+                  (currentProgress - segmentStart) / (segmentEnd - segmentStart)
+                );
                 
                 const actualEndX = startX + (endX - startX) * segmentProgress;
                 const actualEndY = startY + (endY - startY) * segmentProgress;
@@ -163,7 +225,7 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
 
         {/* Points */}
         {points.map((point, i) => {
-          const x = (i / (points.length - 1)) * 100;
+          const x = (distances[i] / totalDistance) * 100;
           const y = ((CONFIG.map.drone.MAX_ALTITUDE - point.altitude) /
             (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE)) * 100;
 
@@ -176,43 +238,28 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
                 top: `${y}%`
               }}
             >
-              {/* Point */}
+              {/* Point with distance */}
               <div
-                className={`relative flex items-center justify-center w-8 h-8 -ml-2 -mt-2 rounded-full select-none ${isAnimating
-                    ? 'bg-white/50 cursor-not-allowed'
-                    : 'bg-white cursor-pointer hover:bg-blue-100'
-                  }`}
+                className={`relative flex items-center justify-center w-8 h-8 -ml-2 -mt-2 rounded-full select-none ${
+                  isAnimating ? 'bg-white/50 cursor-not-allowed' : 'bg-white cursor-pointer hover:bg-blue-100'
+                }`}
                 onMouseDown={(e) => {
-                  e.preventDefault(); // Prevent text selection
+                  e.preventDefault();
                   handleMouseDown(i)(e);
                 }}
               >
-                {/* Altitude value */}
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-white text-xs whitespace-nowrap select-none">
-                  {point.altitude.toFixed(2)}
+                {/* Distance and altitude values */}
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-white text-xs whitespace-nowrap select-none flex flex-col items-center">
+                  <span>{point.altitude.toFixed(2)}</span>
                 </div>
 
-                {/* Number in center */}
                 <span className="text-[10px] font-bold text-gray-600 select-none">
                   {i + 1}
                 </span>
               </div>
-
-              {/* Delete button */}
-              <button
-                className={`absolute -bottom-8 left-1/2 -translate-x-1/2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 
-                  ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
-                onClick={() => handleDeletePoint(i)}
-                disabled={isAnimating}
-                title={isAnimating ? "Cannot delete while animating" : "Delete point"}
-              >
-                <X className="w-3 h-3" />
-              </button>
             </div>
           );
         })}
-
-
       </div>
     </div>
   );

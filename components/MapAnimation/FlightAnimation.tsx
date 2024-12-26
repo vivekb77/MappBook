@@ -47,7 +47,20 @@ const interpolateAltitude = (startPoint: Point, endPoint: Point, progress: numbe
   return startPoint.altitude + (endPoint.altitude - startPoint.altitude) * progress;
 };
 
-export const FlightAnimation: React.FC<FlightAnimationProps> = ({
+// Helper function to calculate distance between points
+const calculateDistance = (point1: Point, point2: Point): number => {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
+  const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(point1.latitude * Math.PI / 180) * Math.cos(point2.latitude * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+const FlightAnimation: React.FC<FlightAnimationProps> = ({
   points,
   isAnimating,
   CONFIG,
@@ -58,11 +71,25 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
 }) => {
   const animationFrameRef = useRef<number | null>(null);
 
+  const calculateSegmentDurations = useCallback((points: Point[]): number[] => {
+    const SPEED_KM_PER_SECOND = 0.125; // 0.125 km/s = 450 km/h
+    const MIN_SEGMENT_DURATION = 3000; // Minimum 3 seconds per segment
+    
+    const durations: number[] = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      const distance = calculateDistance(points[i], points[i + 1]);
+      const duration = Math.max(MIN_SEGMENT_DURATION, distance / SPEED_KM_PER_SECOND * 1000);
+      durations.push(duration);
+    }
+    return durations;
+  }, []);
+
   const startDroneAnimation = useCallback(() => {
     if (points.length < 2) return;
     
-    const SEGMENT_DURATION = 8000; // 3 seconds per segment
-    const INITIAL_ROTATION_DURATION = 8000; // 2 seconds for initial rotation
+    const INITIAL_ROTATION_DURATION = 8000; // 8 seconds for initial rotation
+    const segmentDurations = calculateSegmentDurations(points);
+    const totalFlightDuration = segmentDurations.reduce((sum, duration) => sum + duration, 0);
     
     onAnimationStart();
     const startTime = Date.now();
@@ -74,11 +101,7 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
       // Initial rotation and zoom phase
       if (elapsedTime < INITIAL_ROTATION_DURATION) {
         const progress = elapsedTime / INITIAL_ROTATION_DURATION;
-        
-        // Calculate bearing between first two points
         const bearing = calculateVerticalBearing(points[0], points[1]);
-        
-        // Incorporate initial altitude
         const initialZoom = CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 2);
         const targetZoom = CONFIG.map.drone.FLIGHT_ZOOM - (points[0].altitude * 2);
         
@@ -90,17 +113,27 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
           bearing: bearing * progress
         });
         
-        onAnimationProgress(progress / points.length);
+        onAnimationProgress(0);
         animationFrameRef.current = requestAnimationFrame(animate);
         return;
       }
 
       // Flight phase
       const flightTime = elapsedTime - INITIAL_ROTATION_DURATION;
-      const segmentIndex = Math.floor(flightTime / SEGMENT_DURATION);
+      let accumulatedTime = 0;
+      let segmentIndex = 0;
       
+      // Find current segment based on elapsed time
+      for (let i = 0; i < segmentDurations.length; i++) {
+        if (accumulatedTime + segmentDurations[i] > flightTime) {
+          segmentIndex = i;
+          break;
+        }
+        accumulatedTime += segmentDurations[i];
+      }
+
       if (segmentIndex < points.length - 1) {
-        const segmentProgress = (flightTime % SEGMENT_DURATION) / SEGMENT_DURATION;
+        const segmentProgress = (flightTime - accumulatedTime) / segmentDurations[segmentIndex];
         const startPoint = points[segmentIndex];
         const endPoint = points[segmentIndex + 1];
         
@@ -111,7 +144,6 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
           (endPoint.latitude - startPoint.latitude) * segmentProgress;
         const bearing = calculateVerticalBearing(startPoint, endPoint);
         
-        // Interpolate altitude and adjust zoom with doubled effect
         const currentAltitude = interpolateAltitude(startPoint, endPoint, segmentProgress);
         const adjustedZoom = CONFIG.map.drone.FLIGHT_ZOOM - (currentAltitude * 2);
 
@@ -123,7 +155,8 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
           pitch: CONFIG.map.drone.PITCH
         });
 
-        onAnimationProgress((segmentIndex + segmentProgress + 1) / points.length);
+        const overallProgress = (accumulatedTime + (segmentDurations[segmentIndex] * segmentProgress)) / totalFlightDuration;
+        onAnimationProgress(overallProgress);
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
         // Animation complete
@@ -131,7 +164,7 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
       }
     };
 
-    // Start at first point with initial altitude adjustment
+    // Start at first point
     onViewStateChange({
       longitude: points[0].longitude,
       latitude: points[0].latitude,
@@ -142,6 +175,8 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
 
     animationFrameRef.current = requestAnimationFrame(animate);
   }, [points, CONFIG, onAnimationStart, onViewStateChange, onAnimationProgress, onAnimationCancel]);
+
+
 
   const cancelAnimation = useCallback(() => {
     if (animationFrameRef.current) {

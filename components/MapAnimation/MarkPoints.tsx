@@ -61,11 +61,11 @@ const calculateDistance = (point1: { longitude: number; latitude: number }, poin
   const R = 6371; // Earth's radius in kilometers
   const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
   const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(point1.latitude * Math.PI / 180) * Math.cos(point2.latitude * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(point1.latitude * Math.PI / 180) * Math.cos(point2.latitude * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
 
@@ -73,7 +73,7 @@ const createCircleGeoJson = (center: Point, radiusKm: number): GeoJSONFeature =>
   const points = 64;
   const coords: [number, number][] = [];
   const km = radiusKm;
-  
+
   for (let i = 0; i <= points; i++) {
     const angle = (i * 360) / points;
     const rad = (angle * Math.PI) / 180;
@@ -81,7 +81,7 @@ const createCircleGeoJson = (center: Point, radiusKm: number): GeoJSONFeature =>
     const lng = center.longitude + (km / (111.32 * Math.cos(center.latitude * Math.PI / 180))) * Math.sin(rad);
     coords.push([lng, lat]);
   }
-  
+
   return {
     type: 'Feature',
     properties: {},
@@ -101,21 +101,28 @@ const createPathGeoJson = (points: Point[]): GeoJSONFeature => ({
   }
 });
 
-const CustomMarker: React.FC<{ index: number; isDragging?: boolean }> = ({ index, isDragging }) => {
+const CustomMarker: React.FC<{ index: number; isDragging?: boolean; distance?: number }> = ({
+  index,
+  isDragging,
+  distance
+}) => {
   return (
     <div className="relative cursor-grab active:cursor-grabbing">
+      <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-black/75 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
+        {distance !== undefined ? `${distance.toFixed(2)} km` : ''}
+      </div>
       <svg width="30" height="42" viewBox="0 0 30 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path 
-          d="M15 0C6.71573 0 0 6.71573 0 15C0 23.2843 15 42 15 42C15 42 30 23.2843 30 15C30 6.71573 23.2843 0 15 0Z" 
+        <path
+          d="M15 0C6.71573 0 0 6.71573 0 15C0 23.2843 15 42 15 42C15 42 30 23.2843 30 15C30 6.71573 23.2843 0 15 0Z"
           fill={isDragging ? "#FF4B4B" : "#4285F4"}
         />
-        <circle cx="15" cy="15" r="12" fill="white"/>
-        <text 
-          x="15" 
-          y="20" 
-          textAnchor="middle" 
+        <circle cx="15" cy="15" r="12" fill="white" />
+        <text
+          x="15"
+          y="20"
+          textAnchor="middle"
           fill={isDragging ? "#FF4B4B" : "#4285F4"}
-          fontSize="14" 
+          fontSize="14"
           fontWeight="bold"
           fontFamily="Arial"
         >
@@ -124,6 +131,20 @@ const CustomMarker: React.FC<{ index: number; isDragging?: boolean }> = ({ index
       </svg>
     </div>
   );
+};
+
+// Calculate cumulative distances for all points
+const calculateCumulativeDistances = (points: Point[]): number[] => {
+  const distances: number[] = [0]; // First point has 0 distance
+
+  for (let i = 1; i < points.length; i++) {
+    const prevPoint = points[i - 1];
+    const currentPoint = points[i];
+    const segmentDistance = calculateDistance(prevPoint, currentPoint);
+    distances.push(distances[i - 1] + segmentDistance);
+  }
+
+  return distances;
 };
 
 export const MapMarkers: React.FC<MapMarkersProps> = ({
@@ -138,7 +159,7 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
   const validateDrag = (point: Point, newLng: number, newLat: number): boolean => {
     const originalPos = point.originalPosition || { longitude: point.longitude, latitude: point.latitude };
     const distance = calculateDistance(originalPos, { longitude: newLng, latitude: newLat });
-    
+
     if (distance > CONFIG.map.drone.POINT_RADIUS_KM) {
       onError(`Cannot move point more than ${CONFIG.map.drone.POINT_RADIUS_KM}km from original position`);
       return false;
@@ -166,7 +187,7 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
   };
 
   const pathGeoJson = points.length > 0 ? createPathGeoJson(points) : null;
-  const nextPointCircleGeoJson = points.length > 0 ? 
+  const nextPointCircleGeoJson = points.length > 0 ?
     createCircleGeoJson(points[points.length - 1], CONFIG.map.drone.POINT_RADIUS_KM) : null;
 
   return (
@@ -205,15 +226,15 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
       {/* Movement Range Circles for each point */}
       {points.map((point, index) => {
         const movementCircle = createCircleGeoJson(
-          point.originalPosition ? 
-            { ...point, latitude: point.originalPosition.latitude, longitude: point.originalPosition.longitude } : 
+          point.originalPosition ?
+            { ...point, latitude: point.originalPosition.latitude, longitude: point.originalPosition.longitude } :
             point,
           CONFIG.map.drone.POINT_RADIUS_KM
         );
         return (
-          <Source 
-            key={`movement-circle-${index}`} 
-            type="geojson" 
+          <Source
+            key={`movement-circle-${index}`}
+            type="geojson"
             data={movementCircle as GeoJSON.FeatureCollection | GeoJSON.Feature}
           >
             <Layer
@@ -231,23 +252,33 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
       })}
 
       {/* Markers */}
-      {points.map((point, index) => (
-        <Marker
-          key={point.index}
-          longitude={point.longitude}
-          
-          latitude={point.latitude}
-          anchor="bottom"
-          draggable={!isAnimating}
-          onDragStart={() => handleDragStart(index)}
-          onDrag={(e) => handleDrag(index, e.lngLat)}
-          onDragEnd={handleDragEnd}
-        >
-          <CustomMarker index={point.index} isDragging={index === draggingIndex} />
-        </Marker>
-      ))}
+      {points.map((point, index) => {
+        const distances = calculateCumulativeDistances(points);
+        return (
+          <Marker
+            key={point.index}
+            longitude={point.longitude}
+            latitude={point.latitude}
+            anchor="bottom"
+            draggable={!isAnimating}
+            onDragStart={() => handleDragStart(index)}
+            onDrag={(e) => handleDrag(index, e.lngLat)}
+            onDragEnd={handleDragEnd}
+          >
+            <CustomMarker
+              index={point.index}
+              isDragging={index === draggingIndex}
+              distance={distances[index]}
+            />
+          </Marker>
+        );
+      })}
+
+
     </>
   );
+
+
 };
 
 export default MapMarkers;
