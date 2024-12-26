@@ -35,19 +35,70 @@ interface FlightAnimationProps {
   onAnimationProgress: (progress: number) => void;
 }
 
-const calculateVerticalBearing = (startPoint: Point, endPoint: Point): number => {
-  const dx = endPoint.longitude - startPoint.longitude;
-  const dy = endPoint.latitude - startPoint.latitude;
+// Generate interpolated points for the curved path
+const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 20): Point[] => {
+  if (points.length < 2) return points;
+
+  const interpolatedPoints: Point[] = [];
+  
+  for (let i = 0; i < points.length - 1; i++) {
+    const start = points[i];
+    const end = points[i + 1];
+    
+    // Add the start point
+    interpolatedPoints.push(start);
+    
+    // Add intermediate points using cubic interpolation
+    for (let j = 1; j < numIntermediatePoints; j++) {
+      const t = j / numIntermediatePoints;
+      
+      // Cubic interpolation coefficients
+      const t2 = t * t;
+      const t3 = t2 * t;
+      const mt = 1 - t;
+      const mt2 = mt * mt;
+      const mt3 = mt2 * mt;
+      
+      // Control points for smoother curves
+      const control1 = i > 0 ? points[i - 1] : start;
+      const control2 = i < points.length - 2 ? points[i + 2] : end;
+      
+      // Calculate interpolated coordinates
+      const lng = (2 * t3 - 3 * t2 + 1) * start.longitude +
+        (t3 - 2 * t2 + t) * (end.longitude - control1.longitude) +
+        (-2 * t3 + 3 * t2) * end.longitude +
+        (t3 - t2) * (control2.longitude - start.longitude);
+        
+      const lat = (2 * t3 - 3 * t2 + 1) * start.latitude +
+        (t3 - 2 * t2 + t) * (end.latitude - control1.latitude) +
+        (-2 * t3 + 3 * t2) * end.latitude +
+        (t3 - t2) * (control2.latitude - start.latitude);
+        
+      // Interpolate altitude linearly
+      const alt = start.altitude + (end.altitude - start.altitude) * t;
+      
+      interpolatedPoints.push({
+        longitude: lng,
+        latitude: lat,
+        altitude: alt,
+        index: start.index
+      });
+    }
+  }
+  
+  // Add the final point
+  interpolatedPoints.push(points[points.length - 1]);
+  
+  return interpolatedPoints;
+};
+
+const calculateBearing = (point1: Point, point2: Point): number => {
+  const dx = point2.longitude - point1.longitude;
+  const dy = point2.latitude - point1.latitude;
   let angle = (Math.atan2(dy, dx) * 180) / Math.PI;
   return (90 - angle + 360) % 360;
 };
 
-// New function to interpolate altitude
-const interpolateAltitude = (startPoint: Point, endPoint: Point, progress: number): number => {
-  return startPoint.altitude + (endPoint.altitude - startPoint.altitude) * progress;
-};
-
-// Helper function to calculate distance between points
 const calculateDistance = (point1: Point, point2: Point): number => {
   const R = 6371; // Earth's radius in kilometers
   const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
@@ -71,25 +122,23 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
 }) => {
   const animationFrameRef = useRef<number | null>(null);
 
-  const calculateSegmentDurations = useCallback((points: Point[]): number[] => {
-    const SPEED_KM_PER_SECOND = 0.125; // 0.125 km/s = 450 km/h
-    const MIN_SEGMENT_DURATION = 3000; // Minimum 3 seconds per segment
-    
-    const durations: number[] = [];
-    for (let i = 0; i < points.length - 1; i++) {
-      const distance = calculateDistance(points[i], points[i + 1]);
-      const duration = Math.max(MIN_SEGMENT_DURATION, distance / SPEED_KM_PER_SECOND * 1000);
-      durations.push(duration);
-    }
-    return durations;
-  }, []);
-
   const startDroneAnimation = useCallback(() => {
     if (points.length < 2) return;
     
     const INITIAL_ROTATION_DURATION = 8000; // 8 seconds for initial rotation
-    const segmentDurations = calculateSegmentDurations(points);
-    const totalFlightDuration = segmentDurations.reduce((sum, duration) => sum + duration, 0);
+    const SPEED_KM_PER_SECOND = 0.125; // 450 km/h
+    
+    // Generate the curved path with interpolated points
+    const curvedPath = generateCurvedPath(points);
+    
+    // Calculate total distance along the curved path
+    let totalDistance = 0;
+    for (let i = 0; i < curvedPath.length - 1; i++) {
+      totalDistance += calculateDistance(curvedPath[i], curvedPath[i + 1]);
+    }
+    
+    // Calculate total duration based on distance and speed
+    const totalFlightDuration = (totalDistance / SPEED_KM_PER_SECOND) * 1000;
     
     onAnimationStart();
     const startTime = Date.now();
@@ -101,7 +150,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       // Initial rotation and zoom phase
       if (elapsedTime < INITIAL_ROTATION_DURATION) {
         const progress = elapsedTime / INITIAL_ROTATION_DURATION;
-        const bearing = calculateVerticalBearing(points[0], points[1]);
+        const initialBearing = calculateBearing(curvedPath[0], curvedPath[1]);
         const initialZoom = CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 2);
         const targetZoom = CONFIG.map.drone.FLIGHT_ZOOM - (points[0].altitude * 2);
         
@@ -110,7 +159,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
           latitude: points[0].latitude,
           zoom: initialZoom + (targetZoom - initialZoom) * progress,
           pitch: CONFIG.map.drone.PITCH * progress,
-          bearing: bearing * progress
+          bearing: initialBearing * progress
         });
         
         onAnimationProgress(0);
@@ -120,32 +169,30 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
 
       // Flight phase
       const flightTime = elapsedTime - INITIAL_ROTATION_DURATION;
-      let accumulatedTime = 0;
-      let segmentIndex = 0;
-      
-      // Find current segment based on elapsed time
-      for (let i = 0; i < segmentDurations.length; i++) {
-        if (accumulatedTime + segmentDurations[i] > flightTime) {
-          segmentIndex = i;
-          break;
-        }
-        accumulatedTime += segmentDurations[i];
-      }
-
-      if (segmentIndex < points.length - 1) {
-        const segmentProgress = (flightTime - accumulatedTime) / segmentDurations[segmentIndex];
-        const startPoint = points[segmentIndex];
-        const endPoint = points[segmentIndex + 1];
+      if (flightTime <= totalFlightDuration) {
+        const progress = flightTime / totalFlightDuration;
+        const pathIndex = Math.min(
+          Math.floor(progress * (curvedPath.length - 1)), 
+          curvedPath.length - 2
+        );
         
-        // Interpolate between points
-        const longitude = startPoint.longitude + 
-          (endPoint.longitude - startPoint.longitude) * segmentProgress;
-        const latitude = startPoint.latitude + 
-          (endPoint.latitude - startPoint.latitude) * segmentProgress;
-        const bearing = calculateVerticalBearing(startPoint, endPoint);
+        const currentPoint = curvedPath[pathIndex];
+        const nextPoint = curvedPath[pathIndex + 1];
+        const segmentProgress = (progress * (curvedPath.length - 1)) % 1;
         
-        const currentAltitude = interpolateAltitude(startPoint, endPoint, segmentProgress);
-        const adjustedZoom = CONFIG.map.drone.FLIGHT_ZOOM - (currentAltitude * 2);
+        // Interpolate position
+        const longitude = currentPoint.longitude + 
+          (nextPoint.longitude - currentPoint.longitude) * segmentProgress;
+        const latitude = currentPoint.latitude + 
+          (nextPoint.latitude - currentPoint.latitude) * segmentProgress;
+        const altitude = currentPoint.altitude + 
+          (nextPoint.altitude - currentPoint.altitude) * segmentProgress;
+        
+        // Calculate bearing based on current and next interpolated points
+        const bearing = calculateBearing(currentPoint, nextPoint);
+        
+        // Adjust zoom based on altitude
+        const adjustedZoom = CONFIG.map.drone.FLIGHT_ZOOM - (altitude * 2);
 
         onViewStateChange({
           longitude,
@@ -155,8 +202,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
           pitch: CONFIG.map.drone.PITCH
         });
 
-        const overallProgress = (accumulatedTime + (segmentDurations[segmentIndex] * segmentProgress)) / totalFlightDuration;
-        onAnimationProgress(overallProgress);
+        onAnimationProgress(progress);
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
         // Animation complete
@@ -175,8 +221,6 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
 
     animationFrameRef.current = requestAnimationFrame(animate);
   }, [points, CONFIG, onAnimationStart, onViewStateChange, onAnimationProgress, onAnimationCancel]);
-
-
 
   const cancelAnimation = useCallback(() => {
     if (animationFrameRef.current) {
