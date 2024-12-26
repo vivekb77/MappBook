@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 
-// Add distance calculation function
+// Flight speed constant
+const FLIGHT_SPEED_KM_PER_SECOND = 0.185;
+
+
 const calculateDistance = (point1: Point, point2: Point): number => {
-  const R = 6371; // Earth's radius in kilometers
+  const R = 6371;
   const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
   const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
   const a =
@@ -30,9 +33,6 @@ const CONFIG = {
   }
 };
 
-const INITIAL_ROTATION_DURATION = 8000; // 8 seconds for initial rotation
-const SPEED_KM_PER_SECOND = 0.125; // 450 km/h = 0.125 km/s
-
 interface AltitudeTimelineProps {
   points: Point[];
   onAltitudeChange: (index: number, altitude: number) => void;
@@ -51,55 +51,96 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
   const timelineRef = useRef<HTMLDivElement>(null);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
 
-  // Calculate cumulative distances and total distance
+
+  // Generate curved path for flight phase only
+  const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 500) => {
+    if (points.length < 2) return points;
+    
+    const interpolatedPoints: Point[] = [];
+    
+    // Generate the curved flight path (excluding orbit)
+    for (let i = 0; i < points.length - 1; i++) {
+      const start = points[i];
+      const end = points[i + 1];
+      
+      interpolatedPoints.push(start);
+      
+      for (let j = 1; j < numIntermediatePoints && i < points.length - 2; j++) {
+        const t = j / numIntermediatePoints;
+        const t2 = t * t;
+        const t3 = t2 * t;
+        
+        const control1 = i > 0 ? points[i - 1] : start;
+        const control2 = i < points.length - 2 ? points[i + 2] : end;
+        
+        const lng = (2 * t3 - 3 * t2 + 1) * start.longitude +
+          (t3 - 2 * t2 + t) * (end.longitude - control1.longitude) +
+          (-2 * t3 + 3 * t2) * end.longitude +
+          (t3 - t2) * (control2.longitude - start.longitude);
+          
+        const lat = (2 * t3 - 3 * t2 + 1) * start.latitude +
+          (t3 - 2 * t2 + t) * (end.latitude - control1.latitude) +
+          (-2 * t3 + 3 * t2) * end.latitude +
+          (t3 - t2) * (control2.latitude - start.latitude);
+          
+        const alt = start.altitude + (end.altitude - start.altitude) * t;
+        
+        interpolatedPoints.push({
+          longitude: lng,
+          latitude: lat,
+          altitude: alt,
+          index: start.index
+        });
+      }
+    }
+    
+    // Add final point
+    interpolatedPoints.push(points[points.length - 1]);
+    return interpolatedPoints;
+  };
+
+  // Calculate cumulative distances using curved path
   const calculateDistances = () => {
+    const flightPath = generateCurvedPath(points, 0);  // Use 0 as initial bearing
     const distances: number[] = [0];
     let totalDistance = 0;
     
-    for (let i = 1; i < points.length; i++) {
-      const segmentDistance = calculateDistance(points[i-1], points[i]);
+    // Calculate total distance along curved path
+    for (let i = 0; i < flightPath.length - 1; i++) {
+      const segmentDistance = calculateDistance(flightPath[i], flightPath[i + 1]);
       totalDistance += segmentDistance;
-      distances.push(totalDistance);
+      
+      // Store distances at original points for visualization
+      if (flightPath[i].index !== flightPath[i + 1].index) {
+        distances.push(totalDistance);
+      }
     }
     
     return { distances, totalDistance };
   };
 
-  // Calculate segment durations based on distances
-  const calculateSegmentDurations = () => {
-    const durations: number[] = [];
-    const MIN_SEGMENT_DURATION = 3000; // Minimum 3 seconds per segment
-    
-    for (let i = 0; i < points.length - 1; i++) {
-      const distance = calculateDistance(points[i], points[i + 1]);
-      const duration = Math.max(MIN_SEGMENT_DURATION, distance / SPEED_KM_PER_SECOND * 1000);
-      durations.push(duration);
-    }
-    
-    return durations;
-  };
 
-  // Calculate actual progress considering initial rotation and distances
+  // Calculate actual progress for flight phase only
   const calculateActualProgress = () => {
     if (!isAnimating || points.length < 2) return 0;
     
-    const { distances, totalDistance } = calculateDistances();
-    const durations = calculateSegmentDurations();
-    const totalDuration = durations.reduce((sum, d) => sum + d, 0);
+    // Calculate total flight distance using curved path
+    const flightPath = generateCurvedPath(points, 0);
+    let totalFlightDistance = 0;
     
-    // If we're still in initial rotation, return 0
-    if (animationProgress * (totalDuration + INITIAL_ROTATION_DURATION) < INITIAL_ROTATION_DURATION) {
-      return 0;
+    // Calculate along curved path but only up to last point before orbit
+    const lastPointIndex = points.length - 1;
+    const flightOnlyPath = flightPath.filter(p => p.index < lastPointIndex);
+    
+    for (let i = 0; i < flightOnlyPath.length - 1; i++) {
+      totalFlightDistance += calculateDistance(flightOnlyPath[i], flightOnlyPath[i + 1]);
     }
-
-    // Calculate progress based on time after initial rotation
-    const timeAfterRotation = animationProgress * (totalDuration + INITIAL_ROTATION_DURATION) - INITIAL_ROTATION_DURATION;
-    const flightProgress = timeAfterRotation / totalDuration;
     
-    return Math.min(1, Math.max(0, flightProgress));
+    // Just use animation progress directly since we're calculating distance the same way
+    // animationProgress will only be updated during flight phase now
+    return Math.min(1, Math.max(0, animationProgress));
   };
 
-  // Rest of the component functions remain the same...
   const handleMouseDown = (index: number) => (e: React.MouseEvent) => {
     if (isAnimating) return;
     setDraggingPoint(index);
