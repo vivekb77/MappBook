@@ -35,8 +35,44 @@ interface FlightAnimationProps {
   onAnimationProgress: (progress: number) => void;
 }
 
-// Generate interpolated points for the curved path
-const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 20): Point[] => {
+// Smoothly interpolate angles considering 360-degree wrapping
+const interpolateAngle = (startAngle: number, endAngle: number, t: number): number => {
+  // Normalize angles to 0-360 range
+  startAngle = ((startAngle % 360) + 360) % 360;
+  endAngle = ((endAngle % 360) + 360) % 360;
+
+  // Find the shortest path
+  let diff = endAngle - startAngle;
+  if (diff > 180) diff -= 360;
+  if (diff < -180) diff += 360;
+
+  // Interpolate along the shortest path
+  let result = startAngle + diff * t;
+  return ((result % 360) + 360) % 360;
+};
+
+// Generate points for an orbital path
+const generateOrbitPoints = (center: Point, radiusKm: number = 0.5, numPoints: number = 60): Point[] => {
+  const orbitPoints: Point[] = [];
+  for (let i = 0; i <= numPoints; i++) {
+    const angle = (i * 360) / numPoints;
+    const rad = (angle * Math.PI) / 180;
+    
+    // Calculate offset from center point
+    const latOffset = (radiusKm / 111.32) * Math.cos(rad);
+    const lngOffset = (radiusKm / (111.32 * Math.cos(center.latitude * Math.PI / 180))) * Math.sin(rad);
+    
+    orbitPoints.push({
+      longitude: center.longitude + lngOffset,
+      latitude: center.latitude + latOffset,
+      altitude: center.altitude,
+      index: center.index
+    });
+  }
+  return orbitPoints;
+};
+//numIntermediatePoints adjust it to make it more smooth 
+const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 100): Point[] => {
   if (points.length < 2) return points;
 
   const interpolatedPoints: Point[] = [];
@@ -45,25 +81,19 @@ const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 20)
     const start = points[i];
     const end = points[i + 1];
     
-    // Add the start point
     interpolatedPoints.push(start);
     
-    // Add intermediate points using cubic interpolation
     for (let j = 1; j < numIntermediatePoints; j++) {
       const t = j / numIntermediatePoints;
-      
-      // Cubic interpolation coefficients
       const t2 = t * t;
       const t3 = t2 * t;
       const mt = 1 - t;
       const mt2 = mt * mt;
       const mt3 = mt2 * mt;
       
-      // Control points for smoother curves
       const control1 = i > 0 ? points[i - 1] : start;
       const control2 = i < points.length - 2 ? points[i + 2] : end;
       
-      // Calculate interpolated coordinates
       const lng = (2 * t3 - 3 * t2 + 1) * start.longitude +
         (t3 - 2 * t2 + t) * (end.longitude - control1.longitude) +
         (-2 * t3 + 3 * t2) * end.longitude +
@@ -74,7 +104,6 @@ const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 20)
         (-2 * t3 + 3 * t2) * end.latitude +
         (t3 - t2) * (control2.latitude - start.latitude);
         
-      // Interpolate altitude linearly
       const alt = start.altitude + (end.altitude - start.altitude) * t;
       
       interpolatedPoints.push({
@@ -89,6 +118,11 @@ const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 20)
   // Add the final point
   interpolatedPoints.push(points[points.length - 1]);
   
+  // Add orbital path around the final point
+  const lastPoint = points[points.length - 1];
+  const orbitPoints = generateOrbitPoints(lastPoint);
+  interpolatedPoints.push(...orbitPoints);
+  
   return interpolatedPoints;
 };
 
@@ -100,7 +134,7 @@ const calculateBearing = (point1: Point, point2: Point): number => {
 };
 
 const calculateDistance = (point1: Point, point2: Point): number => {
-  const R = 6371; // Earth's radius in kilometers
+  const R = 6371;
   const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
   const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
   const a =
@@ -121,23 +155,22 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
   onAnimationProgress
 }) => {
   const animationFrameRef = useRef<number | null>(null);
+  const currentBearingRef = useRef<number>(0);
 
   const startDroneAnimation = useCallback(() => {
     if (points.length < 2) return;
     
-    const INITIAL_ROTATION_DURATION = 8000; // 8 seconds for initial rotation
-    const SPEED_KM_PER_SECOND = 0.125; // 450 km/h
+    const INITIAL_ROTATION_DURATION = 8000;
+    const SPEED_KM_PER_SECOND = 0.125;
+    const ROTATION_SMOOTHNESS = 0.1; // Adjust this value to control rotation speed (0-1)
     
-    // Generate the curved path with interpolated points
     const curvedPath = generateCurvedPath(points);
-    
-    // Calculate total distance along the curved path
     let totalDistance = 0;
+    
     for (let i = 0; i < curvedPath.length - 1; i++) {
       totalDistance += calculateDistance(curvedPath[i], curvedPath[i + 1]);
     }
     
-    // Calculate total duration based on distance and speed
     const totalFlightDuration = (totalDistance / SPEED_KM_PER_SECOND) * 1000;
     
     onAnimationStart();
@@ -147,19 +180,22 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       const currentTime = Date.now();
       const elapsedTime = currentTime - startTime;
       
-      // Initial rotation and zoom phase
       if (elapsedTime < INITIAL_ROTATION_DURATION) {
         const progress = elapsedTime / INITIAL_ROTATION_DURATION;
         const initialBearing = calculateBearing(curvedPath[0], curvedPath[1]);
-        const initialZoom = CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 2);
-        const targetZoom = CONFIG.map.drone.FLIGHT_ZOOM - (points[0].altitude * 2);
+        const initialZoom = CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 3);
+        const targetZoom = CONFIG.map.drone.FLIGHT_ZOOM - (points[0].altitude * 3);
+        
+        // Smoothly interpolate initial rotation
+        const currentBearing = interpolateAngle(0, initialBearing, progress);
+        currentBearingRef.current = currentBearing;
         
         onViewStateChange({
           longitude: points[0].longitude,
           latitude: points[0].latitude,
           zoom: initialZoom + (targetZoom - initialZoom) * progress,
           pitch: CONFIG.map.drone.PITCH * progress,
-          bearing: initialBearing * progress
+          bearing: currentBearing
         });
         
         onAnimationProgress(0);
@@ -167,7 +203,6 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
         return;
       }
 
-      // Flight phase
       const flightTime = elapsedTime - INITIAL_ROTATION_DURATION;
       if (flightTime <= totalFlightDuration) {
         const progress = flightTime / totalFlightDuration;
@@ -180,7 +215,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
         const nextPoint = curvedPath[pathIndex + 1];
         const segmentProgress = (progress * (curvedPath.length - 1)) % 1;
         
-        // Interpolate position
+        // Calculate position
         const longitude = currentPoint.longitude + 
           (nextPoint.longitude - currentPoint.longitude) * segmentProgress;
         const latitude = currentPoint.latitude + 
@@ -188,16 +223,22 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
         const altitude = currentPoint.altitude + 
           (nextPoint.altitude - currentPoint.altitude) * segmentProgress;
         
-        // Calculate bearing based on current and next interpolated points
-        const bearing = calculateBearing(currentPoint, nextPoint);
-        
+        // Calculate target bearing and smoothly interpolate
+        const targetBearing = calculateBearing(currentPoint, nextPoint);
+        const smoothBearing = interpolateAngle(
+          currentBearingRef.current,
+          targetBearing,
+          ROTATION_SMOOTHNESS
+        );
+        currentBearingRef.current = smoothBearing;
+
         // Adjust zoom based on altitude
-        const adjustedZoom = CONFIG.map.drone.FLIGHT_ZOOM - (altitude * 2);
+        const adjustedZoom = CONFIG.map.drone.FLIGHT_ZOOM - (altitude * 3);
 
         onViewStateChange({
           longitude,
           latitude,
-          bearing,
+          bearing: smoothBearing,
           zoom: adjustedZoom,
           pitch: CONFIG.map.drone.PITCH
         });
@@ -205,7 +246,6 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
         onAnimationProgress(progress);
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
-        // Animation complete
         onAnimationCancel();
       }
     };
@@ -214,10 +254,11 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
     onViewStateChange({
       longitude: points[0].longitude,
       latitude: points[0].latitude,
-      zoom: CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 2),
+      zoom: CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 3),
       pitch: 0,
       bearing: 0
     });
+    currentBearingRef.current = 0;
 
     animationFrameRef.current = requestAnimationFrame(animate);
   }, [points, CONFIG, onAnimationStart, onViewStateChange, onAnimationProgress, onAnimationCancel]);
