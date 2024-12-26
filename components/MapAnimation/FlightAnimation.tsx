@@ -35,32 +35,33 @@ interface FlightAnimationProps {
   onAnimationProgress: (progress: number) => void;
 }
 
-// Smoothly interpolate angles considering 360-degree wrapping
 const interpolateAngle = (startAngle: number, endAngle: number, t: number): number => {
-  // Normalize angles to 0-360 range
   startAngle = ((startAngle % 360) + 360) % 360;
   endAngle = ((endAngle % 360) + 360) % 360;
-
-  // Find the shortest path
   let diff = endAngle - startAngle;
   if (diff > 180) diff -= 360;
   if (diff < -180) diff += 360;
-
-  // Interpolate along the shortest path
   let result = startAngle + diff * t;
   return ((result % 360) + 360) % 360;
 };
-
-// Generate points for an orbital path
-const generateOrbitPoints = (center: Point, radiusKm: number = 0.5, numPoints: number = 500): Point[] => {
+const generateOrbitPoints = (
+  center: Point, 
+  currentBearing: number,  // Using current bearing from MapViewState
+  radiusKm: number = 0.5, 
+  numPoints: number = 500
+): Point[] => {
   const orbitPoints: Point[] = [];
+  
+  // Start directly from the current map bearing
+  const startBearing = currentBearing;
+  
   for (let i = 0; i <= numPoints; i++) {
-    const angle = (i * 360) / numPoints;
-    const rad = (angle * Math.PI) / 180;
+    // Continue rotation from current bearing
+    const currentBearing = startBearing + ((i * 360) / numPoints);
+    const angleRad = (90 - currentBearing) * (Math.PI / 180);
     
-    // Calculate offset from center point
-    const latOffset = (radiusKm / 111.32) * Math.cos(rad);
-    const lngOffset = (radiusKm / (111.32 * Math.cos(center.latitude * Math.PI / 180))) * Math.sin(rad);
+    const latOffset = (radiusKm / 111.32) * Math.sin(angleRad);
+    const lngOffset = (radiusKm / (111.32 * Math.cos(center.latitude * Math.PI / 180))) * Math.cos(angleRad);
     
     orbitPoints.push({
       longitude: center.longitude + lngOffset,
@@ -69,14 +70,16 @@ const generateOrbitPoints = (center: Point, radiusKm: number = 0.5, numPoints: n
       index: center.index
     });
   }
+  
   return orbitPoints;
 };
-//numIntermediatePoints adjust it to make it more smooth 
-const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 500): Point[] => {
+
+const generateCurvedPath = (points: Point[], currentMapBearing: number, numIntermediatePoints: number = 500): Point[] => {
   if (points.length < 2) return points;
 
   const interpolatedPoints: Point[] = [];
   
+  // Generate the curved flight path
   for (let i = 0; i < points.length - 1; i++) {
     const start = points[i];
     const end = points[i + 1];
@@ -87,9 +90,6 @@ const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 500
       const t = j / numIntermediatePoints;
       const t2 = t * t;
       const t3 = t2 * t;
-      const mt = 1 - t;
-      const mt2 = mt * mt;
-      const mt3 = mt2 * mt;
       
       const control1 = i > 0 ? points[i - 1] : start;
       const control2 = i < points.length - 2 ? points[i + 2] : end;
@@ -115,16 +115,21 @@ const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 500
     }
   }
   
-  // Add the final point
+  // Add the final flight point
   interpolatedPoints.push(points[points.length - 1]);
   
-  // Add orbital path around the final point
-  const lastPoint = points[points.length - 1];
-  const orbitPoints = generateOrbitPoints(lastPoint);
+  // Generate orbital path from current map bearing
+  const orbitPoints = generateOrbitPoints(
+    points[points.length - 1],
+    currentMapBearing,  // using the actual map bearing
+    0.5
+  );
+  
   interpolatedPoints.push(...orbitPoints);
   
   return interpolatedPoints;
 };
+
 
 const calculateBearing = (point1: Point, point2: Point): number => {
   const dx = point2.longitude - point1.longitude;
@@ -162,11 +167,12 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
     
     const INITIAL_ROTATION_DURATION = 8000;
     const SPEED_KM_PER_SECOND = 0.185;
-    const ROTATION_SMOOTHNESS = 0.9; // Adjust this value to control rotation speed (0-1)
+    const ROTATION_SMOOTHNESS = 0.1; // less = more smooth
     
-    const curvedPath = generateCurvedPath(points);
+    // Generate path using current bearing from ref
+    const curvedPath = generateCurvedPath(points, currentBearingRef.current);
+    
     let totalDistance = 0;
-    
     for (let i = 0; i < curvedPath.length - 1; i++) {
       totalDistance += calculateDistance(curvedPath[i], curvedPath[i + 1]);
     }
@@ -186,7 +192,6 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
         const initialZoom = CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 3);
         const targetZoom = CONFIG.map.drone.FLIGHT_ZOOM - (points[0].altitude * 3);
         
-        // Smoothly interpolate initial rotation
         const currentBearing = interpolateAngle(0, initialBearing, progress);
         currentBearingRef.current = currentBearing;
         
@@ -215,7 +220,6 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
         const nextPoint = curvedPath[pathIndex + 1];
         const segmentProgress = (progress * (curvedPath.length - 1)) % 1;
         
-        // Calculate position
         const longitude = currentPoint.longitude + 
           (nextPoint.longitude - currentPoint.longitude) * segmentProgress;
         const latitude = currentPoint.latitude + 
@@ -223,7 +227,6 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
         const altitude = currentPoint.altitude + 
           (nextPoint.altitude - currentPoint.altitude) * segmentProgress;
         
-        // Calculate target bearing and smoothly interpolate
         const targetBearing = calculateBearing(currentPoint, nextPoint);
         const smoothBearing = interpolateAngle(
           currentBearingRef.current,
@@ -232,7 +235,6 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
         );
         currentBearingRef.current = smoothBearing;
 
-        // Adjust zoom based on altitude
         const adjustedZoom = CONFIG.map.drone.FLIGHT_ZOOM - (altitude * 3);
 
         onViewStateChange({
@@ -250,7 +252,6 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       }
     };
 
-    // Start at first point
     onViewStateChange({
       longitude: points[0].longitude,
       latitude: points[0].latitude,

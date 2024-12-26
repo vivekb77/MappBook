@@ -306,7 +306,7 @@ const MapboxMap: React.FC = () => {
           pitch: 0,
           bearing: 0
         }))}
-        className="absolute bottom-[50%] right-[1%] bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-colors"
+        className="absolute bottom-[45%] right-[1%] bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-colors"
         title="Look North"
       >
         <Compass className="w-6 h-6 text-blue-600" />

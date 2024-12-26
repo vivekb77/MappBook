@@ -6,7 +6,7 @@ const MapControlsInfo = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="absolute bottom-[60%] right-[1%]">
+    <div className="absolute bottom-[55%] right-[1%]">
       <button
         onClick={() => setIsOpen(true)}
         className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors shadow-lg"
@@ -15,9 +15,9 @@ const MapControlsInfo = () => {
       </button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="fixed w-[90vw] sm:w-[440px] rounded-2xl bg-gradient-to-br from-pink-100 to-purple-50 p-0 border-0">
+        <DialogContent className="fixed w-[90vw] sm:w-[440px] rounded-2xl bg-gradient-to-br from-pink-100 to-blue-50 p-0 border-0">
           <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="text-xl font-semibold text-center bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+            <DialogTitle className="text-xl font-semibold text-center bg-gradient-to-r from-blue-600 to-pink-500 bg-clip-text text-transparent">
               Map Navigation Guide
             </DialogTitle>
           </DialogHeader>
@@ -27,7 +27,7 @@ const MapControlsInfo = () => {
               <div className="space-y-3">
                 <div>
                   <p className="text-sm">
-                    <span className="font-medium text-purple-600">Basic Controls:</span>
+                    <span className="font-medium text-blue-600">Basic Controls:</span>
                     <span className="text-gray-600"> Essential map navigation:</span>
                   </p>
                   <ul className="text-sm text-gray-600 mt-2 space-y-2 ml-4">
@@ -45,7 +45,7 @@ const MapControlsInfo = () => {
 
                 <div>
                   <p className="text-sm">
-                    <span className="font-medium text-purple-600">Advanced Navigation:</span>
+                    <span className="font-medium text-blue-600">Advanced Navigation:</span>
                     <span className="text-gray-600"> Using keyboard controls:</span>
                   </p>
                   <ul className="text-sm text-gray-600 mt-2 space-y-2 ml-4">
@@ -59,8 +59,8 @@ const MapControlsInfo = () => {
                 </div>
               </div>
 
-              <div className="bg-purple-50/50 rounded-lg p-3 text-sm">
-                <p className="font-medium text-purple-600">Pro Tips 💫</p>
+              <div className="bg-blue-50/50 rounded-lg p-3 text-sm">
+                <p className="font-medium text-blue-600">Pro Tips 💫</p>
                 <ul className="mt-1 text-gray-600 space-y-1">
                   <li>• Hold Shift while scrolling for faster zoom</li>
                   <li>• Use two fingers on trackpad to tilt the view</li>
