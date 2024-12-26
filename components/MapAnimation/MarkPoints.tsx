@@ -92,14 +92,69 @@ const createCircleGeoJson = (center: Point, radiusKm: number): GeoJSONFeature =>
   };
 };
 
-const createPathGeoJson = (points: Point[]): GeoJSONFeature => ({
-  type: 'Feature',
-  properties: {},
-  geometry: {
-    type: 'LineString',
-    coordinates: points.map(p => [p.longitude, p.latitude])
+const createPathGeoJson = (points: Point[]): GeoJSONFeature => {
+  if (points.length < 2) return {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: points.map(p => [p.longitude, p.latitude])
+    }
+  };
+
+  // Generate interpolation points between each pair of points
+  const interpolatedCoords: [number, number][] = [];
+  const numIntermediatePoints = 20; // Increase for smoother curves
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const start = points[i];
+    const end = points[i + 1];
+    
+    // Add the start point
+    interpolatedCoords.push([start.longitude, start.latitude]);
+    
+    // Add intermediate points using cubic interpolation
+    for (let j = 1; j < numIntermediatePoints; j++) {
+      const t = j / numIntermediatePoints;
+      
+      // Cubic interpolation formula
+      const t2 = t * t;
+      const t3 = t2 * t;
+      const mt = 1 - t;
+      const mt2 = mt * mt;
+      const mt3 = mt2 * mt;
+      
+      // Control points for smoother curves
+      const control1 = i > 0 ? points[i - 1] : start;
+      const control2 = i < points.length - 2 ? points[i + 2] : end;
+      
+      // Calculate interpolated point
+      const lng = (2 * t3 - 3 * t2 + 1) * start.longitude +
+                 (t3 - 2 * t2 + t) * (end.longitude - control1.longitude) +
+                 (-2 * t3 + 3 * t2) * end.longitude +
+                 (t3 - t2) * (control2.longitude - start.longitude);
+                 
+      const lat = (2 * t3 - 3 * t2 + 1) * start.latitude +
+                 (t3 - 2 * t2 + t) * (end.latitude - control1.latitude) +
+                 (-2 * t3 + 3 * t2) * end.latitude +
+                 (t3 - t2) * (control2.latitude - start.latitude);
+      
+      interpolatedCoords.push([lng, lat]);
+    }
   }
-});
+  
+  // Add the final point
+  interpolatedCoords.push([points[points.length - 1].longitude, points[points.length - 1].latitude]);
+
+  return {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: interpolatedCoords
+    }
+  };
+};
 
 const CustomMarker: React.FC<{ index: number; isDragging?: boolean; distance?: number }> = ({
   index,
@@ -199,9 +254,10 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
             id="path-layer"
             type="line"
             paint={{
-              'line-color': '#ffffff',
-              'line-width': 2,
-              'line-opacity': 0.8
+              'line-color': '#4285F4',
+              'line-width': 4,
+              'line-opacity': 0.8,
+              'line-blur': 1
             }}
           />
         </Source>
@@ -273,12 +329,8 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
           </Marker>
         );
       })}
-
-
     </>
   );
-
-
 };
 
 export default MapMarkers;
