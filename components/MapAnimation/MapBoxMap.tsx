@@ -18,8 +18,8 @@ const CONFIG = {
       ROTATION_DURATION: 0, //not used from here, flight animation has it 
       FLIGHT_DURATION: 0, //not used from here, flight animation has it
       INITIAL_ZOOM: 1,
-      FLIGHT_ZOOM: 17,
-      PITCH: 60,
+      FLIGHT_ZOOM: 16,
+      PITCH: 55,
       POINT_RADIUS_KM: 5,
       REQUIRED_ZOOM: 10,
       MAX_POINTS: 10,
@@ -306,7 +306,7 @@ const MapboxMap: React.FC = () => {
           pitch: 0,
           bearing: 0
         }))}
-        className="absolute bottom-[25%] right-[1%] bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-colors"
+        className="absolute bottom-[50%] right-[1%] bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-colors"
         title="Look North"
       >
         <Compass className="w-6 h-6 text-blue-600" />

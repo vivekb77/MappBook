@@ -6,7 +6,7 @@ const MapControlsInfo = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="absolute bottom-[30%] right-[1%]">
+    <div className="absolute bottom-[60%] right-[1%]">
       <button
         onClick={() => setIsOpen(true)}
         className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors shadow-lg"

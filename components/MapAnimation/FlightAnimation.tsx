@@ -52,7 +52,7 @@ const interpolateAngle = (startAngle: number, endAngle: number, t: number): numb
 };
 
 // Generate points for an orbital path
-const generateOrbitPoints = (center: Point, radiusKm: number = 0.5, numPoints: number = 60): Point[] => {
+const generateOrbitPoints = (center: Point, radiusKm: number = 0.5, numPoints: number = 500): Point[] => {
   const orbitPoints: Point[] = [];
   for (let i = 0; i <= numPoints; i++) {
     const angle = (i * 360) / numPoints;
@@ -72,7 +72,7 @@ const generateOrbitPoints = (center: Point, radiusKm: number = 0.5, numPoints: n
   return orbitPoints;
 };
 //numIntermediatePoints adjust it to make it more smooth 
-const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 100): Point[] => {
+const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 500): Point[] => {
   if (points.length < 2) return points;
 
   const interpolatedPoints: Point[] = [];
@@ -161,8 +161,8 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
     if (points.length < 2) return;
     
     const INITIAL_ROTATION_DURATION = 8000;
-    const SPEED_KM_PER_SECOND = 0.125;
-    const ROTATION_SMOOTHNESS = 0.1; // Adjust this value to control rotation speed (0-1)
+    const SPEED_KM_PER_SECOND = 0.185;
+    const ROTATION_SMOOTHNESS = 0.9; // Adjust this value to control rotation speed (0-1)
     
     const curvedPath = generateCurvedPath(points);
     let totalDistance = 0;
