@@ -44,29 +44,58 @@ const interpolateAngle = (startAngle: number, endAngle: number, t: number): numb
   let result = startAngle + diff * t;
   return ((result % 360) + 360) % 360;
 };
+
+
+
 const generateOrbitPoints = (
   center: Point, 
-  currentBearing: number,  // Using current bearing from MapViewState
-  radiusKm: number = 0.5, 
-  numPoints: number = 500
+  currentBearing: number,
+  radiusKm: number = 0.5,
+  numPoints: number = 500,
+  options: {
+    adaptiveRadius?: boolean;
+    smoothTransition?: boolean;
+    startPoint?: Point;
+  } = {}
 ): Point[] => {
   const orbitPoints: Point[] = [];
-  
-  // Start directly from the current map bearing
   const startBearing = currentBearing;
   
+  // Calculate adaptive radius based on altitude if enabled
+  const finalRadius = options.adaptiveRadius 
+    ? Math.max(0.1, radiusKm * (1 + center.altitude / 100))
+    : radiusKm;
+    
+  // If smooth transition is enabled and we have a start point,
+  // adjust initial radius to match the distance from center
+  let initialRadius = finalRadius;
+  if (options.smoothTransition && options.startPoint) {
+    const startDistance = calculateDistance(center, options.startPoint);
+    initialRadius = startDistance;
+  }
+
   for (let i = 0; i <= numPoints; i++) {
-    // Continue rotation from current bearing
-    const currentBearing = startBearing + ((i * 360) / numPoints);
+    const progress = i / numPoints;
+    const currentBearing = startBearing + (progress * 360);
     const angleRad = (90 - currentBearing) * (Math.PI / 180);
     
-    const latOffset = (radiusKm / 111.32) * Math.sin(angleRad);
-    const lngOffset = (radiusKm / (111.32 * Math.cos(center.latitude * Math.PI / 180))) * Math.cos(angleRad);
+    // Interpolate radius from initial to final for smooth transition
+    const currentRadius = options.smoothTransition 
+      ? initialRadius + (finalRadius - initialRadius) * progress
+      : finalRadius;
+    
+    const latOffset = (currentRadius / 111.32) * Math.sin(angleRad);
+    const lngOffset = (currentRadius / (111.32 * Math.cos(center.latitude * Math.PI / 180))) * Math.cos(angleRad);
+    
+    // Optional: gradually adjust altitude during orbit
+    const altitudeOffset = options.smoothTransition 
+      ? (center.altitude - (options.startPoint?.altitude || center.altitude)) * Math.sin(progress * Math.PI)
+      : 0;
     
     orbitPoints.push({
       longitude: center.longitude + lngOffset,
       latitude: center.latitude + latOffset,
-      altitude: center.altitude,
+      altitude: center.altitude + altitudeOffset,
       index: center.index
     });
   }
@@ -74,55 +103,65 @@ const generateOrbitPoints = (
   return orbitPoints;
 };
 
+
+
 const generateCurvedPath = (points: Point[], currentMapBearing: number, numIntermediatePoints: number = 500): Point[] => {
   if (points.length < 2) return points;
 
   const interpolatedPoints: Point[] = [];
   
-  // Generate the curved flight path
-  for (let i = 0; i < points.length - 1; i++) {
-    const start = points[i];
-    const end = points[i + 1];
-    
-    interpolatedPoints.push(start);
-    
-    for (let j = 1; j < numIntermediatePoints; j++) {
-      const t = j / numIntermediatePoints;
-      const t2 = t * t;
-      const t3 = t2 * t;
+    // Generate the curved flight path
+    for (let i = 0; i < points.length - 1; i++) {
+      const start = points[i];
+      const end = points[i + 1];
       
-      const control1 = i > 0 ? points[i - 1] : start;
-      const control2 = i < points.length - 2 ? points[i + 2] : end;
+      interpolatedPoints.push(start);
       
-      const lng = (2 * t3 - 3 * t2 + 1) * start.longitude +
-        (t3 - 2 * t2 + t) * (end.longitude - control1.longitude) +
-        (-2 * t3 + 3 * t2) * end.longitude +
-        (t3 - t2) * (control2.longitude - start.longitude);
+      for (let j = 1; j < numIntermediatePoints; j++) {
+        const t = j / numIntermediatePoints;
+        const t2 = t * t;
+        const t3 = t2 * t;
         
-      const lat = (2 * t3 - 3 * t2 + 1) * start.latitude +
-        (t3 - 2 * t2 + t) * (end.latitude - control1.latitude) +
-        (-2 * t3 + 3 * t2) * end.latitude +
-        (t3 - t2) * (control2.latitude - start.latitude);
+        const control1 = i > 0 ? points[i - 1] : start;
+        const control2 = i < points.length - 2 ? points[i + 2] : end;
         
-      const alt = start.altitude + (end.altitude - start.altitude) * t;
-      
-      interpolatedPoints.push({
-        longitude: lng,
-        latitude: lat,
-        altitude: alt,
-        index: start.index
-      });
+        const lng = (2 * t3 - 3 * t2 + 1) * start.longitude +
+          (t3 - 2 * t2 + t) * (end.longitude - control1.longitude) +
+          (-2 * t3 + 3 * t2) * end.longitude +
+          (t3 - t2) * (control2.longitude - start.longitude);
+          
+        const lat = (2 * t3 - 3 * t2 + 1) * start.latitude +
+          (t3 - 2 * t2 + t) * (end.latitude - control1.latitude) +
+          (-2 * t3 + 3 * t2) * end.latitude +
+          (t3 - t2) * (control2.latitude - start.latitude);
+          
+        const alt = start.altitude + (end.altitude - start.altitude) * t;
+        
+        interpolatedPoints.push({
+          longitude: lng,
+          latitude: lat,
+          altitude: alt,
+          index: start.index
+        });
+      }
     }
-  }
   
   // Add the final flight point
-  interpolatedPoints.push(points[points.length - 1]);
+  const finalFlightPoint = points[points.length - 1];
+  interpolatedPoints.push(finalFlightPoint);
   
-  // Generate orbital path from current map bearing
+  // Generate orbital path with smooth transition
+  const lastFlightPoint = interpolatedPoints[interpolatedPoints.length - 1];
   const orbitPoints = generateOrbitPoints(
-    points[points.length - 1],
-    currentMapBearing,  // using the actual map bearing
-    0.5
+    finalFlightPoint,
+    currentMapBearing,
+    0.5,
+    500,
+    {
+      adaptiveRadius: true,
+      smoothTransition: true,
+      startPoint: lastFlightPoint
+    }
   );
   
   interpolatedPoints.push(...orbitPoints);
@@ -161,23 +200,42 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
 }) => {
   const animationFrameRef = useRef<number | null>(null);
   const currentBearingRef = useRef<number>(0);
+  const isOrbitingRef = useRef<boolean>(false);
 
   const startDroneAnimation = useCallback(() => {
     if (points.length < 2) return;
     
     const INITIAL_ROTATION_DURATION = 8000;
-    const SPEED_KM_PER_SECOND = 0.185;
-    const ROTATION_SMOOTHNESS = 0.1; // less = more smooth
+    const FLIGHT_SPEED_KM_PER_SECOND = 0.185;
+    const ORBIT_SPEED_FACTOR = 0.10; 
+    const ROTATION_SMOOTHNESS = 0.1;
     
-    // Generate path using current bearing from ref
     const curvedPath = generateCurvedPath(points, currentBearingRef.current);
     
-    let totalDistance = 0;
-    for (let i = 0; i < curvedPath.length - 1; i++) {
-      totalDistance += calculateDistance(curvedPath[i], curvedPath[i + 1]);
+    // Separate flight path and orbit path
+    const flightPathEndIndex = curvedPath.findIndex((point, index) => {
+      if (index === 0) return false;
+      const prevPoint = curvedPath[index - 1];
+      return Math.abs(point.longitude - prevPoint.longitude) > 0.01 || 
+             Math.abs(point.latitude - prevPoint.latitude) > 0.01;
+    });
+    
+    const flightPath = curvedPath.slice(0, flightPathEndIndex);
+    const orbitPath = curvedPath.slice(flightPathEndIndex);
+    
+    // Calculate distances and durations
+    let totalFlightDistance = 0;
+    for (let i = 0; i < flightPath.length - 1; i++) {
+      totalFlightDistance += calculateDistance(flightPath[i], flightPath[i + 1]);
     }
     
-    const totalFlightDuration = (totalDistance / SPEED_KM_PER_SECOND) * 1000;
+    let totalOrbitDistance = 0;
+    for (let i = 0; i < orbitPath.length - 1; i++) {
+      totalOrbitDistance += calculateDistance(orbitPath[i], orbitPath[i + 1]);
+    }
+    
+    const flightDuration = (totalFlightDistance / FLIGHT_SPEED_KM_PER_SECOND) * 1000;
+    const orbitDuration = (totalOrbitDistance / (FLIGHT_SPEED_KM_PER_SECOND * ORBIT_SPEED_FACTOR)) * 1000;
     
     onAnimationStart();
     const startTime = Date.now();
@@ -186,6 +244,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       const currentTime = Date.now();
       const elapsedTime = currentTime - startTime;
       
+      // Initial rotation phase
       if (elapsedTime < INITIAL_ROTATION_DURATION) {
         const progress = elapsedTime / INITIAL_ROTATION_DURATION;
         const initialBearing = calculateBearing(curvedPath[0], curvedPath[1]);
@@ -209,47 +268,73 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       }
 
       const flightTime = elapsedTime - INITIAL_ROTATION_DURATION;
-      if (flightTime <= totalFlightDuration) {
-        const progress = flightTime / totalFlightDuration;
+      
+      // Flight phase
+      if (flightTime <= flightDuration) {
+        isOrbitingRef.current = false;
+        const progress = flightTime / flightDuration;
         const pathIndex = Math.min(
-          Math.floor(progress * (curvedPath.length - 1)), 
-          curvedPath.length - 2
+          Math.floor(progress * (flightPath.length - 1)), 
+          flightPath.length - 2
         );
         
-        const currentPoint = curvedPath[pathIndex];
-        const nextPoint = curvedPath[pathIndex + 1];
-        const segmentProgress = (progress * (curvedPath.length - 1)) % 1;
+        const currentPoint = flightPath[pathIndex];
+        const nextPoint = flightPath[pathIndex + 1];
+        const segmentProgress = (progress * (flightPath.length - 1)) % 1;
         
-        const longitude = currentPoint.longitude + 
-          (nextPoint.longitude - currentPoint.longitude) * segmentProgress;
-        const latitude = currentPoint.latitude + 
-          (nextPoint.latitude - currentPoint.latitude) * segmentProgress;
-        const altitude = currentPoint.altitude + 
-          (nextPoint.altitude - currentPoint.altitude) * segmentProgress;
-        
-        const targetBearing = calculateBearing(currentPoint, nextPoint);
-        const smoothBearing = interpolateAngle(
-          currentBearingRef.current,
-          targetBearing,
-          ROTATION_SMOOTHNESS
-        );
-        currentBearingRef.current = smoothBearing;
-
-        const adjustedZoom = CONFIG.map.drone.FLIGHT_ZOOM - (altitude * 3);
-
-        onViewStateChange({
-          longitude,
-          latitude,
-          bearing: smoothBearing,
-          zoom: adjustedZoom,
-          pitch: CONFIG.map.drone.PITCH
-        });
-
+        updateViewState(currentPoint, nextPoint, segmentProgress);
         onAnimationProgress(progress);
-        animationFrameRef.current = requestAnimationFrame(animate);
-      } else {
+      } 
+      // Orbit phase
+      else if (flightTime <= flightDuration + orbitDuration) {
+        isOrbitingRef.current = true;
+        const orbitProgress = (flightTime - flightDuration) / orbitDuration;
+        const pathIndex = Math.min(
+          Math.floor(orbitProgress * (orbitPath.length - 1)), 
+          orbitPath.length - 2
+        );
+        
+        const currentPoint = orbitPath[pathIndex];
+        const nextPoint = orbitPath[pathIndex + 1];
+        const segmentProgress = (orbitProgress * (orbitPath.length - 1)) % 1;
+        
+        updateViewState(currentPoint, nextPoint, segmentProgress);
+        onAnimationProgress(1); // Keep progress at 100% during orbit
+      } 
+      // Animation complete
+      else {
         onAnimationCancel();
+        return;
       }
+      
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    const updateViewState = (currentPoint: Point, nextPoint: Point, segmentProgress: number) => {
+      const longitude = currentPoint.longitude + 
+        (nextPoint.longitude - currentPoint.longitude) * segmentProgress;
+      const latitude = currentPoint.latitude + 
+        (nextPoint.latitude - currentPoint.latitude) * segmentProgress;
+      const altitude = currentPoint.altitude + 
+        (nextPoint.altitude - currentPoint.altitude) * segmentProgress;
+      
+      const targetBearing = calculateBearing(currentPoint, nextPoint);
+      const smoothBearing = interpolateAngle(
+        currentBearingRef.current,
+        targetBearing,
+        isOrbitingRef.current ? ROTATION_SMOOTHNESS * 0.5 : ROTATION_SMOOTHNESS
+      );
+      currentBearingRef.current = smoothBearing;
+
+      const adjustedZoom = CONFIG.map.drone.FLIGHT_ZOOM - (altitude * 3);
+
+      onViewStateChange({
+        longitude,
+        latitude,
+        bearing: smoothBearing,
+        zoom: adjustedZoom,
+        pitch: CONFIG.map.drone.PITCH
+      });
     };
 
     onViewStateChange({
