@@ -42,6 +42,11 @@ const calculateVerticalBearing = (startPoint: Point, endPoint: Point): number =>
   return (90 - angle + 360) % 360;
 };
 
+// New function to interpolate altitude
+const interpolateAltitude = (startPoint: Point, endPoint: Point, progress: number): number => {
+  return startPoint.altitude + (endPoint.altitude - startPoint.altitude) * progress;
+};
+
 export const FlightAnimation: React.FC<FlightAnimationProps> = ({
   points,
   isAnimating,
@@ -73,11 +78,14 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
         // Calculate bearing between first two points
         const bearing = calculateVerticalBearing(points[0], points[1]);
         
+        // Incorporate initial altitude
+        const initialZoom = CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 2);
+        const targetZoom = CONFIG.map.drone.FLIGHT_ZOOM - (points[0].altitude * 2);
+        
         onViewStateChange({
           longitude: points[0].longitude,
           latitude: points[0].latitude,
-          zoom: CONFIG.map.drone.INITIAL_ZOOM + 
-            (CONFIG.map.drone.FLIGHT_ZOOM - CONFIG.map.drone.INITIAL_ZOOM) * progress,
+          zoom: initialZoom + (targetZoom - initialZoom) * progress,
           pitch: CONFIG.map.drone.PITCH * progress,
           bearing: bearing * progress
         });
@@ -102,12 +110,16 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
         const latitude = startPoint.latitude + 
           (endPoint.latitude - startPoint.latitude) * segmentProgress;
         const bearing = calculateVerticalBearing(startPoint, endPoint);
+        
+        // Interpolate altitude and adjust zoom with doubled effect
+        const currentAltitude = interpolateAltitude(startPoint, endPoint, segmentProgress);
+        const adjustedZoom = CONFIG.map.drone.FLIGHT_ZOOM - (currentAltitude * 2);
 
         onViewStateChange({
           longitude,
           latitude,
           bearing,
-          zoom: CONFIG.map.drone.FLIGHT_ZOOM,
+          zoom: adjustedZoom,
           pitch: CONFIG.map.drone.PITCH
         });
 
@@ -119,11 +131,11 @@ export const FlightAnimation: React.FC<FlightAnimationProps> = ({
       }
     };
 
-    // Start at first point
+    // Start at first point with initial altitude adjustment
     onViewStateChange({
       longitude: points[0].longitude,
       latitude: points[0].latitude,
-      zoom: CONFIG.map.drone.INITIAL_ZOOM,
+      zoom: CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 2),
       pitch: 0,
       bearing: 0
     });

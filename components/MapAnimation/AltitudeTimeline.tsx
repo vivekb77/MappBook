@@ -74,6 +74,9 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
     };
   }, [draggingPoint, isAnimating]);
 
+  // Calculate adjusted progress that only starts after point 1
+  const adjustedProgress = Math.max(0, (animationProgress * (points.length - 1) - 1) / (points.length - 2));
+
   return (
     <div
       ref={timelineRef}
@@ -120,6 +123,42 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
               />
             );
           })}
+
+          {/* Animation Progress Line */}
+          {isAnimating && points.length > 1 && adjustedProgress > 0 && (
+            <>
+              {points.slice(0, -1).map((point, i) => {
+                const startX = (i / (points.length - 1)) * 100;
+                const endX = ((i + 1) / (points.length - 1)) * 100;
+                const startY = ((CONFIG.map.drone.MAX_ALTITUDE - point.altitude) /
+                  (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE)) * 100;
+                const endY = ((CONFIG.map.drone.MAX_ALTITUDE - points[i + 1].altitude) /
+                  (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE)) * 100;
+                
+                // Only show segments up to the current progress
+                const segmentProgress = Math.min(1, Math.max(0, 
+                  (adjustedProgress * (points.length - 2) - i) / 1
+                ));
+                
+                if (segmentProgress <= 0) return null;
+                
+                const actualEndX = startX + (endX - startX) * segmentProgress;
+                const actualEndY = startY + (endY - startY) * segmentProgress;
+
+                return (
+                  <line
+                    key={`progress-${i}`}
+                    x1={`${startX}%`}
+                    y1={`${startY}%`}
+                    x2={`${actualEndX}%`}
+                    y2={`${actualEndY}%`}
+                    stroke="#3B82F6"
+                    strokeWidth="4"
+                  />
+                );
+              })}
+            </>
+          )}
         </svg>
 
         {/* Points */}
@@ -172,24 +211,9 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
             </div>
           );
         })}
-      </div>
 
-      {/* Animation Progress Bar */}
-      {isAnimating && points.length > 0 && (
-        <>
-          <div className="absolute bottom-0 inset-x-8 h-2 bg-black/30">
-            <div
-              className="absolute inset-y-0 left-0 bg-blue-500"
-              style={{
-                width: `${animationProgress * 100}%`
-              }}
-            />
-          </div>
-          <div className="absolute -bottom-6 left-8 text-white text-xs">
-            {Math.round(animationProgress * 100)}%
-          </div>
-        </>
-      )}
+
+      </div>
     </div>
   );
 };

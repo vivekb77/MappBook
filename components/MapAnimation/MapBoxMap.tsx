@@ -15,16 +15,16 @@ const CONFIG = {
       satellite: "mapbox://styles/mapbox/satellite-streets-v12",
     },
     drone: {
-      ROTATION_DURATION: 0, //not used
-      FLIGHT_DURATION: 0, //not used
+      ROTATION_DURATION: 0, //not used from here, flight animation has it 
+      FLIGHT_DURATION: 0, //not used from here, flight animation has it
       INITIAL_ZOOM: 1,
-      FLIGHT_ZOOM: 16,
-      PITCH: 80,
+      FLIGHT_ZOOM: 17,
+      PITCH: 60,
       POINT_RADIUS_KM: 5,
       REQUIRED_ZOOM: 10,
       MAX_POINTS: 10,
-      MIN_ALTITUDE: 0.5,
-      MAX_ALTITUDE: 1
+      MIN_ALTITUDE: 0, //not used from here, altitude has it
+      MAX_ALTITUDE: 1  //not used from here, altitude has it
     },
   }
 };
