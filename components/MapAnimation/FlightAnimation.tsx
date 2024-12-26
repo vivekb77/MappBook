@@ -201,6 +201,38 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
   const animationFrameRef = useRef<number | null>(null);
   const currentBearingRef = useRef<number>(0);
   const isOrbitingRef = useRef<boolean>(false);
+  const resetPitchAnimationRef = useRef<number | null>(null);
+
+  const resetPitchToZero = useCallback(() => {
+    const RESET_DURATION = 1000; // 1 second duration
+    const startTime = Date.now();
+    const startPitch = CONFIG.map.drone.PITCH;
+
+    const animateReset = () => {
+      const currentTime = Date.now();
+      const progress = Math.min((currentTime - startTime) / RESET_DURATION, 1);
+      
+      // Simple easing function
+      const easedProgress = 1 - Math.pow(1 - progress, 2);
+      const currentPitch = startPitch * (1 - easedProgress);
+
+      onViewStateChange({
+        longitude: points[points.length - 1].longitude,
+        latitude: points[points.length - 1].latitude,
+        zoom: CONFIG.map.drone.FLIGHT_ZOOM - (points[points.length - 1].altitude * 3),
+        pitch: currentPitch,
+        bearing: currentBearingRef.current
+      });
+
+      if (progress < 1) {
+        resetPitchAnimationRef.current = requestAnimationFrame(animateReset);
+      } else {
+        resetPitchAnimationRef.current = null;
+      }
+    };
+
+    resetPitchAnimationRef.current = requestAnimationFrame(animateReset);
+  }, [points, CONFIG, onViewStateChange]);
 
   const startDroneAnimation = useCallback(() => {
     if (points.length < 2) return;
@@ -303,6 +335,11 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       } 
       // Animation complete
       else {
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+        resetPitchToZero();
         onAnimationCancel();
         return;
       }
@@ -352,9 +389,15 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
   const cancelAnimation = useCallback(() => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
-      onAnimationCancel();
+      animationFrameRef.current = null;
     }
-  }, [onAnimationCancel]);
+    if (resetPitchAnimationRef.current) {
+      cancelAnimationFrame(resetPitchAnimationRef.current);
+      resetPitchAnimationRef.current = null;
+    }
+    resetPitchToZero();
+    onAnimationCancel();
+  }, [onAnimationCancel, resetPitchToZero]);
 
   return (
     <div className="flex space-x-2">
