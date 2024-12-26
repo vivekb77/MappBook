@@ -64,6 +64,7 @@ interface MapMarkersProps {
   onPointMove: (index: number, lng: number, lat: number) => void;
   onError: (message: string) => void;
   onUpdatePointLabel: (index: number, label: string) => void;
+  onPointRemove: (index: number) => void;
 }
 
 const calculateDistance = (point1: { longitude: number; latitude: number }, point2: { longitude: number; latitude: number }): number => {
@@ -178,55 +179,55 @@ const CustomMarker: React.FC<{
   label,
   onLabelClick
 }) => {
-  return (
+    return (
       <div className="relative cursor-grab active:cursor-grabbing">
-          {/* Distance Display */}
-          <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-black/75 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-              {distance !== undefined ? `${distance.toFixed(2)} km` : ''}
+        {/* Distance Display */}
+        <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-black/75 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
+          {distance !== undefined ? `${distance.toFixed(2)} km` : ''}
+        </div>
+
+        {/* Label Display */}
+        {label && (
+          <div className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
+            {label}
           </div>
+        )}
 
-          {/* Label Display */}
-          {label && (
-              <div className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                  {label}
-              </div>
-          )}
+        <div className="flex items-center">
+          {/* Marker SVG */}
+          <svg width="30" height="42" viewBox="0 0 30 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M15 0C6.71573 0 0 6.71573 0 15C0 23.2843 15 42 15 42C15 42 30 23.2843 30 15C30 6.71573 23.2843 0 15 0Z"
+              fill={isDragging ? "#FF4B4B" : "#4285F4"}
+            />
+            <circle cx="15" cy="15" r="12" fill="white" />
+            <text
+              x="15"
+              y="20"
+              textAnchor="middle"
+              fill={isDragging ? "#FF4B4B" : "#4285F4"}
+              fontSize="14"
+              fontWeight="bold"
+              fontFamily="Arial"
+            >
+              {index}
+            </text>
+          </svg>
 
-          <div className="flex items-center">
-              {/* Marker SVG */}
-              <svg width="30" height="42" viewBox="0 0 30 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                      d="M15 0C6.71573 0 0 6.71573 0 15C0 23.2843 15 42 15 42C15 42 30 23.2843 30 15C30 6.71573 23.2843 0 15 0Z"
-                      fill={isDragging ? "#FF4B4B" : "#4285F4"}
-                  />
-                  <circle cx="15" cy="15" r="12" fill="white" />
-                  <text
-                      x="15"
-                      y="20"
-                      textAnchor="middle"
-                      fill={isDragging ? "#FF4B4B" : "#4285F4"}
-                      fontSize="14"
-                      fontWeight="bold"
-                      fontFamily="Arial"
-                  >
-                      {index}
-                  </text>
-              </svg>
-
-              {/* Label Button */}
-              <button
-                  onClick={(e) => {
-                      e.stopPropagation();
-                      onLabelClick();
-                  }}
-                  className="ml-2 bg-white rounded-full p-1.5 shadow-md hover:bg-gray-50 transition-colors"
-              >
-                  <Pencil className="w-4 h-4 text-gray-400" />
-              </button>
-          </div>
+          {/* Label Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onLabelClick();
+            }}
+            className="ml-2 bg-white rounded-full p-1.5 shadow-md hover:bg-gray-50 transition-colors"
+          >
+            <Pencil className="w-4 h-4 text-gray-400" />
+          </button>
+        </div>
       </div>
-  );
-};
+    );
+  };
 
 
 // Label Dialog Component
@@ -234,8 +235,9 @@ const LabelDialog: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSave: (label: string) => void;
+  onRemove: () => void;
   currentLabel: string;
-}> = ({ isOpen, onClose, onSave, currentLabel }) => {
+}> = ({ isOpen, onClose, onSave, onRemove, currentLabel }) => {
   const [labelInput, setLabelInput] = useState(currentLabel);
   const MAX_LABEL_LENGTH = 25;
 
@@ -263,7 +265,7 @@ const LabelDialog: React.FC<{
       <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] sm:w-[440px] rounded-2xl bg-white p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-xs font-medium text-blue-400">
-            Set a label for Point
+            Edit Point
           </DialogTitle>
         </DialogHeader>
 
@@ -293,6 +295,19 @@ const LabelDialog: React.FC<{
           <div className="text-xs text-gray-400 mt-1">
             {labelInput.length}/{MAX_LABEL_LENGTH} characters
           </div>
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={() => {
+                onRemove();
+                onClose();
+              }}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+              aria-label="Remove point"
+            >
+              <X className="w-4 h-4" />
+              Remove Point
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -320,7 +335,8 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
   CONFIG,
   onPointMove,
   onError,
-  onUpdatePointLabel
+  onUpdatePointLabel,
+  onPointRemove
 }) => {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [labelDialogState, setLabelDialogState] = useState<{
@@ -332,14 +348,14 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
   });
 
   const validateDrag = (point: Point, newLng: number, newLat: number): boolean => {
-      const originalPos = point.originalPosition || { longitude: point.longitude, latitude: point.latitude };
-      const distance = calculateDistance(originalPos, { longitude: newLng, latitude: newLat });
+    const originalPos = point.originalPosition || { longitude: point.longitude, latitude: point.latitude };
+    const distance = calculateDistance(originalPos, { longitude: newLng, latitude: newLat });
 
-      if (distance > CONFIG.map.drone.POINT_RADIUS_KM) {
-          onError(`Cannot move point more than ${CONFIG.map.drone.POINT_RADIUS_KM}km from original position`);
-          return false;
-      }
-      return true;
+    if (distance > CONFIG.map.drone.POINT_RADIUS_KM) {
+      onError(`Cannot move point more than ${CONFIG.map.drone.POINT_RADIUS_KM}km from original position`);
+      return false;
+    }
+    return true;
   };
 
   const handleLabelClick = (index: number) => {
@@ -360,7 +376,7 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
         onError("Label is too long");
         return;
       }
-      
+
       // Update the label in the parent component
       onUpdatePointLabel(labelDialogState.pointIndex, label);
     }
@@ -368,124 +384,128 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
   };
 
   const handleDragStart = (index: number) => {
-      if (isAnimating) {
-          onError("Cannot move points while animating");
-          return;
-      }
-      setDraggingIndex(index);
+    if (isAnimating) {
+      onError("Cannot move points while animating");
+      return;
+    }
+    setDraggingIndex(index);
   };
 
   const handleDrag = (index: number, { lng, lat }: { lng: number; lat: number }) => {
-      const point = points[index];
-      if (validateDrag(point, lng, lat)) {
-          onPointMove(index, lng, lat);
-      }
+    const point = points[index];
+    if (validateDrag(point, lng, lat)) {
+      onPointMove(index, lng, lat);
+    }
   };
 
   const handleDragEnd = () => {
-      setDraggingIndex(null);
+    setDraggingIndex(null);
   };
 
   const pathGeoJson = points.length > 0 ? createPathGeoJson(points) : null;
   const nextPointCircleGeoJson = points.length > 0 ?
-      createCircleGeoJson(points[points.length - 1], CONFIG.map.drone.POINT_RADIUS_KM) : null;
+    createCircleGeoJson(points[points.length - 1], CONFIG.map.drone.POINT_RADIUS_KM) : null;
 
   return (
-      <>
-          {/* Path Layer */}
-          {pathGeoJson && (
-              <Source type="geojson" data={pathGeoJson as GeoJSON.FeatureCollection | GeoJSON.Feature}>
-                  <Layer
-                      id="path-layer"
-                      type="line"
-                      paint={{
-                          'line-color': '#4285F4',
-                          'line-width': 4,
-                          'line-opacity': 0.8,
-                          'line-blur': 1
-                      }}
-                  />
-              </Source>
-          )}
-
-          {/* Next Point Range Circle */}
-          {nextPointCircleGeoJson && !isAnimating && (
-              <Source type="geojson" data={nextPointCircleGeoJson as GeoJSON.FeatureCollection | GeoJSON.Feature}>
-                  <Layer
-                      id="next-point-circle"
-                      type="line"
-                      paint={{
-                          'line-color': '#ffff00',
-                          'line-width': 2,
-                          'line-opacity': 0.8,
-                          'line-dasharray': [2, 2]
-                      }}
-                  />
-              </Source>
-          )}
-
-          {/* Movement Range Circles */}
-          {points.map((point, index) => {
-              const movementCircle = createCircleGeoJson(
-                  point.originalPosition ?
-                      { ...point, latitude: point.originalPosition.latitude, longitude: point.originalPosition.longitude } :
-                      point,
-                  CONFIG.map.drone.POINT_RADIUS_KM
-              );
-              return (
-                  <Source
-                      key={`movement-circle-${index}`}
-                      type="geojson"
-                      data={movementCircle as GeoJSON.FeatureCollection | GeoJSON.Feature}
-                  >
-                      <Layer
-                          id={`movement-circle-${index}`}
-                          type="line"
-                          paint={{
-                              'line-color': '#00ff00',
-                              'line-width': 1,
-                              'line-opacity': index === draggingIndex ? 0.8 : 0.3,
-                              'line-dasharray': [2, 2]
-                          }}
-                      />
-                  </Source>
-              );
-          })}
-
-          {/* Markers */}
-          {points.map((point, index) => {
-              const distances = calculateCumulativeDistances(points);
-              console.log('Rendering point:', point);
-              return (
-                  <Marker
-                      key={point.index}
-                      longitude={point.longitude}
-                      latitude={point.latitude}
-                      anchor="bottom"
-                      draggable={!isAnimating}
-                      onDragStart={() => handleDragStart(index)}
-                      onDrag={(e) => handleDrag(index, e.lngLat)}
-                      onDragEnd={handleDragEnd}
-                  >
-                      <CustomMarker
-                          index={point.index}
-                          isDragging={index === draggingIndex}
-                          distance={distances[index]}
-                          label={point.label}
-                          onLabelClick={() => handleLabelClick(index)}
-                      />
-                  </Marker>
-              );
-          })}
-
-          {/* Label Dialog */}
-          <LabelDialog
-              isOpen={labelDialogState.isOpen}
-              onClose={() => setLabelDialogState({ isOpen: false, pointIndex: null })}
-              onSave={handleLabelSave}
-              currentLabel={labelDialogState.pointIndex !== null ? points[labelDialogState.pointIndex]?.label || '' : ''}
+    <>
+      {/* Path Layer */}
+      {pathGeoJson && (
+        <Source type="geojson" data={pathGeoJson as GeoJSON.FeatureCollection | GeoJSON.Feature}>
+          <Layer
+            id="path-layer"
+            type="line"
+            paint={{
+              'line-color': '#4285F4',
+              'line-width': 4,
+              'line-opacity': 0.8,
+              'line-blur': 1
+            }}
           />
-      </>
+        </Source>
+      )}
+
+      {/* Next Point Range Circle */}
+      {nextPointCircleGeoJson && !isAnimating && (
+        <Source type="geojson" data={nextPointCircleGeoJson as GeoJSON.FeatureCollection | GeoJSON.Feature}>
+          <Layer
+            id="next-point-circle"
+            type="line"
+            paint={{
+              'line-color': '#ffff00',
+              'line-width': 2,
+              'line-opacity': 0.8,
+              'line-dasharray': [2, 2]
+            }}
+          />
+        </Source>
+      )}
+
+      {/* Movement Range Circles */}
+      {points.map((point, index) => {
+        const movementCircle = createCircleGeoJson(
+          point.originalPosition ?
+            { ...point, latitude: point.originalPosition.latitude, longitude: point.originalPosition.longitude } :
+            point,
+          CONFIG.map.drone.POINT_RADIUS_KM
+        );
+        return (
+          <Source
+            key={`movement-circle-${index}`}
+            type="geojson"
+            data={movementCircle as GeoJSON.FeatureCollection | GeoJSON.Feature}
+          >
+            <Layer
+              id={`movement-circle-${index}`}
+              type="line"
+              paint={{
+                'line-color': '#00ff00',
+                'line-width': 1,
+                'line-opacity': index === draggingIndex ? 0.8 : 0.3,
+                'line-dasharray': [2, 2]
+              }}
+            />
+          </Source>
+        );
+      })}
+
+      {/* Markers */}
+      {points.map((point, index) => {
+        const distances = calculateCumulativeDistances(points);
+        return (
+          <Marker
+            key={point.index}
+            longitude={point.longitude}
+            latitude={point.latitude}
+            anchor="bottom"
+            draggable={!isAnimating}
+            onDragStart={() => handleDragStart(index)}
+            onDrag={(e) => handleDrag(index, e.lngLat)}
+            onDragEnd={handleDragEnd}
+          >
+            <CustomMarker
+              index={point.index}
+              isDragging={index === draggingIndex}
+              distance={distances[index]}
+              label={point.label}
+              onLabelClick={() => handleLabelClick(index)}
+            />
+          </Marker>
+        );
+      })}
+
+      {/* Label Dialog */}
+      <LabelDialog
+        isOpen={labelDialogState.isOpen}
+        onClose={() => setLabelDialogState({ isOpen: false, pointIndex: null })}
+        onSave={handleLabelSave}
+        onRemove={() => {
+          if (labelDialogState.pointIndex !== null) {
+            onPointRemove(labelDialogState.pointIndex);
+          }
+        }}
+        currentLabel={labelDialogState.pointIndex !== null ? points[labelDialogState.pointIndex]?.label || '' : ''}
+      />
+    </>
   );
 };
 

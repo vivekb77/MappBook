@@ -234,6 +234,7 @@ const MapboxMap: React.FC = () => {
             newPoints[index] = { ...newPoints[index], label };
             setPoints(newPoints);
           }}
+          onPointRemove={handlePointRemove}
         />
 
 

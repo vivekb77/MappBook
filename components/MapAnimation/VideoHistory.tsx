@@ -293,18 +293,18 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
             <div
               key={video.animation_video_id}
               className={`w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md transition-colors group mb-2
-                ${selectedVideoId === video.animation_video_id ? 'bg-purple-100' : ''}`}
+                ${selectedVideoId === video.animation_video_id ? 'bg-blue-100' : ''}`}
             >
               <button
                 onClick={() => handleVideoSelect(video)}
                 className="flex-grow flex items-center gap-3 min-w-0"
               >
-                <div className="w-16 h-16 bg-purple-100 rounded flex items-center justify-center flex-shrink-0">
-                  <Video className={`w-6 h-6 ${selectedVideoId === video.animation_video_id ? 'text-purple-700' : 'text-purple-500'}`} />
+                <div className="w-16 h-16 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
+                  <Video className={`w-6 h-6 ${selectedVideoId === video.animation_video_id ? 'text-blue-700' : 'text-blue-500'}`} />
                 </div>
                 <div className="flex-grow min-w-0 text-left">
                   <p className={`text-sm font-medium truncate
-                    ${selectedVideoId === video.animation_video_id ? 'text-purple-700' : 'text-gray-700'}`}>
+                    ${selectedVideoId === video.animation_video_id ? 'text-blue-700' : 'text-gray-700'}`}>
                     Footage
                   </p>
                   <p className="text-xs text-gray-500">
@@ -344,7 +344,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
               onClick={loadMore}
               disabled={loading}
               className="mt-2 w-full py-2 px-4 text-sm font-medium text-gray-600 
-                hover:text-purple-500 flex items-center justify-center gap-2 
+                hover:text-blue-500 flex items-center justify-center gap-2 
                 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
