@@ -51,17 +51,17 @@ const aspectRatioOptions: AspectRatioOption[] = [
 
 type RenderingStatus = 'idle' | 'saving' | 'rendering' | 'complete' | 'error';
 
-const ExportButton: React.FC<ExportButtonProps> = ({ 
-  points, 
-  onExportComplete, 
-  onVideoCreated 
+const ExportButton: React.FC<ExportButtonProps> = ({
+  points,
+  onExportComplete,
+  onVideoCreated
 }) => {
   const [renderingStatus, setRenderingStatus] = useState<RenderingStatus>('idle');
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<string>("9:16");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const supabase = getClerkSupabaseClient();
   const { mappbookUser, setMappbookUser } = useMappbookUser();
 
@@ -77,7 +77,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             .single();
 
           if (error) throw error;
-          
+
           if (data) {
             setMappbookUser({
               ...mappbookUser,
@@ -112,10 +112,10 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     if (points.length === 0 || !mappbookUser?.animation_credits || mappbookUser.animation_credits <= 0) {
       return false;
     }
-  
+
     setRenderingStatus('saving');
     setIsDialogOpen(false);
-    
+
     try {
       if (!mappbookUser?.mappbook_user_id) {
         throw new Error('Invalid user ID');
@@ -125,7 +125,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       const { data: animationData, error: saveError } = await supabase
         .from('Animation_Data')
         .insert([{
-          location_data: points, 
+          location_data: points,
           mappbook_user_id: mappbookUser.mappbook_user_id
         }])
         .select();
@@ -140,7 +140,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           points,
           aspectRatio: selectedAspectRatio,
           mappbook_user_id: mappbookUser.mappbook_user_id
@@ -183,7 +183,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             setRenderingStatus('complete');
             showToast('Video created successfully!', 'success');
             onExportComplete?.();
-            
+
             const event = new CustomEvent('videoCreated');
             window.dispatchEvent(event);
             return;
@@ -251,7 +251,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             <DialogTitle className="text-gray-200">Create Animation Video</DialogTitle>
             <DialogDescription className="text-gray-400">
               <div className="flex items-center justify-between mb-4">
-                <span>The video will be created on the server, after completion it will appear in your Videos section for you to Download</span>
+                <span>The video will be processed on the server, after completion it will appear under 'Your Videos' section to View & Download</span>
                 <div className="flex items-center gap-2 px-3 py-1 bg-gray-700 rounded-full">
                   <Coins className="w-4 h-4 text-yellow-400" />
                   <span className="text-gray-200 font-medium">
@@ -265,30 +265,29 @@ const ExportButton: React.FC<ExportButtonProps> = ({
               </div>
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-6">
-            <RadioGroup 
-              value={selectedAspectRatio} 
+            <RadioGroup
+              value={selectedAspectRatio}
               onValueChange={setSelectedAspectRatio}
               className="grid grid-cols-2 gap-4"
             >
               {aspectRatioOptions.map((option) => (
-                <div 
+                <div
                   key={option.aspectRatio}
                   className={`relative p-4 rounded-lg border cursor-pointer
-                    ${selectedAspectRatio === option.aspectRatio 
-                      ? 'border-blue-500 bg-gray-700/50' 
+                    ${selectedAspectRatio === option.aspectRatio
+                      ? 'border-blue-500 bg-gray-700/50'
                       : 'border-gray-700 bg-gray-900/50 hover:bg-gray-700/30'}
                     transition-colors`}
                   onClick={() => setSelectedAspectRatio(option.aspectRatio)}
                 >
                   <div className="flex flex-col items-center gap-4">
-                    <div className={`relative ${
-                      option.aspectRatio === "9:16" 
-                        ? "w-12 h-20" 
-                        : "w-16 h-20"
-                    } bg-gray-700 rounded-lg border border-gray-600`} />
-                    
+                    <div className={`relative ${option.aspectRatio === "9:16"
+                      ? "w-12 h-20"
+                      : "w-16 h-20"
+                      } bg-gray-700 rounded-lg border border-gray-600`} />
+
                     <div className="text-center">
                       <p className="text-gray-200 font-medium">{option.aspectRatio}</p>
                       <div className="mt-2 text-sm text-gray-400">
@@ -307,6 +306,18 @@ const ExportButton: React.FC<ExportButtonProps> = ({
               ))}
             </RadioGroup>
           </div>
+
+          {typeof mappbookUser?.animation_credits === 'number' && mappbookUser.animation_credits <= 5 && mappbookUser.animation_credits > 0 && (
+            <div className="text-yellow-200 text-sm mb-4">
+              Running low on credits! Consider adding more credits to continue creating videos.
+            </div>
+          )}
+
+          {typeof mappbookUser?.animation_credits === 'number' && mappbookUser.animation_credits === 0 && (
+            <div className="text-red-400 text-sm mb-4">
+              No credits remaining. Please add credits to process video.
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 mt-4">
             <Button

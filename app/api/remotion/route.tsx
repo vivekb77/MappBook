@@ -6,6 +6,13 @@ import {
 } from '@remotion/lambda/client';
 import { createClient } from '@supabase/supabase-js';
 
+type AWSRegion = 
+  | 'us-east-1' | 'us-east-2' | 'us-west-1' | 'us-west-2'
+  | 'ap-south-1' | 'ap-northeast-1' | 'ap-northeast-2' | 'ap-northeast-3'
+  | 'ap-southeast-1' | 'ap-southeast-2' | 'ca-central-1' | 'eu-central-1'
+  | 'eu-west-1' | 'eu-west-2' | 'eu-west-3' | 'eu-north-1'
+  | 'sa-east-1';
+
 // Video configuration
 const DURATION_IN_FRAMES = 299; // 10 seconds at 30fps
 const BASE_VIDEO_CONFIG = {
@@ -21,7 +28,7 @@ const ASPECT_RATIO_CONFIGS = {
 };
 
 // AWS Lambda configuration
-const REGION = process.env.AWS_REGION || 'us-east-1';
+const REGION = (process.env.AWS_REGION || 'us-east-1') as AWSRegion;
 const FUNCTION_NAME = 'remotion-render-4-0-242-mem2048mb-disk2048mb-120sec'
 const SERVE_URL = 'https://remotionlambda-useast1-0303dghv3x.s3.us-east-1.amazonaws.com/sites/mappbook-animation/index.html'
 const BUCKET_NAME = 'remotionlambda-useast1-0303dghv3x';
@@ -107,13 +114,12 @@ export async function POST(req: NextRequest) {
       maxRetries: 3,
       privacy: 'public',
       framesPerLambda: 100,
-      timeoutInSeconds: 300,
+
       frameRange: [0, DURATION_IN_FRAMES - 1],
-      bucketName: BUCKET_NAME,
+
       ...BASE_VIDEO_CONFIG,
       ...dimensions,
       chromiumOptions: {
-        timeout: 300000,
         gl: 'angle',
       },
     });

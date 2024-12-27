@@ -401,6 +401,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
                   <video
                     src={selectedVideo.video_url}
                     controls
+                    autoPlay
                     className="w-full h-full rounded-lg"
                   />
                 )}
