@@ -1,4 +1,3 @@
-// middleware.ts
 import { authMiddleware } from "@clerk/nextjs";
 
 export default authMiddleware({
@@ -6,12 +5,12 @@ export default authMiddleware({
     "/",
     "/api/stripe/webhook",
     "/terms",
+    "/create",
     "/api/search-address",
-    "/api/recordflipbook",
     "/api/get-assets",
     "/passport",
-    "/playflipbook",
     "/privacy",
+    "/sign-in",
     "/contact",
     "/payment-success",
     "/map",
@@ -22,10 +21,9 @@ export default authMiddleware({
 
 export const config = {
   matcher: [
-    // Only match routes that should be protected
     "/profile/:path*",
     "/dashboard/:path*",
     "/settings/:path*",
-    "/api/((?!get-assets|stripe/webhook|search-address|recordflipbook).)*"  // Match all API routes except the public ones
+    "/api/((?!get-assets|stripe/webhook|search-address).)*"  // Match all API routes except the public ones
   ]
 };

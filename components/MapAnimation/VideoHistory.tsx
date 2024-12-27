@@ -271,9 +271,9 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
 
   if (videos.length === 0 && !loading) {
     return (
-      <div className="mt-6 bg-white/80 rounded-lg overflow-hidden border border-gray-100 p-8">
-        <div className="text-center text-gray-500">
-          <Video className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+      <div className="mt-6 bg-gray-800/90 rounded-lg overflow-hidden border border-gray-700 p-8">
+        <div className="text-center text-gray-400">
+          <Video className="w-12 h-12 mx-auto mb-4 text-gray-500" />
           <p className="text-sm font-medium">No video history</p>
           <p className="text-xs mt-1">Your previously created videos will appear here</p>
         </div>
@@ -282,9 +282,9 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
   }
 
   return (
-    <div className="relative mt-6 bg-white/80 rounded-lg overflow-hidden border border-gray-100">
-      <div className="p-4 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-700">Your Videos</h3>
+    <div className="relative mt-6 bg-gray-800/90 rounded-lg overflow-hidden border border-gray-700">
+      <div className="p-4 border-b border-gray-700">
+        <h3 className="text-sm font-semibold text-gray-200">Your Videos</h3>
       </div>
 
       <ScrollArea className="h-[300px]">
@@ -292,28 +292,28 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
           {videos.map((video) => (
             <div
               key={video.animation_video_id}
-              className={`w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md transition-colors group mb-2
-                ${selectedVideoId === video.animation_video_id ? 'bg-blue-100' : ''}`}
+              className={`w-full flex items-center gap-3 p-2 hover:bg-gray-700 rounded-md transition-colors group mb-2
+                ${selectedVideoId === video.animation_video_id ? 'bg-gray-700/80' : ''}`}
             >
               <button
                 onClick={() => handleVideoSelect(video)}
                 className="flex-grow flex items-center gap-3 min-w-0"
               >
-                <div className="w-16 h-16 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
-                  <Video className={`w-6 h-6 ${selectedVideoId === video.animation_video_id ? 'text-blue-700' : 'text-blue-500'}`} />
+                <div className="w-16 h-16 bg-gray-700/60 rounded flex items-center justify-center flex-shrink-0">
+                  <Video className={`w-6 h-6 ${selectedVideoId === video.animation_video_id ? 'text-blue-400' : 'text-blue-500'}`} />
                 </div>
                 <div className="flex-grow min-w-0 text-left">
                   <p className={`text-sm font-medium truncate
-                    ${selectedVideoId === video.animation_video_id ? 'text-blue-700' : 'text-gray-700'}`}>
-                    Footage
+                    ${selectedVideoId === video.animation_video_id ? 'text-blue-400' : 'text-gray-200'}`}>
+                    Footage on <span>{formatDate(video.created_at)}</span>
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {video.location_count} Points{video.location_count !== 1 ? 's' : ''}
-                  </p>
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
                     <Clock className="w-3 h-3" />
-                    <span>{formatDate(video.created_at)} at {formatTime(video.created_at)}</span>
+                    <span>at {formatTime(video.created_at)}</span>
                   </div>
+                  <p className="text-xs text-gray-400">
+                    {video.location_count} Point{video.location_count !== 1 ? 's' : ''}
+                  </p>
                 </div>
               </button>
 
@@ -322,7 +322,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
                   variant="ghost"
                   size="sm"
                   onClick={(e) => handleDownload(video.video_url, video.created_at, e)}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 text-gray-300 hover:text-blue-400 hover:bg-gray-700"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -331,7 +331,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
                   variant="ghost"
                   size="sm"
                   onClick={(e) => handleDelete(video, e)}
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                  className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-gray-700"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -343,8 +343,8 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
             <button
               onClick={loadMore}
               disabled={loading}
-              className="mt-2 w-full py-2 px-4 text-sm font-medium text-gray-600 
-                hover:text-blue-500 flex items-center justify-center gap-2 
+              className="mt-2 w-full py-2 px-4 text-sm font-medium text-gray-300 
+                hover:text-blue-400 flex items-center justify-center gap-2 
                 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
@@ -359,44 +359,49 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
       </ScrollArea>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-gray-800 border border-gray-700">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Video</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-gray-200">Delete Video</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
               Are you sure you want to delete this video?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
+            <AlertDialogCancel className="bg-gray-700 text-gray-200 hover:bg-gray-600 border-gray-600">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-red-500 hover:bg-red-600 text-gray-200"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Add Video Modal */}
+      {/* Video Modal */}
       {isVideoModalOpen && selectedVideo && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 w-[80vw] max-w-4xl">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-4 w-[80vw] max-w-4xl border border-gray-700">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Footage</h3>
+              <h3 className="text-lg font-semibold text-gray-200">Footage</h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsVideoModalOpen(false)}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 text-gray-300 hover:text-gray-200 hover:bg-gray-700"
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <div className="relative aspect-video">
+            <div className="relative aspect-video bg-gray-900 rounded-lg">
               <Player
                 component={() => (
                   <video
                     src={selectedVideo.video_url}
                     controls
-                    className="w-full h-full"
+                    className="w-full h-full rounded-lg"
                   />
                 )}
                 durationInFrames={1000}
@@ -409,7 +414,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
                 }}
               />
             </div>
-            <div className="mt-4 text-sm text-gray-500">
+            <div className="mt-4 text-sm text-gray-400">
               <p>{selectedVideo.location_count} Points{selectedVideo.location_count !== 1 ? 's' : ''}</p>
               <p>Created on {formatDate(selectedVideo.created_at)} at {formatTime(selectedVideo.created_at)}</p>
             </div>
@@ -417,17 +422,19 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
         </div>
       )}
 
+      {/* Toasts */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map(toast => (
           <div
             key={toast.id}
             className={`flex items-center justify-between p-4 rounded-lg shadow-lg min-w-[200px] 
-              ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`}
+              ${toast.type === 'success' ? 'bg-blue-500' : 'bg-red-500'} text-gray-200 border
+              ${toast.type === 'success' ? 'border-blue-400' : 'border-red-400'}`}
           >
             <span className="text-sm">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              className="ml-2 text-white hover:text-gray-200"
+              className="ml-2 text-gray-200 hover:text-gray-100"
             >
               <X className="h-4 w-4" />
             </button>

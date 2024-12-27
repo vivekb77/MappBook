@@ -15,7 +15,7 @@ const CONFIG = {
       satellite: "mapbox://styles/mapbox/satellite-streets-v12",
     },
     drone: {
-      ROTATION_DURATION: 0, //not used from here, flight animation has it 
+      ROTATION_DURATION: 0,//not used from here, flight animation has it 
       FLIGHT_DURATION: 0, //not used from here, flight animation has it
       INITIAL_ZOOM: 1,
       FLIGHT_ZOOM: 16,
@@ -23,16 +23,15 @@ const CONFIG = {
       POINT_RADIUS_KM: 5,
       REQUIRED_ZOOM: 10,
       MAX_POINTS: 10,
-      MIN_ALTITUDE: 0, //not used from here, altitude has it
+      MIN_ALTITUDE: 0,  //not used from here, altitude has it
       MAX_ALTITUDE: 1  //not used from here, altitude has it
     },
   }
 };
 
-
 // Helper function to calculate distance between points
 const calculateDistance = (point1: Point, point2: Point): number => {
-  const R = 6371; // Earth's radius in kilometers
+  const R = 6371;
   const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
   const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
   const a =
@@ -82,7 +81,7 @@ const MapboxMap: React.FC = () => {
   const [animationProgress, setAnimationProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-
+  // Validation and handlers remain the same
   const validatePoint = (newPoint: PointData): string | null => {
     if (isAnimating) {
       return "Cannot add points while animating";
@@ -173,7 +172,6 @@ const MapboxMap: React.FC = () => {
 
   const handleAnimationCancel = () => {
     setIsAnimating(false);
-
     setAnimationProgress(0);
   };
 
@@ -181,7 +179,6 @@ const MapboxMap: React.FC = () => {
     setPoints(prev => {
       const newPoints = [...prev];
       newPoints.splice(index, 1);
-      // Update indices for remaining points
       return newPoints.map((point, i) => ({
         ...point,
         index: i + 1
@@ -190,23 +187,20 @@ const MapboxMap: React.FC = () => {
     setErrorMessage("");
   };
 
-
   return (
     <div className="relative w-full h-full">
       {/* MappBook Logo */}
       <div className="absolute top-4 left-4 z-50">
-        <div className="bg-white/90 p-2 rounded-lg shadow-lg hover:bg-white transition-colors">
-          <span className="font-bold text-xl text-blue-600">MappBook</span>
+        <div className="bg-gray-800/90 p-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors border border-gray-700">
+          <span className="font-bold text-xl text-blue-400">MappBook</span>
         </div>
       </div>
 
       {/* Export Buttons */}
       <ExportButton points={points} />
 
-      {/* Map stats display - moved down to accommodate new buttons */}
-      <div className="absolute top-20 right-4 bg-black/50 text-white p-4 rounded space-y-2 font-mono text-sm z-50">
-        {/* <div>Longitude: {viewState.longitude.toFixed(6)}°</div>
-      <div>Latitude: {viewState.latitude.toFixed(6)}°</div> */}
+      {/* Map stats display */}
+      <div className="absolute top-20 right-4 bg-gray-800/90 text-gray-200 p-4 rounded space-y-2 font-mono text-sm z-50 border border-gray-700">
         <div>Zoom: {viewState.zoom.toFixed(2)}</div>
         <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
         <div>Bearing: {viewState.bearing.toFixed(2)}°</div>
@@ -236,8 +230,6 @@ const MapboxMap: React.FC = () => {
           }}
           onPointRemove={handlePointRemove}
         />
-
-
       </Map>
 
       {/* Altitude Timeline */}
@@ -255,7 +247,7 @@ const MapboxMap: React.FC = () => {
 
       {/* Controls */}
       <div className="absolute bottom-48 right-4 space-y-2">
-        <div className="text-white bg-black/50 p-2 rounded text-right">
+        <div className="text-gray-200 bg-gray-800/90 p-2 rounded text-right border border-gray-700">
           {errorMessage ? (
             <span className="text-red-400">{errorMessage}</span>
           ) : (
@@ -278,9 +270,8 @@ const MapboxMap: React.FC = () => {
             {points.length > 0 && !isAnimating && (
               <Button
                 onClick={resetPoints}
-                className="bg-red-500 text-white hover:bg-red-600"
+                className="bg-red-500 text-gray-200 hover:bg-red-600 border border-red-400"
               >
-                {/* <X className="w-4 h-4 mr-2" /> */}
                 Clear Points
               </Button>
             )}
@@ -295,10 +286,9 @@ const MapboxMap: React.FC = () => {
               onAnimationProgress={setAnimationProgress}
             />
           </div>
-
-
         </div>
       </div>
+
       {/* North Button */}
       <button
         onClick={() => setViewState(prev => ({
@@ -306,10 +296,10 @@ const MapboxMap: React.FC = () => {
           pitch: 0,
           bearing: 0
         }))}
-        className="absolute bottom-[45%] right-[1%] bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-colors"
+        className="absolute bottom-[45%] right-[1%] bg-gray-800/90 hover:bg-gray-800 p-3 rounded-full shadow-lg transition-colors border border-gray-700"
         title="Look North"
       >
-        <Compass className="w-6 h-6 text-blue-600" />
+        <Compass className="w-6 h-6 text-blue-400" />
       </button>
     </div>
   );
