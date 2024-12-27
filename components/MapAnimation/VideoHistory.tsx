@@ -415,7 +415,6 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
               />
             </div>
             <div className="mt-4 text-sm text-gray-400">
-              <p>{selectedVideo.location_count} Points{selectedVideo.location_count !== 1 ? 's' : ''}</p>
               <p>Created on {formatDate(selectedVideo.created_at)} at {formatTime(selectedVideo.created_at)}</p>
             </div>
           </div>

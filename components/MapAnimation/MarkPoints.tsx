@@ -265,7 +265,7 @@ const LabelDialog: React.FC<{
       <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] sm:w-[440px] rounded-2xl bg-white p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-xs font-medium text-blue-400">
-            Edit Point
+            Point Metadata
           </DialogTitle>
         </DialogHeader>
 
@@ -276,7 +276,7 @@ const LabelDialog: React.FC<{
               value={labelInput}
               onChange={(e) => setLabelInput(e.target.value.slice(0, MAX_LABEL_LENGTH))}
               onKeyDown={handleKeyPress}
-              placeholder="Point text"
+              placeholder="Point label"
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-20"
               maxLength={MAX_LABEL_LENGTH}
               autoFocus

@@ -7,6 +7,7 @@ import SignInButton from './SignInButton';
 import { track } from '@vercel/analytics';
 import AddCredits from './AddCredits';
 import VideoHistory from './VideoHistory';
+import DesktopRecommendationBanner from './DesktopRecommendationBanner';
 
 declare global {
   interface Window {
@@ -89,17 +90,17 @@ const DashboardContainer = () => {
               </div>
 
               <div className="flex flex-col gap-4 mt-8">
-                <FeatureCard 
+                <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Global Coverage"
                   description="Access detailed maps from anywhere in the world to create your perfect shot."
                 />
-                <FeatureCard 
+                <FeatureCard
                   icon={<Camera className="w-8 h-8 text-blue-500" />}
                   title="Cinematic Paths"
                   description="Design smooth camera movements and transitions for professional-looking results."
                 />
-                <FeatureCard 
+                <FeatureCard
                   icon={<Video className="w-8 h-8 text-blue-500" />}
                   title="Easy Export"
                   description="Export your creations in high quality video formats ready to share."
@@ -120,6 +121,8 @@ const DashboardContainer = () => {
               <AddCredits />
             </>
           )}
+
+          <DesktopRecommendationBanner />
         </div>
       </div>
 
@@ -157,7 +160,7 @@ const DashboardContainer = () => {
             <a
               href="/privacy"
               target="_blank"
-              rel="noopener noreferrer" 
+              rel="noopener noreferrer"
               className="text-gray-400 hover:text-blue-500 transition-colors duration-300"
             >
               Privacy
