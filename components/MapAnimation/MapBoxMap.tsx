@@ -1,13 +1,15 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Map, MapRef } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import MapMarkers from './MarkPoints';
 import AltitudeTimeline from './AltitudeTimeline';
 import FlightAnimation from './FlightAnimation';
 import ExportButton from "./Export";
-import { Compass, X } from "lucide-react";
+import { Compass, Loader2 } from "lucide-react";
 import InfoPopUp from "./InfoPopUp";
+import { nanoid } from 'nanoid';
 
 const CONFIG = {
   map: {
@@ -15,19 +17,27 @@ const CONFIG = {
       satellite: "mapbox://styles/mapbox/satellite-streets-v12",
     },
     drone: {
-      ROTATION_DURATION: 0,//not used from here, flight animation has it 
-      FLIGHT_DURATION: 0, //not used from here, flight animation has it
+      ROTATION_DURATION: 0,
+      FLIGHT_DURATION: 0,
       INITIAL_ZOOM: 1,
       FLIGHT_ZOOM: 16,
       PITCH: 55,
       POINT_RADIUS_KM: 5,
       REQUIRED_ZOOM: 10,
       MAX_POINTS: 10,
-      MIN_ALTITUDE: 0,  //not used from here, altitude has it
-      MAX_ALTITUDE: 1  //not used from here, altitude has it
+      MIN_ALTITUDE: 0,
+      MAX_ALTITUDE: 1,
+      MAX_RETRY_ATTEMPTS: 2,
     },
+    fog: {
+      'horizon-blend': 0.2,
+      'color': '#ffffff',
+      'high-color': '#245bde',
+      'space-color': '#000000',
+      'star-intensity': 0.6
+    }
   }
-};
+} as const;
 
 // Helper function to calculate distance between points
 const calculateDistance = (point1: Point, point2: Point): number => {
@@ -49,6 +59,10 @@ interface Point {
   zoom?: number;
   index: number;
   label?: string;
+  originalPosition?: {
+    longitude: number;
+    latitude: number;
+  };
 }
 
 interface PointData {
@@ -63,7 +77,18 @@ interface MapViewState {
   zoom: number;
   pitch: number;
   bearing: number;
+  padding?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
 }
+
+type MapStatus = {
+  status: 'idle' | 'loading' | 'error' | 'ready';
+  error?: string;
+};
 
 const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: 0,
@@ -71,17 +96,33 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   zoom: CONFIG.map.drone.INITIAL_ZOOM,
   pitch: 0,
   bearing: 0,
+  padding: {
+    top: 0,
+    bottom: 320,
+    left: 0,
+    right: 0
+  }
 };
 
 const MapboxMap: React.FC = () => {
+  // Refs
   const mapRef = useRef<MapRef>(null);
+  const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
+  const isMountedRef = useRef(true);
+  const retryAttemptsRef = useRef(0);
+  const eventListenersRef = useRef<Array<{ type: string; listener: (e: any) => void }>>([]);
+  const mapContainerId = useRef(`map-container-${nanoid()}`);
+
+  // State
+  const [mapStatus, setMapStatus] = useState<MapStatus>({ status: 'loading' });
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
   const [points, setPoints] = useState<Point[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationProgress, setAnimationProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [persistentError, setPersistentError] = useState<string | null>(null);
 
-  // Validation and handlers remain the same
+  // Utility functions and handlers
   const validatePoint = (newPoint: PointData): string | null => {
     if (isAnimating) {
       return "Cannot add points while animating";
@@ -110,6 +151,178 @@ const MapboxMap: React.FC = () => {
     return null;
   };
 
+  const cleanup = () => {
+    if (!isMountedRef.current) return;
+
+    // Clean up map instance
+    if (mapInstanceRef.current) {
+      const map = mapInstanceRef.current;
+
+      // Remove event listeners
+      eventListenersRef.current.forEach(({ type, listener }) => {
+        try {
+          if (map && typeof map.off === 'function') {
+            map.off(type, listener);
+          }
+        } catch (e) {
+          console.warn('Error removing event listener:', e);
+        }
+      });
+      eventListenersRef.current = [];
+
+      try {
+        // Get map container and parent before cleanup
+        const container = map.getContainer();
+        const parent = container?.parentNode;
+
+        // Remove layers and sources safely
+        if (map.getStyle()) {
+          const style = map.getStyle();
+          style.layers?.forEach(layer => {
+            try {
+              if (map.getLayer(layer.id)) {
+                map.removeLayer(layer.id);
+              }
+            } catch (e) {
+              console.warn(`Error removing layer ${layer.id}:`, e);
+            }
+          });
+
+          Object.keys(style.sources || {}).forEach(sourceId => {
+            try {
+              if (map.getSource(sourceId)) {
+                map.removeSource(sourceId);
+              }
+            } catch (e) {
+              console.warn(`Error removing source ${sourceId}:`, e);
+            }
+          });
+        }
+
+        // Remove map with fallback
+        try {
+          map.remove();
+        } catch (e) {
+          console.warn('Error removing map:', e);
+          // Fallback: manual container removal
+          if (parent && container && parent.contains(container)) {
+            try {
+              parent.removeChild(container);
+            } catch (e) {
+              console.warn('Error manually removing map container:', e);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Map cleanup error:', e);
+      }
+
+      mapInstanceRef.current = null;
+    }
+
+    setIsAnimating(false);
+    if (isMountedRef.current) {
+      setMapStatus({ status: 'idle' });
+    }
+  };
+
+  const handleWebGLContextLoss = () => {
+    if (!isMountedRef.current) return;
+
+    retryAttemptsRef.current += 1;
+
+    setMapStatus({
+      status: 'error',
+      error: retryAttemptsRef.current > CONFIG.map.drone.MAX_RETRY_ATTEMPTS
+        ? "Unable to restore map after multiple attempts. Please refresh the page."
+        : "WebGL context lost. Attempting to reload map..."
+    });
+
+    setTimeout(() => {
+      if (isMountedRef.current) {
+        cleanup();
+
+        if (retryAttemptsRef.current <= CONFIG.map.drone.MAX_RETRY_ATTEMPTS) {
+          setTimeout(() => {
+            if (isMountedRef.current) {
+              setMapStatus({ status: 'loading' });
+            }
+          }, 1000);
+        }
+      }
+    }, 100);
+  };
+
+  const handleMapError = () => {
+    if (isMountedRef.current) {
+      setMapStatus({
+        status: 'error',
+        error: "Unable to load map. Please refresh the page."
+      });
+    }
+    setPersistentError("Unable to load map. Please refresh the page.");
+    cleanup();
+  };
+
+  const handleMapLoad = () => {
+    if (!mapRef.current || mapInstanceRef.current || !isMountedRef.current) return;
+
+    const map = mapRef.current.getMap();
+    if (!map || !map.getContainer()) return;
+
+    mapInstanceRef.current = map;
+
+    // Handle general map errors
+    const errorHandler = () => {
+      if (isMountedRef.current) {
+        handleMapError();
+      }
+    };
+    map.on('error', errorHandler);
+    eventListenersRef.current.push({ type: 'error', listener: errorHandler });
+
+    // Handle WebGL context loss
+    const canvas = map.getCanvas();
+    if (canvas) {
+      const contextLossHandler = (e: Event) => {
+        e.preventDefault();  // Prevent default handling
+        handleWebGLContextLoss();
+      };
+      canvas.addEventListener('webglcontextlost', contextLossHandler);
+      eventListenersRef.current.push({ 
+        type: 'webglcontextlost', 
+        listener: contextLossHandler 
+      });
+
+      // Optional: Handle context restoration
+      const contextRestoredHandler = () => {
+        if (isMountedRef.current) {
+          setMapStatus({ status: 'loading' });
+          map.resize();  // Force map redraw
+        }
+      };
+      canvas.addEventListener('webglcontextrestored', contextRestoredHandler);
+      eventListenersRef.current.push({ 
+        type: 'webglcontextrestored', 
+        listener: contextRestoredHandler 
+      });
+    }
+
+    try {
+      map.touchZoomRotate?.enable();
+      map.touchZoomRotate?.disableRotation();
+      map.setFog(CONFIG.map.fog);
+
+      if (isMountedRef.current) {
+        setMapStatus({ status: 'ready' });
+      }
+    } catch (e) {
+      console.warn('Error initializing map:', e);
+      handleMapError();
+    }
+  };
+
+  // Event handlers
   const handleMapClick = (event: any) => {
     const { lng, lat } = event.lngLat;
     const pointData = {
@@ -160,21 +373,6 @@ const MapboxMap: React.FC = () => {
     });
   };
 
-  const resetPoints = () => {
-    setPoints([]);
-    setErrorMessage("");
-  };
-
-  const handleAnimationStart = () => {
-    setIsAnimating(true);
-    setAnimationProgress(0);
-  };
-
-  const handleAnimationCancel = () => {
-    setIsAnimating(false);
-    setAnimationProgress(0);
-  };
-
   const handlePointRemove = (index: number) => {
     setPoints(prev => {
       const newPoints = [...prev];
@@ -187,8 +385,60 @@ const MapboxMap: React.FC = () => {
     setErrorMessage("");
   };
 
+  const resetPoints = () => {
+    setPoints([]);
+    setErrorMessage("");
+  };
+
+  // Lifecycle
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      cleanup();
+    };
+  }, []);
+
+  if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>
+          Mapbox access token is missing. Please check your environment variables.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
-    <div className="relative w-full h-full">
+    <div
+      id={mapContainerId.current}
+      className="relative w-full h-full"
+    >
+
+      {mapStatus.status === 'loading' && (
+        <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-50">
+          <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-purple-100" />
+              <div className="absolute inset-0 animate-spin rounded-full h-12 w-12 border-t-[3px] border-pink-400"
+                style={{ animationDirection: 'reverse' }} />
+            </div>
+            <span className="text-lg font-medium text-gray-700">
+              Loading 🌎
+            </span>
+          </div>
+        </div>
+      )}
+
+      {persistentError && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
+          <Alert variant="destructive" className="max-w-md">
+            <AlertDescription>{persistentError}</AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       {/* MappBook Logo */}
       <div className="absolute top-4 left-4 z-50">
         <div className="bg-gray-800/90 p-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors border border-gray-700">
@@ -215,6 +465,16 @@ const MapboxMap: React.FC = () => {
         onClick={handleMapClick}
         mapStyle={CONFIG.map.styles.satellite}
         style={{ width: '100%', height: '100%' }}
+        onLoad={handleMapLoad}
+        onError={handleMapError}
+        reuseMaps={false}
+        preserveDrawingBuffer={true}
+        attributionControl={false}
+        boxZoom={false}
+        doubleClickZoom={false}
+        dragRotate={false}
+        keyboard={false}
+        touchPitch={false}
       >
         <MapMarkers
           points={points}
@@ -280,8 +540,14 @@ const MapboxMap: React.FC = () => {
               points={points}
               isAnimating={isAnimating}
               CONFIG={CONFIG}
-              onAnimationStart={handleAnimationStart}
-              onAnimationCancel={handleAnimationCancel}
+              onAnimationStart={() => {
+                setIsAnimating(true);
+                setAnimationProgress(0);
+              }}
+              onAnimationCancel={() => {
+                setIsAnimating(false);
+                setAnimationProgress(0);
+              }}
               onViewStateChange={setViewState}
               onAnimationProgress={setAnimationProgress}
             />
@@ -305,4 +571,5 @@ const MapboxMap: React.FC = () => {
   );
 };
 
-export default MapboxMap;
+// Use React.memo to prevent unnecessary re-renders
+export default React.memo(MapboxMap);
