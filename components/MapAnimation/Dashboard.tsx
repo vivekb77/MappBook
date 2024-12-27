@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
 import { logout } from '../utils/auth';
-import { Camera, Globe, Video } from 'lucide-react';
+import { Camera, Globe, Video, Coins } from 'lucide-react';
 import SignInButton from './SignInButton';
 import { track } from '@vercel/analytics';
 import AddCredits from './AddCredits';
@@ -19,6 +19,7 @@ const DashboardContainer = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { mappbookUser, setMappbookUser } = useMappbookUser();
   const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     if (isLoaded) {
       setIsLoading(false);
@@ -32,7 +33,8 @@ const DashboardContainer = () => {
     }
   };
 
-  if (isLoading) {
+
+  if (isLoading || !isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="flex flex-col items-center gap-4">
@@ -72,16 +74,24 @@ const DashboardContainer = () => {
                 </span>
                 <span className="text-xs text-gray-400">Dashboard</span>
               </div>
-              <div className="w-10 h-10 rounded-full bg-blue-500 
-              text-white flex items-center justify-center font-medium">
-                {mappbookUser.display_name?.[0].toUpperCase() || 'MappBook User'?.[0].toUpperCase()}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 rounded-full border border-gray-700">
+                  <Coins className="w-4 h-4 text-yellow-400" />
+                  <span className="text-sm font-medium text-gray-200">
+                    {mappbookUser.animation_credits || 0} credits
+                  </span>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-blue-500 
+                text-white flex items-center justify-center font-medium">
+                  {mappbookUser.display_name?.[0].toUpperCase() || 'M'}
+                </div>
               </div>
             </div>
           </div>
         )}
 
         <div className="max-w-7xl mx-auto p-6 space-y-6">
-          {!isSignedIn && (
+          {isLoaded && !isSignedIn && (
             <div className="space-y-4">
               <div className="bg-gray-800 rounded-lg p-8 text-center">
                 <h2 className="text-3xl font-bold text-white mb-4">Welcome to MappBook</h2>
@@ -109,7 +119,7 @@ const DashboardContainer = () => {
             </div>
           )}
 
-          {mappbookUser && isSignedIn && (
+          {isLoaded && isSignedIn && mappbookUser && (
             <>
               <div>
                 <h2 className="text-2xl font-bold text-white mb-4">Your Creative Journey</h2>

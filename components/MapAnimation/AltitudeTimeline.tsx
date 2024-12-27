@@ -180,11 +180,11 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
   return (
     <div
       ref={timelineRef}
-      className="absolute bottom-12 left-1/2 -translate-x-1/2 w-4/5 h-32 bg-black/50 rounded-lg p-4"
+      className="absolute bottom-12 left-1/2 -translate-x-1/2 md:w-4/5 w-[90%] h-32 bg-black/50 rounded-lg p-4"
       onMouseMove={handleMouseMove}
     >
       {/* Title text with total distance */}
-      <div className="absolute -top-8 left-4 text-white text-sm font-medium flex gap-4">
+      <div className="absolute -top-0 left-4 text-white text-xs font-extralight flex gap-4">
         <span>Hold & Drag points up to set altitude</span>
       </div>
 

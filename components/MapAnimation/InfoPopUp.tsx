@@ -18,7 +18,7 @@ const MapControlsInfo = () => {
         <DialogContent className="fixed w-[90vw] sm:w-[440px] rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 p-0 border border-gray-700">
           <DialogHeader className="p-6 pb-0">
             <DialogTitle className="text-xl font-semibold text-center bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-              Map Navigation Guide
+              Guide
             </DialogTitle>
           </DialogHeader>
 
@@ -53,18 +53,32 @@ const MapControlsInfo = () => {
                       <kbd className="px-2 py-1 bg-gray-700 border border-gray-600 rounded text-xs text-gray-200">Ctrl</kbd> + Mouse: Change pitch & bearing
                     </li>
                     <li className="flex items-center gap-2">
-                      <Compass className="w-4 h-4 text-blue-400" /> Double-click to reset orientation
+                      <Compass className="w-4 h-4 text-blue-400" /> Click to reset orientation
                     </li>
                   </ul>
                 </div>
               </div>
 
               <div className="bg-gray-900/50 rounded-lg p-3 text-sm border border-gray-700">
-                <p className="font-medium text-blue-400">Pro Tips 💫</p>
-                <ul className="mt-1 text-gray-300 space-y-1">
-                  <li>• Hold Shift while scrolling for faster zoom</li>
-                  <li>• Use two fingers on trackpad to tilt the view</li>
-                  <li>• Press ESC to exit any active tool</li>
+                <p className="font-medium text-blue-400">Animating Awesome videos Tips 💫</p>
+                <ul className="mt-1 text-gray-300 space-y-2">
+                  <li>• Vary point distances (closer for detailed areas, wider for transitions)</li>
+                  <li>• Create smooth curved paths around landmarks for cinematic flow</li>
+                  <li>• Use altitude changes strategically (rise for overview, descend for details)</li>
+                  {/* <li>• Time your animations with speed variations (slow for emphasis, fast for transitions)</li>
+                  <li>• Add hover points at key locations to create natural pauses</li>
+                  <li>• Combine tilt and bearing changes for dynamic perspectives</li>
+                  <li>• Layer multiple animation paths for complex sequences</li>
+                  <li>• Sync camera movements with zoom levels for smooth transitions</li> */}
+                </ul>
+              </div>
+
+              <div className="bg-gray-900/50 rounded-lg p-3 text-sm border border-gray-700">
+                <p className="font-medium text-blue-400">Performance & Export Tips 🎥</p>
+                <ul className="mt-1 text-gray-300 space-y-2">
+                  <li>• Animation smoothness depends on internet connection and processor speed</li>
+                  <li>• Run the animation twice - second run will use cached map data for better performance</li>
+                  <li>• Exported videos are server-rendered for consistent high quality</li>
                 </ul>
               </div>
             </div>
