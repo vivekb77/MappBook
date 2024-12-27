@@ -30,20 +30,10 @@ const ContactPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Logo Section */}
-      <div className="p-4 text-center border-b border-pink-100/50 bg-white/50">
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-          rounded-xl p-2 shadow-md transform -rotate-3">
-            {/* <Map className="w-5 h-5 text-white" /> */}
-          </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 
-          text-transparent bg-clip-text transform rotate-1">
-            MappBook
-          </h1>
+      <div className="absolute left-1/2 top-2 -translate-x-1/2 z-50">
+        <div className="bg-gray-800/90 p-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors border border-gray-700">
+          <span className="font-bold text-xl text-blue-400">MappBook</span>
         </div>
-        <p className="text-xs font-medium text-purple-400">
-        Share your World 🌎 Track your Adventures ✈️
-        </p>
       </div>
 
       {/* Header */}
@@ -53,7 +43,7 @@ const ContactPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">Contact Us</h1>
             <Link
               href="/"
-              className="text-purple-600 hover:text-purple-800 font-medium"
+              className="text-blue-600 hover:text-blue-800 font-medium"
             >
               Back to Home
             </Link>

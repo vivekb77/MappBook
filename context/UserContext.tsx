@@ -6,11 +6,8 @@ export type MappBookUser = {
     total_map_views: number;
     map_views_left: number;
     display_name : string;
-    map_style: string;
     country_fill_color : string;
-    is_passport_video_premium_user:boolean;
-    passport_video_premium_start_date:Date;
-    passport_video_credits: number
+    animation_credits: number
   };
 
 interface UserContextType {

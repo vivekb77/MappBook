@@ -102,6 +102,18 @@ const nextConfig = {
             {
               key: 'Cross-Origin-Embedder-Policy',
               value: 'credentialless'
+            },
+            {
+              key: 'Access-Control-Allow-Origin',
+              value: 'https://s3.us-east-1.amazonaws.com'
+            },
+            {
+              key: 'Access-Control-Allow-Methods',
+              value: 'GET, OPTIONS'
+            },
+            {
+              key: 'Access-Control-Allow-Headers',
+              value: '*'
             }
           ]
         },

@@ -228,7 +228,7 @@ export default function MapPage() {
         await Promise.all([
             Promise.resolve().then(() => {
                 const newTab = document.createElement('a');
-                newTab.href = '/';
+                newTab.href = '/mymappbook';
                 newTab.target = '_blank';
                 newTab.rel = 'noopener noreferrer';
                 newTab.click();
