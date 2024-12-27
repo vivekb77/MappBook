@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, XCircle, CheckCircle, Video } from "lucide-react";
+import { Download, Loader2, XCircle, CheckCircle, Video, Coins } from "lucide-react";
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { useMappbookUser } from '@/context/UserContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -48,6 +48,7 @@ const aspectRatioOptions: AspectRatioOption[] = [
     ]
   }
 ];
+
 type RenderingStatus = 'idle' | 'saving' | 'rendering' | 'complete' | 'error';
 
 const ExportButton: React.FC<ExportButtonProps> = ({ 
@@ -59,9 +60,41 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<string>("9:16");
+  const [isLoading, setIsLoading] = useState(false);
   
   const supabase = getClerkSupabaseClient();
-  const { mappbookUser } = useMappbookUser();
+  const { mappbookUser, setMappbookUser } = useMappbookUser();
+
+  useEffect(() => {
+    const fetchCredits = async () => {
+      if (isDialogOpen && mappbookUser?.mappbook_user_id) {
+        setIsLoading(true);
+        try {
+          const { data, error } = await supabase
+            .from('MappBook_Users')
+            .select('animation_credits')
+            .eq('mappbook_user_id', mappbookUser.mappbook_user_id)
+            .single();
+
+          if (error) throw error;
+          
+          if (data) {
+            setMappbookUser({
+              ...mappbookUser,
+              animation_credits: data.animation_credits
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching credits:', error);
+          showToast('Failed to fetch animation credits', 'error');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchCredits();
+  }, [isDialogOpen, mappbookUser?.mappbook_user_id]);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now();
@@ -76,7 +109,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   };
 
   const handleExport = async () => {
-    if (points.length === 0) {
+    if (points.length === 0 || !mappbookUser?.animation_credits || mappbookUser.animation_credits <= 0) {
       return false;
     }
   
@@ -109,7 +142,8 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         },
         body: JSON.stringify({ 
           points,
-          aspectRatio: selectedAspectRatio 
+          aspectRatio: selectedAspectRatio,
+          mappbook_user_id: mappbookUser.mappbook_user_id
         }),
       });
 
@@ -126,6 +160,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           const progress = await progressResponse.json();
 
           if (progress.done) {
+
             const { error: videoError } = await supabase
               .from('Animation_Video')
               .insert([{
@@ -138,6 +173,12 @@ const ExportButton: React.FC<ExportButtonProps> = ({
               }]);
 
             if (videoError) throw videoError;
+
+            // Update local user state
+            setMappbookUser({
+              ...mappbookUser,
+              animation_credits: mappbookUser.animation_credits - 1
+            });
 
             setRenderingStatus('complete');
             showToast('Video created successfully!', 'success');
@@ -183,18 +224,18 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     }
   };
 
-  const isLoading = renderingStatus === 'saving' || renderingStatus === 'rendering';
-  const isDisabled = points.length === 0 || isLoading;
+  const isButtonLoading = renderingStatus === 'saving' || renderingStatus === 'rendering';
+  const isButtonDisabled = points.length === 0 || isButtonLoading;
 
   return (
     <>
       <div className="absolute top-4 right-4 z-50 flex space-x-2">
         <Button
           onClick={() => setIsDialogOpen(true)}
-          disabled={isDisabled}
+          disabled={isButtonDisabled}
           className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 min-w-[140px] border border-gray-700"
         >
-          {isLoading ? (
+          {isButtonLoading ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : (
             <Download className="w-4 h-4 mr-2" />
@@ -209,7 +250,19 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           <DialogHeader>
             <DialogTitle className="text-gray-200">Create Animation Video</DialogTitle>
             <DialogDescription className="text-gray-400">
-              The video will be created on the server, after completion it will appear in your Videos section for you to Download
+              <div className="flex items-center justify-between mb-4">
+                <span>The video will be created on the server, after completion it will appear in your Videos section for you to Download</span>
+                <div className="flex items-center gap-2 px-3 py-1 bg-gray-700 rounded-full">
+                  <Coins className="w-4 h-4 text-yellow-400" />
+                  <span className="text-gray-200 font-medium">
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      `${mappbookUser?.animation_credits || 0} credits`
+                    )}
+                  </span>
+                </div>
+              </div>
             </DialogDescription>
           </DialogHeader>
           
@@ -230,7 +283,6 @@ const ExportButton: React.FC<ExportButtonProps> = ({
                   onClick={() => setSelectedAspectRatio(option.aspectRatio)}
                 >
                   <div className="flex flex-col items-center gap-4">
-                    {/* Visual representation of aspect ratio */}
                     <div className={`relative ${
                       option.aspectRatio === "9:16" 
                         ? "w-12 h-20" 
@@ -266,7 +318,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             </Button>
             <Button
               onClick={handleExport}
-              disabled={isLoading}
+              disabled={isLoading || !mappbookUser?.animation_credits || mappbookUser.animation_credits <= 0}
               className="bg-blue-500 hover:bg-blue-600 text-gray-200"
             >
               {isLoading ? (
@@ -278,7 +330,6 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-
 
       {/* Toast notifications */}
       <div className="fixed top-4 right-4 z-50 space-y-2">
