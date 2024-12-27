@@ -17,11 +17,12 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface VideoHistoryItem {
-  animation_video_id: string;  // Updated from 'id'
+  animation_video_id: string;
   video_url: string;
   location_count: number;
   created_at: string;
 }
+
 interface VideoHistoryProps {
   userId: string;
 }
@@ -45,7 +46,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
   const PAGE_SIZE = 5;
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<VideoHistoryItem | null>(null);
-
+  
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
@@ -292,32 +293,32 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
           {videos.map((video) => (
             <div
               key={video.animation_video_id}
-              className={`w-full flex items-center gap-3 p-2 hover:bg-gray-700 rounded-md transition-colors group mb-2
+              className={`w-full flex items-center gap-2 p-2 hover:bg-gray-700 rounded-md transition-colors group mb-2
                 ${selectedVideoId === video.animation_video_id ? 'bg-gray-700/80' : ''}`}
             >
               <button
                 onClick={() => handleVideoSelect(video)}
-                className="flex-grow flex items-center gap-3 min-w-0"
+                className="flex-grow flex items-center gap-2 min-w-0"
               >
-                <div className="w-16 h-16 bg-gray-700/60 rounded flex items-center justify-center flex-shrink-0">
-                  <Video className={`w-6 h-6 ${selectedVideoId === video.animation_video_id ? 'text-blue-400' : 'text-blue-500'}`} />
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-700/60 rounded flex items-center justify-center flex-shrink-0">
+                  <Video className={`w-5 h-5 md:w-6 md:h-6 ${selectedVideoId === video.animation_video_id ? 'text-blue-400' : 'text-blue-500'}`} />
                 </div>
                 <div className="flex-grow min-w-0 text-left">
-                  <p className={`text-sm font-medium truncate
+                  <p className={`text-xs md:text-sm font-medium truncate
                     ${selectedVideoId === video.animation_video_id ? 'text-blue-400' : 'text-gray-200'}`}>
                     Footage on <span>{formatDate(video.created_at)}</span>
                   </p>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
-                    <Clock className="w-3 h-3" />
-                    <span>at {formatTime(video.created_at)}</span>
+                  <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                    <Clock className="w-3 h-3 hidden md:block" />
+                    <span className="text-xs">{formatTime(video.created_at)}</span>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 hidden md:block">
                     {video.location_count} Point{video.location_count !== 1 ? 's' : ''}
                   </p>
                 </div>
               </button>
 
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -343,7 +344,7 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
             <button
               onClick={loadMore}
               disabled={loading}
-              className="mt-2 w-full py-2 px-4 text-sm font-medium text-gray-300 
+              className="mt-2 w-full py-2 px-4 text-xs md:text-sm font-medium text-gray-300 
                 hover:text-blue-400 flex items-center justify-center gap-2 
                 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -357,7 +358,6 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
           )}
         </div>
       </ScrollArea>
-
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-gray-800 border border-gray-700">
           <AlertDialogHeader>

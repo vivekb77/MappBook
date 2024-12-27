@@ -488,7 +488,7 @@ const MapboxMap: React.FC = () => {
         attributionControl={true}
         boxZoom={false}
         doubleClickZoom={false}
-        dragRotate={false}
+        dragRotate={true}
         keyboard={false}
         touchPitch={false}
       >
