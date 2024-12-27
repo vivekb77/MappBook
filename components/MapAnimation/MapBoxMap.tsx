@@ -10,6 +10,8 @@ import ExportButton from "./Export";
 import { Compass, Loader2 } from "lucide-react";
 import InfoPopUp from "./InfoPopUp";
 import { nanoid } from 'nanoid';
+import { useUser } from '@clerk/nextjs';
+import SignInButton from './SignInButton';
 
 const CONFIG = {
   map: {
@@ -77,12 +79,6 @@ interface MapViewState {
   zoom: number;
   pitch: number;
   bearing: number;
-  padding?: {
-    top: number;
-    bottom: number;
-    left: number;
-    right: number;
-  };
 }
 
 type MapStatus = {
@@ -91,19 +87,12 @@ type MapStatus = {
 };
 
 const DEFAULT_VIEW_STATE: MapViewState = {
-  longitude: 0,
-  latitude: 0,
+  longitude: -98.5795,
+  latitude: 39.8283,
   zoom: CONFIG.map.drone.INITIAL_ZOOM,
   pitch: 0,
   bearing: 0,
-  padding: {
-    top: 0,
-    bottom: 320,
-    left: 0,
-    right: 0
-  }
 };
-
 const MapboxMap: React.FC = () => {
   // Refs
   const mapRef = useRef<MapRef>(null);
@@ -121,6 +110,7 @@ const MapboxMap: React.FC = () => {
   const [animationProgress, setAnimationProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [persistentError, setPersistentError] = useState<string | null>(null);
+  const { isLoaded, isSignedIn, user } = useUser();
 
   // Utility functions and handlers
   const validatePoint = (newPoint: PointData): string | null => {
@@ -289,9 +279,9 @@ const MapboxMap: React.FC = () => {
         handleWebGLContextLoss();
       };
       canvas.addEventListener('webglcontextlost', contextLossHandler);
-      eventListenersRef.current.push({ 
-        type: 'webglcontextlost', 
-        listener: contextLossHandler 
+      eventListenersRef.current.push({
+        type: 'webglcontextlost',
+        listener: contextLossHandler
       });
 
       // Optional: Handle context restoration
@@ -302,9 +292,9 @@ const MapboxMap: React.FC = () => {
         }
       };
       canvas.addEventListener('webglcontextrestored', contextRestoredHandler);
-      eventListenersRef.current.push({ 
-        type: 'webglcontextrestored', 
-        listener: contextRestoredHandler 
+      eventListenersRef.current.push({
+        type: 'webglcontextrestored',
+        listener: contextRestoredHandler
       });
     }
 
@@ -324,6 +314,11 @@ const MapboxMap: React.FC = () => {
 
   // Event handlers
   const handleMapClick = (event: any) => {
+    if (!isSignedIn) {
+      setErrorMessage("Please sign in to add points");
+      return;
+    }
+
     const { lng, lat } = event.lngLat;
     const pointData = {
       longitude: lng,
@@ -341,7 +336,13 @@ const MapboxMap: React.FC = () => {
     handleAddPoint(pointData);
   };
 
+
   const handleAddPoint = (pointData: PointData) => {
+    if (!isSignedIn) {
+      setErrorMessage("Please sign in to add points");
+      return;
+    }
+
     setPoints(prev => [...prev, {
       ...pointData,
       altitude: CONFIG.map.drone.MIN_ALTITUDE,
@@ -354,6 +355,11 @@ const MapboxMap: React.FC = () => {
   };
 
   const handlePointMove = (index: number, longitude: number, latitude: number) => {
+    if (!isSignedIn) {
+      setErrorMessage("Please sign in to modify points");
+      return;
+    }
+
     setPoints(prev => {
       const newPoints = [...prev];
       newPoints[index] = {
@@ -366,6 +372,8 @@ const MapboxMap: React.FC = () => {
   };
 
   const handleAltitudeChange = (index: number, altitude: number) => {
+    if (!isSignedIn) return;
+
     setPoints(prev => {
       const newPoints = [...prev];
       newPoints[index] = { ...newPoints[index], altitude };
@@ -415,6 +423,14 @@ const MapboxMap: React.FC = () => {
       id={mapContainerId.current}
       className="relative w-full h-full"
     >
+
+      {!isSignedIn && mapStatus.status === 'ready' && (
+        <div className="absolute bottom-20 left-0 right-0 flex justify-center z-50 pointer-events-none">
+          <div className="w-48 pointer-events-auto">
+            <SignInButton />
+          </div>
+        </div>
+      )}
 
       {mapStatus.status === 'loading' && (
         <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-50">
@@ -469,27 +485,30 @@ const MapboxMap: React.FC = () => {
         onError={handleMapError}
         reuseMaps={false}
         preserveDrawingBuffer={true}
-        attributionControl={false}
+        attributionControl={true}
         boxZoom={false}
         doubleClickZoom={false}
         dragRotate={false}
         keyboard={false}
         touchPitch={false}
       >
-        <MapMarkers
-          points={points}
-          isAnimating={isAnimating}
-          viewState={viewState}
-          CONFIG={CONFIG}
-          onPointMove={handlePointMove}
-          onError={setErrorMessage}
-          onUpdatePointLabel={(index: number, label: string) => {
-            const newPoints = [...points];
-            newPoints[index] = { ...newPoints[index], label };
-            setPoints(newPoints);
-          }}
-          onPointRemove={handlePointRemove}
-        />
+        {isSignedIn && (
+          <MapMarkers
+            points={points}
+            isAnimating={isAnimating}
+            viewState={viewState}
+            CONFIG={CONFIG}
+            onPointMove={handlePointMove}
+            onError={setErrorMessage}
+            onUpdatePointLabel={(index: number, label: string) => {
+              if (!isSignedIn) return;
+              const newPoints = [...points];
+              newPoints[index] = { ...newPoints[index], label };
+              setPoints(newPoints);
+            }}
+            onPointRemove={handlePointRemove}
+          />
+        )}
       </Map>
 
       {/* Altitude Timeline */}
@@ -507,24 +526,26 @@ const MapboxMap: React.FC = () => {
 
       {/* Controls */}
       <div className="absolute bottom-48 right-4 space-y-2">
-        <div className="text-gray-200 bg-gray-800/90 p-2 rounded text-right border border-gray-700">
-          {errorMessage ? (
-            <span className="text-red-400">{errorMessage}</span>
-          ) : (
-            <>
-              {viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM &&
-                `Zoom in to level ${CONFIG.map.drone.REQUIRED_ZOOM} to start marking points`}
-              {viewState.zoom >= CONFIG.map.drone.REQUIRED_ZOOM && (
-                <>
-                  {points.length === 0 && 'Click to place first point'}
-                  {points.length > 0 && !isAnimating &&
-                    `Place point ${points.length + 1} within yellow circle (${points.length}/${CONFIG.map.drone.MAX_POINTS})`}
-                  {isAnimating && 'In flight...'}
-                </>
-              )}
-            </>
-          )}
-        </div>
+        {mapStatus.status === 'ready' &&
+          <div className="text-gray-200 bg-gray-800/90 p-2 rounded text-right border border-gray-700">
+            {errorMessage ? (
+              <span className="text-red-400">{errorMessage}</span>
+            ) : (
+              <>
+                {viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM &&
+                  `Zoom in to level ${CONFIG.map.drone.REQUIRED_ZOOM} to start marking points`}
+                {viewState.zoom >= CONFIG.map.drone.REQUIRED_ZOOM && (
+                  <>
+                    {points.length === 0 && 'Click to place first point'}
+                    {points.length > 0 && !isAnimating &&
+                      `Place point ${points.length + 1} within yellow circle (${points.length}/${CONFIG.map.drone.MAX_POINTS})`}
+                    {isAnimating && 'In flight...'}
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        }
         <div className="flex flex-col items-end space-y-2">
           <div className="flex space-x-2">
             {points.length > 0 && !isAnimating && (
