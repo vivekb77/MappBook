@@ -61,6 +61,7 @@
     "@remotion/lambda": "^4.0.0",
     "@remotion/player": "^4.0.0",
     "@remotion/renderer": "^4.0.0",
-    "@types/page-flip": "^2.0.3"
+    "@types/page-flip": "^2.0.3",
+    "terser-webpack-plugin": "^5.3.11"
   }
 }

@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const nextConfig = {
     poweredByHeader: false,
     compress: true,
+    productionBrowserSourceMaps: false, // Disable source maps in production
     
     images: {
       minimumCacheTTL: 60,
@@ -24,11 +25,41 @@ const nextConfig = {
         type: 'webassembly/async'
       });
   
-
+      // Production optimizations
       if (!dev) {
+        // Enhance Terser options for better minification
+        config.optimization.minimize = true;
+        config.optimization.minimizer = config.optimization.minimizer || [];
+        config.optimization.minimizer.push(
+          new (require('terser-webpack-plugin'))({
+            terserOptions: {
+              compress: {
+                drop_console: true, // Remove console.* statements
+                drop_debugger: true, // Remove debugger statements
+                pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'],
+                passes: 3, // Multiple compression passes
+                unsafe: true,
+                unsafe_math: true,
+              },
+              mangle: {
+                reserved: [], // Add any reserved names that shouldn't be mangled
+                properties: {
+                  regex: /^_/ // Mangle properties starting with underscore
+                }
+              },
+              format: {
+                comments: false, // Remove comments
+              },
+              sourceMap: false,
+            },
+          })
+        );
+
+        // Enhanced chunk splitting configuration
         config.optimization.splitChunks = {
           chunks: 'all',
           minSize: 20000,
+          maxSize: 244000,
           cacheGroups: {
             default: false,
             vendors: false,
@@ -37,7 +68,8 @@ const nextConfig = {
               name: 'framework',
               test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
               priority: 40,
-              enforce: true
+              enforce: true,
+              reuseExistingChunk: true
             },
             lib: {
               test(module) {
@@ -56,15 +88,23 @@ const nextConfig = {
             commons: {
               name: 'commons',
               minChunks: 2,
-              priority: 20
+              priority: 20,
+              reuseExistingChunk: true
             }
           },
         };
+
+        // Add module concatenation
+        config.optimization.concatenateModules = true;
+
+        // Add module ids optimization
+        config.optimization.moduleIds = 'deterministic';
       }
       return config;
     },
   
     reactStrictMode: true,
+    swcMinify: true, // Enable SWC minification
   
     async headers() {
       return [

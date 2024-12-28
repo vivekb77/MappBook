@@ -412,7 +412,7 @@ const MapboxMap: React.FC = () => {
     return (
       <Alert variant="destructive">
         <AlertDescription>
-          Mapbox access token is missing. Please check your environment variables.
+          Mapbox access token is missing.
         </AlertDescription>
       </Alert>
     );
@@ -539,7 +539,7 @@ const MapboxMap: React.FC = () => {
                     {points.length === 0 && 'Click to place first point'}
                     {points.length > 0 && !isAnimating &&
                       `Place point ${points.length + 1} within yellow circle (${points.length}/${CONFIG.map.drone.MAX_POINTS})`}
-                    {isAnimating && 'In flight...'}
+                    {isAnimating && 'Flying'}
                   </>
                 )}
               </>
