@@ -122,8 +122,8 @@ const DashboardContainer = () => {
           {isLoaded && isSignedIn && mappbookUser && (
             <>
               <div>
-                <h2 className="text-2xl font-bold text-white mb-4">Your Creative Journey</h2>
-                <p className="text-gray-300 mb-6">Continue creating amazing drone-like footage with MappBook.</p>
+                {/* <h2 className="text-2xl font-bold text-white mb-4">No drone required 😉</h2> */}
+                <p className="text-gray-300 mb-6">Create amazing drone-like footage with MappBook</p>
                 <div className="w-full overflow-x-auto">
                   <VideoHistory userId={mappbookUser.mappbook_user_id} />
                 </div>

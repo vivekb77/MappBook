@@ -132,8 +132,9 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold mb-6">
+        
+        <div className="text-center max-w-4xl mx-auto mt-8">
+          <h1 className="text-4xl font-bold mb-6">
             Create Stunning Drone-Like Footage Using Maps
           </h1>
           <p className="text-xl text-gray-300 mb-8">
@@ -148,8 +149,8 @@ const LandingPage = () => {
       </section>
 
       {/* Demo Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="bg-gray-800 rounded-xl p-8">
+      <section className="container mx-auto px-3 py-26">
+        <div className="bg-gray-800 rounded-xl p-2">
           <div className="aspect-video bg-gray-700 rounded-lg flex items-center justify-center relative overflow-hidden">
             <div className="relative w-full h-full">
               <Image
