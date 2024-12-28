@@ -115,11 +115,11 @@ const MapboxMap: React.FC = () => {
   // Utility functions and handlers
   const validatePoint = (newPoint: PointData): string | null => {
     if (isAnimating) {
-      return "Cannot add points while animating";
+      return "Cannot edit while flying";
     }
 
     if (viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM) {
-      return `Please zoom in to level ${CONFIG.map.drone.REQUIRED_ZOOM} or higher`;
+      return `Zoom in to level ${CONFIG.map.drone.REQUIRED_ZOOM} or higher`;
     }
 
     if (points.length >= CONFIG.map.drone.MAX_POINTS) {
@@ -315,7 +315,7 @@ const MapboxMap: React.FC = () => {
   // Event handlers
   const handleMapClick = (event: any) => {
     if (!isSignedIn) {
-      setErrorMessage("Please sign in to add points");
+      setErrorMessage("Sign in to add points");
       return;
     }
 
@@ -339,7 +339,7 @@ const MapboxMap: React.FC = () => {
 
   const handleAddPoint = (pointData: PointData) => {
     if (!isSignedIn) {
-      setErrorMessage("Please sign in to add points");
+      setErrorMessage("Sign in to add points");
       return;
     }
 
@@ -356,7 +356,7 @@ const MapboxMap: React.FC = () => {
 
   const handlePointMove = (index: number, longitude: number, latitude: number) => {
     if (!isSignedIn) {
-      setErrorMessage("Please sign in to modify points");
+      setErrorMessage("Sign in to modify points");
       return;
     }
 
@@ -507,7 +507,7 @@ const MapboxMap: React.FC = () => {
       {/* Map UI Controls Group */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Map stats display */}
-        <div className="absolute top-14 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-sm z-50 border border-gray-700 pointer-events-auto">
+        <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs z-50 border border-gray-700 pointer-events-auto">
           <div>Zoom: {viewState.zoom.toFixed(2)}</div>
           {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
         <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
@@ -515,7 +515,7 @@ const MapboxMap: React.FC = () => {
 
         {/* Status and Instructions */}
         {mapStatus.status === 'ready' && (
-          <div className="absolute top-24 right-2 text-gray-200 bg-gray-800/90 p-2 rounded text-right border border-gray-700 pointer-events-auto">
+          <div className="absolute top-16 right-2 text-gray-200 bg-gray-800/90 p-1 rounded text-right border font-mono text-xs border-gray-700 pointer-events-auto">
             {errorMessage ? (
               <span className="text-red-400">{errorMessage}</span>
             ) : (
@@ -535,8 +535,6 @@ const MapboxMap: React.FC = () => {
           </div>
         )}
 
-        <InfoPopUp />
-
         {/* North Button */}
         <button
           onClick={() => setViewState(prev => ({
@@ -551,7 +549,7 @@ const MapboxMap: React.FC = () => {
         </button>
       </div>
 
-
+      <InfoPopUp />
       {/* Altitude Timeline */}
       {points.length > 0 && (
         <AltitudeTimeline
