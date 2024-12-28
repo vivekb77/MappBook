@@ -229,7 +229,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
 
   return (
     <>
-      <div className="absolute top-3 right-2 z-50 flex space-x-2">
+      <div className="absolute top-2 right-2 z-50 flex space-x-2">
         <Button
           onClick={() => setIsDialogOpen(true)}
           disabled={isButtonDisabled}

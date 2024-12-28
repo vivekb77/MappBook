@@ -90,7 +90,7 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -98.5795,
   latitude: 39.8283,
   zoom: CONFIG.map.drone.INITIAL_ZOOM,
-  pitch: 0,
+  pitch: 50,
   bearing: 0,
 };
 const MapboxMap: React.FC = () => {
@@ -147,6 +147,15 @@ const MapboxMap: React.FC = () => {
     // Clean up map instance
     if (mapInstanceRef.current) {
       const map = mapInstanceRef.current;
+
+      try {
+        map.setTerrain(null);
+        if (map.getSource('mapbox-dem')) {
+          map.removeSource('mapbox-dem');
+        }
+      } catch (e) {
+        console.warn('Error cleaning up terrain:', e);
+      }
 
       // Remove event listeners
       eventListenersRef.current.forEach(({ type, listener }) => {
@@ -299,13 +308,21 @@ const MapboxMap: React.FC = () => {
     }
 
     try {
+      map.addSource('mapbox-dem', {
+        'type': 'raster-dem',
+        'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+        'tileSize': 512,
+        'maxzoom': 17
+      });
       map.touchZoomRotate?.enable();
-      map.touchZoomRotate?.disableRotation();
       map.setFog(CONFIG.map.fog);
 
+      map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.3 });
       if (isMountedRef.current) {
         setMapStatus({ status: 'ready' });
       }
+
+
     } catch (e) {
       console.warn('Error initializing map:', e);
       handleMapError();
@@ -456,7 +473,7 @@ const MapboxMap: React.FC = () => {
       )}
 
       {/* MappBook Logo */}
-      <div className="absolute top-4 left-4 z-50">
+      <div className="absolute top-2 left-2 z-50">
         <div className="bg-gray-800/90 p-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors border border-gray-700">
           <span className="font-bold text-xl text-blue-400">MappBook</span>
         </div>
@@ -510,7 +527,7 @@ const MapboxMap: React.FC = () => {
         <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs z-50 border border-gray-700 pointer-events-auto">
           <div>Zoom: {viewState.zoom.toFixed(2)}</div>
           {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
-        <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
+          <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
         </div>
 
         {/* Status and Instructions */}
@@ -535,18 +552,9 @@ const MapboxMap: React.FC = () => {
           </div>
         )}
 
-        {/* North Button */}
-        <button
-          onClick={() => setViewState(prev => ({
-            ...prev,
-            pitch: 0,
-            bearing: 0
-          }))}
-          className="absolute top-44 right-2 bg-gray-800/90 hover:bg-gray-800 p-3 rounded-full shadow-lg transition-colors border border-gray-700 pointer-events-auto"
-          title="Look North"
-        >
-          <Compass className="w-6 h-6 text-blue-400" />
-        </button>
+        <div className="absolute bottom-48 left-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs z-50 border border-gray-700 pointer-events-auto">
+          Ctrl + Mouse
+        </div>
       </div>
 
       <InfoPopUp />
@@ -562,9 +570,20 @@ const MapboxMap: React.FC = () => {
       )}
 
       {/* Controls */}
-      <div className="absolute bottom-48 right-4 space-y-2">
-
+      <div className="absolute bottom-48 right-2 space-y-2">
         <div className="flex flex-col items-end space-y-2">
+          <button
+            onClick={() => setViewState(prev => ({
+              ...prev,
+              pitch: 0,
+              bearing: 0
+            }))}
+            className="bg-gray-800/90 hover:bg-gray-800 p-3 rounded-full shadow-lg transition-colors border border-gray-700"
+            title="Look North"
+          >
+            <Compass className="w-6 h-6 text-blue-400" />
+          </button>
+
           <div className="flex space-x-2">
             {points.length > 0 && !isAnimating && (
               <Button
