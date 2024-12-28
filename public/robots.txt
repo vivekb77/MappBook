@@ -1,8 +1,2 @@
 User-agent: *
-Disallow: /
-Noindex: /
-
-# Allow Google to index home page
-User-agent: Googlebot
-Allow: /$
-Disallow: /*/
+Allow: /

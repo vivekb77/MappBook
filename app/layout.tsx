@@ -8,10 +8,10 @@ import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'MappBook.com',
-  description: 'Share your World 🌎 Track your Adventures ✈️ Show the World where you have been 📍',
+  description: 'Create Stunning Drone-Like Footage Using Maps',
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   }
 };
 

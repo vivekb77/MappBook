@@ -465,13 +465,6 @@ const MapboxMap: React.FC = () => {
       {/* Export Buttons */}
       <ExportButton points={points} />
 
-      {/* Map stats display */}
-      <div className="absolute top-20 right-2 bg-gray-800/90 text-gray-200 p-2 rounded space-y-2 font-mono text-sm z-50 border border-gray-700">
-        <div>Zoom: {viewState.zoom.toFixed(2)}</div>
-        {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
-        <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
-      </div>
-
       {/* Main map component */}
       <Map
         ref={mapRef}
@@ -485,7 +478,7 @@ const MapboxMap: React.FC = () => {
         onError={handleMapError}
         reuseMaps={false}
         preserveDrawingBuffer={true}
-        attributionControl={true}
+        attributionControl={false}
         boxZoom={false}
         doubleClickZoom={false}
         dragRotate={true}
@@ -511,23 +504,18 @@ const MapboxMap: React.FC = () => {
         )}
       </Map>
 
-      {/* Altitude Timeline */}
-      {points.length > 0 && (
-        <AltitudeTimeline
-          points={points}
-          onAltitudeChange={handleAltitudeChange}
-          onPointRemove={handlePointRemove}
-          isAnimating={isAnimating}
-          animationProgress={animationProgress}
-        />
-      )}
+      {/* Map UI Controls Group */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Map stats display */}
+        <div className="absolute top-14 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-sm z-50 border border-gray-700 pointer-events-auto">
+          <div>Zoom: {viewState.zoom.toFixed(2)}</div>
+          {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
+        <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
+        </div>
 
-      <InfoPopUp />
-
-      {/* Controls */}
-      <div className="absolute bottom-48 right-4 space-y-2">
-        {mapStatus.status === 'ready' &&
-          <div className="text-gray-200 bg-gray-800/90 p-2 rounded text-right border border-gray-700">
+        {/* Status and Instructions */}
+        {mapStatus.status === 'ready' && (
+          <div className="absolute top-24 right-2 text-gray-200 bg-gray-800/90 p-2 rounded text-right border border-gray-700 pointer-events-auto">
             {errorMessage ? (
               <span className="text-red-400">{errorMessage}</span>
             ) : (
@@ -545,7 +533,39 @@ const MapboxMap: React.FC = () => {
               </>
             )}
           </div>
-        }
+        )}
+
+        <InfoPopUp />
+
+        {/* North Button */}
+        <button
+          onClick={() => setViewState(prev => ({
+            ...prev,
+            pitch: 0,
+            bearing: 0
+          }))}
+          className="absolute top-44 right-2 bg-gray-800/90 hover:bg-gray-800 p-3 rounded-full shadow-lg transition-colors border border-gray-700 pointer-events-auto"
+          title="Look North"
+        >
+          <Compass className="w-6 h-6 text-blue-400" />
+        </button>
+      </div>
+
+
+      {/* Altitude Timeline */}
+      {points.length > 0 && (
+        <AltitudeTimeline
+          points={points}
+          onAltitudeChange={handleAltitudeChange}
+          onPointRemove={handlePointRemove}
+          isAnimating={isAnimating}
+          animationProgress={animationProgress}
+        />
+      )}
+
+      {/* Controls */}
+      <div className="absolute bottom-48 right-4 space-y-2">
+
         <div className="flex flex-col items-end space-y-2">
           <div className="flex space-x-2">
             {points.length > 0 && !isAnimating && (
@@ -575,19 +595,6 @@ const MapboxMap: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* North Button */}
-      <button
-        onClick={() => setViewState(prev => ({
-          ...prev,
-          pitch: 0,
-          bearing: 0
-        }))}
-        className="absolute bottom-[45%] right-[1%] bg-gray-800/90 hover:bg-gray-800 p-3 rounded-full shadow-lg transition-colors border border-gray-700"
-        title="Look North"
-      >
-        <Compass className="w-6 h-6 text-blue-400" />
-      </button>
     </div>
   );
 };
