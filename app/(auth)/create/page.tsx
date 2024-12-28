@@ -37,12 +37,12 @@ export default function Create() {
     <div className="fixed inset-0 h-screen-dynamic overflow-hidden bg-gray-900">
       <div className="flex h-full w-full relative">
         {/* Map Section */}
-        <div className="flex-1 h-full w-full md:w-[67%] touch-none">
+        <div className="flex-1 h-full w-full md:w-[70%] touch-none">
           <MapboxMap />
         </div>
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-[33%] h-screen-dynamic overflow-hidden bg-gray-800 border-l border-gray-700">
+        <div className="hidden md:block w-[30%] h-screen-dynamic overflow-hidden bg-gray-800 border-l border-gray-700">
           <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
             <Dashboard />
           </div>

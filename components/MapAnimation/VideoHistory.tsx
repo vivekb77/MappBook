@@ -300,8 +300,8 @@ const VideoHistory = ({ userId }: VideoHistoryProps) => {
                 onClick={() => handleVideoSelect(video)}
                 className="flex-grow flex items-center gap-2 min-w-0"
               >
-                <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-700/60 rounded flex items-center justify-center flex-shrink-0">
-                  <Video className={`w-5 h-5 md:w-6 md:h-6 ${selectedVideoId === video.animation_video_id ? 'text-blue-400' : 'text-blue-500'}`} />
+                <div className="w-5 h-5 md:w-5 md:h-5 bg-gray-700/60 rounded flex items-center justify-center flex-shrink-0">
+                  <Video className={`w-5 h-5 md:w-5 md:h-5 ${selectedVideoId === video.animation_video_id ? 'text-blue-400' : 'text-blue-500'}`} />
                 </div>
                 <div className="flex-grow min-w-0 text-left">
                   <p className={`text-xs md:text-sm font-medium truncate
