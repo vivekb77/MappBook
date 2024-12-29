@@ -198,8 +198,19 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
       style={{ touchAction: 'none' }}
     >
       <div className="absolute -bottom-0 right-4 text-white text-xs font-extralight flex gap-4">
-        <span>Hold & Drag points up to set altitude</span>
+        <span>Hold & Drag points to set flying height</span>
       </div>
+      <div className="absolute top-0 left-4 text-white text-xs font-extralight">
+      {/* Desktop instructions */}
+      <div className="hidden md:block">
+        <span>Ctrl + Mouse: 3D Map</span>
+      </div>
+      
+      {/* Mobile instructions */}
+      <div className="block md:hidden">
+        <span>2 Fingers swipe up/down: 3D Map</span>
+      </div>
+    </div>
 
       <div className="absolute inset-0 flex flex-col justify-between p-4">
         {Array.from({ length: 5 }).map((_, i) => (

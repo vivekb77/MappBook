@@ -23,7 +23,7 @@ const CONFIG = {
       FLIGHT_DURATION: 0,
       INITIAL_ZOOM: 1,
       FLIGHT_ZOOM: 16,
-      PITCH: 55,
+      PITCH: 60,
       POINT_RADIUS_KM: 5,
       REQUIRED_ZOOM: 10,
       MAX_POINTS: 10,
@@ -32,11 +32,17 @@ const CONFIG = {
       MAX_RETRY_ATTEMPTS: 2,
     },
     fog: {
-      'horizon-blend': 0.2,
-      'color': '#ffffff',
-      'high-color': '#245bde',
-      'space-color': '#000000',
-      'star-intensity': 0.6
+      'horizon-blend': 0.4,          // More dramatic horizon blend
+      'color': '#ffa07a',           // Light salmon color for sunset effect
+      'high-color': '#4169e1',      // Royal blue for upper atmosphere
+      'space-color': '#191970',     // Midnight blue for space
+      'star-intensity': 0.85
+    },
+    light: {
+      anchor: 'viewport',
+      color: '#ffffff',
+      intensity: 0.65,         // Brighter
+      position: [1.5, 90, 80]  // High angle, shorter shadows
     }
   }
 } as const;
@@ -90,7 +96,7 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   longitude: -98.5795,
   latitude: 39.8283,
   zoom: CONFIG.map.drone.INITIAL_ZOOM,
-  pitch: 50,
+  pitch: 0,
   bearing: 0,
 };
 const MapboxMap: React.FC = () => {
@@ -317,7 +323,7 @@ const MapboxMap: React.FC = () => {
       map.touchZoomRotate?.enable();
       map.setFog(CONFIG.map.fog);
 
-      map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.3 });
+      map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
       if (isMountedRef.current) {
         setMapStatus({ status: 'ready' });
       }
@@ -495,7 +501,7 @@ const MapboxMap: React.FC = () => {
         onError={handleMapError}
         reuseMaps={false}
         preserveDrawingBuffer={true}
-        attributionControl={false}
+        attributionControl={true}
         boxZoom={false}
         doubleClickZoom={false}
         dragRotate={true}
@@ -524,11 +530,13 @@ const MapboxMap: React.FC = () => {
       {/* Map UI Controls Group */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Map stats display */}
+        {viewState.zoom <=12 &&
         <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs z-50 border border-gray-700 pointer-events-auto">
           <div>Zoom: {viewState.zoom.toFixed(2)}</div>
           {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
           <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
         </div>
+        }
 
         {/* Status and Instructions */}
         {mapStatus.status === 'ready' && (
@@ -552,9 +560,6 @@ const MapboxMap: React.FC = () => {
           </div>
         )}
 
-        <div className="absolute bottom-48 left-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs z-50 border border-gray-700 pointer-events-auto">
-          Ctrl + Mouse
-        </div>
       </div>
 
       <InfoPopUp />
