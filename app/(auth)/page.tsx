@@ -140,7 +140,7 @@ const LandingPage = () => {
           <p className="text-xl text-gray-300 mb-8">
             Transform your map exploration into cinematic experiences. No drone required.
           </p>
-          <Link href="/create">
+          <Link href="/studio">
             <button className="px-8 py-4 bg-blue-500 rounded-lg text-lg font-semibold hover:bg-blue-600 transition">
               Start Creating
             </button>

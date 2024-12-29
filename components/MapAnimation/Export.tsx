@@ -156,7 +156,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       // Start polling for progress
       const checkProgress = async () => {
         try {
-          const progressResponse = await fetch(`/api/remotion?renderId=${renderId}&bucketName=${bucketName}`);
+          const progressResponse = await fetch(`/api/server?renderId=${renderId}&bucketName=${bucketName}`);
           const progress = await progressResponse.json();
 
           if (progress.done) {

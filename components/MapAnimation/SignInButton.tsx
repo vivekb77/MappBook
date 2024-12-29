@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-const SignInButton = ({ redirectUrl = '/create' }) => {
+const SignInButton = ({ redirectUrl = '/studio' }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {

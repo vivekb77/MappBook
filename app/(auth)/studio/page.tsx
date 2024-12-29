@@ -63,7 +63,7 @@ export default function Create() {
         >
           {/* Tab Handle */}
           <div
-            className="absolute -top-12 left-1/2 -translate-x-1/2 w-[50%] max-w-md
+            className="absolute -top-10 left-1/2 -translate-x-1/2 w-[50%] max-w-md
               bg-gradient-to-r from-blue-600 to-blue-500
               rounded-t-xl px-6 py-4 cursor-pointer shadow-lg
               hover:scale-105 transition-all
@@ -72,7 +72,7 @@ export default function Create() {
           >
             <div className="flex items-center justify-center space-x-2">
               <ChevronUp
-                className={`w-8 h-8 text-white transition-transform duration-300
+                className={`w-8 h-6 text-white transition-transform duration-300
                   ${!isOpen ? 'rotate-180' : ''}`}
               />
             </div>
