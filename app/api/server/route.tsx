@@ -32,7 +32,7 @@ const REGION = (process.env.AWS_REGION || 'us-east-1') as AWSRegion;
 const FUNCTION_NAME = 'remotion-render-4-0-242-mem2048mb-disk2048mb-120sec'
 const SERVE_URL = 'https://remotionlambda-useast1-0303dghv3x.s3.us-east-1.amazonaws.com/sites/mappbook-animation/index.html'
 const BUCKET_NAME = 'remotionlambda-useast1-0303dghv3x';
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER;
+const MAPBOX_TOKEN = process.env.REMOTION_MAPBOX_ACCESS_TOKEN;
 
 // Supabase configuration
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL;
@@ -102,52 +102,35 @@ export async function POST(req: NextRequest) {
 
 
 
-
+    // npx remotion lambda render https://remotionlambda-useast1-0303dghv3x.s3.us-east-1.amazonaws.com/sites/mappbook-animation/index.html FlightAnimation out
 
 
 
 
     // Start the render
-const renderResponse = await renderMediaOnLambda({
-  region: REGION,
-  functionName: FUNCTION_NAME,
-  serveUrl: SERVE_URL,
-  composition: 'FlightAnimation', // Updated to use our new flight animation composition
-  inputProps: {
-    points,
-    mapboxToken: MAPBOX_TOKEN,
-    config: {
-      rotationDuration: 240, // 8 seconds at 30fps
-      flightSpeedKmPerSecond: 0.185,
-      orbitSpeedFactor: 0.25,
-      flightZoom: 16,
-      initialZoom: 1,
-      pitch: 60
-    },
-    transitionFrames: 60
-  },
-  codec: 'h264',
-  imageFormat: 'jpeg',
-  maxRetries: 3,
-  privacy: 'public',
-  framesPerLambda: 100,
-  frameRange: [0, DURATION_IN_FRAMES - 1],
-  ...BASE_VIDEO_CONFIG,
-  ...dimensions,
-  chromiumOptions: {
-    gl: 'angle',
-  },
-  overwrite: true,         // Optional: overwrite existing files with same name
-});
 
-// Optional: Log progress and status
-console.log(`Render started with ID: ${renderResponse.renderId}`);
-console.log(`Bucket: ${renderResponse.bucketName}`);
-
-
-
-
-
+    const renderResponse = await renderMediaOnLambda({
+      region: REGION,
+      functionName: FUNCTION_NAME,
+      serveUrl: SERVE_URL,
+      composition: 'FlightAnimation',
+      inputProps: {
+        points: points,
+        mapboxToken: MAPBOX_TOKEN,
+      },
+      codec: 'h264',
+      imageFormat: 'jpeg',
+      maxRetries: 3,
+      privacy: 'public',
+      framesPerLambda: 500,
+      frameRange: [0, 499],
+      ...dimensions,
+      chromiumOptions: {
+        gl: 'swangle',
+        headless: true
+      },
+      timeoutInMilliseconds: 900000,
+    });
 
 
 
