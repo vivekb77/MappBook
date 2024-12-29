@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Map, MapRef } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import InfoPopUp from "./InfoPopUp";
 import { nanoid } from 'nanoid';
 import { useUser } from '@clerk/nextjs';
 import SignInButton from './SignInButton';
+import { throttle } from 'lodash';
 
 const CONFIG = {
   map: {
@@ -119,7 +120,7 @@ const MapboxMap: React.FC = () => {
   const { isLoaded, isSignedIn, user } = useUser();
 
   // Utility functions and handlers
-  const validatePoint = (newPoint: PointData): string | null => {
+  const validatePoint = useCallback((newPoint: PointData): string | null => {
     if (isAnimating) {
       return "Cannot edit while flying";
     }
@@ -145,7 +146,7 @@ const MapboxMap: React.FC = () => {
     }
 
     return null;
-  };
+  }, [isAnimating, points, viewState.zoom]);
 
   const cleanup = () => {
     if (!isMountedRef.current) return;
@@ -231,6 +232,14 @@ const MapboxMap: React.FC = () => {
     }
   };
 
+  // Throttle handlers that trigger frequently
+  const handleMapMove = useCallback(
+    throttle((evt) => {
+      setViewState(evt.viewState);
+    }, 16), // ~60fps
+    []
+  );
+
   const handleWebGLContextLoss = () => {
     if (!isMountedRef.current) return;
 
@@ -269,7 +278,7 @@ const MapboxMap: React.FC = () => {
     cleanup();
   };
 
-  const handleMapLoad = () => {
+  const handleMapLoad = useCallback(() => {
     if (!mapRef.current || mapInstanceRef.current || !isMountedRef.current) return;
 
     const map = mapRef.current.getMap();
@@ -333,7 +342,7 @@ const MapboxMap: React.FC = () => {
       console.warn('Error initializing map:', e);
       handleMapError();
     }
-  };
+  }, []);
 
   // Event handlers
   const handleMapClick = (event: any) => {
@@ -377,7 +386,7 @@ const MapboxMap: React.FC = () => {
     }]);
   };
 
-  const handlePointMove = (index: number, longitude: number, latitude: number) => {
+  const handlePointMove = useCallback((index: number, longitude: number, latitude: number) => {
     if (!isSignedIn) {
       setErrorMessage("Sign in to modify points");
       return;
@@ -392,7 +401,7 @@ const MapboxMap: React.FC = () => {
       };
       return newPoints;
     });
-  };
+  }, [isSignedIn]);
 
   const handleAltitudeChange = (index: number, altitude: number) => {
     if (!isSignedIn) return;
@@ -440,6 +449,51 @@ const MapboxMap: React.FC = () => {
       </Alert>
     );
   }
+
+  const mapControls = useMemo(() => (
+    <div className="absolute bottom-48 right-2 space-y-2">
+      <div className="flex flex-col items-end space-y-2">
+        <button
+          onClick={() => setViewState(prev => ({
+            ...prev,
+            pitch: 0,
+            bearing: 0
+          }))}
+          className="bg-gray-800/90 hover:bg-gray-800 p-3 rounded-full shadow-lg transition-colors border border-gray-700"
+          title="Look North"
+        >
+          <Compass className="w-6 h-6 text-blue-400" />
+        </button>
+        
+        <div className="flex space-x-2">
+          {points.length > 0 && !isAnimating && (
+            <Button
+              onClick={resetPoints}
+              className="bg-red-500 text-gray-200 hover:bg-red-600 border border-red-400"
+            >
+              Clear Points
+            </Button>
+          )}
+
+          <FlightAnimation
+            points={points}
+            isAnimating={isAnimating}
+            CONFIG={CONFIG}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setAnimationProgress(0);
+            }}
+            onAnimationCancel={() => {
+              setIsAnimating(false);
+              setAnimationProgress(0);
+            }}
+            onViewStateChange={setViewState}
+            onAnimationProgress={setAnimationProgress}
+          />
+        </div>
+      </div>
+    </div>
+    ), [points.length, isAnimating]);
 
   return (
     <div
@@ -499,7 +553,7 @@ const MapboxMap: React.FC = () => {
         style={{ width: '100%', height: '100%' }}
         onLoad={handleMapLoad}
         onError={handleMapError}
-        reuseMaps={false}
+        reuseMaps={true}
         preserveDrawingBuffer={true}
         attributionControl={true}
         boxZoom={false}
@@ -507,6 +561,9 @@ const MapboxMap: React.FC = () => {
         dragRotate={true}
         keyboard={false}
         touchPitch={true}
+        minZoom={1}
+        maxZoom={20}
+        renderWorldCopies={false}
       >
         {isSignedIn && (
           <MapMarkers
@@ -526,16 +583,17 @@ const MapboxMap: React.FC = () => {
           />
         )}
       </Map>
+      <InfoPopUp />
 
       {/* Map UI Controls Group */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Map stats display */}
-        {viewState.zoom <=12 &&
-        <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs z-50 border border-gray-700 pointer-events-auto">
-          <div>Zoom: {viewState.zoom.toFixed(2)}</div>
-          {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
+        {viewState.zoom <= 12 &&
+          <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs z-50 border border-gray-700 pointer-events-auto">
+            <div>Zoom: {viewState.zoom.toFixed(2)}</div>
+            {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
           <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
-        </div>
+          </div>
         }
 
         {/* Status and Instructions */}
@@ -562,7 +620,7 @@ const MapboxMap: React.FC = () => {
 
       </div>
 
-      <InfoPopUp />
+      
       {/* Altitude Timeline */}
       {points.length > 0 && (
         <AltitudeTimeline
@@ -575,48 +633,8 @@ const MapboxMap: React.FC = () => {
       )}
 
       {/* Controls */}
-      <div className="absolute bottom-48 right-2 space-y-2">
-        <div className="flex flex-col items-end space-y-2">
-          <button
-            onClick={() => setViewState(prev => ({
-              ...prev,
-              pitch: 0,
-              bearing: 0
-            }))}
-            className="bg-gray-800/90 hover:bg-gray-800 p-3 rounded-full shadow-lg transition-colors border border-gray-700"
-            title="Look North"
-          >
-            <Compass className="w-6 h-6 text-blue-400" />
-          </button>
-
-          <div className="flex space-x-2">
-            {points.length > 0 && !isAnimating && (
-              <Button
-                onClick={resetPoints}
-                className="bg-red-500 text-gray-200 hover:bg-red-600 border border-red-400"
-              >
-                Clear Points
-              </Button>
-            )}
-
-            <FlightAnimation
-              points={points}
-              isAnimating={isAnimating}
-              CONFIG={CONFIG}
-              onAnimationStart={() => {
-                setIsAnimating(true);
-                setAnimationProgress(0);
-              }}
-              onAnimationCancel={() => {
-                setIsAnimating(false);
-                setAnimationProgress(0);
-              }}
-              onViewStateChange={setViewState}
-              onAnimationProgress={setAnimationProgress}
-            />
-          </div>
-        </div>
-      </div>
+      {mapControls}
+      
     </div>
   );
 };
