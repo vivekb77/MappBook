@@ -5,7 +5,7 @@ export default authMiddleware({
     "/",
     "/api/stripe/webhook",
     "/terms",
-    "/create",
+    "/studio",
     "/api/search-address",
     "/api/get-assets",
     "/passport",

@@ -135,7 +135,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       const animationDataId = animationData[0].animation_data_id;
 
       // Start the render with aspect ratio
-      const response = await fetch('/api/remotion', {
+      const response = await fetch('/api/server', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
