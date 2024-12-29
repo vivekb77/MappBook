@@ -1,28 +1,29 @@
-// remotion/Root.tsx
+// RemotionRoot.tsx
 import React from 'react';
 import {Composition} from 'remotion';
-import {MyComposition} from './Composition';
+
 
 export const RemotionRoot: React.FC = () => {
-  // Calculate duration based on expected points
-  // Allow ~2 seconds (60 frames) per point transition
-  const maxPoints = 10; // adjust based on your needs
-  const framesPerTransition = 30;
-  const totalDuration = maxPoints * framesPerTransition;
-
   return (
     <>
       <Composition
-        id="Empty"
-        component={MyComposition}
-        durationInFrames={totalDuration}
+        id="FlightAnimation"
+
+        durationInFrames={900} // Adjust based on flight duration
         fps={30}
         width={1280}
         height={720}
         defaultProps={{
           points: [],
-          mapboxToken: '',
-          transitionFrames: framesPerTransition,
+          mapboxToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER || '',
+          config: {
+            rotationDuration: 240, // 8 seconds * 30fps
+            flightSpeedKmPerSecond: 0.185,
+            orbitSpeedFactor: 0.25,
+            flightZoom: 16,
+            initialZoom: 1,
+            pitch: 60
+          }
         }}
       />
     </>

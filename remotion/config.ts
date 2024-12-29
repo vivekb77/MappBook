@@ -1,12 +1,4 @@
 // /remotion/config.ts
-// export const DURATION_IN_FRAMES = 150;
-
-// export const VIDEO_CONFIG = {
-//   fps: 30,
-//   width: 1280,
-//   height: 720,
-//   quality: 80,
-// };
 
 
 // npx remotion lambda policies validate

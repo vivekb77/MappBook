@@ -98,31 +98,63 @@ export async function POST(req: NextRequest) {
     // Get video dimensions based on aspect ratio
     const dimensions =  ASPECT_RATIO_CONFIGS.default;
 
+
+
+
+
+
+
+
+
+
     // Start the render
-    const renderResponse = await renderMediaOnLambda({
-      region: REGION,
-      functionName: FUNCTION_NAME,
-      serveUrl: SERVE_URL,
-      composition: 'Empty',
-      inputProps: {
-        points,
-        mapboxToken: MAPBOX_TOKEN,
-        aspectRatio,
-      },
-      codec: 'h264',
-      imageFormat: 'jpeg',
-      maxRetries: 3,
-      privacy: 'public',
-      framesPerLambda: 100,
+const renderResponse = await renderMediaOnLambda({
+  region: REGION,
+  functionName: FUNCTION_NAME,
+  serveUrl: SERVE_URL,
+  composition: 'FlightAnimation', // Updated to use our new flight animation composition
+  inputProps: {
+    points,
+    mapboxToken: MAPBOX_TOKEN,
+    config: {
+      rotationDuration: 240, // 8 seconds at 30fps
+      flightSpeedKmPerSecond: 0.185,
+      orbitSpeedFactor: 0.25,
+      flightZoom: 16,
+      initialZoom: 1,
+      pitch: 60
+    },
+    transitionFrames: 60
+  },
+  codec: 'h264',
+  imageFormat: 'jpeg',
+  maxRetries: 3,
+  privacy: 'public',
+  framesPerLambda: 100,
+  frameRange: [0, DURATION_IN_FRAMES - 1],
+  ...BASE_VIDEO_CONFIG,
+  ...dimensions,
+  chromiumOptions: {
+    gl: 'angle',
+  },
+  overwrite: true,         // Optional: overwrite existing files with same name
+});
 
-      frameRange: [0, DURATION_IN_FRAMES - 1],
+// Optional: Log progress and status
+console.log(`Render started with ID: ${renderResponse.renderId}`);
+console.log(`Bucket: ${renderResponse.bucketName}`);
 
-      ...BASE_VIDEO_CONFIG,
-      ...dimensions,
-      chromiumOptions: {
-        gl: 'angle',
-      },
-    });
+
+
+
+
+
+
+
+
+
+
+
 
     // Update credits and processing flag on successful render
     const { error: updateEndError } = await supabase
