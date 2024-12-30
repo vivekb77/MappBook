@@ -1,10 +1,18 @@
 // /api/render/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  renderMediaOnLambda, 
-  getRenderProgress, 
+import {
+  renderMediaOnLambda,
+  getRenderProgress,
+  RenderMediaOnLambdaInput,
 } from '@remotion/lambda/client';
 import { createClient } from '@supabase/supabase-js';
+
+
+// If specified, Remotion will send a POST request to the provided endpoint to notify your application when the Lambda rendering process finishes, errors out or times out.
+const webhook: RenderMediaOnLambdaInput['webhook'] = {
+  url: 'https://mappbook.com/api/remotion-webhook',
+  secret: null,
+};
 
 // AWS Lambda configuration
 const FUNCTION_NAME = 'remotion-render-4-0-242-mem2048mb-disk2048mb-120sec'
@@ -30,7 +38,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(req: NextRequest) {
   try {
-    const { points, aspectRatio, showLabels, mappbook_user_id } = await req.json();
+    const { points, aspectRatio, showLabels, mappbook_user_id, animation_data_id, location_count } = await req.json();
 
     // Validate input
     if (!points || !Array.isArray(points) || points.length === 0) {
@@ -69,15 +77,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-
-
-
-
-
-
-
-
-
+    // https://www.remotion.dev/docs/lambda/rendermediaonlambda#framesperlambda
 
     // Start the render
 
@@ -93,41 +93,22 @@ export async function POST(req: NextRequest) {
       },
       codec: 'h264',
       imageFormat: 'jpeg',
+      jpegQuality: 100,
+      webhook,
       maxRetries: 1,
       privacy: 'public',
-      framesPerLambda: 100,
-      frameRange: [0, 99],
+      framesPerLambda: 1000,
+      concurrencyPerLambda:2,
+      timeoutInMilliseconds:500000,
       chromiumOptions: {
         gl: 'swangle',
         headless: true
       }
     });
 
-
-
-
-
-
-
-
-    // Update credits and processing flag on successful render
-    const { error: updateEndError } = await supabase
-      .from('MappBook_Users')
-      .update({ 
-        animation_credits: userData.animation_credits - 1
-      })
-      .eq('mappbook_user_id', mappbook_user_id);
-
-    if (updateEndError) {
-      console.error('Error updating processing flag and credits:', updateEndError);
-      // Continue with the response even if the update fails
-    }
-
     return NextResponse.json({
       renderId: renderResponse.renderId,
-      bucketName: renderResponse.bucketName || BUCKET_NAME,
-      aspectRatio,
-      remainingCredits: userData.animation_credits - 1
+      bucketName: renderResponse.bucketName || BUCKET_NAME
     });
 
   } catch (error) {
@@ -135,41 +116,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { error: 'Failed to start render' },
-      { status: 500 }
-    );
-  }
-}
-
-
-
-
-
-
-export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const renderId = searchParams.get('renderId');
-  const bucketName = searchParams.get('bucketName');
-  
-  if (!renderId || !bucketName) {
-    return NextResponse.json(
-      { error: 'Missing renderId or bucketName parameter' },
-      { status: 400 }
-    );
-  }
-
-  try {
-    const progress = await getRenderProgress({
-      renderId,
-      bucketName,
-      region: 'us-east-1',
-      functionName: FUNCTION_NAME,
-    });
-
-    return NextResponse.json(progress);
-  } catch (error) {
-    console.error('Progress check error:', error);
-    return NextResponse.json(
-      { error: 'Failed to check render progress' },
       { status: 500 }
     );
   }

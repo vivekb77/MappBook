@@ -5,7 +5,7 @@ import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { useMappbookUser } from '@/context/UserContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { RadioGroup } from '@radix-ui/react-dropdown-menu';
-
+import { getRenderProgress } from '@remotion/lambda/client';
 interface Point {
   longitude: number;
   latitude: number;
@@ -121,20 +121,8 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         throw new Error('Invalid user ID');
       }
 
-      // First save to Animation_Data table
-      const { data: animationData, error: saveError } = await supabase
-        .from('Animation_Data')
-        .insert([{
-          location_data: points,
-          mappbook_user_id: mappbookUser.mappbook_user_id
-        }])
-        .select();
-
-      if (saveError) throw saveError;
-
-      const animationDataId = animationData[0].animation_data_id;
-
       // Start the render with aspect ratio
+
       const response = await fetch('/api/server', {
         method: 'POST',
         headers: {
@@ -143,7 +131,8 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         body: JSON.stringify({
           points,
           aspectRatio: selectedAspectRatio,
-          mappbook_user_id: mappbookUser.mappbook_user_id
+          mappbook_user_id: mappbookUser.mappbook_user_id,
+          show_labels: true,
         }),
       });
 
@@ -153,27 +142,32 @@ const ExportButton: React.FC<ExportButtonProps> = ({
 
       const { renderId, bucketName } = await response.json();
 
-      // Start polling for progress
+
+      // Save to Animation_Data table
+      const { data: animationData, error: saveError } = await supabase
+        .from('Animation_Data')
+        .insert([{
+          location_data: points,
+          location_count:points.length,
+          mappbook_user_id: mappbookUser.mappbook_user_id,
+          render_id: renderId
+        }])
+        .select();
+
+      if (saveError) throw saveError;
+
+
+      //check progress to show user when video is done
       const checkProgress = async () => {
         try {
-          const progressResponse = await fetch(`/api/server?renderId=${renderId}&bucketName=${bucketName}`);
-          const progress = await progressResponse.json();
+          const progress = await getRenderProgress({
+            renderId: renderId,
+            bucketName: bucketName,
+            functionName: 'remotion-render-4-0-242-mem2048mb-disk2048mb-120sec',
+            region: 'us-east-1',
+          });
 
           if (progress.done) {
-
-            const { error: videoError } = await supabase
-              .from('Animation_Video')
-              .insert([{
-                video_url: progress.outputFile,
-                mappbook_user_id: mappbookUser.mappbook_user_id,
-                animation_data_id: animationDataId,
-                location_count: points.length,
-                video_cost: progress.costs.accruedSoFar,
-                aspect_ratio: selectedAspectRatio
-              }]);
-
-            if (videoError) throw videoError;
-
             // Update local user state
             setMappbookUser({
               ...mappbookUser,
@@ -187,8 +181,8 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             const event = new CustomEvent('videoCreated');
             window.dispatchEvent(event);
             return;
-          } else if (progress.error) {
-            throw new Error(progress.error);
+          } else if (progress.errors) {
+            //tracking of verce
           } else {
             setRenderingStatus('rendering');
             setTimeout(checkProgress, 10000);
@@ -201,6 +195,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       };
 
       await checkProgress();
+
     } catch (err) {
       console.error('Export error:', err);
       setRenderingStatus('error');
