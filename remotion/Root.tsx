@@ -1,8 +1,9 @@
 import React from 'react';
-import {Composition} from 'remotion';
+import { Composition } from 'remotion';
 import FlightAnimation from './FlightAnimation';
+import type { ComponentType } from 'react';
 
-interface Point {
+export interface Point {
   longitude: number;
   latitude: number;
   altitude: number;
@@ -10,7 +11,7 @@ interface Point {
   index: number;
 }
 
-interface FlightConfig {
+export interface FlightConfig {
   rotationDuration: number;
   flightSpeedKmPerSecond: number;
   orbitSpeedFactor: number;
@@ -19,44 +20,41 @@ interface FlightConfig {
   pitch: number;
 }
 
-interface FlightAnimationProps {
+export interface FlightAnimationProps {
   points: Point[];
   mapboxToken: string;
   config: FlightConfig;
 }
 
+const calculateDistance = (p1: Point, p2: Point): number => {
+  const R = 6371;
+  const dLat = (p2.latitude - p1.latitude) * Math.PI / 180;
+  const dLon = (p2.longitude - p1.longitude) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(p1.latitude * Math.PI / 180) * Math.cos(p2.latitude * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+const calculateTotalDistance = (points: Point[]): number => {
+  return points.reduce((total, point, index) => {
+    if (index === 0) return 0;
+    return total + calculateDistance(points[index - 1], point);
+  }, 0);
+};
+
+const FPS = 30;
+const ORBIT_DURATION_BUFFER = 500;
+const MIN_DURATION = 1000;
+
+// Cast the FlightAnimation component to satisfy Remotion's type constraints
+const FlightAnimationComponent = FlightAnimation as ComponentType<any>;
+
 export const RemotionRoot: React.FC = () => {
   const defaultProps: FlightAnimationProps = {
-    points: [
-      {
-        longitude: -107.44890865039108,
-        latitude: 44.828362786095965,
-        zoom: 12.299082968494874,
-        altitude: 0,
-        index: 1
-      },
-      {
-        longitude: -107.49581154637008,
-        latitude: 44.82509563869135,
-        zoom: 12.299082968494874,
-        altitude: 0.9140625,
-        index: 2
-      },
-      {
-        longitude: -107.5054433910801,
-        latitude: 44.84568547299284,
-        zoom: 12.299082968494874,
-        altitude: 0,
-        index: 3
-      },
-      {
-        longitude: -107.48883194875394,
-        latitude: 44.868444513102475,
-        zoom: 12.299082968494874,
-        altitude: 0.828125,
-        index: 4
-      }
-    ],
+    points: [{"longitude":174.1426688780395,"latitude":-39.3794835701303,"zoom":10.044567785360918,"altitude":0,"index":1},{"longitude":174.0973743238153,"latitude":-39.38360237980848,"zoom":10.044567785360918,"altitude":0,"index":2},{"longitude":174.06140511899235,"latitude":-39.359915905177836,"zoom":10.044567785360918,"altitude":0,"index":3},{"longitude":174.04475270935228,"latitude":-39.33055412738477,"zoom":10.044567785360918,"altitude":0,"index":4},{"longitude":174.016776661155,"latitude":-39.2965408703882,"zoom":10.044567785360918,"altitude":0,"index":5}],
     mapboxToken: process.env.REMOTION_MAPBOX_ACCESS_TOKEN || '',
     config: {
       rotationDuration: 240,
@@ -68,39 +66,37 @@ export const RemotionRoot: React.FC = () => {
     }
   };
 
-  // Calculate total duration based on path length and config
-  const calculateDuration = () => {
-    const points = defaultProps.points;
-    if (points.length < 2) return 1000;
+  const calculateDuration = React.useMemo(() => {
+    const { points, config } = defaultProps;
+    if (points.length < 2) return MIN_DURATION;
 
-    let totalDistance = 0;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const R = 6371; // Earth's radius in km
-      const dLat = (p2.latitude - p1.latitude) * Math.PI / 180;
-      const dLon = (p2.longitude - p1.longitude) * Math.PI / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(p1.latitude * Math.PI / 180) * Math.cos(p2.latitude * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      totalDistance += R * c;
-    }
-
-    const flightDuration = (totalDistance / defaultProps.config.flightSpeedKmPerSecond) * 10; // multiply by fps
-    const totalDuration = defaultProps.config.rotationDuration + flightDuration;
+    const totalDistance = calculateTotalDistance(points);
+    const flightDuration = (totalDistance / config.flightSpeedKmPerSecond) * FPS;
+    const orbitDuration = flightDuration * config.orbitSpeedFactor;
     
-    return Math.ceil(totalDuration) + 500; // Add buffer for orbit phase
-  };
+    const totalDuration = Math.ceil(
+      config.rotationDuration + 
+      flightDuration + 
+      orbitDuration + 
+      ORBIT_DURATION_BUFFER
+    );
+
+    return Math.max(totalDuration, MIN_DURATION);
+  }, [defaultProps.points, defaultProps.config]);
+
+  React.useEffect(() => {
+    if (!defaultProps.mapboxToken) {
+      console.error('REMOTION_MAPBOX_ACCESS_TOKEN is not set in environment variables');
+    }
+  }, [defaultProps.mapboxToken]);
 
   return (
     <>
       <Composition
         id="FlightAnimation"
-        component={FlightAnimation}
-        durationInFrames={calculateDuration()}
-        fps={10}
+        component={FlightAnimationComponent}
+        durationInFrames={calculateDuration}
+        fps={FPS}
         width={1080}
         height={1920}
         defaultProps={defaultProps}

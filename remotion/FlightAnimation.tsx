@@ -9,6 +9,7 @@ import {
   continueRender
 } from 'remotion';
 import "mapbox-gl/dist/mapbox-gl.css";
+import { Globe } from 'lucide-react';
 
 interface Point {
   longitude: number;
@@ -59,7 +60,7 @@ const calculateBearing = (point1: Point, point2: Point): number => {
 };
 
 const calculateDistance = (point1: Point, point2: Point): number => {
-  const R = 6371;
+  const R = 6371; // Earth's radius in kilometers
   const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
   const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
   const a =
@@ -71,7 +72,7 @@ const calculateDistance = (point1: Point, point2: Point): number => {
 };
 
 const generateOrbitPoints = (
-  center: Point, 
+  center: Point,
   currentBearing: number,
   radiusKm: number = 0.5,
   numPoints: number = 500,
@@ -84,7 +85,7 @@ const generateOrbitPoints = (
   const orbitPoints: Point[] = [];
   const startBearing = currentBearing;
   
-  const finalRadius = options.adaptiveRadius 
+  const finalRadius = options.adaptiveRadius
     ? Math.max(0.1, radiusKm * (1 + center.altitude / 100))
     : radiusKm;
     
@@ -99,14 +100,14 @@ const generateOrbitPoints = (
     const currentBearing = startBearing + (progress * 360);
     const angleRad = (90 - currentBearing) * (Math.PI / 180);
     
-    const currentRadius = options.smoothTransition 
+    const currentRadius = options.smoothTransition
       ? initialRadius + (finalRadius - initialRadius) * progress
       : finalRadius;
     
     const latOffset = (currentRadius / 111.32) * Math.sin(angleRad);
     const lngOffset = (currentRadius / (111.32 * Math.cos(center.latitude * Math.PI / 180))) * Math.cos(angleRad);
     
-    const altitudeOffset = options.smoothTransition 
+    const altitudeOffset = options.smoothTransition
       ? (center.altitude - (options.startPoint?.altitude || center.altitude)) * Math.sin(progress * Math.PI)
       : 0;
     
@@ -183,20 +184,20 @@ const generateCurvedPath = (points: Point[], currentMapBearing: number, numInter
   };
 };
 
-const FlightAnimation: React.ComponentType<any> = ({ points, mapboxToken, config }: FlightAnimationProps) => {
+const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, config }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const mapRef = React.useRef<MapRef>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [mapInstance, setMapInstance] = React.useState<mapboxgl.Map | null>(null);
   const loadingHandle = React.useRef<number | null>(null);
-  
+
   const {
     totalDuration,
     flightPath,
     orbitPath,
     initialViewState,
-    viewStates
+    calculateViewState
   } = useMemo(() => {
     const initial = {
       longitude: points[0]?.longitude ?? 0,
@@ -223,10 +224,14 @@ const FlightAnimation: React.ComponentType<any> = ({ points, mapboxToken, config
     const orbitDuration = (totalOrbitDistance / (config.flightSpeedKmPerSecond * config.orbitSpeedFactor)) * fps;
     const totalDuration = config.rotationDuration + flightDuration + orbitDuration;
 
-    const frames = Array.from({ length: Math.ceil(totalDuration) });
     
-    let lastBearing = 0;
-    const viewStates: ViewState[] = frames.map((_, frameIndex) => {
+    const calculateViewState = (frameIndex: number): ViewState => {
+      console.log(`Calculating viewState for frame ${frameIndex}`);
+      console.log(`Initial longitude ${initial.longitude}`);
+      console.log(`Initial latitude ${initial.latitude}`);
+
+
+
       // Initial rotation phase
       if (frameIndex < config.rotationDuration) {
         const progress = frameIndex / config.rotationDuration;
@@ -245,6 +250,9 @@ const FlightAnimation: React.ComponentType<any> = ({ points, mapboxToken, config
         };
       }
       
+
+
+      
       // Flight phase
       const flightTime = frameIndex - config.rotationDuration;
       if (flightTime <= flightDuration) {
@@ -258,22 +266,19 @@ const FlightAnimation: React.ComponentType<any> = ({ points, mapboxToken, config
         const nextPoint = flightPath[pathIndex + 1];
         const segmentProgress = (progress * (flightPath.length - 1)) % 1;
         
-        const longitude = currentPoint.longitude + 
-          (nextPoint.longitude - currentPoint.longitude) * segmentProgress;
-        const latitude = currentPoint.latitude + 
-          (nextPoint.latitude - currentPoint.latitude) * segmentProgress;
-        const altitude = currentPoint.altitude + 
-          (nextPoint.altitude - currentPoint.altitude) * segmentProgress;
-        
+        // Cache the previous bearing to ensure smooth transitions
+        const prevViewState = frameIndex > 0 ? calculateViewState(frameIndex - 1) : null;
         const targetBearing = calculateBearing(currentPoint, nextPoint);
-        const smoothBearing = interpolateAngle(lastBearing, targetBearing, ROTATION_SMOOTHNESS);
-        lastBearing = smoothBearing;
-
+        const smoothBearing = prevViewState
+          ? interpolateAngle(prevViewState.bearing, targetBearing, ROTATION_SMOOTHNESS)
+          : targetBearing;
         
         return {
-          longitude,
-          latitude,
-          zoom: config.flightZoom - (altitude * 3),
+          longitude: currentPoint.longitude +
+            (nextPoint.longitude - currentPoint.longitude) * segmentProgress,
+          latitude: currentPoint.latitude +
+            (nextPoint.latitude - currentPoint.latitude) * segmentProgress,
+          zoom: config.flightZoom - (currentPoint.altitude * 3),
           pitch: config.pitch,
           bearing: smoothBearing
         };
@@ -292,21 +297,19 @@ const FlightAnimation: React.ComponentType<any> = ({ points, mapboxToken, config
         const nextPoint = orbitPath[pathIndex + 1];
         const segmentProgress = (progress * (orbitPath.length - 1)) % 1;
         
-        const longitude = currentPoint.longitude + 
-          (nextPoint.longitude - currentPoint.longitude) * segmentProgress;
-        const latitude = currentPoint.latitude + 
-          (nextPoint.latitude - currentPoint.latitude) * segmentProgress;
-        const altitude = currentPoint.altitude + 
-          (nextPoint.altitude - currentPoint.altitude) * segmentProgress;
-          
+        // Ensure smooth transition from flight phase
+        const prevViewState = frameIndex > 0 ? calculateViewState(frameIndex - 1) : null;
         const targetBearing = calculateBearing(currentPoint, nextPoint);
-        const smoothBearing = interpolateAngle(lastBearing, targetBearing, ROTATION_SMOOTHNESS * 0.5);
-        lastBearing = smoothBearing;
+        const smoothBearing = prevViewState
+          ? interpolateAngle(prevViewState.bearing, targetBearing, ROTATION_SMOOTHNESS * 0.5)
+          : targetBearing;
         
         return {
-          longitude,
-          latitude,
-          zoom: config.flightZoom - (altitude * 3),
+          longitude: currentPoint.longitude +
+            (nextPoint.longitude - currentPoint.longitude) * segmentProgress,
+          latitude: currentPoint.latitude +
+            (nextPoint.latitude - currentPoint.latitude) * segmentProgress,
+          zoom: config.flightZoom - (currentPoint.altitude * 3),
           pitch: interpolate(
             progress,
             [0.8, 1],
@@ -315,32 +318,43 @@ const FlightAnimation: React.ComponentType<any> = ({ points, mapboxToken, config
           bearing: smoothBearing
         };
       }
-
-
-      
       
       // Final state
+      const finalPoint = points[points.length - 1];
+      const prevViewState = frameIndex > 0 ? calculateViewState(frameIndex - 1) : null;
+      
+      
+
+
+
       return {
-        longitude: points[points.length - 1].longitude,
-        latitude: points[points.length - 1].latitude,
+        longitude: finalPoint.longitude,
+        latitude: finalPoint.latitude,
         zoom: config.flightZoom,
         pitch: 0,
-        bearing: viewStates[frameIndex - 1]?.bearing ?? 0
+        bearing: prevViewState?.bearing ?? 0
       };
-    });
+      
+    };
 
-    console.log('Input points:', points);
-      console.log('View states:', viewStates.slice(0, 5)); // Show first 5 view states
 
+  
 
     return {
       totalDuration,
       flightPath,
       orbitPath,
       initialViewState: initial,
-      viewStates
+      calculateViewState
     };
   }, [points, config, fps]);
+
+  const currentViewState = useMemo(() => 
+    calculateViewState(frame),
+    [frame, calculateViewState]
+  );
+
+
 
   React.useEffect(() => {
     if (!mapRef.current || mapInstance) return;
@@ -390,7 +404,7 @@ const FlightAnimation: React.ComponentType<any> = ({ points, mapboxToken, config
 
           map.addLayer({
             id: 'flight-path',
-            type: 'line',
+            type: 'line',  // There was a missing closing quote here
             source: 'flight-path',
             paint: {
               'line-color': '#ffffff',
@@ -398,6 +412,8 @@ const FlightAnimation: React.ComponentType<any> = ({ points, mapboxToken, config
               'line-opacity': 0.7
             }
           });
+
+          
         }
 
         setIsLoaded(true);
@@ -424,15 +440,16 @@ const FlightAnimation: React.ComponentType<any> = ({ points, mapboxToken, config
   }, [mapRef.current, points, config.flightZoom, initialViewState, flightPath]);
 
   React.useEffect(() => {
-    if (!mapInstance || !isLoaded || frame >= viewStates.length) return;
+    if (!mapInstance || !isLoaded) return;
     
-    const currentView = viewStates[frame];
-    if (currentView) {
-      mapInstance.jumpTo({
-        ...currentView,
-      });
-    }
-  }, [frame, mapInstance, isLoaded, viewStates]);
+    // Use easeTo for smooth transitions
+    mapInstance.easeTo({
+      ...currentViewState,
+      duration: 0,  // Set to 0 for frame-perfect updates
+      animate: false // Disable animation to prevent interpolation
+    });
+  }, [currentViewState, mapInstance, isLoaded]);
+
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#000' }}>
