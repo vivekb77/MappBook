@@ -102,9 +102,6 @@ export async function POST(req: NextRequest) {
 
 
 
-    // npx remotion lambda render https://remotionlambda-useast1-0303dghv3x.s3.us-east-1.amazonaws.com/sites/mappbook-animation/index.html FlightAnimation out
-
-
 
 
     // Start the render
@@ -122,8 +119,8 @@ export async function POST(req: NextRequest) {
       imageFormat: 'jpeg',
       maxRetries: 3,
       privacy: 'public',
-      framesPerLambda: 500,
-      frameRange: [0, 499],
+      framesPerLambda: 100,
+      frameRange: [0, 99],
       ...dimensions,
       chromiumOptions: {
         gl: 'swangle',
