@@ -119,6 +119,7 @@ const generateOrbitPoints = (
     });
   }
   
+  // console.log(orbitPoints)
   return orbitPoints;
 };
 
@@ -200,8 +201,8 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
     calculateViewState
   } = useMemo(() => {
     const initial = {
-      longitude: points[0]?.longitude ?? 0,
-      latitude: points[0]?.latitude ?? 0,
+      longitude: points[0].longitude,
+      latitude: points[0].latitude,
       zoom: config.initialZoom,
       pitch: 0,
       bearing: 0
@@ -226,17 +227,11 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
 
     
     const calculateViewState = (frameIndex: number): ViewState => {
-      console.log(`Calculating viewState for frame ${frameIndex}`);
-      console.log(`Initial longitude ${initial.longitude}`);
-      console.log(`Initial latitude ${initial.latitude}`);
-
-
 
       // Initial rotation phase
       if (frameIndex < config.rotationDuration) {
         const progress = frameIndex / config.rotationDuration;
         const initialBearing = calculateBearing(points[0], points[1]);
-        
         return {
           longitude: initial.longitude,
           latitude: initial.latitude,
@@ -457,7 +452,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
         ref={mapRef}
         mapboxAccessToken={mapboxToken}
         initialViewState={initialViewState}
-        mapStyle="mapbox://styles/mapbox/satellite-v9"
+        mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
         fog={{
           'horizon-blend': 0.4,
           'color': '#ffa07a',
@@ -465,18 +460,16 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
           'space-color': '#191970',
           'star-intensity': 0.85
         }}
-        attributionControl={false}
-        reuseMaps
-        preserveDrawingBuffer
-        renderWorldCopies={false}
-        interactive={false}
+        attributionControl={true}
+        // reuseMaps
+        // preserveDrawingBuffer
         trackResize={false}
         maxZoom={config.flightZoom + 1}
         minZoom={config.initialZoom - 1}
         maxPitch={config.pitch + 10}
         minPitch={0}
         maxTileCacheSize={50}
-        optimizeForTerrain={true}
+        optimizeForTerrain={false}
         transformRequest={(url, resourceType) => {
           return {
             url,

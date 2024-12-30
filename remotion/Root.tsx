@@ -54,14 +54,15 @@ const FlightAnimationComponent = FlightAnimation as ComponentType<any>;
 
 export const RemotionRoot: React.FC = () => {
   const defaultProps: FlightAnimationProps = {
-    points: [{"longitude":174.1426688780395,"latitude":-39.3794835701303,"zoom":10.044567785360918,"altitude":0,"index":1},{"longitude":174.0973743238153,"latitude":-39.38360237980848,"zoom":10.044567785360918,"altitude":0,"index":2},{"longitude":174.06140511899235,"latitude":-39.359915905177836,"zoom":10.044567785360918,"altitude":0,"index":3},{"longitude":174.04475270935228,"latitude":-39.33055412738477,"zoom":10.044567785360918,"altitude":0,"index":4},{"longitude":174.016776661155,"latitude":-39.2965408703882,"zoom":10.044567785360918,"altitude":0,"index":5}],
-    mapboxToken: process.env.REMOTION_MAPBOX_ACCESS_TOKEN || '',
+    // points: [],
+    points: [{"longitude":-93.6174027635334,"latitude":46.09365125181901,"zoom":10.346912853958845,"altitude":0.00,"index":1,"originalPosition":{"longitude":-93.6174027635334,"latitude":46.09365125181901}},{"longitude":-93.58878884885478,"latitude":46.13145273587273,"zoom":10.346912853958845,"altitude":0,"index":2,"originalPosition":{"longitude":-93.57745126002013,"latitude":46.10263613121563}},{"longitude":-93.53102113431578,"latitude":46.113865171666475,"zoom":10.346912853958845,"altitude":0.65625,"index":3,"originalPosition":{"longitude":-93.53102113431578,"latitude":46.113865171666475}},{"longitude":-93.4894499752545,"latitude":46.113116640137264,"zoom":10.346912853958845,"altitude":0,"index":4,"originalPosition":{"longitude":-93.4894499752545,"latitude":46.113116640137264}},{"longitude":-93.48675054934162,"latitude":46.15015674712444,"zoom":10.346912853958845,"altitude":0,"index":5,"originalPosition":{"longitude":-93.48675054934162,"latitude":46.15015674712444}},{"longitude":-93.45597709393279,"latitude":46.177827023156595,"zoom":10.346912853958845,"altitude":0,"index":6,"originalPosition":{"longitude":-93.45597709393279,"latitude":46.177827023156595}}],
+    mapboxToken: 'pk.eyJ1IjoibmV3c2V4cHJlc3NueiIsImEiOiJjbTU5Y3IwdXYzcXVwMmpxMzZ5czN4cWowIn0.p9lIC3ALRUwhwIIsw7W7vQ',
     config: {
       rotationDuration: 240,
       flightSpeedKmPerSecond: 0.185,
       orbitSpeedFactor: 0.25,
-      flightZoom: 11,
-      initialZoom: 1,
+      flightZoom: 16,
+      initialZoom: 2, // if set to 1 , map is zoomed at latitude 0
       pitch: 60
     }
   };
@@ -84,11 +85,6 @@ export const RemotionRoot: React.FC = () => {
     return Math.max(totalDuration, MIN_DURATION);
   }, [defaultProps.points, defaultProps.config]);
 
-  React.useEffect(() => {
-    if (!defaultProps.mapboxToken) {
-      console.error('REMOTION_MAPBOX_ACCESS_TOKEN is not set in environment variables');
-    }
-  }, [defaultProps.mapboxToken]);
 
   return (
     <>
@@ -96,9 +92,11 @@ export const RemotionRoot: React.FC = () => {
         id="FlightAnimation"
         component={FlightAnimationComponent}
         durationInFrames={calculateDuration}
+        // durationInFrames={2000}
+        // fps={10}
         fps={FPS}
         width={1080}
-        height={1920}
+        height={1350}
         defaultProps={defaultProps}
       />
     </>

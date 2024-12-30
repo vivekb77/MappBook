@@ -6,19 +6,9 @@ import {
 } from '@remotion/lambda/client';
 import { createClient } from '@supabase/supabase-js';
 
-type AWSRegion = 
-  | 'us-east-1' | 'us-east-2' | 'us-west-1' | 'us-west-2'
-  | 'ap-south-1' | 'ap-northeast-1' | 'ap-northeast-2' | 'ap-northeast-3'
-  | 'ap-southeast-1' | 'ap-southeast-2' | 'ca-central-1' | 'eu-central-1'
-  | 'eu-west-1' | 'eu-west-2' | 'eu-west-3' | 'eu-north-1'
-  | 'sa-east-1';
+
 
 // Video configuration
-const DURATION_IN_FRAMES = 299; // 10 seconds at 30fps
-const BASE_VIDEO_CONFIG = {
-  fps: 30,
-  jpegQuality: 80,
-};
 const ASPECT_RATIO_CONFIGS = {
   '16:9': { width: 1920, height: 1080 },
   '9:16': { width: 1080, height: 1920 },
@@ -28,11 +18,9 @@ const ASPECT_RATIO_CONFIGS = {
 };
 
 // AWS Lambda configuration
-const REGION = (process.env.AWS_REGION || 'us-east-1') as AWSRegion;
 const FUNCTION_NAME = 'remotion-render-4-0-242-mem2048mb-disk2048mb-120sec'
 const SERVE_URL = 'https://remotionlambda-useast1-0303dghv3x.s3.us-east-1.amazonaws.com/sites/mappbook-animation/index.html'
 const BUCKET_NAME = 'remotionlambda-useast1-0303dghv3x';
-const MAPBOX_TOKEN = process.env.REMOTION_MAPBOX_ACCESS_TOKEN;
 
 // Supabase configuration
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL;
@@ -44,9 +32,6 @@ if (!SERVE_URL) {
 }
 if (!BUCKET_NAME) {
   throw new Error('AWS_BUCKET_NAME environment variable not set');
-}
-if (!MAPBOX_TOKEN) {
-  throw new Error('NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER environment variable not set');
 }
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Supabase credentials are required');
@@ -95,8 +80,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get video dimensions based on aspect ratio
-    const dimensions =  ASPECT_RATIO_CONFIGS.default;
+
+
+
 
 
 
@@ -107,26 +93,23 @@ export async function POST(req: NextRequest) {
     // Start the render
 
     const renderResponse = await renderMediaOnLambda({
-      region: REGION,
+      region: 'us-east-1',
       functionName: FUNCTION_NAME,
       serveUrl: SERVE_URL,
       composition: 'FlightAnimation',
       inputProps: {
         points: points,
-        mapboxToken: MAPBOX_TOKEN,
       },
       codec: 'h264',
       imageFormat: 'jpeg',
-      maxRetries: 3,
+      maxRetries: 1,
       privacy: 'public',
       framesPerLambda: 100,
       frameRange: [0, 99],
-      ...dimensions,
       chromiumOptions: {
         gl: 'swangle',
         headless: true
-      },
-      timeoutInMilliseconds: 900000,
+      }
     });
 
 
@@ -187,7 +170,7 @@ export async function GET(req: NextRequest) {
     const progress = await getRenderProgress({
       renderId,
       bucketName,
-      region: REGION,
+      region: 'us-east-1',
       functionName: FUNCTION_NAME,
     });
 
