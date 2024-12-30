@@ -226,111 +226,130 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
     const totalDuration = config.rotationDuration + flightDuration + orbitDuration;
 
     
-    const calculateViewState = (frameIndex: number): ViewState => {
+   // Change in the calculateViewState function within the useMemo block:
+const calculateViewState = (frameIndex: number): ViewState => {
+  let prevBearing = 0;
+  
+  // Initial rotation phase
+  if (frameIndex < config.rotationDuration) {
+    const progress = frameIndex / config.rotationDuration;
+    const initialBearing = calculateBearing(points[0], points[1]);
+    return {
+      longitude: initial.longitude,
+      latitude: initial.latitude,
+      zoom: interpolate(
+        progress,
+        [0, 1],
+        [config.initialZoom, config.flightZoom]
+      ),
+      pitch: interpolate(progress, [0, 1], [0, config.pitch]),
+      bearing: interpolateAngle(0, initialBearing, progress)
+    };
+  }
 
-      // Initial rotation phase
-      if (frameIndex < config.rotationDuration) {
-        const progress = frameIndex / config.rotationDuration;
-        const initialBearing = calculateBearing(points[0], points[1]);
-        return {
-          longitude: initial.longitude,
-          latitude: initial.latitude,
-          zoom: interpolate(
-            progress,
-            [0, 1],
-            [config.initialZoom, config.flightZoom]
-          ),
-          pitch: interpolate(progress, [0, 1], [0, config.pitch]),
-          bearing: interpolateAngle(0, initialBearing, progress)
-        };
-      }
-      
-
-
-      
-      // Flight phase
-      const flightTime = frameIndex - config.rotationDuration;
+  // Store previous frame's bearing without recursion
+  if (frameIndex > 0) {
+    const prevFrame = frameIndex - 1;
+    if (prevFrame < config.rotationDuration) {
+      const progress = prevFrame / config.rotationDuration;
+      const initialBearing = calculateBearing(points[0], points[1]);
+      prevBearing = interpolateAngle(0, initialBearing, progress);
+    } else {
+      const flightTime = prevFrame - config.rotationDuration;
       if (flightTime <= flightDuration) {
         const progress = flightTime / flightDuration;
         const pathIndex = Math.min(
           Math.floor(progress * (flightPath.length - 1)),
           flightPath.length - 2
         );
-        
         const currentPoint = flightPath[pathIndex];
         const nextPoint = flightPath[pathIndex + 1];
-        const segmentProgress = (progress * (flightPath.length - 1)) % 1;
-        
-        // Cache the previous bearing to ensure smooth transitions
-        const prevViewState = frameIndex > 0 ? calculateViewState(frameIndex - 1) : null;
-        const targetBearing = calculateBearing(currentPoint, nextPoint);
-        const smoothBearing = prevViewState
-          ? interpolateAngle(prevViewState.bearing, targetBearing, ROTATION_SMOOTHNESS)
-          : targetBearing;
-        
-        return {
-          longitude: currentPoint.longitude +
-            (nextPoint.longitude - currentPoint.longitude) * segmentProgress,
-          latitude: currentPoint.latitude +
-            (nextPoint.latitude - currentPoint.latitude) * segmentProgress,
-          zoom: config.flightZoom - (currentPoint.altitude * 3),
-          pitch: config.pitch,
-          bearing: smoothBearing
-        };
+        prevBearing = calculateBearing(currentPoint, nextPoint);
       }
-      
-      // Orbit phase
-      const orbitTime = flightTime - flightDuration;
-      if (orbitTime <= orbitDuration) {
-        const progress = orbitTime / orbitDuration;
-        const pathIndex = Math.min(
-          Math.floor(progress * (orbitPath.length - 1)),
-          orbitPath.length - 2
-        );
-        
-        const currentPoint = orbitPath[pathIndex];
-        const nextPoint = orbitPath[pathIndex + 1];
-        const segmentProgress = (progress * (orbitPath.length - 1)) % 1;
-        
-        // Ensure smooth transition from flight phase
-        const prevViewState = frameIndex > 0 ? calculateViewState(frameIndex - 1) : null;
-        const targetBearing = calculateBearing(currentPoint, nextPoint);
-        const smoothBearing = prevViewState
-          ? interpolateAngle(prevViewState.bearing, targetBearing, ROTATION_SMOOTHNESS * 0.5)
-          : targetBearing;
-        
-        return {
-          longitude: currentPoint.longitude +
-            (nextPoint.longitude - currentPoint.longitude) * segmentProgress,
-          latitude: currentPoint.latitude +
-            (nextPoint.latitude - currentPoint.latitude) * segmentProgress,
-          zoom: config.flightZoom - (currentPoint.altitude * 3),
-          pitch: interpolate(
-            progress,
-            [0.8, 1],
-            [config.pitch, 0]
-          ),
-          bearing: smoothBearing
-        };
-      }
-      
-      // Final state
-      const finalPoint = points[points.length - 1];
-      const prevViewState = frameIndex > 0 ? calculateViewState(frameIndex - 1) : null;
-      
-      
+    }
+  }
 
-
-
-      return {
-        longitude: finalPoint.longitude,
-        latitude: finalPoint.latitude,
-        zoom: config.flightZoom,
-        pitch: 0,
-        bearing: prevViewState?.bearing ?? 0
-      };
-      
+  // Flight phase
+  const flightTime = frameIndex - config.rotationDuration;
+  if (flightTime <= flightDuration) {
+    const progress = flightTime / flightDuration;
+    const pathIndex = Math.min(
+      Math.floor(progress * (flightPath.length - 1)),
+      flightPath.length - 2
+    );
+    
+    const currentPoint = flightPath[pathIndex];
+    const nextPoint = flightPath[pathIndex + 1];
+    const segmentProgress = (progress * (flightPath.length - 1)) % 1;
+    
+    const targetBearing = calculateBearing(currentPoint, nextPoint);
+    const smoothBearing = frameIndex > 0
+      ? interpolateAngle(prevBearing, targetBearing, ROTATION_SMOOTHNESS)
+      : targetBearing;
+    
+    return {
+      longitude: currentPoint.longitude +
+        (nextPoint.longitude - currentPoint.longitude) * segmentProgress,
+      latitude: currentPoint.latitude +
+        (nextPoint.latitude - currentPoint.latitude) * segmentProgress,
+      zoom: config.flightZoom - (currentPoint.altitude * 3),
+      pitch: config.pitch,
+      bearing: smoothBearing
     };
+  }
+
+// Orbit phase
+const orbitTime = flightTime - flightDuration;
+if (orbitTime <= orbitDuration) {
+  const progress = orbitTime / orbitDuration;
+  const pathIndex = Math.min(
+    Math.floor(progress * (orbitPath.length - 1)),
+    orbitPath.length - 2
+  );
+  
+  const currentPoint = orbitPath[pathIndex];
+  const nextPoint = orbitPath[pathIndex + 1];
+  const segmentProgress = (progress * (orbitPath.length - 1)) % 1;
+  
+  // Ensure smooth transition from flight phase
+  const prevViewState = frameIndex > 0 ? calculateViewState(frameIndex - 1) : null;
+  const targetBearing = calculateBearing(currentPoint, nextPoint);
+  const smoothBearing = prevViewState
+    ? interpolateAngle(prevViewState.bearing, targetBearing, ROTATION_SMOOTHNESS * 0.5)
+    : targetBearing;
+  
+  return {
+    longitude: currentPoint.longitude +
+      (nextPoint.longitude - currentPoint.longitude) * segmentProgress,
+    latitude: currentPoint.latitude +
+      (nextPoint.latitude - currentPoint.latitude) * segmentProgress,
+    zoom: config.flightZoom - (currentPoint.altitude * 3),
+    pitch: interpolate(
+      progress,
+      [0.8, 1],
+      [config.pitch, 0]
+    ),
+    bearing: smoothBearing
+  };
+}
+
+// Final state
+const finalPoint = points[points.length - 1];
+const prevViewState = frameIndex > 0 ? calculateViewState(frameIndex - 1) : null;
+
+
+
+
+
+return {
+  longitude: finalPoint.longitude,
+  latitude: finalPoint.latitude,
+  zoom: config.flightZoom,
+  pitch: 0,
+  bearing: prevViewState?.bearing ?? 0
+};
+
+};
 
 
   
