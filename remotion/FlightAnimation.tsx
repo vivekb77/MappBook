@@ -36,11 +36,11 @@ interface ViewState {
   bearing: number;
 }
 
-
 interface FlightAnimationProps {
   points: Point[];
   mapboxToken: string;
   config: FlightConfig;
+  showLabels?: boolean;
 }
 
 const interpolateAngle = (startAngle: number, endAngle: number, t: number): number => {
@@ -187,7 +187,7 @@ const generateCurvedPath = (points: Point[], currentMapBearing: number, numInter
   };
 };
 
-const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, config }) => {
+const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, config, showLabels }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const mapRef = React.useRef<MapRef>(null);
@@ -381,6 +381,19 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
         await new Promise<void>((resolve) => {
           const checkTiles = () => {
             if (map.areTilesLoaded()) {
+              // Set label visibility based on prop
+              const style = map.getStyle();
+              if (style && style.layers) {
+                style.layers.forEach(layer => {
+                  if (layer.type === 'symbol') {
+                    map.setLayoutProperty(
+                      layer.id,
+                      'visibility',
+                      showLabels ? 'visible' : 'none'
+                    );
+                  }
+                });
+              }
               resolve();
             } else {
               setTimeout(checkTiles, 100);
@@ -449,7 +462,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
         continueRender(loadingHandle.current);
       }
     };
-  }, [mapRef.current, points, config.flightZoom, initialViewState, flightPath]);
+  }, [mapRef.current, points, config.flightZoom, initialViewState, flightPath, showLabels]);
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#000' }}>

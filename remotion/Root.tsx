@@ -11,6 +11,14 @@ export interface Point {
   index: number;
 }
 
+interface FlightAnimationProps {
+  points: Point[];
+  mapboxToken: string;
+  config: FlightConfig;
+  aspectRatio?: AspectRatio;
+  showLabels?: boolean;
+}
+
 export interface FlightConfig {
   rotationDuration: number;
   flightSpeedKmPerSecond: number;
@@ -20,11 +28,15 @@ export interface FlightConfig {
   pitch: number;
 }
 
-export interface FlightAnimationProps {
-  points: Point[];
-  mapboxToken: string;
-  config: FlightConfig;
-}
+const ASPECT_RATIO_CONFIGS = {
+  '16:9': { width: 1920, height: 1080 },
+  '9:16': { width: 1080, height: 1920 },
+  '1:1': { width: 1080, height: 1080 },
+  '4:5': { width: 1080, height: 1350 },
+  default: { width: 1920, height: 1080 }
+} as const;
+
+type AspectRatio = keyof typeof ASPECT_RATIO_CONFIGS;
 
 const calculateDistance = (p1: Point, p2: Point): number => {
   const R = 6371;
@@ -49,13 +61,14 @@ const FPS = 30;
 const ORBIT_DURATION_BUFFER = 500;
 const MIN_DURATION = 1000;
 
-// Cast the FlightAnimation component to satisfy Remotion's type constraints
+
 const FlightAnimationComponent = FlightAnimation as ComponentType<any>;
 
 export const RemotionRoot: React.FC = () => {
+
   const defaultProps: FlightAnimationProps = {
     // points: [],
-    points: [{"longitude":-93.6174027635334,"latitude":46.09365125181901,"zoom":10.346912853958845,"altitude":0.00,"index":1,"originalPosition":{"longitude":-93.6174027635334,"latitude":46.09365125181901}},{"longitude":-93.58878884885478,"latitude":46.13145273587273,"zoom":10.346912853958845,"altitude":0,"index":2,"originalPosition":{"longitude":-93.57745126002013,"latitude":46.10263613121563}},{"longitude":-93.53102113431578,"latitude":46.113865171666475,"zoom":10.346912853958845,"altitude":0.65625,"index":3,"originalPosition":{"longitude":-93.53102113431578,"latitude":46.113865171666475}},{"longitude":-93.4894499752545,"latitude":46.113116640137264,"zoom":10.346912853958845,"altitude":0,"index":4,"originalPosition":{"longitude":-93.4894499752545,"latitude":46.113116640137264}},{"longitude":-93.48675054934162,"latitude":46.15015674712444,"zoom":10.346912853958845,"altitude":0,"index":5,"originalPosition":{"longitude":-93.48675054934162,"latitude":46.15015674712444}},{"longitude":-93.45597709393279,"latitude":46.177827023156595,"zoom":10.346912853958845,"altitude":0,"index":6,"originalPosition":{"longitude":-93.45597709393279,"latitude":46.177827023156595}}],
+    points: [{"longitude":-97.12875642759997,"latitude":44.98371495408537,"zoom":10.747596086725022,"altitude":0,"index":1,"originalPosition":{"longitude":-97.12875642759997,"latitude":44.98371495408537}},{"longitude":-97.18153944103312,"latitude":44.98429377028762,"zoom":10.747596086725022,"altitude":1,"index":2,"originalPosition":{"longitude":-97.18153944103312,"latitude":44.98429377028762}},{"longitude":-97.20527133854578,"latitude":44.96547925227662,"zoom":10.747596086725022,"altitude":0,"index":3,"originalPosition":{"longitude":-97.20527133854578,"latitude":44.96547925227662}},{"longitude":-97.23595913705303,"latitude":44.93797000682201,"zoom":10.747596086725022,"altitude":0,"index":4,"originalPosition":{"longitude":-97.23595913705303,"latitude":44.93797000682201}}],
     mapboxToken: 'pk.eyJ1IjoibmV3c2V4cHJlc3NueiIsImEiOiJjbTU5Y3IwdXYzcXVwMmpxMzZ5czN4cWowIn0.p9lIC3ALRUwhwIIsw7W7vQ',
     config: {
       rotationDuration: 240,
@@ -64,7 +77,9 @@ export const RemotionRoot: React.FC = () => {
       flightZoom: 16,
       initialZoom: 2, // if set to 1 , map is zoomed at latitude 0
       pitch: 60
-    }
+    },
+    aspectRatio: '4:5',
+    showLabels: true
   };
 
   const calculateDuration = React.useMemo(() => {
@@ -74,17 +89,20 @@ export const RemotionRoot: React.FC = () => {
     const totalDistance = calculateTotalDistance(points);
     const flightDuration = (totalDistance / config.flightSpeedKmPerSecond) * FPS;
     const orbitDuration = flightDuration * config.orbitSpeedFactor;
-    
+
     const totalDuration = Math.ceil(
-      config.rotationDuration + 
-      flightDuration + 
-      orbitDuration + 
+      config.rotationDuration +
+      flightDuration +
+      orbitDuration +
       ORBIT_DURATION_BUFFER
     );
 
     return Math.max(totalDuration, MIN_DURATION);
   }, [defaultProps.points, defaultProps.config]);
 
+  const dimensions = React.useMemo(() => {
+    return ASPECT_RATIO_CONFIGS[defaultProps.aspectRatio || '4:5'];
+  }, [defaultProps.aspectRatio]);
 
   return (
     <>
@@ -92,11 +110,9 @@ export const RemotionRoot: React.FC = () => {
         id="FlightAnimation"
         component={FlightAnimationComponent}
         durationInFrames={calculateDuration}
-        // durationInFrames={2000}
-        // fps={10}
         fps={FPS}
-        width={1080}
-        height={1350}
+        width={dimensions.width}
+        height={dimensions.height}
         defaultProps={defaultProps}
       />
     </>

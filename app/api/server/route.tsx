@@ -6,17 +6,6 @@ import {
 } from '@remotion/lambda/client';
 import { createClient } from '@supabase/supabase-js';
 
-
-
-// Video configuration
-const ASPECT_RATIO_CONFIGS = {
-  '16:9': { width: 1920, height: 1080 },
-  '9:16': { width: 1080, height: 1920 },
-  '1:1': { width: 1080, height: 1080 },
-  '4:5': { width: 1080, height: 1350 },
-  default: { width: 1920, height: 1080 }
-};
-
 // AWS Lambda configuration
 const FUNCTION_NAME = 'remotion-render-4-0-242-mem2048mb-disk2048mb-120sec'
 const SERVE_URL = 'https://remotionlambda-useast1-0303dghv3x.s3.us-east-1.amazonaws.com/sites/mappbook-animation/index.html'
@@ -41,7 +30,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(req: NextRequest) {
   try {
-    const { points, aspectRatio, mappbook_user_id } = await req.json();
+    const { points, aspectRatio, showLabels, mappbook_user_id } = await req.json();
 
     // Validate input
     if (!points || !Array.isArray(points) || points.length === 0) {
@@ -99,6 +88,8 @@ export async function POST(req: NextRequest) {
       composition: 'FlightAnimation',
       inputProps: {
         points: points,
+        aspectRatio: aspectRatio,
+        showLabels: showLabels,
       },
       codec: 'h264',
       imageFormat: 'jpeg',
