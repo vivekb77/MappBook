@@ -104,7 +104,6 @@ const nextConfig = {
     },
   
     reactStrictMode: true,
-    swcMinify: true, // Enable SWC minification
   
     async headers() {
       return [

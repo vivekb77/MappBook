@@ -110,6 +110,7 @@ export const RemotionRoot: React.FC = () => {
         id="FlightAnimation"
         component={FlightAnimationComponent}
         durationInFrames={calculateDuration}
+        // durationInFrames={100}
         fps={FPS}
         width={dimensions.width}
         height={dimensions.height}

@@ -91,15 +91,25 @@ export async function POST(req: NextRequest) {
         aspectRatio: aspectRatio,
         showLabels: showLabels,
       },
+
       codec: 'h264',
       imageFormat: 'jpeg',
-      jpegQuality: 100,
-      webhook,
+      jpegQuality: 70,
+      // webhook,
       maxRetries: 1,
       privacy: 'public',
+
+      //Video quality and performance settings
+      crf: 28,  // Slightly favor compression over quality (default is 18)  lower the number, the better the quality, range 1-51
+
+      muted: true,
+
+      // Performance settings
       framesPerLambda: 1000,
-      concurrencyPerLambda:2,
-      timeoutInMilliseconds:500000,
+      concurrencyPerLambda: 2,
+
+      timeoutInMilliseconds: 900000,
+      logLevel: 'verbose', // keep only for debugging
       chromiumOptions: {
         gl: 'swangle',
         headless: true

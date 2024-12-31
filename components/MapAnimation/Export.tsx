@@ -5,7 +5,6 @@ import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { useMappbookUser } from '@/context/UserContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { RadioGroup } from '@radix-ui/react-dropdown-menu';
-import { getRenderProgress } from '@remotion/lambda/client';
 interface Point {
   longitude: number;
   latitude: number;
@@ -158,43 +157,43 @@ const ExportButton: React.FC<ExportButtonProps> = ({
 
 
       //check progress to show user when video is done
-      const checkProgress = async () => {
-        try {
-          const progress = await getRenderProgress({
-            renderId: renderId,
-            bucketName: bucketName,
-            functionName: 'remotion-render-4-0-242-mem2048mb-disk2048mb-120sec',
-            region: 'us-east-1',
-          });
+      // const checkProgress = async () => {
+      //   try {
+      //     const progress = await getRenderProgress({
+      //       renderId: renderId,
+      //       bucketName: bucketName,
+      //       functionName: 'remotion-render-4-0-242-mem2048mb-disk2048mb-120sec',
+      //       region: 'us-east-1',
+      //     });
 
-          if (progress.done) {
-            // Update local user state
-            setMappbookUser({
-              ...mappbookUser,
-              animation_credits: mappbookUser.animation_credits - 1
-            });
+      //     if (progress.done) {
+      //       // Update local user state
+      //       setMappbookUser({
+      //         ...mappbookUser,
+      //         animation_credits: mappbookUser.animation_credits - 1
+      //       });
 
-            setRenderingStatus('complete');
-            showToast('Video created successfully!', 'success');
-            onExportComplete?.();
+      //       setRenderingStatus('complete');
+      //       showToast('Video created successfully!', 'success');
+      //       onExportComplete?.();
 
-            const event = new CustomEvent('videoCreated');
-            window.dispatchEvent(event);
-            return;
-          } else if (progress.errors) {
-            //tracking of verce
-          } else {
-            setRenderingStatus('rendering');
-            setTimeout(checkProgress, 10000);
-          }
-        } catch (error) {
-          console.error('Progress check error:', error);
-          setRenderingStatus('error');
-          showToast('Error during video rendering', 'error');
-        }
-      };
+      //       const event = new CustomEvent('videoCreated');
+      //       window.dispatchEvent(event);
+      //       return;
+      //     } else if (progress.errors) {
+      //       //tracking of verce
+      //     } else {
+      //       setRenderingStatus('rendering');
+      //       setTimeout(checkProgress, 10000);
+      //     }
+      //   } catch (error) {
+      //     console.error('Progress check error:', error);
+      //     setRenderingStatus('error');
+      //     showToast('Error during video rendering', 'error');
+      //   }
+      // };
 
-      await checkProgress();
+      // await checkProgress();
 
     } catch (err) {
       console.error('Export error:', err);

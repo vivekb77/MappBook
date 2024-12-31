@@ -376,24 +376,23 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
 
     const preloadTiles = async () => {
       try {
+        // First, wait for the map to load
+        await new Promise<void>((resolve) => {
+          if (map.loaded()) {
+            resolve();
+          } 
+          else {
+            map.once('load', () => resolve());
+          }
+        });
+
+        // Then set the initial view state
         map.jumpTo(initialViewState);
 
+        // Wait for tiles to load
         await new Promise<void>((resolve) => {
           const checkTiles = () => {
             if (map.areTilesLoaded()) {
-              // Set label visibility based on prop
-              const style = map.getStyle();
-              if (style && style.layers) {
-                style.layers.forEach(layer => {
-                  if (layer.type === 'symbol') {
-                    map.setLayoutProperty(
-                      layer.id,
-                      'visibility',
-                      showLabels ? 'visible' : 'none'
-                    );
-                  }
-                });
-              }
               resolve();
             } else {
               setTimeout(checkTiles, 100);
@@ -402,6 +401,26 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
           checkTiles();
         });
 
+        // After map is loaded, safely modify layers
+        const style = map.getStyle();
+        if (style && style.layers) {
+          
+          style.layers.forEach(layer => {
+            if (layer.type === 'symbol') {
+              try {
+                map.setLayoutProperty(
+                  layer.id,
+                  'visibility',
+                  showLabels ? 'visible' : 'none'
+                );
+              } catch (e) {
+                console.warn(`Failed to set visibility for layer ${layer.id}:`, e);
+              }
+            }
+          });
+        }
+
+        // Add terrain if not already present
         if (!map.getSource('mapbox-dem')) {
           map.addSource('mapbox-dem', {
             'type': 'raster-dem',
@@ -412,33 +431,32 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
           map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
         }
 
-
-        //flight path , remove for prod
+        // Add flight path
         if (points.length >= 2) {
-          map.addSource('flight-path', {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: flightPath.map(p => [p.longitude, p.latitude])
+          if (!map.getSource('flight-path')) {
+            map.addSource('flight-path', {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: flightPath.map(p => [p.longitude, p.latitude])
+                }
               }
-            }
-          });
+            });
 
-          map.addLayer({
-            id: 'flight-path',
-            type: 'line',  // There was a missing closing quote here
-            source: 'flight-path',
-            paint: {
-              'line-color': '#ffffff',
-              'line-width': 10,
-              'line-opacity': 0.7
-            }
-          });
-
-
+            map.addLayer({
+              id: 'flight-path',
+              type: 'line',
+              source: 'flight-path',
+              paint: {
+                'line-color': '#ffffff',
+                'line-width': 10,
+                'line-opacity': 0.7
+              }
+            });
+          }
         }
 
         setIsLoaded(true);
@@ -463,6 +481,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
       }
     };
   }, [mapRef.current, points, config.flightZoom, initialViewState, flightPath, showLabels]);
+
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#000' }}>
