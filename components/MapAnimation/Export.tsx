@@ -133,6 +133,11 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         .select();
 
       if (saveError) throw saveError;
+
+      if (!animationData || animationData.length === 0) {
+        throw new Error('No animation data returned after insert');
+      }
+
       setRenderingStatus('rendering');
 
       // Start the render
@@ -143,11 +148,8 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          points,
-          aspectRatio: selectedAspectRatio,
           mappbook_user_id: mappbookUser.mappbook_user_id,
-          show_labels: true,
-          animation_video_id: animationData.animation_video_id
+          animation_video_id: animationData[0].animation_video_id
         }),
       });
 

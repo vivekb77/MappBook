@@ -1,5 +1,5 @@
-// /api/lambda-server.tsx
-import type { NextApiRequest, NextApiResponse } from 'next';
+// app/api/lambda-server/route.ts
+import { NextResponse } from 'next/server';
 
 type RequestData = {
   points: any[]; // Replace with your specific points type
@@ -9,39 +9,23 @@ type RequestData = {
   animation_video_id: string;
 };
 
-type ResponseData = {
-  success: boolean;
-  data?: any;
-  error?: string;
-};
-
 // You might want to move this to an environment variable
-const LAMBDA_ENDPOINT = 'YOUR_LAMBDA_ENDPOINT';
+const LAMBDA_ENDPOINT = 'https://gedsq7ntux2i46oscwjviyrvjq0pyubc.lambda-url.us-east-1.on.aws/';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<ResponseData>
-) {
-  // Only allow POST method
-  if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Method not allowed' });
-  }
-
+export async function POST(request: Request) {
   try {
-    const {
-      points,
-      aspectRatio,
-      mappbook_user_id,
-      show_labels,
-      animation_video_id,
-    } = req.body as RequestData;
+    // Parse the request body
+    const body = await request.json() as RequestData;
+    const { mappbook_user_id, animation_video_id } = body;
+
+    console.log(body)
 
     // Validate required fields
-    if (!points || !mappbook_user_id || !animation_video_id) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields',
-      });
+    if (!mappbook_user_id || !animation_video_id) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
     // Make request to Lambda
@@ -51,10 +35,7 @@ export default async function handler(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        points,
-        aspectRatio,
         mappbook_user_id,
-        show_labels,
         animation_video_id,
       }),
     });
@@ -65,21 +46,30 @@ export default async function handler(
 
     const data = await lambdaResponse.json();
 
-    return res.status(200).json({
+    return NextResponse.json({
       success: true,
       data,
     });
 
   } catch (error) {
     console.error('Lambda server error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Internal server error',
-    });
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
-// Configure API route to handle larger payloads if needed
+// If you need to handle other HTTP methods, you can add them like this:
+export async function GET() {
+  return NextResponse.json(
+    { success: false, error: 'Method not allowed' },
+    { status: 405 }
+  );
+}
+
+// For the config options in App Router, create a separate config file
+// app/api/lambda-server/config.ts
 export const config = {
   api: {
     bodyParser: {
