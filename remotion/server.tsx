@@ -1,4 +1,4 @@
-// /api/render/route.ts
+// /api/render/route.ts to call this function
 import { NextRequest, NextResponse } from 'next/server';
 import {
   renderMediaOnLambda,
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       muted: true,
 
       // Performance settings
-      framesPerLambda: 50,
+      framesPerLambda: 10000,
       concurrencyPerLambda: 2,
 
       timeoutInMilliseconds: 900000,
