@@ -423,6 +423,7 @@ const MapboxMap: React.FC = () => {
     <div
       id={mapContainerId.current}
       className="relative w-full h-full"
+      data-testid="map-full-view"
     >
 
       {mapStatus.status === 'loading' && (

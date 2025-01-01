@@ -398,18 +398,20 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
   return (
     <div className="flex space-x-2">
       {points.length >= 2 && !isAnimating && (
-        <Button
-          onClick={startDroneAnimation}
-          className="bg-white text-black hover:bg-gray-100"
-        >
-          Start Flight
-        </Button>
+         <Button
+         onClick={startDroneAnimation}
+         className="bg-white text-black hover:bg-gray-100"
+         data-testid="start-flight-button"
+       >
+         Start Flight
+       </Button>
       )}
 
       {isAnimating && (
         <Button
           onClick={cancelAnimation}
           className="bg-red-500 text-white hover:bg-red-600"
+          data-testid="cancel-flight-button"
         >
           Cancel Flight
         </Button>
