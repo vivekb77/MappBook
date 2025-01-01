@@ -1,16 +1,9 @@
 "use client"
-
-import { useState, useRef } from 'react'
-import { useUser } from '@clerk/nextjs'
 import dynamic from 'next/dynamic'
 
 const MapboxMap = dynamic(() => import('@/components/Render/RenderMapBoxMap'))
 
-export default function Create() {
-  const [isOpen, setIsOpen] = useState(false)
-
-
-
+export default function Render() {
 
   return (
     <div className="fixed inset-0 h-screen-dynamic overflow-hidden bg-gray-900">

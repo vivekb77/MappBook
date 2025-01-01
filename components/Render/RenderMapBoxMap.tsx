@@ -1,10 +1,16 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Map, MapRef } from "react-map-gl";
+import { useParams } from 'next/navigation'
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import FlightAnimation from '@/components/MapAnimation/FlightAnimation';
 import { nanoid } from 'nanoid';
 import { throttle } from 'lodash';
+import { supabase } from "@/components/utils/supabase"
+
+type MapPageParams = {
+  id: string;
+}
 
 const CONFIG = {
   map: {
@@ -92,7 +98,26 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   pitch: 0,
   bearing: 0,
 };
+
+interface AnimationVideo {
+  animation_video_id: string;
+  points: Point[];
+  video_generation_status: boolean;
+  video_url: string | null;
+  mappbook_user_id: string;
+  location_count: number;
+  created_at: string;
+  updated_at: string;
+  is_deleted: boolean;
+  aspect_ratio: string;
+  show_labels: boolean;
+}
+
 const MapboxMap: React.FC = () => {
+ 
+  const params = useParams<MapPageParams>();
+  const animation_video_id = params?.id ?? null;
+
   // Refs
   const mapRef = useRef<MapRef>(null);
   const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
@@ -107,9 +132,45 @@ const MapboxMap: React.FC = () => {
   const [points, setPoints] = useState<Point[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationProgress, setAnimationProgress] = useState(0);
-  const [errorMessage, setErrorMessage] = useState<string>("");
   const [persistentError, setPersistentError] = useState<string | null>(null);
 
+  // Add new state for animation data
+  const [animationData, setAnimationData] = useState<AnimationVideo | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
+
+  // Add data fetching effect
+  useEffect(() => {
+    const fetchAnimationData = async () => {
+      if (!animation_video_id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('Animation_Video')
+          .select('*')
+          .eq('animation_video_id', animation_video_id)
+          .single();
+
+        if (error) throw error;
+        if (!data) throw new Error('Animation not found');
+
+        // Validate required fields
+        if (!data.points || !Array.isArray(data.points) || data.points.length === 0) {
+          throw new Error('Invalid animation data: Missing or invalid points');
+        }
+
+        setAnimationData(data);
+        setPoints(data.points); // Set the points for FlightAnimation
+      } catch (err) {
+        // setDataError(err.message);
+        console.error('Error fetching animation:', err);
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    fetchAnimationData();
+  }, [animation_video_id]);
 
   const cleanup = () => {
     if (!isMountedRef.current) return;
@@ -195,13 +256,6 @@ const MapboxMap: React.FC = () => {
     }
   };
 
-  // Throttle handlers that trigger frequently
-  const handleMapMove = useCallback(
-    throttle((evt) => {
-      setViewState(evt.viewState);
-    }, 16), // ~60fps
-    []
-  );
 
   const handleWebGLContextLoss = () => {
     if (!isMountedRef.current) return;
@@ -330,32 +384,40 @@ const MapboxMap: React.FC = () => {
       </Alert>
     );
   }
-
   const mapControls = useMemo(() => (
     <div className="absolute bottom-48 right-2 space-y-2">
       <div className="flex flex-col items-end space-y-2">
-        
         <div className="flex space-x-2">
-
-          <FlightAnimation
-            points={points}
-            isAnimating={isAnimating}
-            CONFIG={CONFIG}
-            onAnimationStart={() => {
-              setIsAnimating(true);
-              setAnimationProgress(0);
-            }}
-            onAnimationCancel={() => {
-              setIsAnimating(false);
-              setAnimationProgress(0);
-            }}
-            onViewStateChange={setViewState}
-            onAnimationProgress={setAnimationProgress}
-          />
+          {dataLoading ? (
+            <div className="p-2 bg-gray-800 rounded-lg">
+              <span className="text-gray-300">Loading data...</span>
+            </div>
+          ) : dataError ? (
+            <Alert variant="destructive">
+              <AlertDescription>{dataError}</AlertDescription>
+            </Alert>
+          ) : (
+            <FlightAnimation
+              points={points}
+              isAnimating={isAnimating}
+              CONFIG={CONFIG}
+              onAnimationStart={() => {
+                setIsAnimating(true);
+                setAnimationProgress(0);
+              }}
+              onAnimationCancel={() => {
+                setIsAnimating(false);
+                setAnimationProgress(0);
+              }}
+              onViewStateChange={setViewState}
+              onAnimationProgress={setAnimationProgress}
+            />
+          )}
         </div>
       </div>
     </div>
-    ), [points.length, isAnimating]);
+  ), [points.length, isAnimating, dataLoading, dataError]);
+
 
   return (
     <div
@@ -377,24 +439,18 @@ const MapboxMap: React.FC = () => {
           </div>
         </div>
       )}
-
-      {persistentError && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Alert variant="destructive" className="max-w-md">
-            <AlertDescription>{persistentError}</AlertDescription>
-          </Alert>
-        </div>
+      {dataError && (
+        <Alert variant="destructive" className="absolute top-4 right-4 z-50">
+          <AlertDescription>{dataError}</AlertDescription>
+        </Alert>
       )}
-
-      {/* MappBook Logo */}
-      <div className="absolute top-2 left-2 z-50">
+       {/* MappBook Logo */}
+       <div className="absolute top-2 left-2 z-50">
         <div className="bg-gray-800/90 p-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors border border-gray-700">
           <span className="font-bold text-xl text-blue-400">MappBook</span>
         </div>
       </div>
 
-
-      {/* Main map component */}
       <Map
         ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER}
@@ -415,14 +471,11 @@ const MapboxMap: React.FC = () => {
         minZoom={1}
         maxZoom={20}
         renderWorldCopies={false}
-      >
-       
-      </Map>
-
+      />
       
+      {mapControls}
     </div>
   );
 };
 
-// Use React.memo to prevent unnecessary re-renders
 export default React.memo(MapboxMap);
