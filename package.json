@@ -16,10 +16,6 @@
     "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/react-scroll-area": "^1.2.2",
     "@radix-ui/react-slot": "^1.1.1",
-    "@remotion/cli": "^4.0.242",
-    "@remotion/lambda": "^4.0.242",
-    "@remotion/player": "^4.0.242",
-    "@remotion/renderer": "^4.0.242",
     "@sparticuz/chromium": "^131.0.1",
     "@supabase/supabase-js": "^2.45.6",
     "@types/mapbox-gl": "^2.7.13",
@@ -58,10 +54,6 @@
     "typescript": "^5.1.6"
   },
   "devDependencies": {
-    "@remotion/cli": "^4.0.0",
-    "@remotion/lambda": "^4.0.0",
-    "@remotion/player": "^4.0.0",
-    "@remotion/renderer": "^4.0.0",
     "@types/lodash": "^4.17.13",
     "@types/page-flip": "^2.0.3",
     "terser-webpack-plugin": "^5.3.11"
