@@ -57,7 +57,7 @@ const calculateTotalDistance = (points: Point[]): number => {
   }, 0);
 };
 
-const FPS = 30;
+const FPS = 25;
 const ORBIT_DURATION_BUFFER = 500;
 const MIN_DURATION = 1000;
 
@@ -71,15 +71,15 @@ export const RemotionRoot: React.FC = () => {
     points: [{"longitude":-97.12875642759997,"latitude":44.98371495408537,"zoom":10.747596086725022,"altitude":0,"index":1,"originalPosition":{"longitude":-97.12875642759997,"latitude":44.98371495408537}},{"longitude":-97.18153944103312,"latitude":44.98429377028762,"zoom":10.747596086725022,"altitude":1,"index":2,"originalPosition":{"longitude":-97.18153944103312,"latitude":44.98429377028762}},{"longitude":-97.20527133854578,"latitude":44.96547925227662,"zoom":10.747596086725022,"altitude":0,"index":3,"originalPosition":{"longitude":-97.20527133854578,"latitude":44.96547925227662}},{"longitude":-97.23595913705303,"latitude":44.93797000682201,"zoom":10.747596086725022,"altitude":0,"index":4,"originalPosition":{"longitude":-97.23595913705303,"latitude":44.93797000682201}}],
     mapboxToken: 'pk.eyJ1IjoibmV3c2V4cHJlc3NueiIsImEiOiJjbTU5Y3IwdXYzcXVwMmpxMzZ5czN4cWowIn0.p9lIC3ALRUwhwIIsw7W7vQ',
     config: {
-      rotationDuration: 240,
-      flightSpeedKmPerSecond: 0.185,
+      rotationDuration: 100,
+      flightSpeedKmPerSecond: 0.300,
       orbitSpeedFactor: 0.25,
       flightZoom: 16,
       initialZoom: 2, // if set to 1 , map is zoomed at latitude 0
       pitch: 60
     },
     aspectRatio: '4:5',
-    showLabels: true
+    showLabels: false
   };
 
   const calculateDuration = React.useMemo(() => {
@@ -109,8 +109,8 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="FlightAnimation"
         component={FlightAnimationComponent}
-        durationInFrames={calculateDuration}
-        // durationInFrames={100}
+        // durationInFrames={calculateDuration}
+        durationInFrames={200}
         fps={FPS}
         width={dimensions.width}
         height={dimensions.height}

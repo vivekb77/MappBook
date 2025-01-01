@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
 
       codec: 'h264',
       imageFormat: 'jpeg',
-      jpegQuality: 70,
+      jpegQuality: 80,
       // webhook,
       maxRetries: 1,
       privacy: 'public',
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       muted: true,
 
       // Performance settings
-      framesPerLambda: 1000,
+      framesPerLambda: 50,
       concurrencyPerLambda: 2,
 
       timeoutInMilliseconds: 900000,

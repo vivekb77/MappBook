@@ -374,6 +374,13 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
     const map = mapRef.current.getMap();
     setMapInstance(map);
 
+    // Reduce CPU usage by disabling unnecessary features
+    map.dragRotate.disable();
+    map.touchZoomRotate.disable();
+    map.boxZoom.disable();
+    map.scrollZoom.disable();
+    map.doubleClickZoom.disable();
+
     const preloadTiles = async () => {
       try {
         // First, wait for the map to load
@@ -401,7 +408,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
           checkTiles();
         });
 
-        // After map is loaded, safely modify layers
+        // // After map is loaded, safely modify layers
         const style = map.getStyle();
         if (style && style.layers) {
           
@@ -420,7 +427,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
           });
         }
 
-        // Add terrain if not already present
+        // // Add terrain if not already present
         if (!map.getSource('mapbox-dem')) {
           map.addSource('mapbox-dem', {
             'type': 'raster-dem',
@@ -431,7 +438,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
           map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
         }
 
-        // Add flight path
+        // // Add flight path
         if (points.length >= 2) {
           if (!map.getSource('flight-path')) {
             map.addSource('flight-path', {
@@ -502,9 +509,9 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({ points, mapboxToken, 
           'space-color': '#191970',
           'star-intensity': 0.85
         }}
-        attributionControl={true}
-        // reuseMaps
-        // preserveDrawingBuffer
+        attributionControl={false}
+        reuseMaps
+        preserveDrawingBuffer
         trackResize={false}
         maxZoom={config.flightZoom + 1}
         minZoom={config.initialZoom - 1}
