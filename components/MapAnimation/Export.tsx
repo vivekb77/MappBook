@@ -120,9 +120,24 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         throw new Error('Invalid user ID');
       }
 
-      // Start the render with aspect ratio
+      // Save to Animation_Video table
+      const { data: animationData, error: saveError } = await supabase
+        .from('Animation_Video')
+        .insert([{
+          points: points,
+          location_count: points.length,
+          mappbook_user_id: mappbookUser.mappbook_user_id,
+          aspect_ratio: selectedAspectRatio,
+          show_labels: true,
+        }])
+        .select();
 
-      const response = await fetch('/api/server', {
+      if (saveError) throw saveError;
+      setRenderingStatus('rendering');
+
+      // Start the render
+
+      const response = await fetch('/api/lambda-server', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,6 +147,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           aspectRatio: selectedAspectRatio,
           mappbook_user_id: mappbookUser.mappbook_user_id,
           show_labels: true,
+          animation_video_id: animationData.animation_video_id
         }),
       });
 
@@ -139,61 +155,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         throw new Error('Failed to start render');
       }
 
-      const { renderId, bucketName } = await response.json();
-
-
-      // Save to Animation_Data table
-      const { data: animationData, error: saveError } = await supabase
-        .from('Animation_Data')
-        .insert([{
-          location_data: points,
-          location_count:points.length,
-          mappbook_user_id: mappbookUser.mappbook_user_id,
-          render_id: renderId
-        }])
-        .select();
-
-      if (saveError) throw saveError;
-
-
-      //check progress to show user when video is done
-      // const checkProgress = async () => {
-      //   try {
-      //     const progress = await getRenderProgress({
-      //       renderId: renderId,
-      //       bucketName: bucketName,
-      //       functionName: 'remotion-render-4-0-242-mem2048mb-disk2048mb-120sec',
-      //       region: 'us-east-1',
-      //     });
-
-      //     if (progress.done) {
-      //       // Update local user state
-      //       setMappbookUser({
-      //         ...mappbookUser,
-      //         animation_credits: mappbookUser.animation_credits - 1
-      //       });
-
-      //       setRenderingStatus('complete');
-      //       showToast('Video created successfully!', 'success');
-      //       onExportComplete?.();
-
-      //       const event = new CustomEvent('videoCreated');
-      //       window.dispatchEvent(event);
-      //       return;
-      //     } else if (progress.errors) {
-      //       //tracking of verce
-      //     } else {
-      //       setRenderingStatus('rendering');
-      //       setTimeout(checkProgress, 10000);
-      //     }
-      //   } catch (error) {
-      //     console.error('Progress check error:', error);
-      //     setRenderingStatus('error');
-      //     showToast('Error during video rendering', 'error');
-      //   }
-      // };
-
-      // await checkProgress();
+      setRenderingStatus('complete');
 
     } catch (err) {
       console.error('Export error:', err);
