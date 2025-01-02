@@ -6,6 +6,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import FlightAnimation from '@/components/MapAnimation/FlightAnimation';
 import { nanoid } from 'nanoid';
+import { Label } from "@radix-ui/react-dropdown-menu";
 
 const CONFIG = {
   map: {
@@ -97,7 +98,41 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
   const [animationProgress, setAnimationProgress] = useState(0);
   const [persistentError, setPersistentError] = useState<string | null>(null);
   const [points, setPoints] = useState<Point[]>(initialPoints);
+  const [showMapBoxPlacesLabels, setShowMapBoxPlacesLabels] = useState(false);
 
+ // Calculate flight path for visualization
+ const flightPath = useMemo(() => {
+  return points.map(point => ({
+    longitude: point.longitude,
+    latitude: point.latitude
+  }));
+}, [points]);
+
+
+const showOrNotMapBoxPlacesLabels = useCallback((map: mapboxgl.Map) => {
+const style = map.getStyle();
+if (style && style.layers) {
+  style.layers.forEach(layer => {
+    if (layer.type === 'symbol') {
+      try {
+        map.setLayoutProperty(
+          layer.id,
+          'visibility',
+          showMapBoxPlacesLabels ? 'visible' : 'none'
+        );
+      } catch (e) {
+        console.warn(`Failed to set visibility for layer ${layer.id}:`, e);
+      }
+    }
+  });
+}
+}, [showMapBoxPlacesLabels]);
+
+useEffect(() => {
+  if (mapInstanceRef.current) {
+    showOrNotMapBoxPlacesLabels(mapInstanceRef.current);
+  }
+}, [showMapBoxPlacesLabels, showOrNotMapBoxPlacesLabels]);
 
   const cleanup = () => {
     if (!isMountedRef.current) return;
@@ -267,25 +302,54 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
     }
 
     try {
+      
+      //1 show or not to show places names or road name or any names
+      showOrNotMapBoxPlacesLabels(map);
+
+
+      // 2 add terrain
       map.addSource('mapbox-dem', {
         'type': 'raster-dem',
         'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
         'tileSize': 512,
         'maxzoom': 17
       });
-      // map.touchZoomRotate?.enable();
-      map.setFog(CONFIG.map.fog);
 
       map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
       if (isMountedRef.current) {
         setMapStatus({ status: 'ready' });
       }
 
-      map.dragRotate.disable();
-      map.touchZoomRotate.disable();
-      map.boxZoom.disable();
-      map.scrollZoom.disable();
-      map.doubleClickZoom.disable();
+      //3 add fog
+      map.setFog(CONFIG.map.fog);
+
+      //4 flight path
+      if (points.length >= 2) {
+        if (!map.getSource('flight-path')) {
+          map.addSource('flight-path', {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: flightPath.map(p => [p.longitude, p.latitude])
+              }
+            }
+          });
+
+          map.addLayer({
+            id: 'flight-path',
+            type: 'line',
+            source: 'flight-path',
+            paint: {
+              'line-color': '#ffffff',
+              'line-width': 10,
+              'line-opacity': 0.7
+            }
+          });
+        }
+      }
 
     } catch (e) {
       console.warn('Error initializing map:', e);
@@ -294,7 +358,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
   }, []);
 
 
-
+   
 
 
   // Lifecycle
@@ -361,39 +425,41 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
           </div>
         </div>
       )}
-      
-       {/* MappBook Logo */}
-       <div className="absolute top-2 left-2 z-50">
+
+     {/* Logo and Controls Container */}
+     <div className={`absolute top-2 left-2 z-50 space-y-4 transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
+        {/* MappBook Logo */}
         <div className="bg-gray-800/90 p-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors border border-gray-700">
           <span className="font-bold text-xl text-blue-400">MappBook</span>
         </div>
       </div>
 
-      <Map
-        ref={mapRef}
-        mapboxAccessToken={process.env.NEXT_PUBLIC_ANIMATION_MAPBOX_ACCESS_TOKEN}
-        {...viewState}
-        onMove={evt => setViewState(evt.viewState)}
-        mapStyle={CONFIG.map.styles.satellite}
-        style={{ width: '100%', height: '100%' }}
-        onLoad={handleMapLoad}
-        onError={handleMapError}
-        reuseMaps={true}
-        preserveDrawingBuffer={true}
-        attributionControl={true}
-        boxZoom={false}
-        doubleClickZoom={false}
-        dragRotate={false}
-        keyboard={false}
-        touchPitch={false}
-        minZoom={1}
-        maxZoom={20}
-        renderWorldCopies={false}
-      />
-      
-      {mapControls}
-    </div>
-  );
+        <Map
+          ref={mapRef}
+          mapboxAccessToken={process.env.NEXT_PUBLIC_ANIMATION_MAPBOX_ACCESS_TOKEN}
+          {...viewState}
+          onMove={evt => setViewState(evt.viewState)}
+          mapStyle={CONFIG.map.styles.satellite}
+          style={{ width: '100%', height: '100%' }}
+          onLoad={handleMapLoad}
+          onError={handleMapError}
+          reuseMaps={true}
+          preserveDrawingBuffer={true}
+          attributionControl={true}
+          boxZoom={false}
+          doubleClickZoom={false}
+          dragRotate={false}
+          keyboard={false}
+          touchPitch={false}
+          minZoom={1}
+          maxZoom={20}
+          renderWorldCopies={false}
+          interactive={false}
+        />
+
+        {mapControls}
+      </div>
+      );
 };
 
-export default React.memo(MapboxMap);
+      export default React.memo(MapboxMap);
