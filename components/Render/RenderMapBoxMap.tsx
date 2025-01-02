@@ -1,3 +1,4 @@
+//rendermapboxmap.tsx
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Map, MapRef } from "react-map-gl";
 import { useParams } from 'next/navigation'
@@ -5,11 +6,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import FlightAnimation from '@/components/MapAnimation/FlightAnimation';
 import { nanoid } from 'nanoid';
-import { supabase } from "@/components/utils/supabase"
-
-type MapPageParams = {
-  id: string;
-}
 
 const CONFIG = {
   map: {
@@ -66,6 +62,10 @@ interface MapViewState {
   bearing: number;
 }
 
+interface MapboxMapProps {
+  initialPoints: Point[];
+}
+
 type MapStatus = {
   status: 'idle' | 'loading' | 'error' | 'ready';
   error?: string;
@@ -79,10 +79,8 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   bearing: 0,
 };
 
-const MapboxMap: React.FC = () => {
- 
-  const params = useParams<MapPageParams>();
-  const drone_footage_id = params?.id ?? null;
+const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
+
 
   // Refs
   const mapRef = useRef<MapRef>(null);
@@ -95,46 +93,11 @@ const MapboxMap: React.FC = () => {
   // State
   const [mapStatus, setMapStatus] = useState<MapStatus>({ status: 'loading' });
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
-  const [points, setPoints] = useState<Point[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationProgress, setAnimationProgress] = useState(0);
   const [persistentError, setPersistentError] = useState<string | null>(null);
+  const [points, setPoints] = useState<Point[]>(initialPoints);
 
-  // Add new state for animation data
-  const [dataLoading, setDataLoading] = useState(true);
-  const [dataError, setDataError] = useState<string | null>(null);
-
-  // Add data fetching effect
-  useEffect(() => {
-    const fetchFootageData = async () => {
-      if (!drone_footage_id) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('Drone_Footage')
-          .select('*')
-          .eq('drone_footage_id', drone_footage_id)
-          .single();
-
-        if (error) throw error;
-        if (!data) throw new Error('Footage not found');
-
-        // Validate required fields
-        if (!data.points_coordinates_data || !Array.isArray(data.points_coordinates_data) || data.points_coordinates_data.length === 0) {
-          throw new Error('Invalid footage data: Missing or invalid points');
-        }
-
-        setPoints(data.points_coordinates_data); // Set the points for FlightAnimation
-      } catch (err) {
-        // setDataError(err.message);
-        console.error('Error fetching footage:', err);
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    fetchFootageData();
-  }, [drone_footage_id]);
 
   const cleanup = () => {
     if (!isMountedRef.current) return;
@@ -357,36 +320,25 @@ const MapboxMap: React.FC = () => {
     <div className="absolute bottom-48 right-2 space-y-2">
       <div className="flex flex-col items-end space-y-2">
         <div className="flex space-x-2">
-          {dataLoading ? (
-            <div className="p-2 bg-gray-800 rounded-lg">
-              <span className="text-gray-300">Loading data...</span>
-            </div>
-          ) : dataError ? (
-            <Alert variant="destructive">
-              <AlertDescription>{dataError}</AlertDescription>
-            </Alert>
-          ) : (
-            <FlightAnimation
-              points={points}
-              isAnimating={isAnimating}
-              CONFIG={CONFIG}
-              onAnimationStart={() => {
-                setIsAnimating(true);
-                setAnimationProgress(0);
-              }}
-              onAnimationCancel={() => {
-                setIsAnimating(false);
-                setAnimationProgress(0);
-              }}
-              onViewStateChange={setViewState}
-              onAnimationProgress={setAnimationProgress}
-            />
-          )}
+          <FlightAnimation
+            points={points}
+            isAnimating={isAnimating}
+            CONFIG={CONFIG}
+            onAnimationStart={() => {
+              setIsAnimating(true);
+              setAnimationProgress(0);
+            }}
+            onAnimationCancel={() => {
+              setIsAnimating(false);
+              setAnimationProgress(0);
+            }}
+            onViewStateChange={setViewState}
+            onAnimationProgress={setAnimationProgress}
+          />
         </div>
       </div>
     </div>
-  ), [points.length, isAnimating, dataLoading, dataError]);
-
+  ), [points.length, isAnimating]);
 
   return (
     <div
@@ -409,11 +361,7 @@ const MapboxMap: React.FC = () => {
           </div>
         </div>
       )}
-      {dataError && (
-        <Alert variant="destructive" className="absolute top-4 right-4 z-50">
-          <AlertDescription>{dataError}</AlertDescription>
-        </Alert>
-      )}
+      
        {/* MappBook Logo */}
        <div className="absolute top-2 left-2 z-50">
         <div className="bg-gray-800/90 p-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors border border-gray-700">
