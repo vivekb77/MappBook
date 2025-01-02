@@ -167,13 +167,13 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-gray-800 border border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-gray-200">View Footage full screen</DialogTitle>
+            <DialogTitle className="text-gray-200">View and Record Footage</DialogTitle>
             <DialogDescription className="text-gray-400">
               <div className="flex items-center justify-between mb-4">
                 <span>
                   {saveSuccess 
-                    ? "Click the button below to view your footage in a new tab"
-                    : "This opens the footage in a new tab and you can record the footage"
+                    ? "View and screen record your footage in a new tab to share it"
+                    : "Opens in a new tab for screen recording and sharing"
                   }
                 </span>
                 {!saveSuccess && (
@@ -196,7 +196,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             <>
               {typeof mappbookUser?.drone_footage_credits === 'number' && mappbookUser.drone_footage_credits <= 5 && mappbookUser.drone_footage_credits > 0 && (
                 <div className="text-yellow-200 text-sm mb-4">
-                  Running low on credits! Consider adding more credits to continue creating footage.
+                  Running low on credits! Consider adding more credits to continue.
                 </div>
               )}
 

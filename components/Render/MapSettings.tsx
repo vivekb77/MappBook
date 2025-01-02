@@ -72,7 +72,7 @@ const TogglePill: React.FC<TogglePillProps> = ({ label, value, onChange }) => (
         <DialogContent className="fixed w-[90vw] sm:w-[400px] max-h-[75vh] rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 overflow-hidden flex flex-col">
           <DialogHeader className="p-0">
             <DialogTitle className="text-lg font-semibold text-center bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-              Settings
+              Flight Settings
             </DialogTitle>
           </DialogHeader>
 

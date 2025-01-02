@@ -75,11 +75,11 @@ const MapControlsInfo = () => {
                 </div>
 
                 <div className="bg-gray-900/50 rounded-lg p-2 text-sm border border-gray-700">
-                  <p className="font-medium text-blue-400">Performance & Export Tips 🎥</p>
+                  <p className="font-medium text-blue-400">Performance Tips 🎥</p>
                   <ul className="mt-1 text-gray-300 space-y-1">
                     <li>• Animation smoothness depends on internet connection and processor speed</li>
                     <li>• Run the animation twice - second run will use cached map data for better performance</li>
-                    <li>• Exported videos are server-rendered for consistent high quality</li>
+                    {/* <li>• Exported videos are server-rendered for consistent high quality</li> */}
                   </ul>
                 </div>
               </div>

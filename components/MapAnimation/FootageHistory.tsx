@@ -273,7 +273,7 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="bg-gray-800 border border-gray-700 w-4/5 mx-auto rounded-xl">
           <DialogHeader>
-            <DialogTitle className="text-gray-200">View Footage</DialogTitle>
+            <DialogTitle className="text-gray-200">Footage</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 pt-4">
             <Button

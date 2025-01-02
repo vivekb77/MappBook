@@ -435,7 +435,7 @@ useEffect(() => {
             },
             paint: {
               'line-color': '#4a90e2',
-              'line-width': 18,
+              'line-width': 58,
               'line-opacity': 0.3,
               'line-blur': 3
             }
@@ -453,7 +453,7 @@ useEffect(() => {
             },
             paint: {
               'line-color': '#0066ff',
-              'line-width': 8,
+              'line-width': 28,
               'line-opacity': 0.8
             }
           });
@@ -558,13 +558,13 @@ useEffect(() => {
         attributionControl={true}
         boxZoom={false}
         doubleClickZoom={false}
-        dragRotate={false}
+        dragRotate={true}
         keyboard={false}
-        touchPitch={false}
+        touchPitch={true}
         minZoom={1}
         maxZoom={20}
         renderWorldCopies={false}
-        interactive={false}
+        interactive={true}
       />
 
       {mapControls}
