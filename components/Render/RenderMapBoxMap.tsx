@@ -1,14 +1,13 @@
 //rendermapboxmap.tsx
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Map, MapRef } from "react-map-gl";
-import { useParams } from 'next/navigation'
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import FlightAnimation from '@/components/MapAnimation/FlightAnimation';
 import { nanoid } from 'nanoid';
-import { Label } from "@radix-ui/react-dropdown-menu";
 import InfoPopUp from "./InfoPopUp";
 import MapSettings from "./MapSettings";
+import { useMapPoints } from './MapLayers';
 
 const CONFIG = {
   map: {
@@ -117,42 +116,42 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
   // Calculate flight path for visualization
   const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 20): CurvedPath => {
     const flightPoints: [number, number][] = [];
-  
+
     // Generate the curved flight path
     for (let i = 0; i < points.length - 1; i++) {
       const start = points[i];
       const end = points[i + 1];
-      
+
       flightPoints.push([start.longitude, start.latitude]);
-      
+
       for (let j = 1; j < numIntermediatePoints; j++) {
         const t = j / numIntermediatePoints;
         const t2 = t * t;
         const t3 = t2 * t;
-        
+
         const control1 = i > 0 ? points[i - 1] : start;
         const control2 = i < points.length - 2 ? points[i + 2] : end;
-        
+
         const lng = (2 * t3 - 3 * t2 + 1) * start.longitude +
           (t3 - 2 * t2 + t) * (end.longitude - control1.longitude) +
           (-2 * t3 + 3 * t2) * end.longitude +
           (t3 - t2) * (control2.longitude - start.longitude);
-          
+
         const lat = (2 * t3 - 3 * t2 + 1) * start.latitude +
           (t3 - 2 * t2 + t) * (end.latitude - control1.latitude) +
           (-2 * t3 + 3 * t2) * end.latitude +
           (t3 - t2) * (control2.latitude - start.latitude);
-        
+
         flightPoints.push([lng, lat]);
       }
     }
-    
+
     // Add the last point
     if (points.length > 0) {
       const lastPoint = points[points.length - 1];
       flightPoints.push([lastPoint.longitude, lastPoint.latitude]);
     }
-  
+
     return {
       type: 'Feature',
       properties: {},
@@ -203,24 +202,26 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
     }
   }, [showFog]);
 
-useEffect(() => {
-  if (mapInstanceRef.current) {
-    const map = mapInstanceRef.current;
-    try {
-      ['flight-path', 'flight-path-glow'].forEach(layerId => {
-        if (map.getLayer(layerId)) {
-          map.setLayoutProperty(
-            layerId,
-            'visibility',
-            showPath ? 'visible' : 'none'
-          );
-        }
-      });
-    } catch (e) {
-      console.warn('Error toggling path visibility:', e);
+  useEffect(() => {
+    if (mapInstanceRef.current) {
+      const map = mapInstanceRef.current;
+      try {
+        ['flight-path', 'flight-path-glow'].forEach(layerId => {
+          if (map.getLayer(layerId)) {
+            map.setLayoutProperty(
+              layerId,
+              'visibility',
+              showPath ? 'visible' : 'none'
+            );
+          }
+        });
+      } catch (e) {
+        console.warn('Error toggling path visibility:', e);
+      }
     }
-  }
-}, [showPath]);
+  }, [showPath]);
+
+  useMapPoints(mapInstanceRef.current, points, showMapBoxPlacesLabels);
 
   const cleanup = () => {
     if (!isMountedRef.current) return;
@@ -417,12 +418,12 @@ useEffect(() => {
       if (points.length >= 2) {
         if (!map.getSource('flight-path')) {
           const curvedPath = generateCurvedPath(points);
-          
+
           map.addSource('flight-path', {
             type: 'geojson',
             data: curvedPath
           });
-  
+
           // Add path glow effect
           map.addLayer({
             id: 'flight-path-glow',
@@ -440,7 +441,7 @@ useEffect(() => {
               'line-blur': 3
             }
           });
-  
+
           // Add main path line
           map.addLayer({
             id: 'flight-path',
@@ -459,17 +460,13 @@ useEffect(() => {
           });
         }
       }
-  
+
 
     } catch (e) {
       console.warn('Error initializing map:', e);
       handleMapError();
     }
   }, []);
-
-
-
-
 
   // Lifecycle
   useEffect(() => {
