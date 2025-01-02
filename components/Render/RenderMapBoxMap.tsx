@@ -65,6 +65,15 @@ interface MapViewState {
   bearing: number;
 }
 
+interface CurvedPath {
+  type: 'Feature';
+  properties: {};
+  geometry: {
+    type: 'LineString';
+    coordinates: [number, number][];
+  };
+}
+
 interface MapboxMapProps {
   initialPoints: Point[];
 }
@@ -106,13 +115,53 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
   const [showPath, setShowPath] = useState(true);
 
   // Calculate flight path for visualization
-  const flightPath = useMemo(() => {
-    return points.map(point => ({
-      longitude: point.longitude,
-      latitude: point.latitude
-    }));
-  }, [points]);
-
+  const generateCurvedPath = (points: Point[], numIntermediatePoints: number = 20): CurvedPath => {
+    const flightPoints: [number, number][] = [];
+  
+    // Generate the curved flight path
+    for (let i = 0; i < points.length - 1; i++) {
+      const start = points[i];
+      const end = points[i + 1];
+      
+      flightPoints.push([start.longitude, start.latitude]);
+      
+      for (let j = 1; j < numIntermediatePoints; j++) {
+        const t = j / numIntermediatePoints;
+        const t2 = t * t;
+        const t3 = t2 * t;
+        
+        const control1 = i > 0 ? points[i - 1] : start;
+        const control2 = i < points.length - 2 ? points[i + 2] : end;
+        
+        const lng = (2 * t3 - 3 * t2 + 1) * start.longitude +
+          (t3 - 2 * t2 + t) * (end.longitude - control1.longitude) +
+          (-2 * t3 + 3 * t2) * end.longitude +
+          (t3 - t2) * (control2.longitude - start.longitude);
+          
+        const lat = (2 * t3 - 3 * t2 + 1) * start.latitude +
+          (t3 - 2 * t2 + t) * (end.latitude - control1.latitude) +
+          (-2 * t3 + 3 * t2) * end.latitude +
+          (t3 - t2) * (control2.latitude - start.latitude);
+        
+        flightPoints.push([lng, lat]);
+      }
+    }
+    
+    // Add the last point
+    if (points.length > 0) {
+      const lastPoint = points[points.length - 1];
+      flightPoints.push([lastPoint.longitude, lastPoint.latitude]);
+    }
+  
+    return {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: flightPoints
+      }
+    };
+  };
 
   const showOrNotMapBoxPlacesLabels = useCallback((map: mapboxgl.Map) => {
     const style = map.getStyle();
@@ -138,6 +187,40 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
       showOrNotMapBoxPlacesLabels(mapInstanceRef.current);
     }
   }, [showMapBoxPlacesLabels, showOrNotMapBoxPlacesLabels]);
+
+  useEffect(() => {
+    if (mapInstanceRef.current) {
+      const map = mapInstanceRef.current;
+      try {
+        if (showFog) {
+          map.setFog(CONFIG.map.fog);
+        } else {
+          map.setFog(null);
+        }
+      } catch (e) {
+        console.warn('Error toggling fog:', e);
+      }
+    }
+  }, [showFog]);
+
+useEffect(() => {
+  if (mapInstanceRef.current) {
+    const map = mapInstanceRef.current;
+    try {
+      ['flight-path', 'flight-path-glow'].forEach(layerId => {
+        if (map.getLayer(layerId)) {
+          map.setLayoutProperty(
+            layerId,
+            'visibility',
+            showPath ? 'visible' : 'none'
+          );
+        }
+      });
+    } catch (e) {
+      console.warn('Error toggling path visibility:', e);
+    }
+  }
+}, [showPath]);
 
   const cleanup = () => {
     if (!isMountedRef.current) return;
@@ -326,35 +409,57 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
       }
 
       //3 add fog
-      map.setFog(CONFIG.map.fog);
+      if (showFog) {
+        map.setFog(CONFIG.map.fog);
+      }
 
       //4 flight path
       if (points.length >= 2) {
         if (!map.getSource('flight-path')) {
+          const curvedPath = generateCurvedPath(points);
+          
           map.addSource('flight-path', {
             type: 'geojson',
-            data: {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: flightPath.map(p => [p.longitude, p.latitude])
-              }
+            data: curvedPath
+          });
+  
+          // Add path glow effect
+          map.addLayer({
+            id: 'flight-path-glow',
+            type: 'line',
+            source: 'flight-path',
+            layout: {
+              visibility: showPath ? 'visible' : 'none',
+              'line-cap': 'round',
+              'line-join': 'round'
+            },
+            paint: {
+              'line-color': '#4a90e2',
+              'line-width': 18,
+              'line-opacity': 0.3,
+              'line-blur': 3
             }
           });
-
+  
+          // Add main path line
           map.addLayer({
             id: 'flight-path',
             type: 'line',
             source: 'flight-path',
+            layout: {
+              visibility: showPath ? 'visible' : 'none',
+              'line-cap': 'round',
+              'line-join': 'round'
+            },
             paint: {
-              'line-color': '#ffffff',
-              'line-width': 10,
-              'line-opacity': 0.7
+              'line-color': '#0066ff',
+              'line-width': 8,
+              'line-opacity': 0.8
             }
           });
         }
       }
+  
 
     } catch (e) {
       console.warn('Error initializing map:', e);
