@@ -7,7 +7,7 @@ export type MappBookUser = {
     map_views_left: number;
     display_name : string;
     country_fill_color : string;
-    animation_credits: number
+    drone_footage_credits: number
   };
 
 interface UserContextType {

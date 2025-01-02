@@ -19,9 +19,9 @@ const AddCredits = () => {
         setError('');
 
         try {
-            track('Animation - Add credits button clicked');
+            track('Drone - Add credits button clicked');
 
-            const response = await fetch('/api/stripe-animation/create-checkout-session', {
+            const response = await fetch('/api/stripe-drone/create-checkout-session', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ const AddCredits = () => {
                     // If parsing JSON fails, use default error message
                 }
 
-                track('RED - Animation - Add credits failed', {
+                track('RED - Drone - Add credits failed', {
                     user_id: mappbookUser.mappbook_user_id,
                     error: errorMessage
                 });

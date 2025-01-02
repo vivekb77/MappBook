@@ -21,46 +21,16 @@ interface Toast {
 
 interface ExportButtonProps {
   points: Point[];
-  onExportComplete?: () => void;
-  onVideoCreated?: () => void;
 }
 
-interface AspectRatioOption {
-  aspectRatio: string;
-  platforms: string[];
-}
-
-const aspectRatioOptions: AspectRatioOption[] = [
-  {
-    aspectRatio: "9:16",
-    platforms: [
-      "Instagram Stories / Reels",
-      "Facebook Stories",
-      "TikTok"
-    ]
-  },
-  {
-    aspectRatio: "4:5",
-    platforms: [
-      "Instagram Feed Videos",
-      "Twitter"
-    ]
-  }
-];
-
-type RenderingStatus = 'idle' | 'saving' | 'rendering' | 'complete' | 'error';
 
 const ExportButton: React.FC<ExportButtonProps> = ({
   points,
-  onExportComplete,
-  onVideoCreated
 }) => {
-  const [renderingStatus, setRenderingStatus] = useState<RenderingStatus>('idle');
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState<string>("9:16");
   const [isLoading, setIsLoading] = useState(false);
-
+const [footageId, setFootageId] = useState<string | null>(null);
   const supabase = getClerkSupabaseClient();
   const { mappbookUser, setMappbookUser } = useMappbookUser();
 
@@ -71,7 +41,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         try {
           const { data, error } = await supabase
             .from('MappBook_Users')
-            .select('animation_credits')
+            .select('drone_footage_credits')
             .eq('mappbook_user_id', mappbookUser.mappbook_user_id)
             .single();
 
@@ -80,7 +50,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           if (data) {
             setMappbookUser({
               ...mappbookUser,
-              animation_credits: data.animation_credits
+              drone_footage_credits: data.drone_footage_credits
             });
           }
         } catch (error) {
@@ -108,82 +78,45 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   };
 
   const handleExport = async () => {
-    if (points.length === 0 || !mappbookUser?.animation_credits || mappbookUser.animation_credits <= 0) {
+    if (points.length === 0 || !mappbookUser?.drone_footage_credits || mappbookUser.drone_footage_credits <= 0) {
       return false;
     }
-
-    setRenderingStatus('saving');
-    setIsDialogOpen(false);
 
     try {
       if (!mappbookUser?.mappbook_user_id) {
         throw new Error('Invalid user ID');
       }
 
-      // Save to Animation_Video table
-      const { data: animationData, error: saveError } = await supabase
-        .from('Animation_Video')
+      // Save to Drone_Footage table
+      const { data: footageData, error: saveError } = await supabase
+        .from('Drone_Footage')
         .insert([{
-          points: points,
-          location_count: points.length,
+          points_coordinates_data : points,
+          points_count: points.length,
+          total_distance: 33,
           mappbook_user_id: mappbookUser.mappbook_user_id,
-          aspect_ratio: selectedAspectRatio,
-          show_labels: true,
         }])
         .select();
 
       if (saveError) throw saveError;
 
-      if (!animationData || animationData.length === 0) {
-        throw new Error('No animation data returned after insert');
+      if (!footageData || footageData.length === 0) {
+        throw new Error('No footage data returned after insert');
       }
 
-      setRenderingStatus('rendering');
+      // setFootageId(footageData.drone_footage_credits)
+      const event = new CustomEvent('FootageAdded');
+            window.dispatchEvent(event);
 
-      // Start the render
-
-      const response = await fetch('/api/lambda-server', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mappbook_user_id: mappbookUser.mappbook_user_id,
-          animation_video_id: animationData[0].animation_video_id
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to start render');
-      }
-
-      setRenderingStatus('complete');
 
     } catch (err) {
-      console.error('Export error:', err);
-      setRenderingStatus('error');
-      showToast('Failed to create video', 'error');
+      console.error('failed to save:', err);
+      showToast('Failed to save', 'error');
       return false;
     }
   };
 
-  const getButtonText = () => {
-    switch (renderingStatus) {
-      case 'saving':
-        return 'Saving...';
-      case 'rendering':
-        return 'Rendering...';
-      case 'complete':
-        return 'Save & Export';
-      case 'error':
-        return 'Failed';
-      default:
-        return 'Save & Export';
-    }
-  };
-
-  const isButtonLoading = renderingStatus === 'saving' || renderingStatus === 'rendering';
-  const isButtonDisabled = points.length === 0 || isButtonLoading;
+  const isButtonDisabled = points.length <= 2 ;
 
   return (
     <>
@@ -193,12 +126,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           disabled={isButtonDisabled}
           className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 min-w-[140px] border border-gray-700"
         >
-          {isButtonLoading ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <Download className="w-4 h-4 mr-2" />
-          )}
-          {getButtonText()}
+         Export
         </Button>
       </div>
 
@@ -206,17 +134,17 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-gray-800 border border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-gray-200">Create Animation Video</DialogTitle>
+            <DialogTitle className="text-gray-200">View Footage full screen</DialogTitle>
             <DialogDescription className="text-gray-400">
               <div className="flex items-center justify-between mb-4">
-                <span>The video will be processed on the server, after completion it will appear under 'Your Videos' section to View & Download</span>
+                <span>This opens the footage in a new tab and you can record the footage</span>
                 <div className="flex items-center gap-2 px-3 py-1 bg-gray-700 rounded-full">
                   <Coins className="w-4 h-4 text-yellow-400" />
                   <span className="text-gray-200 font-medium">
                     {isLoading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      `${mappbookUser?.animation_credits || 0} credits`
+                      `${mappbookUser?.drone_footage_credits || 0} credits`
                     )}
                   </span>
                 </div>
@@ -224,56 +152,16 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6">
-            <RadioGroup
-              value={selectedAspectRatio}
-              onValueChange={setSelectedAspectRatio}
-              className="grid grid-cols-2 gap-4"
-            >
-              {aspectRatioOptions.map((option) => (
-                <div
-                  key={option.aspectRatio}
-                  className={`relative p-4 rounded-lg border cursor-pointer
-                    ${selectedAspectRatio === option.aspectRatio
-                      ? 'border-blue-500 bg-gray-700/50'
-                      : 'border-gray-700 bg-gray-900/50 hover:bg-gray-700/30'}
-                    transition-colors`}
-                  onClick={() => setSelectedAspectRatio(option.aspectRatio)}
-                >
-                  <div className="flex flex-col items-center gap-4">
-                    <div className={`relative ${option.aspectRatio === "9:16"
-                      ? "w-12 h-20"
-                      : "w-16 h-20"
-                      } bg-gray-700 rounded-lg border border-gray-600`} />
 
-                    <div className="text-center">
-                      <p className="text-gray-200 font-medium">{option.aspectRatio}</p>
-                      <div className="mt-2 text-sm text-gray-400">
-                        <p className="font-medium mb-1">Perfect for:</p>
-                        <ul className="space-y-1">
-                          {option.platforms.map((platform, idx) => (
-                            <li key={idx} className="text-xs">
-                              • {platform}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
-
-          {typeof mappbookUser?.animation_credits === 'number' && mappbookUser.animation_credits <= 5 && mappbookUser.animation_credits > 0 && (
+          {typeof mappbookUser?.drone_footage_credits === 'number' && mappbookUser.drone_footage_credits <= 5 && mappbookUser.drone_footage_credits > 0 && (
             <div className="text-yellow-200 text-sm mb-4">
-              Running low on credits! Consider adding more credits to continue creating videos.
+              Running low on credits! Consider adding more credits to continue creating footage.
             </div>
           )}
 
-          {typeof mappbookUser?.animation_credits === 'number' && mappbookUser.animation_credits === 0 && (
+          {typeof mappbookUser?.drone_footage_credits === 'number' && mappbookUser.drone_footage_credits === 0 && (
             <div className="text-red-400 text-sm mb-4">
-              No credits remaining. Please add credits to process video.
+              No credits remaining. Please add credits to add footage.
             </div>
           )}
 
@@ -287,13 +175,13 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             </Button>
             <Button
               onClick={handleExport}
-              disabled={isLoading || !mappbookUser?.animation_credits || mappbookUser.animation_credits <= 0}
+              disabled={isLoading || !mappbookUser?.drone_footage_credits || mappbookUser.drone_footage_credits <= 0}
               className="bg-blue-500 hover:bg-blue-600 text-gray-200"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                'Create Video'
+                'Save Footage'
               )}
             </Button>
           </div>

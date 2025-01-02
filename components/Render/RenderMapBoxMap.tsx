@@ -346,7 +346,7 @@ const MapboxMap: React.FC = () => {
         'tileSize': 512,
         'maxzoom': 17
       });
-      map.touchZoomRotate?.enable();
+      // map.touchZoomRotate?.enable();
       map.setFog(CONFIG.map.fog);
 
       map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
@@ -354,6 +354,11 @@ const MapboxMap: React.FC = () => {
         setMapStatus({ status: 'ready' });
       }
 
+      map.dragRotate.disable();
+      map.touchZoomRotate.disable();
+      map.boxZoom.disable();
+      map.scrollZoom.disable();
+      map.doubleClickZoom.disable();
 
     } catch (e) {
       console.warn('Error initializing map:', e);
@@ -466,9 +471,9 @@ const MapboxMap: React.FC = () => {
         attributionControl={true}
         boxZoom={false}
         doubleClickZoom={false}
-        dragRotate={true}
+        dragRotate={false}
         keyboard={false}
-        touchPitch={true}
+        touchPitch={false}
         minZoom={1}
         maxZoom={20}
         renderWorldCopies={false}

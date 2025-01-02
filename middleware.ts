@@ -6,7 +6,6 @@ export default authMiddleware({
     "/api/stripe/webhook",
     "/terms",
     "/studio",
-    "/render/:id",
     "/api/search-address",
     "/api/get-assets",
     "/passport",
@@ -25,6 +24,7 @@ export const config = {
     "/profile/:path*",
     "/dashboard/:path*",
     "/settings/:path*",
+    "/render/:id",
     "/api/((?!get-assets|stripe/webhook|search-address).)*"  // Match all API routes except the public ones
   ]
 };

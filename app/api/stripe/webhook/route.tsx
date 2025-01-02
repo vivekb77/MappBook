@@ -51,20 +51,20 @@ export async function POST(request: Request) {
 
       const supabase = getSupabaseAdmin();
 
-      if (priceId === process.env.STRIPE_PRICE_ID_ANIMATION) {
-        // Handle Animation credits
+      if (priceId === process.env.STRIPE_PRICE_ID_DRONE) {
+        // Handle Drone credits
 
         const credit_quantity = Math.round(session.amount_total! * 0.02);
 
         const { data, error } = await supabase
-          .rpc('add_animation_credits_fcb5e877d4ee', {
+          .rpc('add_drone_credits_fcb5e877d4ee', {
             m_user_id: userId,
             quantity: credit_quantity,
           });
 
         if (error) {
-          await track('RED - Animation webhook- Error adding Animation credits');
-          console.error('Error adding Animation credits:', error);
+          await track('RED - Drone webhook- Error adding Drone credits');
+          console.error('Error adding Drone credits:', error);
           throw error;
         }
       } else if (priceId === process.env.STRIPE_PRICE_ID) {

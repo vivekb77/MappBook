@@ -22,7 +22,7 @@ function PaymentStatus() {
 
     const verifyPayment = async () => {
       try {
-        const response = await fetch('/api/stripe-animation/verify-session', {
+        const response = await fetch('/api/stripe-drone/verify-session', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -45,8 +45,8 @@ function PaymentStatus() {
     verifyPayment();
   }, [searchParams]);
 
-  const handleBackToAnimation = () => {
-    router.push('/create');
+  const handleBackToStudio = () => {
+    router.push('/studio');
   };
 
   if (status === 'loading') {
@@ -74,12 +74,12 @@ function PaymentStatus() {
           Thank you for adding Credits! Your account has been updated with additional Credits.
         </p>
         <button
-          onClick={handleBackToAnimation}
+          onClick={handleBackToStudio}
           className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-purple-500 hover:bg-purple-600 
           text-white rounded-xl transition-colors duration-200"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Animation
+          Back to Studio
         </button>
       </div>
     );
@@ -97,12 +97,12 @@ function PaymentStatus() {
         {error || 'Failed to verify payment'}
       </p>
       <button
-        onClick={handleBackToAnimation}
+        onClick={handleBackToStudio}
         className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-purple-500 hover:bg-purple-600 
         text-white rounded-xl transition-colors duration-200"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Animation
+        Back to Studio
       </button>
     </div>
   );

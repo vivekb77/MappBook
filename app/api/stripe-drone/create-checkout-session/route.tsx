@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID_ANIMATION,
+          price: process.env.STRIPE_PRICE_ID_DRONE,
           adjustable_quantity: {
             enabled: true,
             minimum: 1,
@@ -34,19 +34,19 @@ export async function POST(request: Request) {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success-animation?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/create`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success-drone?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/studio`,
       customer_email: userEmail,
       metadata: {
         userId: userId.toString(), // Ensure userId is a string
       },
     });
-    await track('Animation - Checkout session created', {
+    await track('Drone - Checkout session created', {
       userId: userId.toString(),
     });
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    await track('RED - Animation - Error creating checkout session');
+    await track('RED - Drone - Error creating checkout session');
     console.error('Error creating checkout session:', err);
     return NextResponse.json(
       { error: 'Error creating checkout session' },
