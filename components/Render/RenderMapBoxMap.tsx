@@ -8,6 +8,7 @@ import { nanoid } from 'nanoid';
 import InfoPopUp from "./InfoPopUp";
 import MapSettings from "./MapSettings";
 import { useMapPoints } from './MapLayers';
+import FullscreenButton from './FullscreenButton';
 
 const CONFIG = {
   map: {
@@ -515,9 +516,12 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
     <div
       id={mapContainerId.current}
       className="relative w-full h-full"
-      data-testid="map-full-view"
     >
-
+      {!isAnimating &&
+        <>
+          <FullscreenButton containerId={mapContainerId.current} />
+        </>
+      }
       {mapStatus.status === 'loading' && (
         <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-900">
           <div className="bg-gray-800 rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
