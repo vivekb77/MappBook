@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect, useMemo, useCallback } from "react"
 import { Map, MapRef } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import FlightAnimation from '@/components/MapAnimation/FlightAnimation';
+import FlightAnimation from './FlightAnimation';
 import { nanoid } from 'nanoid';
 import InfoPopUp from "./InfoPopUp";
 import MapSettings from "./MapSettings";
