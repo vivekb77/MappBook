@@ -65,6 +65,7 @@ interface MapMarkersProps {
   onError: (message: string) => void;
   onUpdatePointLabel: (index: number, label: string) => void;
   onPointRemove: (index: number) => void;
+  onDistanceChange?: (totalDistance: number, pointDistances: number[]) => void;
 }
 
 const calculateDistance = (point1: { longitude: number; latitude: number }, point2: { longitude: number; latitude: number }): number => {
@@ -245,6 +246,7 @@ const LabelDialog: React.FC<{
   useEffect(() => {
     setLabelInput(currentLabel || '');
   }, [isOpen, currentLabel]);
+  
 
   const handleSave = () => {
     const trimmedLabel = labelInput.trim();
@@ -336,7 +338,8 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
   onPointMove,
   onError,
   onUpdatePointLabel,
-  onPointRemove
+  onPointRemove,
+  onDistanceChange
 }) => {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [labelDialogState, setLabelDialogState] = useState<{
@@ -346,6 +349,14 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
     isOpen: false,
     pointIndex: null
   });
+
+  useEffect(() => {
+    const distances = calculateCumulativeDistances(points);
+    onDistanceChange?.(
+      distances[distances.length - 1] || 0,
+      distances
+    );
+  }, [points, onDistanceChange]);
 
   const validateDrag = (point: Point, newLng: number, newLat: number): boolean => {
     const originalPos = point.originalPosition || { longitude: point.longitude, latitude: point.latitude };
@@ -382,6 +393,8 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
     }
     setLabelDialogState({ isOpen: false, pointIndex: null });
   };
+
+  
 
   const handleDragStart = (index: number) => {
     if (isAnimating) {

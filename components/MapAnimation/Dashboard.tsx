@@ -6,7 +6,7 @@ import { Camera, Globe, Video, Coins } from 'lucide-react';
 import SignInButton from './SignInButton';
 import { track } from '@vercel/analytics';
 import AddCredits from './AddCredits';
-import VideoHistory from './VideoHistory';
+import FootageHistory from './FootageHistory';
 import DesktopRecommendationBanner from './DesktopRecommendationBanner';
 
 declare global {
@@ -78,7 +78,7 @@ const DashboardContainer = () => {
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 rounded-full border border-gray-700">
                   <Coins className="w-4 h-4 text-yellow-400" />
                   <span className="text-sm font-medium text-gray-200">
-                    {mappbookUser.animation_credits || 0} credits
+                    {mappbookUser.drone_footage_credits || 0} credits
                   </span>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-blue-500 
@@ -125,7 +125,7 @@ const DashboardContainer = () => {
                 {/* <h2 className="text-2xl font-bold text-white mb-4">No drone required 😉</h2> */}
                 <p className="text-gray-300 mb-6">Create amazing drone-like footage with MappBook</p>
                 <div className="w-full overflow-x-auto">
-                  <VideoHistory userId={mappbookUser.mappbook_user_id} />
+                  <FootageHistory userId={mappbookUser.mappbook_user_id} />
                 </div>
               </div>
               <AddCredits />

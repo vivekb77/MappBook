@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plane, ChevronDown, Loader2, Clock, Download, Share2, X, Trash2 } from 'lucide-react';
+import { ChevronDown, Loader2, Clock, X, Trash2, Plane } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { Button } from "@/components/ui/button";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface FootageHistoryItem {
   drone_footage_id: string;
@@ -39,10 +39,12 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
   const [selectedFootageId, setSelectedFootageId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [footageToDelete, setFootageToDelete] = useState<FootageHistoryItem | null>(null);
+  const [selectedFootage, setSelectedFootage] = useState<FootageHistoryItem | null>(null);
   const supabase = getClerkSupabaseClient();
   const PAGE_SIZE = 5;
-  
+
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
@@ -55,11 +57,8 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
     fetchFootage();
   }, [page]);
 
-
-  // Listen for footage creation events
   useEffect(() => {
     const handleFootageAdded = () => {
-      // Reset to first page and refetch
       setPage(1);
       fetchFootage();
     };
@@ -71,7 +70,6 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
   const removeToast = (id: number) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
-
 
   const fetchFootage = async () => {
     try {
@@ -91,13 +89,11 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
 
       if (data) {
         setHasMore(count ? start + PAGE_SIZE < count : false);
-
         if (page === 1) {
           setFootage(data);
         } else {
           setFootage(prev => [...prev, ...data]);
         }
-
         if (!selectedFootageId && data.length > 0) {
           setSelectedFootageId(data[0].drone_footage_id);
         }
@@ -110,18 +106,13 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
     }
   };
 
-  const handleDelete = async (
-    foot: FootageHistoryItem,
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.stopPropagation();
-
-    if (!foot.drone_footage_id) {
+  const handleDelete = async () => {
+    if (!selectedFootage?.drone_footage_id) {
       showToast('Invalid footage selected', 'error');
       return;
     }
 
-    setFootageToDelete(foot);
+    setFootageToDelete(selectedFootage);
     setDeleteDialogOpen(true);
   };
 
@@ -139,15 +130,14 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
 
       if (error) throw error;
 
-      // Update local state
       setFootage(prev => prev.filter(v => v.drone_footage_id !== footageToDelete.drone_footage_id));
       showToast('Footage deleted successfully');
 
-      // Update selected footage if needed
       if (selectedFootageId === footageToDelete.drone_footage_id) {
         const remainingfootage = footage.filter(v => v.drone_footage_id !== footageToDelete.drone_footage_id);
         setSelectedFootageId(remainingfootage.length > 0 ? remainingfootage[0].drone_footage_id : null);
       }
+      setViewDialogOpen(false);
     } catch (error) {
       console.error('Error deleting Footage:', error);
       showToast('Failed to delete Footage. Please try again.', 'error');
@@ -157,6 +147,17 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
     }
   };
 
+  const handleViewFootage = (foot: FootageHistoryItem) => {
+    setSelectedFootage(foot);
+    setViewDialogOpen(true);
+  };
+
+  const openFootageInNewTab = () => {
+    if (selectedFootage?.drone_footage_id) {
+      window.open(`https://mappbook.com/render/${selectedFootage.drone_footage_id}`, '_blank');
+      setViewDialogOpen(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -173,8 +174,6 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
     });
   };
 
-
-
   const loadMore = () => {
     if (!loading && hasMore) {
       setPage(prev => prev + 1);
@@ -185,8 +184,8 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
     return (
       <div className="mt-6 bg-gray-800/90 rounded-lg overflow-hidden border border-gray-700 p-8">
         <div className="text-center text-gray-400">
-          <Plane className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-          <p className="text-sm font-medium">No footage history</p>
+          <Plane />
+          <p className="text-sm font-medium mt-4">No footage history</p>
           <p className="text-xs mt-1">Your previously created footage will appear here</p>
         </div>
       </div>
@@ -204,18 +203,17 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
           {footage.map((foot) => (
             <div
               key={foot.drone_footage_id}
-              className={`w-full flex items-center gap-2 p-2 hover:bg-gray-700 rounded-md transition-colors group mb-2
-                ${selectedFootageId === foot.drone_footage_id ? 'bg-gray-700/80' : ''}`}
+              className={`w-full flex items-center gap-2 p-2 hover:bg-gray-700 rounded-md transition-colors group mb-2 cursor-pointer
+`}
+              onClick={() => handleViewFootage(foot)}
             >
-              <button
-                className="flex-grow flex items-center gap-2 min-w-0"
-              >
-                <div className="w-5 h-5 md:w-5 md:h-5 bg-gray-700/60 rounded flex items-center justify-center flex-shrink-0">
-                  <Plane className={`w-5 h-5 md:w-5 md:h-5 ${selectedFootageId === foot.drone_footage_id ? 'text-blue-400' : 'text-blue-500'}`} />
+              <div className="flex-grow flex items-center gap-2 min-w-0">
+                <div className="w-10 h-10 md:w-10 md:h-10 bg-gray-200/60 rounded flex items-center justify-center flex-shrink-0">
+                  <Plane />
                 </div>
-                <div className="flex-grow min-w-0 text-left">
+                <div className="flex-grow min-w-0">
                   <p className={`text-xs md:text-sm font-medium truncate
-                    ${selectedFootageId === foot.drone_footage_id ? 'text-blue-400' : 'text-gray-200'}`}>
+                    ${selectedFootageId === foot.drone_footage_id ? 'text-gray-200' : 'text-gray-200'}`}>
                     Footage on <span>{formatDate(foot.created_at)}</span>
                   </p>
                   <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
@@ -223,29 +221,9 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
                     <span className="text-xs">{formatTime(foot.created_at)}</span>
                   </div>
                   <p className="text-xs text-gray-400 hidden md:block">
-                    {foot.total_distance} km
+                    {foot.total_distance.toFixed(1)} km
                   </p>
                 </div>
-              </button>
-
-              <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  // onClick={(e) => openFootage(foot.drone_footage_id)}
-                  className="h-8 w-8 p-0 text-gray-300 hover:text-blue-400 hover:bg-gray-700"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => handleDelete(foot, e)}
-                  className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-gray-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           ))}
@@ -268,8 +246,9 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
           )}
         </div>
       </ScrollArea>
+
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-gray-800 border border-gray-700">
+        <AlertDialogContent className="bg-gray-800 border border-gray-700 w-4/5 mx-auto rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-gray-200">Delete Footage</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
@@ -280,8 +259,8 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
             <AlertDialogCancel className="bg-gray-700 text-gray-200 hover:bg-gray-600 border-gray-600">
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDelete} 
+            <AlertDialogAction
+              onClick={confirmDelete}
               className="bg-red-500 hover:bg-red-600 text-gray-200"
             >
               Delete
@@ -289,6 +268,32 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* View Footage Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="bg-gray-800 border border-gray-700 w-4/5 mx-auto rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="text-gray-200">View Footage</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 pt-4">
+            <Button
+              onClick={openFootageInNewTab}
+              className="bg-blue-500 hover:bg-blue-600 text-gray-200"
+            >
+              <Plane className="w-4 h-4 mr-2" />
+              View Footage
+            </Button>
+            <Button
+              onClick={handleDelete}
+              variant="destructive"
+              className="bg-red-500 hover:bg-red-600 text-gray-200"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Footage
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Toasts */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">

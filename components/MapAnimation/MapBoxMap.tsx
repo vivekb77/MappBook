@@ -115,6 +115,7 @@ const MapboxMap: React.FC = () => {
   const [points, setPoints] = useState<Point[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationProgress, setAnimationProgress] = useState(0);
+  const [totalDistance, setTotalDistance] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [persistentError, setPersistentError] = useState<string | null>(null);
   const { isLoaded, isSignedIn, user } = useUser();
@@ -139,7 +140,6 @@ const MapboxMap: React.FC = () => {
         lastPoint,
         { ...newPoint, altitude: 0, index: 0 }
       );
-
       if (distance > CONFIG.map.drone.POINT_RADIUS_KM) {
         return `New point must be within ${CONFIG.map.drone.POINT_RADIUS_KM}km of last point`;
       }
@@ -464,7 +464,7 @@ const MapboxMap: React.FC = () => {
         >
           <Compass className="w-6 h-6 text-blue-400" />
         </button>
-        
+
         <div className="flex space-x-2">
           {points.length > 0 && !isAnimating && (
             <Button
@@ -493,7 +493,7 @@ const MapboxMap: React.FC = () => {
         </div>
       </div>
     </div>
-    ), [points.length, isAnimating]);
+  ), [points.length, isAnimating]);
 
   return (
     <div
@@ -540,7 +540,7 @@ const MapboxMap: React.FC = () => {
       </div>
 
       {/* Export Buttons */}
-      <ExportButton points={points} />
+      <ExportButton points={points} totalDistance={totalDistance} />
 
       {/* Main map component */}
       <Map
@@ -580,6 +580,9 @@ const MapboxMap: React.FC = () => {
               setPoints(newPoints);
             }}
             onPointRemove={handlePointRemove}
+            onDistanceChange={(total, distances) => {
+              setTotalDistance(total)
+            }}
           />
         )}
       </Map>
@@ -620,7 +623,7 @@ const MapboxMap: React.FC = () => {
 
       </div>
 
-      
+
       {/* Altitude Timeline */}
       {points.length > 0 && (
         <AltitudeTimeline
@@ -634,7 +637,7 @@ const MapboxMap: React.FC = () => {
 
       {/* Controls */}
       {mapControls}
-      
+
     </div>
   );
 };

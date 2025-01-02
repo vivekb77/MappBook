@@ -4,7 +4,7 @@ import { Download, Loader2, XCircle, CheckCircle, Video, Coins } from "lucide-re
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { useMappbookUser } from '@/context/UserContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { RadioGroup } from '@radix-ui/react-dropdown-menu';
+
 interface Point {
   longitude: number;
   latitude: number;
@@ -20,17 +20,19 @@ interface Toast {
 }
 
 interface ExportButtonProps {
-  points: Point[];
+  points: Point[],
+  totalDistance: number
 }
-
 
 const ExportButton: React.FC<ExportButtonProps> = ({
   points,
+  totalDistance
 }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-const [footageId, setFootageId] = useState<string | null>(null);
+  const [footageId, setFootageId] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const supabase = getClerkSupabaseClient();
   const { mappbookUser, setMappbookUser } = useMappbookUser();
 
@@ -82,21 +84,21 @@ const [footageId, setFootageId] = useState<string | null>(null);
       return false;
     }
 
+    setIsLoading(true);
     try {
       if (!mappbookUser?.mappbook_user_id) {
         throw new Error('Invalid user ID');
       }
 
-      // Save to Drone_Footage table
       const { data: footageData, error: saveError } = await supabase
         .from('Drone_Footage')
         .insert([{
-          points_coordinates_data : points,
+          points_coordinates_data: points,
           points_count: points.length,
-          total_distance: 33,
+          total_distance: totalDistance,
           mappbook_user_id: mappbookUser.mappbook_user_id,
         }])
-        .select();
+        .select('drone_footage_id, points_coordinates_data');
 
       if (saveError) throw saveError;
 
@@ -104,91 +106,143 @@ const [footageId, setFootageId] = useState<string | null>(null);
         throw new Error('No footage data returned after insert');
       }
 
-      // setFootageId(footageData.drone_footage_credits)
-      const event = new CustomEvent('FootageAdded');
-            window.dispatchEvent(event);
+      // Deduct one credit
+      const { error: updateError } = await supabase
+        .from('MappBook_Users')
+        .update({ 
+          drone_footage_credits: mappbookUser.drone_footage_credits - 1 
+        })
+        .eq('mappbook_user_id', mappbookUser.mappbook_user_id);
 
+      if (updateError) throw updateError;
+
+      // Update local state
+      setMappbookUser({
+        ...mappbookUser,
+        drone_footage_credits: mappbookUser.drone_footage_credits - 1
+      });
+      
+      setFootageId(footageData[0].drone_footage_id);
+      setSaveSuccess(true);
+      showToast('Footage saved successfully', 'success');
+      const event = new CustomEvent('FootageAdded');
+      window.dispatchEvent(event);
 
     } catch (err) {
       console.error('failed to save:', err);
       showToast('Failed to save', 'error');
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const isButtonDisabled = points.length <= 2 ;
+  const handleViewFootage = () => {
+    if (footageId) {
+      setSaveSuccess(false);
+      setIsDialogOpen(false);
+      window.open(`https://mappbook.com/render/${footageId}`, '_blank');
+    } else {
+      showToast('Error: Could not load footage viewer', 'error');
+      setSaveSuccess(true);
+    }
+  };
+
+  const isButtonDisabled = points.length <= 2;
 
   return (
     <>
       <div className="absolute top-2 right-2 z-50 flex space-x-2">
         <Button
-          onClick={() => setIsDialogOpen(true)}
+          onClick={() => {
+            setIsDialogOpen(true);
+          }}
           disabled={isButtonDisabled}
           className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 min-w-[140px] border border-gray-700"
         >
-         Export
+          Export
         </Button>
       </div>
 
-      {/* Export Confirmation Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-gray-800 border border-gray-700">
           <DialogHeader>
             <DialogTitle className="text-gray-200">View Footage full screen</DialogTitle>
             <DialogDescription className="text-gray-400">
               <div className="flex items-center justify-between mb-4">
-                <span>This opens the footage in a new tab and you can record the footage</span>
-                <div className="flex items-center gap-2 px-3 py-1 bg-gray-700 rounded-full">
-                  <Coins className="w-4 h-4 text-yellow-400" />
-                  <span className="text-gray-200 font-medium">
-                    {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      `${mappbookUser?.drone_footage_credits || 0} credits`
-                    )}
-                  </span>
-                </div>
+                <span>
+                  {saveSuccess 
+                    ? "Click the button below to view your footage in a new tab"
+                    : "This opens the footage in a new tab and you can record the footage"
+                  }
+                </span>
+                {!saveSuccess && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-gray-700 rounded-full">
+                    <Coins className="w-4 h-4 text-yellow-400" />
+                    <span className="text-gray-200 font-medium">
+                      {isLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        `${mappbookUser?.drone_footage_credits || 0} credits`
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
             </DialogDescription>
           </DialogHeader>
 
+          {!saveSuccess && (
+            <>
+              {typeof mappbookUser?.drone_footage_credits === 'number' && mappbookUser.drone_footage_credits <= 5 && mappbookUser.drone_footage_credits > 0 && (
+                <div className="text-yellow-200 text-sm mb-4">
+                  Running low on credits! Consider adding more credits to continue creating footage.
+                </div>
+              )}
 
-          {typeof mappbookUser?.drone_footage_credits === 'number' && mappbookUser.drone_footage_credits <= 5 && mappbookUser.drone_footage_credits > 0 && (
-            <div className="text-yellow-200 text-sm mb-4">
-              Running low on credits! Consider adding more credits to continue creating footage.
-            </div>
-          )}
-
-          {typeof mappbookUser?.drone_footage_credits === 'number' && mappbookUser.drone_footage_credits === 0 && (
-            <div className="text-red-400 text-sm mb-4">
-              No credits remaining. Please add credits to add footage.
-            </div>
+              {typeof mappbookUser?.drone_footage_credits === 'number' && mappbookUser.drone_footage_credits === 0 && (
+                <div className="text-red-400 text-sm mb-4">
+                  No credits remaining. Please add credits to add footage.
+                </div>
+              )}
+            </>
           )}
 
           <div className="flex justify-end gap-3 mt-4">
-            <Button
-              variant="ghost"
-              onClick={() => setIsDialogOpen(false)}
-              className="text-gray-300 hover:text-gray-200 hover:bg-gray-700"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleExport}
-              disabled={isLoading || !mappbookUser?.drone_footage_credits || mappbookUser.drone_footage_credits <= 0}
-              className="bg-blue-500 hover:bg-blue-600 text-gray-200"
-            >
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                'Save Footage'
-              )}
-            </Button>
+            {!saveSuccess ? (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsDialogOpen(false)}
+                  className="text-gray-300 hover:text-gray-200 hover:bg-gray-700"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleExport}
+                  disabled={isLoading || !mappbookUser?.drone_footage_credits || mappbookUser.drone_footage_credits <= 0}
+                  className="bg-blue-500 hover:bg-blue-600 text-gray-200"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    'Save Footage'
+                  )}
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={handleViewFootage}
+                className="bg-blue-500 hover:bg-blue-600 text-gray-200"
+              >
+                <Video className="w-4 h-4 mr-2" />
+                View Footage
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Toast notifications */}
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {toasts.map((toast) => (
           <div
