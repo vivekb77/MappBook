@@ -5,7 +5,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import FlightAnimation from '@/components/MapAnimation/FlightAnimation';
 import { nanoid } from 'nanoid';
-import { throttle } from 'lodash';
 import { supabase } from "@/components/utils/supabase"
 
 type MapPageParams = {
@@ -46,19 +45,6 @@ const CONFIG = {
   }
 } as const;
 
-// Helper function to calculate distance between points
-const calculateDistance = (point1: Point, point2: Point): number => {
-  const R = 6371;
-  const dLat = (point2.latitude - point1.latitude) * Math.PI / 180;
-  const dLon = (point2.longitude - point1.longitude) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(point1.latitude * Math.PI / 180) * Math.cos(point2.latitude * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-};
-
 interface Point {
   longitude: number;
   latitude: number;
@@ -70,12 +56,6 @@ interface Point {
     longitude: number;
     latitude: number;
   };
-}
-
-interface PointData {
-  longitude: number;
-  latitude: number;
-  zoom: number;
 }
 
 interface MapViewState {
@@ -99,24 +79,10 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   bearing: 0,
 };
 
-interface AnimationVideo {
-  animation_video_id: string;
-  points: Point[];
-  video_generation_status: boolean;
-  video_url: string | null;
-  mappbook_user_id: string;
-  location_count: number;
-  created_at: string;
-  updated_at: string;
-  is_deleted: boolean;
-  aspect_ratio: string;
-  show_labels: boolean;
-}
-
 const MapboxMap: React.FC = () => {
  
   const params = useParams<MapPageParams>();
-  const animation_video_id = params?.id ?? null;
+  const drone_footage_id = params?.id ?? null;
 
   // Refs
   const mapRef = useRef<MapRef>(null);
@@ -135,42 +101,40 @@ const MapboxMap: React.FC = () => {
   const [persistentError, setPersistentError] = useState<string | null>(null);
 
   // Add new state for animation data
-  const [animationData, setAnimationData] = useState<AnimationVideo | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
 
   // Add data fetching effect
   useEffect(() => {
-    const fetchAnimationData = async () => {
-      if (!animation_video_id) return;
+    const fetchFootageData = async () => {
+      if (!drone_footage_id) return;
       
       try {
         const { data, error } = await supabase
-          .from('Animation_Video')
+          .from('Drone_Footage')
           .select('*')
-          .eq('animation_video_id', animation_video_id)
+          .eq('drone_footage_id', drone_footage_id)
           .single();
 
         if (error) throw error;
-        if (!data) throw new Error('Animation not found');
+        if (!data) throw new Error('Footage not found');
 
         // Validate required fields
-        if (!data.points || !Array.isArray(data.points) || data.points.length === 0) {
-          throw new Error('Invalid animation data: Missing or invalid points');
+        if (!data.points_coordinates_data || !Array.isArray(data.points_coordinates_data) || data.points_coordinates_data.length === 0) {
+          throw new Error('Invalid footage data: Missing or invalid points');
         }
 
-        setAnimationData(data);
-        setPoints(data.points); // Set the points for FlightAnimation
+        setPoints(data.points_coordinates_data); // Set the points for FlightAnimation
       } catch (err) {
         // setDataError(err.message);
-        console.error('Error fetching animation:', err);
+        console.error('Error fetching footage:', err);
       } finally {
         setDataLoading(false);
       }
     };
 
-    fetchAnimationData();
-  }, [animation_video_id]);
+    fetchFootageData();
+  }, [drone_footage_id]);
 
   const cleanup = () => {
     if (!isMountedRef.current) return;
