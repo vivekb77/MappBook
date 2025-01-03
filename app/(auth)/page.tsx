@@ -64,7 +64,7 @@ const VideoGallery = () => {
     // },
     // {
     //   title: "Grand Canyon Tour",
-     //   thumbnail: "",
+    //   thumbnail: "",
     //   videoUrl: ""
     // },
     // {
@@ -93,24 +93,41 @@ const VideoGallery = () => {
         ))}
       </div>
 
-      <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
-        <DialogContent className="sm:max-w-[90vw] h-[80vh] p-0 bg-transparent border-0 rounded-xl">
-
-          <div className="relative w-full h-full">
-            {selectedVideo && (
+      {selectedVideo && (
+        <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
+          <DialogContent className="sm:max-w-[90vw] h-[80vh] p-0 bg-transparent border-0 rounded-xl">
+            <div className="relative w-full h-full">
               <Player
-                component={() => (
-                  <div className="w-full h-full bg-black">
-                    <video
-                      src={selectedVideo}
-                      controls
-                      autoPlay
-                      className="w-full h-full rounded-lg"
-                    />
-                  </div>
-                )}
+                component={() => {
+                  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+                  React.useEffect(() => {
+                    if (videoRef.current) {
+                      videoRef.current.addEventListener('loadedmetadata', () => {
+                        if (videoRef.current) {
+                          const width = videoRef.current.videoWidth;
+                          const height = videoRef.current.videoHeight;
+                          videoRef.current.style.width = `${width}px`;
+                          videoRef.current.style.height = `${height}px`;
+                        }
+                      });
+                    }
+                  }, []);
+
+                  return (
+                    <div className="w-full h-full bg-black">
+                      <video
+                        ref={videoRef}
+                        src={selectedVideo}
+                        controls
+                        autoPlay
+                        className="w-full h-full rounded-lg"
+                      />
+                    </div>
+                  );
+                }}
                 durationInFrames={1000}
-                compositionWidth={1920}
+                compositionWidth={1520}
                 compositionHeight={1080}
                 fps={30}
                 style={{
@@ -118,16 +135,16 @@ const VideoGallery = () => {
                   height: '100%',
                 }}
               />
-            )}
-            <button
-              onClick={() => setSelectedVideo(null)}
-              className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 rounded-full hover:bg-opacity-70 transition-all"
-            >
-              <X className="w-6 h-6 text-white" />
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+              <button
+                onClick={() => setSelectedVideo(null)}
+                className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 rounded-full hover:bg-opacity-70 transition-all"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
@@ -144,7 +161,7 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16">
-        
+
         <div className="text-center max-w-4xl mx-auto mt-8">
           <h1 className="text-4xl font-bold mb-6">
             Create Stunning Drone-Like Footage Using Maps

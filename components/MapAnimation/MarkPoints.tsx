@@ -246,7 +246,7 @@ const LabelDialog: React.FC<{
   useEffect(() => {
     setLabelInput(currentLabel || '');
   }, [isOpen, currentLabel]);
-  
+
 
   const handleSave = () => {
     const trimmedLabel = labelInput.trim();
@@ -267,38 +267,39 @@ const LabelDialog: React.FC<{
       <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] sm:w-[440px] rounded-2xl bg-white p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-xs font-medium text-blue-400">
-            Add a label
+            Describe this location
           </DialogTitle>
         </DialogHeader>
 
         <div className="mt-4">
           <div className="relative">
-            <p>This text appears on the point when you export the video of drone flight</p>
+            <p className="text-center mb-3 text-sm text-blue-600 font-sans">
+              This text appears on the point when you export the video of drone flight
+            </p>
             <input
               type="text"
               value={labelInput}
               onChange={(e) => setLabelInput(e.target.value.slice(0, MAX_LABEL_LENGTH))}
               onKeyDown={handleKeyPress}
-              placeholder="Point label"
+              placeholder="Description"
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-20"
               maxLength={MAX_LABEL_LENGTH}
               autoFocus
               aria-label="Point label input"
             />
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-              <button
-                onClick={handleSave}
-                className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                aria-label="Save label"
-              >
-                <Check className="w-4 h-4" />
-              </button>
-            </div>
           </div>
           <div className="text-xs text-gray-400 mt-1">
             {labelInput.length}/{MAX_LABEL_LENGTH} characters
           </div>
-          <div className="mt-4 flex justify-center">
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+              aria-label="Save and close"
+            >
+              <Check className="w-4 h-4" />
+              Save & Close
+            </button>
             <button
               onClick={() => {
                 onRemove();
@@ -395,7 +396,7 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
     setLabelDialogState({ isOpen: false, pointIndex: null });
   };
 
-  
+
 
   const handleDragStart = (index: number) => {
     if (isAnimating) {

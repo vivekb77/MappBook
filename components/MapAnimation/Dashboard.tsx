@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
 import { logout } from '../utils/auth';
-import { Camera, Globe, Video, Coins } from 'lucide-react';
+import { Camera, Globe, Video, Coins, Instagram } from 'lucide-react';
 import SignInButton from './SignInButton';
 import { track } from '@vercel/analytics';
 import AddCredits from './AddCredits';
@@ -91,7 +91,7 @@ const DashboardContainer = () => {
         )}
 
         <div className="max-w-7xl mx-auto p-6 space-y-6">
-          {isLoaded && !isSignedIn &&(
+          {isLoaded && !isSignedIn && (
             <div className="space-y-4">
               <div className="bg-gray-800 rounded-lg p-8 text-center">
                 <h2 className="text-3xl font-bold text-white mb-4">Welcome to MappBook</h2>
@@ -113,7 +113,7 @@ const DashboardContainer = () => {
                 <FeatureCard
                   icon={<Video className="w-8 h-8 text-blue-500" />}
                   title="Easy Export"
-                  description="Get high quality videos for your creations." 
+                  description="Get high quality videos for your creations."
                 />
               </div>
             </div>
@@ -121,30 +121,30 @@ const DashboardContainer = () => {
 
           {isLoaded && isSignedIn && mappbookUser && (
             <>
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-4">No drone required 😉</h2>
-              <p className="text-gray-300 mb-6">Create amazing drone-like footage with MappBook</p>
-              <div className="w-full overflow-x-auto">
-                <FootageHistory userId={mappbookUser.mappbook_user_id} />
-              </div>
-            </div>
-            
-            <div className="space-y-4 mb-6">
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-white mb-2">Get More Credits</h3>
-                <p className="text-gray-300">Get stunning aerial footage for your social media</p>
-              </div>
-              
-              <div className="flex flex-col items-center space-y-3">
-                <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-white font-medium">25 Credits</span>
-                    <span className="text-green-400 font-bold">$5</span>
-                  </div>
-                  <p className="text-gray-400 text-sm">Perfect for travel creators</p>
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-4">No drone required 😉</h2>
+                <p className="text-gray-300 mb-6">Create amazing drone-like footage with MappBook</p>
+                <div className="w-full overflow-x-auto">
+                  <FootageHistory userId={mappbookUser.mappbook_user_id} />
                 </div>
-                
-                {/* <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md">
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-white mb-2">Get More Credits</h3>
+                  <p className="text-gray-300">Get stunning aerial footage for your social media</p>
+                </div>
+
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-white font-medium">25 Credits</span>
+                      <span className="text-green-400 font-bold">$5</span>
+                    </div>
+                    <p className="text-gray-400 text-sm">Perfect for travel creators</p>
+                  </div>
+
+                  {/* <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-white font-medium">50 Credits</span>
                     <span className="text-green-400 font-bold">$10</span>
@@ -159,11 +159,30 @@ const DashboardContainer = () => {
                   </div>
                   <p className="text-gray-400 text-sm">Best value - Save 40%</p>
                 </div> */}
+                </div>
               </div>
-            </div>
-            
-            <AddCredits />
-          </>
+
+              <AddCredits />
+
+
+              <div className="flex flex-col items-center mt-8">
+                <a
+                  href="https://www.instagram.com/mappbook"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-3 text-gray-300 hover:text-blue-500 transition-colors duration-300"
+                >
+                  <h3 className="text-xl font-semibold text-white mb-2">See latest creations</h3>
+                  <img
+                    src="/instagram.png"
+                    alt="Instagram"
+                    className="w-12 h-12"
+                  />
+                </a>
+              </div>
+
+
+            </>
           )}
         </div>
         <DesktopRecommendationBanner />
