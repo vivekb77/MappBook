@@ -1,30 +1,33 @@
-import { authMiddleware } from "@clerk/nextjs";
+import { clerkMiddleware, auth } from "@clerk/nextjs/server";
 
-export default authMiddleware({
-  publicRoutes: [
-    "/",
-    "/api/stripe/webhook",
-    "/terms",
-    "/studio",
-    "/api/search-address",
-    "/api/get-assets",
-    "/passport",
-    "/privacy",
-    "/sign-in",
-    "/contact",
-    "/payment-success",
-    "/map",
-    "/map/:id", // Add this for dynamic routes
-    // "/map/(.*)", // This is correct but let's be explicit
-  ]
-});
+// Initialize clerk middleware
+export default clerkMiddleware();
+
+// Define public routes
+export const publicRoutes = [
+  "/",
+  "/api/stripe/webhook",
+  "/terms",
+  "/studio",
+  "/api/search-address",
+  "/api/get-assets",
+  "/passport",
+  "/privacy",
+  "/sign-in",
+  "/contact",
+  "/payment-success",
+  "/map",
+  "/map/:path*",
+  "/render/:path*",
+];
 
 export const config = {
   matcher: [
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/",
     "/profile/:path*",
     "/dashboard/:path*",
     "/settings/:path*",
-    "/render/:id",
-    "/api/((?!get-assets|stripe/webhook|search-address).)*"  // Match all API routes except the public ones
+    "/api/((?!get-assets|stripe/webhook|search-address).)*"
   ]
 };

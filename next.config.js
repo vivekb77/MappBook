@@ -1,9 +1,13 @@
 const crypto = require('crypto');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     poweredByHeader: false,
     compress: true,
-    productionBrowserSourceMaps: false, // Disable source maps in production
+    productionBrowserSourceMaps: false,
+    
+    // Moved from experimental to root level
+    serverExternalPackages: [],
     
     images: {
       minimumCacheTTL: 60,
@@ -14,49 +18,51 @@ const nextConfig = {
     },
   
     webpack: (config, { dev, isServer }) => {
-      // Enable WebAssembly
+      // Enable WebAssembly support through webpack configuration
       config.experiments = {
         ...config.experiments,
         asyncWebAssembly: true,
         layers: true
       };
 
+      // Ensure proper handling of .wasm files
       config.module.rules.push({
         test: /\.wasm$/,
-        type: 'webassembly/async'
+        type: 'webassembly/async',
+        use: {
+          loader: 'wasm-loader'
+        }
       });
   
       // Production optimizations
       if (!dev) {
-        // Enhance Terser options for better minification
         config.optimization.minimize = true;
         config.optimization.minimizer = config.optimization.minimizer || [];
         config.optimization.minimizer.push(
           new (require('terser-webpack-plugin'))({
             terserOptions: {
               compress: {
-                drop_console: true, // Remove console.* statements
-                drop_debugger: true, // Remove debugger statements
+                drop_console: true,
+                drop_debugger: true,
                 pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'],
-                passes: 3, // Multiple compression passes
+                passes: 3,
                 unsafe: true,
                 unsafe_math: true,
               },
               mangle: {
-                reserved: [], // Add any reserved names that shouldn't be mangled
+                reserved: [],
                 properties: {
-                  regex: /^_/ // Mangle properties starting with underscore
+                  regex: /^_/
                 }
               },
               format: {
-                comments: false, // Remove comments
+                comments: false,
               },
               sourceMap: false,
             },
           })
         );
 
-        // Enhanced chunk splitting configuration
         config.optimization.splitChunks = {
           chunks: 'all',
           minSize: 20000,
@@ -95,18 +101,15 @@ const nextConfig = {
           },
         };
 
-        // Add module concatenation
         config.optimization.concatenateModules = true;
-
-        // Add module ids optimization
         config.optimization.moduleIds = 'deterministic';
       }
       return config;
     },
   
     reactStrictMode: true,
-  
-    async headers() {
+    
+    headers() {
       return [
         {
           source: '/:path*',
@@ -170,81 +173,81 @@ const nextConfig = {
             }
           ]
         },
-        {
-          source: '/:path*.js',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'public, max-age=31536000, immutable'
-            }
-          ]
-        },
-        {
-          source: '/:path*.css',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'public, max-age=31536000, immutable'
-            }
-          ]
-        },
-        {
-          source: '/(.*).(png|jpg|jpeg|svg|gif|ico|webp)',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'public, max-age=31536000, immutable'
-            }
-          ]
-        },
-        {
-          source: '/(.*).(woff|woff2|ttf|otf)',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'public, max-age=31536000, immutable'
-            }
-          ]
-        },
-        {
-          source: '/:path*.html',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'public, max-age=3600, must-revalidate'
-            }
-          ]
-        },
-        {
-          source: '/api/:path*',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'no-store, max-age=0'
-            }
-          ]
-        },
-        {
-          source: '/countries10009.geojson',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'public, max-age=31536000, immutable'
-            },
-            {
-              key: 'Content-Type',
-              value: 'application/geo+json'
-            },
-            {
-              key: 'Vary',
-              value: 'Accept-Encoding'
-            }
-          ]
+          {
+            source: '/:path*.js',
+            headers: [
+              {
+                key: 'Cache-Control',
+                value: 'public, max-age=31536000, immutable'
+              }
+            ]
+          },
+          {
+            source: '/:path*.css',
+            headers: [
+              {
+                key: 'Cache-Control',
+                value: 'public, max-age=31536000, immutable'
+              }
+            ]
+          },
+          {
+            source: '/(.*).(png|jpg|jpeg|svg|gif|ico|webp)',
+            headers: [
+              {
+                key: 'Cache-Control',
+                value: 'public, max-age=31536000, immutable'
+              }
+            ]
+          },
+          {
+            source: '/(.*).(woff|woff2|ttf|otf)',
+            headers: [
+              {
+                key: 'Cache-Control',
+                value: 'public, max-age=31536000, immutable'
+              }
+            ]
+          },
+          {
+            source: '/:path*.html',
+            headers: [
+              {
+                key: 'Cache-Control',
+                value: 'public, max-age=3600, must-revalidate'
+              }
+            ]
+          },
+          {
+            source: '/api/:path*',
+            headers: [
+              {
+                key: 'Cache-Control',
+                value: 'no-store, max-age=0'
+              }
+            ]
+          },
+          {
+            source: '/countries10009.geojson',
+            headers: [
+              {
+                key: 'Cache-Control',
+                value: 'public, max-age=31536000, immutable'
+              },
+              {
+                key: 'Content-Type',
+                value: 'application/geo+json'
+              },
+              {
+                key: 'Vary',
+                value: 'Accept-Encoding'
+              }
+            ]
         }
       ];
     },
   
     output: 'standalone',
-  };
+};
   
-  module.exports = nextConfig
+module.exports = nextConfig;
