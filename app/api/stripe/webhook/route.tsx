@@ -4,7 +4,7 @@ import { track } from '@vercel/analytics/server';
 import { getSupabaseAdmin } from '@/components/utils/supabase-admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-10-28.acacia',
+  apiVersion: '2024-12-18.acacia',
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
