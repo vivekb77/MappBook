@@ -39,6 +39,8 @@ const MapControlsInfo = () => {
                     <li>• Flight smoothness depends on internet connection and processor speed</li>
                     <li>• Run the flight twice - second run will use cached map data for better performance</li>
                     <li>• Close other unused tabs</li>
+                    <li>• Works best in Chrome</li>
+                    <li>• Full screen might not work on some devices / browsers</li>
                   </ul>
                 </div>
               </div>

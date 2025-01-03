@@ -172,7 +172,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
               <div className="flex items-center justify-between mb-4">
                 <span>
                   {saveSuccess
-                    ? "Your drone footage is ready! Click to save, this opens in a new tab where you can create a shareable video recording"
+                    ? ""
                     : "Your drone footage is ready! Click to save, this opens in a new tab where you can create a shareable video recording"
                   }
                 </span>
