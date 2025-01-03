@@ -188,7 +188,7 @@ const LandingPage = () => {
           <FeatureCard
             icon={<Video className="w-12 h-12 text-blue-500" />}
             title="Easy Export"
-            description="Export your creations in high quality video"
+            description="Get high quality videos for your creations"
           />
         </div>
       </section>

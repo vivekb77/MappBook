@@ -26,20 +26,18 @@ const MapControlsInfo = () => {
             <div className="p-2 space-y-2">
               <div className="bg-gray-800/80 rounded-lg p-3 shadow-sm space-y-3 border border-gray-700">
 
-                {/* <div className="bg-gray-900/50 rounded-lg p-2 text-sm border border-gray-700">
-                  <p className="font-medium text-blue-400">Animating Awesome videos Tips 💫</p>
+                <div className="bg-gray-900/50 rounded-lg p-2 text-sm border border-gray-700">
+                  <p className="font-medium text-blue-400">Record </p>
                   <ul className="mt-1 text-gray-300 space-y-1">
-                    <li>• Vary point distances (closer for detailed areas, wider for transitions)</li>
-                    <li>• Create smooth curved paths around landmarks for cinematic flow</li>
-                    <li>• Use altitude changes strategically (rise for overview, descend for details)</li>
+                    <li>• Go full screen - start screen recording on your device - start flight</li>
                   </ul>
-                </div> */}
+                </div>
 
                 <div className="bg-gray-900/50 rounded-lg p-2 text-sm border border-gray-700">
-                  <p className="font-medium text-blue-400">Performance Tips 🎥</p>
+                  <p className="font-medium text-blue-400">Performance Tips</p>
                   <ul className="mt-1 text-gray-300 space-y-1">
-                    <li>• Animation smoothness depends on internet connection and processor speed</li>
-                    <li>• Run the animation twice - second run will use cached map data for better performance</li>
+                    <li>• Flight smoothness depends on internet connection and processor speed</li>
+                    <li>• Run the flight twice - second run will use cached map data for better performance</li>
                     <li>• Close other unused tabs</li>
                   </ul>
                 </div>

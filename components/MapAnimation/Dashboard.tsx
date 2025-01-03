@@ -113,7 +113,7 @@ const DashboardContainer = () => {
                 <FeatureCard
                   icon={<Video className="w-8 h-8 text-blue-500" />}
                   title="Easy Export"
-                  description="Export your creations in high quality video formats ready to share."
+                  description="Get high quality videos for your creations." 
                 />
               </div>
             </div>
@@ -121,15 +121,49 @@ const DashboardContainer = () => {
 
           {isLoaded && isSignedIn && mappbookUser && (
             <>
-              <div>
-                {/* <h2 className="text-2xl font-bold text-white mb-4">No drone required 😉</h2> */}
-                <p className="text-gray-300 mb-6">Create amazing drone-like footage with MappBook</p>
-                <div className="w-full overflow-x-auto">
-                  <FootageHistory userId={mappbookUser.mappbook_user_id} />
-                </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-4">No drone required 😉</h2>
+              <p className="text-gray-300 mb-6">Create amazing drone-like footage with MappBook</p>
+              <div className="w-full overflow-x-auto">
+                <FootageHistory userId={mappbookUser.mappbook_user_id} />
               </div>
-              <AddCredits />
-            </>
+            </div>
+            
+            <div className="space-y-4 mb-6">
+              <div className="text-center">
+                <h3 className="text-xl font-semibold text-white mb-2">Get More Credits</h3>
+                <p className="text-gray-300">Get stunning aerial footage for your social media</p>
+              </div>
+              
+              <div className="flex flex-col items-center space-y-3">
+                <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-white font-medium">25 Credits</span>
+                    <span className="text-green-400 font-bold">$5</span>
+                  </div>
+                  <p className="text-gray-400 text-sm">Perfect for travel creators</p>
+                </div>
+                
+                {/* <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-white font-medium">50 Credits</span>
+                    <span className="text-green-400 font-bold">$10</span>
+                  </div>
+                  <p className="text-gray-400 text-sm">Most popular - Save 20%</p>
+                </div>
+                
+                <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-white font-medium">120 Credits</span>
+                    <span className="text-green-400 font-bold">$20</span>
+                  </div>
+                  <p className="text-gray-400 text-sm">Best value - Save 40%</p>
+                </div> */}
+              </div>
+            </div>
+            
+            <AddCredits />
+          </>
           )}
         </div>
         <DesktopRecommendationBanner />

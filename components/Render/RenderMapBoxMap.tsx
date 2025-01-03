@@ -29,11 +29,20 @@ const CONFIG = {
       MAX_RETRY_ATTEMPTS: 2,
     },
     fog: {
-      'horizon-blend': 0.4,          // More dramatic horizon blend
-      'color': '#ffa07a',           // Light salmon color for sunset effect
-      'high-color': '#4169e1',      // Royal blue for upper atmosphere
-      'space-color': '#191970',     // Midnight blue for space
-      'star-intensity': 0.85
+      day: {
+        'horizon-blend': 0.4,
+        'color': '#ffa07a',
+        'high-color': '#4169e1',
+        'space-color': '#191970',
+        'star-intensity': 0.85
+      },
+      night: {
+        'horizon-blend': 0.3,
+        'color': '#242B4B',
+        'high-color': '#161B36',
+        'space-color': '#0B1026',
+        'star-intensity': 0.8
+      }
     },
     light: {
       anchor: 'viewport',
@@ -193,9 +202,9 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
       const map = mapInstanceRef.current;
       try {
         if (showFog) {
-          map.setFog(CONFIG.map.fog);
+          map.setFog(CONFIG.map.fog.day);
         } else {
-          map.setFog(null);
+          map.setFog(CONFIG.map.fog.night);
         }
       } catch (e) {
         console.warn('Error toggling fog:', e);
@@ -412,7 +421,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
 
       //3 add fog
       if (showFog) {
-        map.setFog(CONFIG.map.fog);
+        map.setFog(CONFIG.map.fog.day);
       }
 
       //4 flight path
@@ -489,8 +498,8 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
     );
   }
   const mapControls = useMemo(() => (
-    <div className="absolute bottom-48 right-2 space-y-2">
-      <div className="flex flex-col items-end space-y-2">
+    <div className="absolute bottom-48 right-2">
+      <div className="flex flex-col items-end">
         <div className="flex space-x-2">
           <FlightAnimation
             points={points}

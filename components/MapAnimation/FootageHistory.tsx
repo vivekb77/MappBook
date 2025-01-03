@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Loader2, Clock, X, Trash2, Plane } from 'lucide-react';
+import { ChevronDown, Loader2, Clock, X, Trash2, Plane, Aperture, Eye } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { Button } from "@/components/ui/button";
@@ -183,12 +183,12 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
   if (footage.length === 0 && !loading) {
     return (
       <div className="mt-6 bg-gray-800/90 rounded-lg overflow-hidden border border-gray-700 p-8">
-        <div className="text-center text-gray-400">
-          <Plane />
-          <p className="text-sm font-medium mt-4">No footage history</p>
-          <p className="text-xs mt-1">Your previously created footage will appear here</p>
-        </div>
+      <div className="flex flex-col items-center justify-center text-gray-400">
+      <Aperture size={48} className="text-gray-400" />
+        <p className="text-base font-medium mt-4">No footage history</p>
+        <p className="text-sm mt-1">Your previously saved footage will appear here</p>
       </div>
+    </div>
     );
   }
 
@@ -208,8 +208,8 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
               onClick={() => handleViewFootage(foot)}
             >
               <div className="flex-grow flex items-center gap-2 min-w-0">
-                <div className="w-10 h-10 md:w-10 md:h-10 bg-gray-200/60 rounded flex items-center justify-center flex-shrink-0">
-                  <Plane />
+                <div className="w-12 h-12 md:w-10 md:h-10 bg-gray-200/60 rounded flex items-center justify-center flex-shrink-0">
+                  <Aperture />
                 </div>
                 <div className="flex-grow min-w-0">
                   <p className={`text-xs md:text-sm font-medium truncate
@@ -280,7 +280,7 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
               onClick={openFootageInNewTab}
               className="bg-blue-500 hover:bg-blue-600 text-gray-200"
             >
-              <Plane className="w-4 h-4 mr-2" />
+              <Eye className="w-4 h-4 mr-2" />
               View Footage
             </Button>
             <Button

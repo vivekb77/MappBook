@@ -396,28 +396,28 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
   }, [onAnimationCancel, resetPitchToZero]);
 
   return (
-    <>
-    {points.length >= 2 && !isAnimating && (
+   <>
+  {points.length >= 2 && !isAnimating && (
+    <Button
+      onClick={startDroneAnimation}
+      className="bg-white text-black hover:bg-gray-100"
+    >
+      Start Flight
+    </Button>
+  )}
+
+  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center justify-center space-x-2">
+    {isAnimating && (
       <Button
-        onClick={startDroneAnimation}
-        className="bg-white text-black hover:bg-gray-100"
+        onClick={cancelAnimation}
+        className="w-8 h-8 rounded-full bg-gray-600/50 hover:bg-gray-500/50 p-0"
+        title="Cancel Flight"
       >
-        Start Flight
+        ✕
       </Button>
     )}
-  
-    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center justify-center space-x-2">
-      {isAnimating && (
-        <Button
-          onClick={cancelAnimation}
-          className="w-8 h-8 rounded-full bg-gray-600/50 hover:bg-gray-500/50 p-0"
-          title="Cancel Flight"
-        >
-          ✕
-        </Button>
-      )}
-    </div>
-  </>
+  </div>
+</>
   );
 };
 

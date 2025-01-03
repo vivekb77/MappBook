@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       if (priceId === process.env.STRIPE_PRICE_ID_DRONE) {
         // Handle Drone credits
 
-        const credit_quantity = Math.round(session.amount_total! * 0.02);
+        const credit_quantity = Math.round(session.amount_total! * 0.05); //25 credits for $5
 
         const { data, error } = await supabase
           .rpc('add_drone_credits_fcb5e877d4ee', {

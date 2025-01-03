@@ -59,6 +59,38 @@ const TogglePill: React.FC<TogglePillProps> = ({ label, value, onChange }) => (
     </div>
   );
 
+  const TogglePill2: React.FC<TogglePillProps> = ({ label, value, onChange }) => (
+    <div
+      className="relative h-[38px] rounded-full bg-gray-800 border border-gray-700
+                 flex items-center w-full cursor-pointer select-none"
+      onClick={() => onChange(!value)}
+    >
+      {/* Labels Container */}
+      <div className="absolute inset-0 flex justify-between items-center z-10">
+        <div className="flex-1 flex justify-center items-center gap-1.5">
+          <span className={`text-sm font-medium transition-colors duration-150 
+                          ${value ? 'text-white' : 'text-gray-500'}`}>
+            Day
+          </span>
+        </div>
+        <div className="flex-1 flex justify-center items-center gap-1.5">
+          <span className={`text-sm font-medium transition-colors duration-150 
+                          ${!value ? 'text-white' : 'text-gray-500'}`}>
+            Night
+          </span>
+        </div>
+      </div>
+
+      {/* Sliding Background */}
+      <div
+        className={`absolute h-[34px] w-[49%] mx-[2px] rounded-full
+                    bg-gradient-to-r from-blue-400 to-blue-600
+                    transition-transform duration-150 ease-in-out shadow-md
+                    ${!value ? 'translate-x-[100%]' : 'translate-x-0'}`}
+      />
+    </div>
+  );
+
   return (
     <div className="absolute top-20 right-2">
       <button
@@ -92,7 +124,7 @@ const TogglePill: React.FC<TogglePillProps> = ({ label, value, onChange }) => (
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-blue-400">Fog Effect</label>
-                    <TogglePill
+                    <TogglePill2
                       label="Fog"
                       value={showFog}
                       onChange={setShowFog}

@@ -267,12 +267,13 @@ const LabelDialog: React.FC<{
       <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] sm:w-[440px] rounded-2xl bg-white p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-xs font-medium text-blue-400">
-            Point Metadata
+            Add a label
           </DialogTitle>
         </DialogHeader>
 
         <div className="mt-4">
           <div className="relative">
+            <p>This text appears on the point when you export the video of drone flight</p>
             <input
               type="text"
               value={labelInput}

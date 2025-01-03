@@ -109,8 +109,8 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       // Deduct one credit
       const { error: updateError } = await supabase
         .from('MappBook_Users')
-        .update({ 
-          drone_footage_credits: mappbookUser.drone_footage_credits - 1 
+        .update({
+          drone_footage_credits: mappbookUser.drone_footage_credits - 1
         })
         .eq('mappbook_user_id', mappbookUser.mappbook_user_id);
 
@@ -121,7 +121,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         ...mappbookUser,
         drone_footage_credits: mappbookUser.drone_footage_credits - 1
       });
-      
+
       setFootageId(footageData[0].drone_footage_id);
       setSaveSuccess(true);
       showToast('Footage saved successfully', 'success');
@@ -167,13 +167,13 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-gray-800 border border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-gray-200">View and Record Footage</DialogTitle>
+            <DialogTitle className="text-gray-200">Save & Export</DialogTitle>
             <DialogDescription className="text-gray-400">
               <div className="flex items-center justify-between mb-4">
                 <span>
-                  {saveSuccess 
-                    ? "View and screen record your footage in a new tab to share it"
-                    : "Opens in a new tab for screen recording and sharing"
+                  {saveSuccess
+                    ? "Your drone footage is ready! Click to save, this opens in a new tab where you can create a shareable video recording"
+                    : "Your drone footage is ready! Click to save, this opens in a new tab where you can create a shareable video recording"
                   }
                 </span>
                 {!saveSuccess && (
@@ -194,15 +194,18 @@ const ExportButton: React.FC<ExportButtonProps> = ({
 
           {!saveSuccess && (
             <>
+              <div className="text-yellow-200 text-sm mb-4">
+                Once you save, you won't be able to modify your flight path, waypoints, or camera settings - so make sure to test your complete flight and preview the footage before finalizing.
+              </div>
               {typeof mappbookUser?.drone_footage_credits === 'number' && mappbookUser.drone_footage_credits <= 5 && mappbookUser.drone_footage_credits > 0 && (
                 <div className="text-yellow-200 text-sm mb-4">
-                  Running low on credits! Consider adding more credits to continue.
+                  Running low on credits! Consider adding more credits.
                 </div>
               )}
 
               {typeof mappbookUser?.drone_footage_credits === 'number' && mappbookUser.drone_footage_credits === 0 && (
                 <div className="text-red-400 text-sm mb-4">
-                  No credits remaining. Please add credits to add footage.
+                  No credits remaining. Please add credits to Save & Export.
                 </div>
               )}
             </>
