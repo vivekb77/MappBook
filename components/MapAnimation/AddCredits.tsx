@@ -57,6 +57,9 @@ const AddCredits = () => {
                 throw new Error('No checkout URL received');
             }
         } catch (err) {
+            track('RED - Drone - Add credits failed', {
+                user_id: mappbookUser.mappbook_user_id,
+            });
             console.error('Error initiating checkout:', err);
         } finally {
             setIsLoading(false);

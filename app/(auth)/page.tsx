@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Player } from '@remotion/player';
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { track } from '@vercel/analytics'
 
 interface FeatureCardProps {
   icon: ReactNode;
@@ -18,6 +19,12 @@ interface VideoThumbnailProps {
   videoUrl: string;
   onClick: () => void;
 }
+
+track('Drone - Landing page viewed', {
+  timestamp: new Date().toISOString(),
+  referrer: typeof document !== 'undefined' ? document.referrer : '',
+  pathname: typeof window !== 'undefined' ? window.location.pathname : ''
+})
 
 const VideoThumbnail = ({ title, thumbnail, onClick }: VideoThumbnailProps) => {
   return (
@@ -98,6 +105,14 @@ const VideoGallery = () => {
               <Player
                 component={() => {
                   const videoRef = React.useRef<HTMLVideoElement>(null);
+
+                  React.useEffect(() => {
+                    // Track video play when component mounts
+                    const videoTitle = videos.find(v => v.videoUrl === selectedVideo)?.title || 'Unknown';
+                    track('Drone - Landing page video played', {
+                      videoTitle
+                    });
+                  }, []);
 
                   React.useEffect(() => {
                     if (videoRef.current) {

@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { track } from '@vercel/analytics';
 
 interface FootageHistoryItem {
   drone_footage_id: string;
@@ -99,6 +100,9 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
         }
       }
     } catch (error) {
+      track('RED - Drone - Footage data pull from supabase failed', {
+        user_id: userId
+      });
       console.error('Error fetching drone footage history:', error);
       showToast('Failed to fetch drone footage history. Please try again.', 'error');
     } finally {
@@ -139,6 +143,9 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
       }
       setViewDialogOpen(false);
     } catch (error) {
+      track('RED - Drone - Delete Footage failed', {
+        user_id: userId
+      });
       console.error('Error deleting Footage:', error);
       showToast('Failed to delete Footage. Please try again.', 'error');
     } finally {
@@ -183,12 +190,12 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
   if (footage.length === 0 && !loading) {
     return (
       <div className="mt-6 bg-gray-800/90 rounded-lg overflow-hidden border border-gray-700 p-8">
-      <div className="flex flex-col items-center justify-center text-gray-400">
-      <Aperture size={48} className="text-gray-400" />
-        <p className="text-base font-medium mt-4">No footage history</p>
-        <p className="text-sm mt-1">Your previously saved footage will appear here</p>
+        <div className="flex flex-col items-center justify-center text-gray-400">
+          <Aperture size={48} className="text-gray-400" />
+          <p className="text-base font-medium mt-4">No footage history</p>
+          <p className="text-sm mt-1">Your previously saved footage will appear here</p>
+        </div>
       </div>
-    </div>
     );
   }
 

@@ -13,6 +13,7 @@ import { nanoid } from 'nanoid';
 import { useUser } from '@clerk/nextjs';
 import SignInButton from './SignInButton';
 import { throttle } from 'lodash';
+import { track } from "@vercel/analytics";
 
 const CONFIG = {
   map: {
@@ -268,15 +269,24 @@ const MapboxMap: React.FC = () => {
   };
 
   const handleMapError = () => {
+    // Capture error state first
+    const errorMessage = "Unable to load map. Please refresh the page.";
+    
+    // Track with useful error context
+    track('RED - Drone - Map load failed', {
+      timestamp: new Date().toISOString()
+    });
+
+    // Then update UI state
     if (isMountedRef.current) {
       setMapStatus({
         status: 'error',
-        error: "Unable to load map. Please refresh the page."
+        error: errorMessage
       });
     }
-    setPersistentError("Unable to load map. Please refresh the page.");
+    setPersistentError(errorMessage);
     cleanup();
-  };
+};
 
   const handleMapLoad = useCallback(() => {
     if (!mapRef.current || mapInstanceRef.current || !isMountedRef.current) return;

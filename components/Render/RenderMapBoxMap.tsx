@@ -9,6 +9,7 @@ import InfoPopUp from "./InfoPopUp";
 import MapSettings from "./MapSettings";
 import { useMapPoints } from './MapLayers';
 import FullscreenButton from './FullscreenButton';
+import { track } from "@vercel/analytics";
 
 const CONFIG = {
   map: {
@@ -346,6 +347,10 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
   };
 
   const handleMapError = () => {
+    // Track with useful error context
+    track('RED - Render - Map load failed', {
+      timestamp: new Date().toISOString()
+    });
     if (isMountedRef.current) {
       setMapStatus({
         status: 'error',

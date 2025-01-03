@@ -4,6 +4,7 @@ import { Download, Loader2, XCircle, CheckCircle, Video, Coins } from "lucide-re
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { useMappbookUser } from '@/context/UserContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { track } from '@vercel/analytics';
 
 interface Point {
   longitude: number;
@@ -129,6 +130,9 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       window.dispatchEvent(event);
 
     } catch (err) {
+      track('RED - Drone - Credits data pull from supabase failed', {
+        user_id: mappbookUser.mappbook_user_id
+      });
       console.error('failed to save:', err);
       showToast('Failed to save', 'error');
       return false;

@@ -14,14 +14,14 @@ const SignInButton = ({ redirectUrl = '/studio' }) => {
   const handleSignIn = async () => {
     setIsLoading(true);
     try {
-      track('Animation - New user tried to sign in');
+      track('Drone - New user tried to sign in');
       if (typeof window !== 'undefined') {
         window.rdt?.('track', 'SignUp', {});
       }
       await new Promise(resolve => setTimeout(resolve, 300));
       window.location.href = `/sign-in?redirect_url=${redirectUrl}`;
     } catch (error) {
-      track('RED - Animation - New user sign in has issues');
+      track('RED - Drone - New user sign in has issues');
       window.location.href = `/sign-in?redirect_url=${redirectUrl}`;
     }
   };
