@@ -36,7 +36,7 @@ const FullscreenButton: React.FC<FullscreenButtonProps> = ({ containerId }) => {
   return (
     <Button
       onClick={toggleFullscreen}
-      className="fixed right-4 top-4 z-50 bg-gray-800/90 hover:bg-gray-700/90"
+      className="fixed right-6 top-4 z-50 bg-gray-800/90 hover:bg-gray-700/90"
       size="icon"
       variant="outline"
     >

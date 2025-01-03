@@ -498,39 +498,48 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
     );
   }
   const mapControls = useMemo(() => (
-    <div className="absolute bottom-48 right-2">
-      <div className="flex flex-col items-end">
-        <div className="flex space-x-2">
-          <FlightAnimation
-            points={points}
-            isAnimating={isAnimating}
-            CONFIG={CONFIG}
-            onAnimationStart={() => {
-              setIsAnimating(true);
-              setAnimationProgress(0);
-            }}
-            onAnimationCancel={() => {
-              setIsAnimating(false);
-              setAnimationProgress(0);
-            }}
-            onViewStateChange={setViewState}
-            onAnimationProgress={setAnimationProgress}
+    <div className="absolute right-2 top-2 bottom-2 flex flex-col justify-between items-end">
+      {/* Top controls */}
+      {!isAnimating &&
+        <div className="flex flex-col gap-4">
+          <FullscreenButton containerId={mapContainerId.current} />
+          <InfoPopUp />
+          <MapSettings
+            showLabels={showMapBoxPlacesLabels}
+            setShowLabels={setShowMapBoxPlacesLabels}
+            showFog={showFog}
+            setShowFog={setShowFog}
+            showPath={showPath}
+            setShowPath={setShowPath}
           />
         </div>
+      }
+      {/* Bottom control */}
+      <div className="mb-4">
+        <FlightAnimation
+          points={points}
+          isAnimating={isAnimating}
+          CONFIG={CONFIG}
+          onAnimationStart={() => {
+            setIsAnimating(true);
+            setAnimationProgress(0);
+          }}
+          onAnimationCancel={() => {
+            setIsAnimating(false);
+            setAnimationProgress(0);
+          }}
+          onViewStateChange={setViewState}
+          onAnimationProgress={setAnimationProgress}
+        />
       </div>
     </div>
-  ), [points.length, isAnimating]);
+  ), [points.length, isAnimating, showMapBoxPlacesLabels, showFog, showPath]);
 
   return (
     <div
       id={mapContainerId.current}
       className="relative w-full h-full"
     >
-      {!isAnimating &&
-        <>
-          <FullscreenButton containerId={mapContainerId.current} />
-        </>
-      }
       {mapStatus.status === 'loading' && (
         <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-900">
           <div className="bg-gray-800 rounded-2xl shadow-lg p-8 flex flex-col items-center gap-5">
@@ -578,19 +587,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
       />
 
       {mapControls}
-      {!isAnimating &&
-        <>
-          <InfoPopUp />
-          <MapSettings
-            showLabels={showMapBoxPlacesLabels}
-            setShowLabels={setShowMapBoxPlacesLabels}
-            showFog={showFog}
-            setShowFog={setShowFog}
-            showPath={showPath}
-            setShowPath={setShowPath}
-          />
-        </>
-      }
+
     </div>
   );
 };
