@@ -48,25 +48,37 @@ const VideoGallery = () => {
 
   const videos = [
     {
-      title: "New York City Flyover",
-      thumbnail: "/mapstylesatellite.png",
-      videoUrl: "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-0303dghv3x/renders/ztzdudloqk/out.mp4"
+      title: "Grassland Flyover",
+      thumbnail: "/drone/landingpagevideo1cover.png",
+      videoUrl: "https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/map-animation-videos/landingpagevideo1.mov?t=2025-01-03T00%3A50%3A29.242Z"
     },
     {
-      title: "Grand Canyon Tour",
-      thumbnail: "/mapstyledark.png",
-      videoUrl: "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-0303dghv3x/renders/ztzdudloqk/out.mp4"
-    },
-    {
-      title: "Tokyo Night Flight",
-      thumbnail: "/mapstylelight.png",
-      videoUrl: "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-0303dghv3x/renders/ztzdudloqk/out.mp4"
-    },
-    {
-      title: "Paris Landmarks",
-      thumbnail: "/mapstylesatellite.png",
-      videoUrl: "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-0303dghv3x/renders/ztzdudloqk/out.mp4"
+      title: "Desert Flyover",
+      thumbnail: "/drone/landingpagevideo2cover.png",
+      videoUrl: "https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/map-animation-videos/landingpagevideo2.mov?t=2025-01-03T00%3A50%3A57.801Z"
     }
+    // {
+    //   title: "New York City Flyover",
+    //   thumbnail: "",
+    //   videoUrl: ""
+    // },
+    // {
+    //   title: "Grand Canyon Tour",
+     //   thumbnail: "",
+    //   videoUrl: ""
+    // },
+    // {
+    //   title: "Tokyo Night Flight",
+    //   thumbnail: "",
+    //   videoUrl: ""
+    // },
+    // {
+    //   // /render/2e73db7a-4dac-4764-b712-e1b325981192
+    //   // render/e1019458-187d-47e1-86f4-731dd38765b0
+    //   title: "Paris Landmarks",
+    //   thumbnail: "",
+    //   videoUrl: ""
+    // }
   ];
 
   return (
@@ -154,8 +166,8 @@ const LandingPage = () => {
           <div className="aspect-video bg-gray-700 rounded-lg flex items-center justify-center relative overflow-hidden">
             <div className="relative w-full h-full">
               <Image
-                src="/animation/landingpage.gif"
-                alt="Demo flight over map"
+                src="https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/map-animation-videos/landingpagegif.gif"
+                alt="Example flight over map"
                 layout="fill"
                 objectFit="cover"
                 className="rounded-lg"
