@@ -11,7 +11,8 @@ const MapControlsInfo = () => {
         onClick={() => setIsOpen(true)}
         className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-800/90 hover:bg-gray-800 transition-colors shadow-lg border border-gray-700"
       >
-        <span className="text-blue-400 font-bold text-xl">?</span>
+        {/* <span className="text-blue-400 font-bold text-xl">?</span> */}
+        <Info className="w-6 h-6 text-gray-300" />
       </button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>

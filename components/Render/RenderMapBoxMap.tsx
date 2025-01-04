@@ -10,6 +10,7 @@ import MapSettings from "./MapSettings";
 import { useMapPoints } from './MapLayers';
 import FullscreenButton from './FullscreenButton';
 import { track } from "@vercel/analytics";
+import ShareButton from "./ShareButton";
 
 const CONFIG = {
   map: {
@@ -517,10 +518,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ initialPoints }) => {
             showPath={showPath}
             setShowPath={setShowPath}
           />
+          <ShareButton />
         </div>
       }
       {/* Bottom control */}
-      <div className="mb-4">
+      <div className="mb-10">
         <FlightAnimation
           points={points}
           isAnimating={isAnimating}

@@ -165,6 +165,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 min-w-[140px] border border-gray-700"
         >
           Export
+          <Download className="w-6 h-6 text-gray-300" />
         </Button>
       </div>
 

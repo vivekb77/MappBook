@@ -431,7 +431,7 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
             type="line"
             paint={{
               'line-color': '#4285F4',
-              'line-width': 4,
+              'line-width': 15,
               'line-opacity': 0.8,
               'line-blur': 1
             }}
