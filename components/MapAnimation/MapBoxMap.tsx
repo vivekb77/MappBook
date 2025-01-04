@@ -604,7 +604,7 @@ const MapboxMap: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none">
         {/* Map stats display */}
         {viewState.zoom <= 12 &&
-          <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs md:text-xl z-50 border border-gray-700 pointer-events-auto">
+          <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs md:text-sm z-50 border border-gray-700 pointer-events-auto">
             <div>Zoom: {viewState.zoom.toFixed(2)}</div>
             {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
           <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
@@ -613,7 +613,7 @@ const MapboxMap: React.FC = () => {
 
         {/* Status and Instructions */}
         {mapStatus.status === 'ready' && (
-          <div className="absolute top-16 right-2 text-gray-200 bg-gray-800/90 p-1 rounded text-right border font-mono text-xs md:text-xl border-gray-700 pointer-events-auto">
+          <div className="absolute top-16 right-2 text-gray-200 bg-gray-800/90 p-1 rounded text-right border font-mono text-xs md:text-sm border-gray-700 pointer-events-auto">
             {errorMessage ? (
               <span className="text-red-400">{errorMessage}</span>
             ) : (
