@@ -21,9 +21,6 @@ interface VideoThumbnailProps {
 }
 
 track('Drone - Landing page viewed', {
-  timestamp: new Date().toISOString(),
-  referrer: typeof document !== 'undefined' ? document.referrer : '',
-  pathname: typeof window !== 'undefined' ? window.location.pathname : ''
 })
 
 const VideoThumbnail = ({ title, thumbnail, onClick }: VideoThumbnailProps) => {

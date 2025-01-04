@@ -23,7 +23,7 @@ const CONFIG = {
     drone: {
       ROTATION_DURATION: 0,
       FLIGHT_DURATION: 0,
-      INITIAL_ZOOM: 1,
+      INITIAL_ZOOM: 2,
       FLIGHT_ZOOM: 16,
       PITCH: 60,
       POINT_RADIUS_KM: 5,
@@ -384,10 +384,10 @@ const MapboxMap: React.FC = () => {
       setErrorMessage("Sign in to add points");
       return;
     }
-
+  
     setPoints(prev => [...prev, {
       ...pointData,
-      altitude: CONFIG.map.drone.MIN_ALTITUDE,
+      altitude: Math.random() * (CONFIG.map.drone.MAX_ALTITUDE - CONFIG.map.drone.MIN_ALTITUDE) + CONFIG.map.drone.MIN_ALTITUDE, //random value between 0 to 1
       index: prev.length + 1,
       originalPosition: {
         longitude: pointData.longitude,
@@ -602,7 +602,7 @@ const MapboxMap: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none">
         {/* Map stats display */}
         {viewState.zoom <= 12 &&
-          <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs z-50 border border-gray-700 pointer-events-auto">
+          <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs md:text-xl z-50 border border-gray-700 pointer-events-auto">
             <div>Zoom: {viewState.zoom.toFixed(2)}</div>
             {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
           <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
@@ -611,7 +611,7 @@ const MapboxMap: React.FC = () => {
 
         {/* Status and Instructions */}
         {mapStatus.status === 'ready' && (
-          <div className="absolute top-16 right-2 text-gray-200 bg-gray-800/90 p-1 rounded text-right border font-mono text-xs border-gray-700 pointer-events-auto">
+          <div className="absolute top-16 right-2 text-gray-200 bg-gray-800/90 p-1 rounded text-right border font-mono text-xs md:text-xl border-gray-700 pointer-events-auto">
             {errorMessage ? (
               <span className="text-red-400">{errorMessage}</span>
             ) : (

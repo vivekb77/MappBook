@@ -197,10 +197,10 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
       className="absolute bottom-12 left-1/2 -translate-x-1/2 md:w-4/5 w-[90%] h-32 bg-black/50 rounded-lg p-4 touch-none select-none"
       style={{ touchAction: 'none' }}
     >
-      <div className="absolute -bottom-0 right-4 text-white text-xs font-extralight flex gap-4">
-        <span>Hold & Drag points to set flying height</span>
+      <div className="absolute -top-0 left-4 text-white text-xs font-extralight flex gap-4">
+        <span>Drag circles up or down to control the drone's altitude during flight</span>
       </div>
-      <div className="absolute top-0 left-4 text-white text-xs font-extralight">
+      <div className="absolute bottom-0 left-4 text-white text-xs font-extralight">
       {/* Desktop instructions */}
       <div className="hidden md:block">
         <span>Ctrl + Mouse: 3D Map</span>
@@ -352,9 +352,6 @@ export const AltitudeTimeline: React.FC<AltitudeTimelineProps> = ({
                 onMouseDown={handleMouseStart(i)}
                 onTouchStart={handleTouchStart(i)}
               >
-                {/* <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-white text-xs whitespace-nowrap select-none flex flex-col items-center">
-                  <span>{point.altitude.toFixed(2)}</span>
-                </div> */}
 
                 <span className="text-[10px] font-bold text-gray-600 select-none">
                   {i + 1}

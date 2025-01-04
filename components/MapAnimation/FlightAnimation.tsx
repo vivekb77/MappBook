@@ -242,7 +242,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
   const startDroneAnimation = useCallback(() => {
     if (points.length < 2) return;
     
-    const INITIAL_ROTATION_DURATION = 8000;
+    const INITIAL_ROTATION_DURATION = 5000;
     const FLIGHT_SPEED_KM_PER_SECOND = 0.185;
     const ORBIT_SPEED_FACTOR = 0.25; 
     const ROTATION_SMOOTHNESS = 0.1; //smoothly start rotating from last point less= more smooth
