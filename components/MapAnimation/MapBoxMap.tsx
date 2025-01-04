@@ -558,8 +558,8 @@ const MapboxMap: React.FC = () => {
         ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER}
         {...viewState}
-        onMove={evt => setViewState(evt.viewState)}
-        onClick={handleMapClick}
+        onMove={!isAnimating ? evt => setViewState(evt.viewState) : undefined}
+        onClick={!isAnimating ? handleMapClick : undefined}
         mapStyle={CONFIG.map.styles.satellite}
         style={{ width: '100%', height: '100%' }}
         onLoad={handleMapLoad}
@@ -569,9 +569,10 @@ const MapboxMap: React.FC = () => {
         attributionControl={true}
         boxZoom={false}
         doubleClickZoom={false}
-        dragRotate={true}
+        dragRotate={!isAnimating}
         keyboard={false}
-        touchPitch={true}
+        touchPitch={!isAnimating}
+        interactive={!isAnimating}
         minZoom={1}
         maxZoom={20}
         renderWorldCopies={false}
