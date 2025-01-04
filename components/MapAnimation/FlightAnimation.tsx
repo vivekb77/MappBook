@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 
 interface Point {
@@ -207,9 +207,14 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
   const currentBearingRef = useRef<number>(0);
   const isOrbitingRef = useRef<boolean>(false);
   const resetPitchAnimationRef = useRef<number | null>(null);
+  const currentPathRef = useRef<{
+    flightPath: Point[];
+    orbitPath: Point[];
+  }>({ flightPath: [], orbitPath: [] });
+  const startTimeRef = useRef<number>(0);
 
   const resetPitchToZero = useCallback(() => {
-    const RESET_DURATION = 1000; // 1 second duration
+    const RESET_DURATION = 1000;
     const startTime = Date.now();
     const startPitch = CONFIG.map.drone.PITCH;
 
@@ -217,7 +222,6 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       const currentTime = Date.now();
       const progress = Math.min((currentTime - startTime) / RESET_DURATION, 1);
       
-      // Simple easing function
       const easedProgress = 1 - Math.pow(1 - progress, 2);
       const currentPitch = startPitch * (1 - easedProgress);
 
@@ -239,15 +243,28 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
     resetPitchAnimationRef.current = requestAnimationFrame(animateReset);
   }, [points, CONFIG, onViewStateChange]);
 
+  // Add effect to handle point updates during animation
+  useEffect(() => {
+    if (isAnimating && animationFrameRef.current) {
+      // Recalculate paths with new points
+      currentPathRef.current = generateCurvedPath(points, currentBearingRef.current);
+      
+      // Adjust animation timing
+      const elapsedTime = Date.now() - startTimeRef.current;
+      startTimeRef.current = Date.now() - elapsedTime;
+    }
+  }, [points, isAnimating]);
+
   const startDroneAnimation = useCallback(() => {
     if (points.length < 2) return;
     
     const INITIAL_ROTATION_DURATION = 5000;
     const FLIGHT_SPEED_KM_PER_SECOND = 0.185;
-    const ORBIT_SPEED_FACTOR = 0.25; 
-    const ROTATION_SMOOTHNESS = 0.1; //smoothly start rotating from last point less= more smooth
+    const ORBIT_SPEED_FACTOR = 0.25;
+    const ROTATION_SMOOTHNESS = 0.1;
     
-    const { flightPath, orbitPath } = generateCurvedPath(points, currentBearingRef.current);
+    currentPathRef.current = generateCurvedPath(points, currentBearingRef.current);
+    const { flightPath, orbitPath } = currentPathRef.current;
 
     // Calculate distances and durations
     let totalFlightDistance = 0;
@@ -263,14 +280,13 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
     const flightDuration = (totalFlightDistance / FLIGHT_SPEED_KM_PER_SECOND) * 1000;
     const orbitDuration = (totalOrbitDistance / (FLIGHT_SPEED_KM_PER_SECOND * ORBIT_SPEED_FACTOR)) * 1000;
 
-
-    
     onAnimationStart();
-    const startTime = Date.now();
+    startTimeRef.current = Date.now();
 
     const animate = () => {
       const currentTime = Date.now();
-      const elapsedTime = currentTime - startTime;
+      const elapsedTime = currentTime - startTimeRef.current;
+      const { flightPath, orbitPath } = currentPathRef.current;
       
       // Initial rotation phase
       if (elapsedTime < INITIAL_ROTATION_DURATION) {
@@ -327,7 +343,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
         const segmentProgress = (orbitProgress * (orbitPath.length - 1)) % 1;
         
         updateViewState(currentPoint, nextPoint, segmentProgress);
-        onAnimationProgress(1); // Keep progress at 100% during orbit
+        onAnimationProgress(1);
       } 
       // Animation complete
       else {
