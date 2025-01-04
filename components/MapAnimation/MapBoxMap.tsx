@@ -497,6 +497,7 @@ const MapboxMap: React.FC = () => {
               setIsAnimating(false);
               setAnimationProgress(0);
             }}
+            skipInitialRotation={true}
             onViewStateChange={setViewState}
             onAnimationProgress={setAnimationProgress}
           />

@@ -20,6 +20,7 @@ interface MapViewState {
 interface FlightAnimationProps {
   points: Point[];
   isAnimating: boolean;
+  skipInitialRotation?: boolean;
   CONFIG: {
     map: {
       drone: {
@@ -201,6 +202,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
   onAnimationStart,
   onAnimationCancel,
   onViewStateChange,
+  skipInitialRotation = true,
   onAnimationProgress
 }) => {
   const animationFrameRef = useRef<number | null>(null);
@@ -258,7 +260,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
   const startDroneAnimation = useCallback(() => {
     if (points.length < 2) return;
     
-    const INITIAL_ROTATION_DURATION = 5000;
+    const INITIAL_ROTATION_DURATION = skipInitialRotation ? 0 : 5000;
     const FLIGHT_SPEED_KM_PER_SECOND = 0.185;
     const ORBIT_SPEED_FACTOR = 0.25;
     const ROTATION_SMOOTHNESS = 0.1;
@@ -288,8 +290,8 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       const elapsedTime = currentTime - startTimeRef.current;
       const { flightPath, orbitPath } = currentPathRef.current;
       
-      // Initial rotation phase
-      if (elapsedTime < INITIAL_ROTATION_DURATION) {
+      // Initial rotation phase (now conditional)
+      if (!skipInitialRotation && elapsedTime < INITIAL_ROTATION_DURATION) {
         const progress = elapsedTime / INITIAL_ROTATION_DURATION;
         const initialBearing = calculateBearing(flightPath[0], flightPath[1]);
         const initialZoom = CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 3);
@@ -312,6 +314,7 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       }
 
       const flightTime = elapsedTime - INITIAL_ROTATION_DURATION;
+
       
       // Flight phase
       if (flightTime <= flightDuration) {
@@ -386,14 +389,29 @@ const FlightAnimation: React.FC<FlightAnimationProps> = ({
       });
     };
 
-    onViewStateChange({
-      longitude: points[0].longitude,
-      latitude: points[0].latitude,
-      zoom: CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 3),
-      pitch: 0,
-      bearing: 0
-    });
-    currentBearingRef.current = 0;
+ // Set initial view state based on skipInitialRotation
+    if (skipInitialRotation) {
+      // If skipping rotation, start with flight zoom and initial bearing
+      const initialBearing = calculateBearing(flightPath[0], flightPath[1]);
+      onViewStateChange({
+        longitude: points[0].longitude,
+        latitude: points[0].latitude,
+        zoom: CONFIG.map.drone.FLIGHT_ZOOM - (points[0].altitude * 3),
+        pitch: CONFIG.map.drone.PITCH,
+        bearing: initialBearing
+      });
+      currentBearingRef.current = initialBearing;
+    } else {
+      // Original initial view state
+      onViewStateChange({
+        longitude: points[0].longitude,
+        latitude: points[0].latitude,
+        zoom: CONFIG.map.drone.INITIAL_ZOOM - (points[0].altitude * 3),
+        pitch: 0,
+        bearing: 0
+      });
+      currentBearingRef.current = 0;
+    }
 
     animationFrameRef.current = requestAnimationFrame(animate);
   }, [points, CONFIG, onAnimationStart, onViewStateChange, onAnimationProgress, onAnimationCancel]);
