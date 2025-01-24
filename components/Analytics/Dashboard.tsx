@@ -6,7 +6,7 @@ import { Camera, Globe, Video, Coins, Instagram } from 'lucide-react';
 import SignInButton from './SignInButton';
 import { track } from '@vercel/analytics';
 import AddCredits from './BuyPremium';
-import FootageHistory from './FootageHistory';
+import OrderReportHistory from './OrderReportHistory';
 import DesktopRecommendationBanner from './DesktopRecommendationBanner';
 import FileUpload from './FileUpload';
 
@@ -142,7 +142,7 @@ const DashboardContainer = () => {
                 <p className="text-gray-300 mb-6">Understand Amazon Seller Central Order Reports</p>
                 <FileUpload/>
                 <div className="w-full overflow-x-auto">
-                  <FootageHistory userId={mappbookUser.mappbook_user_id} />
+                  <OrderReportHistory userId={mappbookUser.mappbook_user_id} />
                 </div>
               </div>
 

@@ -54,7 +54,7 @@ const FileUpload = () => {
 
     const allowedTypes = ['.csv', '.txt'];
     const fileExtension = file.name.toLowerCase().slice((file.name.lastIndexOf(".") - 1 >>> 0) + 2);
-    
+
     if (!allowedTypes.includes(`.${fileExtension}`)) {
       setError('Please upload only CSV or TXT files');
       return;
@@ -96,6 +96,8 @@ const FileUpload = () => {
 
             event.target.value = '';
             setIsUploading(false);
+            const event1 = new CustomEvent('ReportAdded');
+            window.dispatchEvent(event1);
             // toast({
             //   title: "Success!",
             //   description: "Your order report has been uploaded and processed.",
@@ -118,7 +120,7 @@ const FileUpload = () => {
 
   return (
     <div className="mt-4">
-      <label 
+      <label
         htmlFor="file-upload"
         className="flex items-center justify-center px-4 py-2 border border-gray-700 rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-700 transition-colors duration-200"
       >

@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { ChevronUp, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import dynamic from 'next/dynamic'
+import { ReportContext } from '@/context/ReportContext';
 
 const Dashboard = dynamic(() => import('@/components/Analytics/Dashboard'))
 const MapboxMap = dynamic(() => import('@/components/Analytics/MapBoxMap'))
@@ -11,6 +12,7 @@ const MapboxMap = dynamic(() => import('@/components/Analytics/MapBoxMap'))
 export default function Create() {
   const { isLoaded } = useUser()
   const [isOpen, setIsOpen] = useState(false)
+  const [reportData, setReportData] = useState(null);
   const sheetRef = useRef(null)
   const toggleSheet = () => setIsOpen(!isOpen)
 
@@ -34,6 +36,7 @@ export default function Create() {
   }
 
   return (
+    <ReportContext.Provider value={{ reportData, setReportData }}>
     <div className="fixed inset-0 h-screen-dynamic overflow-hidden bg-gray-900">
       <div className="flex h-full w-full relative">
         {/* Map Section */}
@@ -87,5 +90,6 @@ export default function Create() {
         </div>
       </div>
     </div>
+    </ReportContext.Provider>
   )
 }

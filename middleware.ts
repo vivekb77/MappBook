@@ -9,6 +9,7 @@ export const publicRoutes = [
   "/api/stripe/webhook",
   "/terms",
   "/studio",
+  "/analytics",
   "/api/search-address",
   "/api/get-assets",
   "/passport",

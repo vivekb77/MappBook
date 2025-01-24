@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { ChevronDown, Loader2, Clock, X, Trash2, Plane, Aperture, Eye } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { Button } from "@/components/ui/button";
+import { useReportContext } from '@/context/ReportContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,8 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { track } from '@vercel/analytics';
 
 interface FootageHistoryItem {
-  drone_footage_id: string;
-  total_distance: number;
+  report_id: string;
   created_at: string;
 }
 
@@ -26,16 +26,18 @@ interface FootageHistoryProps {
   userId: string;
 }
 
+
 interface Toast {
   id: number;
   message: string;
   type: 'success' | 'error';
 }
 
-const FootageHistory = ({ userId }: FootageHistoryProps) => {
+const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
   const [footage, setFootage] = useState<FootageHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const { setReportData } = useReportContext();
   const [page, setPage] = useState(1);
   const [selectedFootageId, setSelectedFootageId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -55,32 +57,32 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
   };
 
   useEffect(() => {
-    fetchFootage();
+    fetchOrderReport();
   }, [page]);
 
   useEffect(() => {
-    const handleFootageAdded = () => {
+    const handleReportAdded = () => {
       setPage(1);
-      fetchFootage();
+      fetchOrderReport();
     };
 
-    window.addEventListener('FootageAdded', handleFootageAdded);
-    return () => window.removeEventListener('FootageAdded', handleFootageAdded);
+    window.addEventListener('ReportAdded', handleReportAdded);
+    return () => window.removeEventListener('ReportAdded', handleReportAdded);
   }, []);
 
   const removeToast = (id: number) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
-  const fetchFootage = async () => {
+  const fetchOrderReport = async () => {
     try {
       setLoading(true);
       const start = (page - 1) * PAGE_SIZE;
       const end = start + PAGE_SIZE - 1;
 
       const { data, error, count } = await supabase
-        .from('Drone_Footage')
-        .select('*', { count: 'exact' })
+        .from('Order_Analytics')
+        .select('report_id,created_at', { count: 'exact' })
         .eq('mappbook_user_id', userId)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
@@ -96,7 +98,7 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
           setFootage(prev => [...prev, ...data]);
         }
         if (!selectedFootageId && data.length > 0) {
-          setSelectedFootageId(data[0].drone_footage_id);
+          setSelectedFootageId(data[0].report_id);
         }
       }
     } catch (error) {
@@ -111,7 +113,7 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
   };
 
   const handleDelete = async () => {
-    if (!selectedFootage?.drone_footage_id) {
+    if (!selectedFootage?.report_id) {
       showToast('Invalid footage selected', 'error');
       return;
     }
@@ -121,25 +123,25 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
   };
 
   const confirmDelete = async () => {
-    if (!footageToDelete?.drone_footage_id) {
+    if (!footageToDelete?.report_id) {
       showToast('Invalid footage selected', 'error');
       return;
     }
 
     try {
       const { error } = await supabase
-        .from('Drone_Footage')
+        .from('Order_Analytics')
         .update({ is_deleted: true })
-        .eq('drone_footage_id', footageToDelete.drone_footage_id);
+        .eq('report_id', footageToDelete.report_id);
 
       if (error) throw error;
 
-      setFootage(prev => prev.filter(v => v.drone_footage_id !== footageToDelete.drone_footage_id));
+      setFootage(prev => prev.filter(v => v.report_id !== footageToDelete.report_id));
       showToast('Footage deleted successfully');
 
-      if (selectedFootageId === footageToDelete.drone_footage_id) {
-        const remainingfootage = footage.filter(v => v.drone_footage_id !== footageToDelete.drone_footage_id);
-        setSelectedFootageId(remainingfootage.length > 0 ? remainingfootage[0].drone_footage_id : null);
+      if (selectedFootageId === footageToDelete.report_id) {
+        const remainingfootage = footage.filter(v => v.report_id !== footageToDelete.report_id);
+        setSelectedFootageId(remainingfootage.length > 0 ? remainingfootage[0].report_id : null);
       }
       setViewDialogOpen(false);
     } catch (error) {
@@ -159,12 +161,37 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
     setViewDialogOpen(true);
   };
 
-  const openFootageInNewTab = () => {
-    if (selectedFootage?.drone_footage_id) {
-      window.open(`https://mappbook.com/render/${selectedFootage.drone_footage_id}`, '_blank');
-      setViewDialogOpen(false);
+  const openReportOnMap = async () => {
+    
+    if (selectedFootage?.report_id) {
+      try {
+        setLoading(true);
+
+        const { data, error } = await supabase
+          .from('Order_Analytics')
+          .select('order_data')
+          .eq('report_id', selectedFootage.report_id)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setReportData(data.order_data);
+        }
+
+      } catch (error) {
+        track('RED - Drone - Report data fetch failed', {
+          user_id: userId
+        });
+        console.error('Error fetching report data:', error);
+        showToast('Failed to fetch report data. Please try again.', 'error');
+      } finally {
+        setLoading(false);
+        setViewDialogOpen(false);
+      }
     }
   };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -202,14 +229,14 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
   return (
     <div className="relative mt-6 bg-gray-800/90 rounded-lg overflow-hidden border border-gray-700">
       <div className="p-4 border-b border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-200">Your Order history</h3>
+        <h3 className="text-sm font-semibold text-gray-200">Your Order Report history</h3>
       </div>
 
       <ScrollArea className="h-[300px]">
         <div className="p-2">
           {footage.map((foot) => (
             <div
-              key={foot.drone_footage_id}
+              key={foot.report_id}
               className={`w-full flex items-center gap-2 p-2 hover:bg-gray-700 rounded-md transition-colors group mb-2 cursor-pointer
 `}
               onClick={() => handleViewFootage(foot)}
@@ -220,15 +247,15 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
                 </div>
                 <div className="flex-grow min-w-0">
                   <p className={`text-xs md:text-sm font-medium truncate
-                    ${selectedFootageId === foot.drone_footage_id ? 'text-gray-200' : 'text-gray-200'}`}>
-                    Footage on <span>{formatDate(foot.created_at)}</span>
+                    ${selectedFootageId === foot.report_id ? 'text-gray-200' : 'text-gray-200'}`}>
+                    Report on <span>{formatDate(foot.created_at)}</span>
                   </p>
                   <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
                     <Clock className="w-3 h-3 hidden md:block" />
                     <span className="text-xs">{formatTime(foot.created_at)}</span>
                   </div>
                   <p className="text-xs text-gray-400 hidden md:block">
-                    {foot.total_distance.toFixed(1)} km
+                    {/* {foot.total_orders} orders */}
                   </p>
                 </div>
               </div>
@@ -280,15 +307,15 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="bg-gray-800 border border-gray-700 w-4/5 mx-auto rounded-xl">
           <DialogHeader>
-            <DialogTitle className="text-gray-200">Footage</DialogTitle>
+            <DialogTitle className="text-gray-200">Details</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 pt-4">
             <Button
-              onClick={openFootageInNewTab}
+              onClick={openReportOnMap}
               className="bg-blue-500 hover:bg-blue-600 text-gray-200"
             >
               <Eye className="w-4 h-4 mr-2" />
-              View Footage
+              View on Map
             </Button>
             <Button
               onClick={handleDelete}
@@ -296,7 +323,7 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
               className="bg-red-500 hover:bg-red-600 text-gray-200"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Delete Footage
+              Delete Report
             </Button>
           </div>
         </DialogContent>
@@ -325,4 +352,4 @@ const FootageHistory = ({ userId }: FootageHistoryProps) => {
   );
 };
 
-export default FootageHistory;
+export default OrderReportHistory;

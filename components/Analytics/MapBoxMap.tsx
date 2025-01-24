@@ -8,8 +8,10 @@ import InfoPopUp from "./InfoPopUp";
 import { nanoid } from 'nanoid';
 import { useUser } from '@clerk/nextjs';
 import SignInButton from './SignInButton';
+import OrderMarkers from './OrderMarkers';
 import { throttle } from 'lodash';
 import { track } from "@vercel/analytics";
+import { useReportContext } from '@/context/ReportContext';
 
 const CONFIG = {
   map: {
@@ -75,6 +77,7 @@ const MapboxMap: React.FC = () => {
   const retryAttemptsRef = useRef(0);
   const eventListenersRef = useRef<Array<{ type: string; listener: (e: any) => void }>>([]);
   const mapContainerId = useRef(`map-container-${nanoid()}`);
+  const { reportData } = useReportContext();
 
   // State
   const [mapStatus, setMapStatus] = useState<MapStatus>({ status: 'loading' });
@@ -313,6 +316,9 @@ const MapboxMap: React.FC = () => {
     );
   }
 
+  useEffect(() => {
+    console.log("Report Data:", reportData);
+  }, [reportData]);
   return (
     <div
       id={mapContainerId.current}
@@ -381,7 +387,7 @@ const MapboxMap: React.FC = () => {
         maxZoom={20}
         renderWorldCopies={false}
       >
-       
+        {mapStatus.status === 'ready' && <OrderMarkers orders={reportData?.orders || []} />}
       </Map>
       <InfoPopUp />
 
@@ -390,9 +396,9 @@ const MapboxMap: React.FC = () => {
         {/* Map stats display */}
         {viewState.zoom <= 12 &&
           <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs md:text-sm z-50 border border-gray-700 pointer-events-auto">
-            <div>Zoom: {viewState.zoom.toFixed(2)}</div>
-            {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div>
-          <div>Bearing: {viewState.bearing.toFixed(2)}°</div> */}
+            {/* <div>Zoom: {viewState.zoom.toFixed(2)}</div> */}
+            {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div> */}
+          {/* <div>Total Orders: {reportData?.metadata.total_orders}</div> */}
           </div>
         }
 
@@ -419,10 +425,7 @@ const MapboxMap: React.FC = () => {
         )}
 
       </div>
-
-
      
-
     </div>
   );
 };
