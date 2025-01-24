@@ -8,6 +8,7 @@ import { track } from '@vercel/analytics';
 import AddCredits from './BuyPremium';
 import FootageHistory from './FootageHistory';
 import DesktopRecommendationBanner from './DesktopRecommendationBanner';
+import FileUpload from './FileUpload';
 
 declare global {
   interface Window {
@@ -98,7 +99,7 @@ const DashboardContainer = () => {
                 <p className="text-gray-300 mb-6">Understand Amazon Seller Central Order Reports</p>
                 <SignInButton />
               </div>
-
+             
               <div className="flex flex-col gap-4 mt-8">
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
@@ -139,6 +140,7 @@ const DashboardContainer = () => {
               <div>
                 <h2 className="text-2xl font-bold text-white mb-4">Amazon</h2>
                 <p className="text-gray-300 mb-6">Understand Amazon Seller Central Order Reports</p>
+                <FileUpload/>
                 <div className="w-full overflow-x-auto">
                   <FootageHistory userId={mappbookUser.mappbook_user_id} />
                 </div>

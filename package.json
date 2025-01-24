@@ -40,6 +40,7 @@
     "next": "^15.1.3",
     "nodemailer": "^6.9.16",
     "page-flip": "^2.0.7",
+    "papaparse": "^5.5.1",
     "plyr": "^3.7.8",
     "plyr-react": "^5.3.0",
     "postcss": "^8.4.49",
@@ -57,6 +58,7 @@
   "devDependencies": {
     "@types/lodash": "^4.17.13",
     "@types/page-flip": "^2.0.3",
+    "@types/papaparse": "^5.3.15",
     "terser-webpack-plugin": "^5.3.11",
     "wasm-loader": "^1.3.0"
   }
