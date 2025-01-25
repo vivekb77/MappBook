@@ -4,7 +4,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Compass, Loader2 } from "lucide-react";
-import InfoPopUp from "./InfoPopUp";
 import { nanoid } from 'nanoid';
 import { useUser } from '@clerk/nextjs';
 import SignInButton from './SignInButton';
@@ -203,7 +202,7 @@ const MapboxMap: React.FC = () => {
 
   const handleMapError = () => {
     const errorMessage = "Unable to load map. Please refresh the page.";
-    
+
     track('RED - Drone - Map load failed', {
       timestamp: new Date().toISOString()
     });
@@ -308,13 +307,13 @@ const MapboxMap: React.FC = () => {
       id={mapContainerId.current}
       className="relative w-full h-full"
     >
-      {!isSignedIn && mapStatus.status === 'ready' && (
+      {/* {!isSignedIn && mapStatus.status === 'ready' && (
         <div className="absolute bottom-20 left-0 right-0 flex justify-center z-50 pointer-events-none">
           <div className="w-48 pointer-events-auto">
             <SignInButton />
           </div>
         </div>
-      )}
+      )} */}
 
       {mapStatus.status === 'loading' && (
         <div className="h-screen-dynamic w-full flex items-center justify-center bg-gray-900">
@@ -374,15 +373,15 @@ const MapboxMap: React.FC = () => {
             ) : (
               <PlotOrderBubbles orders={reportData?.orders || []} />
             )}
-            <MapFilters/>
+            <MapFilters />
           </>
-          
+
         )}
       </Map>
 
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-16 right-2 pointer-events-auto">
-          <div 
+          <div
             className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-64 cursor-pointer select-none border border-gray-700"
             onClick={() => setShowAllOrders(!showAllOrders)}
           >
@@ -390,12 +389,12 @@ const MapboxMap: React.FC = () => {
             <div className="absolute inset-0 flex justify-between items-center z-10">
               <div className="flex-1 flex justify-center items-center gap-1.5">
                 <span className={`text-sm font-medium transition-colors duration-150 ${!showAllOrders ? 'text-white' : 'text-gray-500'}`}>
-                  Group
+                  By ZIP
                 </span>
               </div>
               <div className="flex-1 flex justify-center items-center gap-1.5">
                 <span className={`text-sm font-medium transition-colors duration-150 ${showAllOrders ? 'text-white' : 'text-gray-500'}`}>
-                  All Orders
+                  All Locations
                 </span>
               </div>
             </div>
@@ -411,8 +410,8 @@ const MapboxMap: React.FC = () => {
             />
           </div>
         </div>
-        
-        
+
+
 
         {mapStatus.status === 'loading' && (
           <div className="absolute top-16 right-2 text-gray-200 bg-gray-800/90 p-1 rounded text-right border font-mono text-xs md:text-sm border-gray-700 pointer-events-auto">
@@ -424,7 +423,7 @@ const MapboxMap: React.FC = () => {
                   `Loading Map`}
                 {viewState.zoom >= CONFIG.map.drone.REQUIRED_ZOOM && (
                   <>
-                   {/* {points.length === 0 && 'Click to place first point'}
+                    {/* {points.length === 0 && 'Click to place first point'}
                     {points.length > 0 && !isAnimating &&
                       `Place point ${points.length + 1} within yellow circle (${points.length}/${CONFIG.map.drone.MAX_POINTS})`}
                     {isAnimating && 'Flying'} */}
@@ -434,7 +433,7 @@ const MapboxMap: React.FC = () => {
             )}
           </div>
         )}
-        
+
       </div>
     </div>
   );

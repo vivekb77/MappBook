@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { ChevronDown, Loader2, Clock, X, Trash2, Plane, Aperture, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, Loader2, Clock, X, Trash2, Aperture } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getClerkSupabaseClient } from "@/components/utils/supabase";
 import { Button } from "@/components/ui/button";
@@ -14,18 +14,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { track } from '@vercel/analytics';
 
 interface FootageHistoryItem {
   report_id: string;
   created_at: string;
+  total_orders_in_report: number;
+  total_orders_processed_from_report: number
 }
 
 interface FootageHistoryProps {
   userId: string;
 }
-
 
 interface Toast {
   id: number;
@@ -39,12 +39,10 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
   const [hasMore, setHasMore] = useState(true);
   const { setReportData } = useReportContext();
   const [page, setPage] = useState(1);
-  const [selectedFootageId, setSelectedFootageId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [footageToDelete, setFootageToDelete] = useState<FootageHistoryItem | null>(null);
-  const [selectedFootage, setSelectedFootage] = useState<FootageHistoryItem | null>(null);
+  const [selectedReport, setSelectedReport] = useState<string | null>(null);
   const supabase = getClerkSupabaseClient();
   const PAGE_SIZE = 5;
 
@@ -70,6 +68,14 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
     return () => window.removeEventListener('ReportAdded', handleReportAdded);
   }, []);
 
+  useEffect(() => {
+    if (footage.length > 0 && !selectedReport) {
+      const firstReport = footage[0];
+      setSelectedReport(firstReport.report_id);
+      openReportOnMap(firstReport);
+    }
+  }, [footage]);
+
   const removeToast = (id: number) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
@@ -82,7 +88,7 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
 
       const { data, error, count } = await supabase
         .from('Order_Analytics')
-        .select('report_id,created_at', { count: 'exact' })
+        .select('report_id,created_at,total_orders_in_report,total_orders_processed_from_report', { count: 'exact' })
         .eq('mappbook_user_id', userId)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
@@ -97,9 +103,6 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
         } else {
           setFootage(prev => [...prev, ...data]);
         }
-        if (!selectedFootageId && data.length > 0) {
-          setSelectedFootageId(data[0].report_id);
-        }
       }
     } catch (error) {
       track('RED - Drone - Footage data pull from supabase failed', {
@@ -112,13 +115,9 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedFootage?.report_id) {
-      showToast('Invalid footage selected', 'error');
-      return;
-    }
-
-    setFootageToDelete(selectedFootage);
+  const handleDelete = async (foot: FootageHistoryItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFootageToDelete(foot);
     setDeleteDialogOpen(true);
   };
 
@@ -138,12 +137,6 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
 
       setFootage(prev => prev.filter(v => v.report_id !== footageToDelete.report_id));
       showToast('Footage deleted successfully');
-
-      if (selectedFootageId === footageToDelete.report_id) {
-        const remainingfootage = footage.filter(v => v.report_id !== footageToDelete.report_id);
-        setSelectedFootageId(remainingfootage.length > 0 ? remainingfootage[0].report_id : null);
-      }
-      setViewDialogOpen(false);
     } catch (error) {
       track('RED - Drone - Delete Footage failed', {
         user_id: userId
@@ -156,42 +149,32 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
     }
   };
 
-  const handleViewFootage = (foot: FootageHistoryItem) => {
-    setSelectedFootage(foot);
-    setViewDialogOpen(true);
-  };
+  const openReportOnMap = async (foot: FootageHistoryItem) => {
+    setSelectedReport(foot.report_id);
+    try {
+      setLoading(true);
 
-  const openReportOnMap = async () => {
-    
-    if (selectedFootage?.report_id) {
-      try {
-        setLoading(true);
+      const { data, error } = await supabase
+        .from('Order_Analytics')
+        .select('order_data')
+        .eq('report_id', foot.report_id)
+        .single();
 
-        const { data, error } = await supabase
-          .from('Order_Analytics')
-          .select('order_data')
-          .eq('report_id', selectedFootage.report_id)
-          .single();
+      if (error) throw error;
 
-        if (error) throw error;
-
-        if (data) {
-          setReportData(data.order_data);
-        }
-
-      } catch (error) {
-        track('RED - Drone - Report data fetch failed', {
-          user_id: userId
-        });
-        console.error('Error fetching report data:', error);
-        showToast('Failed to fetch report data. Please try again.', 'error');
-      } finally {
-        setLoading(false);
-        setViewDialogOpen(false);
+      if (data) {
+        setReportData(data.order_data);
       }
+    } catch (error) {
+      track('RED - Drone - Report data fetch failed', {
+        user_id: userId
+      });
+      console.error('Error fetching report data:', error);
+      showToast('Failed to fetch report data. Please try again.', 'error');
+    } finally {
+      setLoading(false);
     }
   };
-
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -219,8 +202,8 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
       <div className="mt-6 bg-gray-800/90 rounded-lg overflow-hidden border border-gray-700 p-8">
         <div className="flex flex-col items-center justify-center text-gray-400">
           <Aperture size={48} className="text-gray-400" />
-          <p className="text-base font-medium mt-4">No Analytics history</p>
-          <p className="text-sm mt-1">Your previously uploaded orders will appear here</p>
+          <p className="text-base font-medium mt-4">No Report history</p>
+          <p className="text-sm mt-1">Your previously uploaded order reports will appear here</p>
         </div>
       </div>
     );
@@ -229,7 +212,7 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
   return (
     <div className="relative mt-6 bg-gray-800/90 rounded-lg overflow-hidden border border-gray-700">
       <div className="p-4 border-b border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-200">Your Order Report history</h3>
+        <h3 className="text-sm font-semibold text-gray-200">Order Report History</h3>
       </div>
 
       <ScrollArea className="h-[300px]">
@@ -237,28 +220,34 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
           {footage.map((foot) => (
             <div
               key={foot.report_id}
-              className={`w-full flex items-center gap-2 p-2 hover:bg-gray-700 rounded-md transition-colors group mb-2 cursor-pointer
-`}
-              onClick={() => handleViewFootage(foot)}
+              className={`w-full flex items-center gap-2 p-2 rounded-md transition-colors group mb-2 cursor-pointer ${selectedReport === foot.report_id ? 'bg-gray-900' : 'hover:bg-gray-700'}`}
+              onClick={() => openReportOnMap(foot)}
             >
               <div className="flex-grow flex items-center gap-2 min-w-0">
-                <div className="w-12 h-12 md:w-10 md:h-10 bg-gray-200/60 rounded flex items-center justify-center flex-shrink-0">
+                <div className="w-14 h-14 md:w-10 md:h-10 bg-gray-200/60 rounded flex items-center justify-center flex-shrink-0">
                   <Aperture />
                 </div>
                 <div className="flex-grow min-w-0">
-                  <p className={`text-xs md:text-sm font-medium truncate
-                    ${selectedFootageId === foot.report_id ? 'text-gray-200' : 'text-gray-200'}`}>
-                    Report on <span>{formatDate(foot.created_at)}</span>
+                  <p className="text-xs md:text-sm font-medium truncate text-gray-200">
+                    Order Report - <span>{formatDate(foot.created_at)}</span>
                   </p>
                   <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
                     <Clock className="w-3 h-3 hidden md:block" />
                     <span className="text-xs">{formatTime(foot.created_at)}</span>
                   </div>
-                  <p className="text-xs text-gray-400 hidden md:block">
-                    {/* {foot.total_orders} orders */}
-                  </p>
+                  <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                    <span className="text-xs">Total Orders {foot.total_orders_processed_from_report} / {foot.total_orders_in_report}</span>
+                  </div>
                 </div>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="opacity-0 group-hover:opacity-100"
+                onClick={(e) => handleDelete(foot, e)}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
             </div>
           ))}
 
@@ -284,9 +273,9 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-gray-800 border border-gray-700 w-4/5 mx-auto rounded-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-gray-200">Delete Footage</AlertDialogTitle>
+            <AlertDialogTitle className="text-gray-200">Delete Report</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
-              Are you sure you want to delete this footage?
+              Are you sure you want to delete this report?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -303,33 +292,6 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* View Footage Dialog */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="bg-gray-800 border border-gray-700 w-4/5 mx-auto rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="text-gray-200">Details</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-4 pt-4">
-            <Button
-              onClick={openReportOnMap}
-              className="bg-blue-500 hover:bg-blue-600 text-gray-200"
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              View on Map
-            </Button>
-            <Button
-              onClick={handleDelete}
-              variant="destructive"
-              className="bg-red-500 hover:bg-red-600 text-gray-200"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Report
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Toasts */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map(toast => (
           <div

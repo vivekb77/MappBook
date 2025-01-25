@@ -1,17 +1,46 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Marker } from 'react-map-gl';
-import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, Legend, Tooltip, TooltipProps } from 'recharts';
 import _ from 'lodash';
+
+type Order = {
+  ship_postal_code: string;
+  shipped_to_latitude: number;
+  shipped_to_longitude: number;
+  order_status: string;
+  sales_channel: string;
+};
+
+type Location = {
+  latitude: number;
+  longitude: number;
+  size: number;
+  totalOrders: number;
+  zipCode: string;
+  statusData: ChartData[];
+  channelData: ChartData[];
+};
+
+type ChartData = {
+  name: string;
+  value: number;
+  count: number;
+  type: 'status' | 'channel';
+};
+
+type OrderVisualizationProps = {
+  orders?: Order[];
+};
 
 const COLORS_STATUS = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'];
 const COLORS_CHANNEL = ['#10b981', '#6366f1', '#f59e0b', '#ef4444'];
 
-const OrderVisualization = ({ orders = [] }) => {
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const panelRef = useRef(null);
+const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [] }) => {
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  const handleClickOutside = useCallback((event) => {
-    if (panelRef.current && !panelRef.current.contains(event.target)) {
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
       setSelectedLocation(null);
     }
   }, []);
@@ -29,7 +58,7 @@ const OrderVisualization = ({ orders = [] }) => {
         const baseSize = Math.log2(totalOrders + 1) * 30;
         const size = Math.max(60, Math.min(200, baseSize));
         
-        const location = {
+        const location: Location = {
           latitude: groupOrders[0].shipped_to_latitude,
           longitude: groupOrders[0].shipped_to_longitude,
           size,
@@ -41,7 +70,7 @@ const OrderVisualization = ({ orders = [] }) => {
               name: status,
               value: (orders.length / totalOrders) * 100,
               count: orders.length,
-              type: 'status'
+              type: 'status' as const
             }))
             .value(),
           channelData: _.chain(groupOrders)
@@ -50,7 +79,7 @@ const OrderVisualization = ({ orders = [] }) => {
               name: channel,
               value: (orders.length / totalOrders) * 100,
               count: orders.length,
-              type: 'channel'
+              type: 'channel' as const
             }))
             .value()
         };
@@ -60,9 +89,9 @@ const OrderVisualization = ({ orders = [] }) => {
       .value();
   }, [orders]);
 
-  const CustomTooltip = ({ active, payload }) => {
+  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
-    const data = payload[0].payload;
+    const data = payload[0].payload as ChartData;
     return (
       <div className="bg-white p-4 rounded shadow-lg border border-gray-200 min-w-[200px] z-50">
         <p className="font-semibold">{data.type === 'status' ? 'Order Status' : 'Sales Channel'}: {data.name}</p>
@@ -71,7 +100,7 @@ const OrderVisualization = ({ orders = [] }) => {
     );
   };
 
-  const InfoPanel = ({ location }) => {
+  const InfoPanel: React.FC<{ location: Location | null }> = ({ location }) => {
     if (!location) return null;
     
     return (
@@ -137,7 +166,7 @@ const OrderVisualization = ({ orders = [] }) => {
             <PieChart width={location.size} height={location.size} className="relative z-10">
               <Tooltip content={<CustomTooltip />} position={{ y: -90 }} wrapperStyle={{ zIndex: 50 }} />
               <Pie className="relative z-10"
-                data={location.statusData.map(d => ({...d, type: 'status'}))}
+                data={location.statusData}
                 cx="50%"
                 cy="50%"
                 outerRadius={location.size * 0.3}
@@ -148,7 +177,7 @@ const OrderVisualization = ({ orders = [] }) => {
                 ))}
               </Pie>
               <Pie className="relative z-10"
-                data={location.channelData.map(d => ({...d, type: 'channel'}))}
+                data={location.channelData}
                 cx="50%"
                 cy="50%"
                 innerRadius={location.size * 0.35}

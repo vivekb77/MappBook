@@ -9,6 +9,7 @@ import AddCredits from './BuyPremium';
 import OrderReportHistory from './OrderReportHistory';
 import DesktopRecommendationBanner from './DesktopRecommendationBanner';
 import FileUpload from './FileUpload';
+import InfoPopUp from "./InfoPopUp";
 
 declare global {
   interface Window {
@@ -96,10 +97,10 @@ const DashboardContainer = () => {
             <div className="space-y-4">
               <div className="bg-gray-800 rounded-lg p-8 text-center">
                 <h2 className="text-3xl font-bold text-white mb-4">Welcome to MappBook</h2>
-                <p className="text-gray-300 mb-6">Understand Amazon Seller Central Order Reports</p>
+                <p className="text-gray-300 mb-6">Geotargeting Analytics for Amazon Seller Central Orders</p>
                 <SignInButton />
               </div>
-             
+
               <div className="flex flex-col gap-4 mt-8">
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
@@ -107,46 +108,62 @@ const DashboardContainer = () => {
                   description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
                 />
                 <FeatureCard
-                  icon={<Camera className="w-8 h-8 text-blue-500" />}
+                  icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Where are my top customers located?"
-                  description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
+                  description="Most business owners rely on Google Analytics which does a commendable job but lacks indepth detail on customer locations across different regions."
                 />
                 <FeatureCard
-                  icon={<Video className="w-8 h-8 text-blue-500" />}
+                  icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Which countries give me the highest revenue?"
-                  description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
+                  description="Get detailed insights into revenue generation by country to optimize your marketing strategies and resource allocation."
                 />
                 <FeatureCard
-                  icon={<Video className="w-8 h-8 text-blue-500" />}
+                  icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Which customers fall in a particular Continent/Country/State/County?"
-                  description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
+                  description="Drill down into specific geographic segments to understand customer distribution across different regional levels for targeted marketing."
                 />
                 <FeatureCard
-                  icon={<Video className="w-8 h-8 text-blue-500" />}
+                  icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="How many customers are from a particular place?"
-                  description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
+                  description="Get precise customer counts by location to identify key markets and growth opportunities in specific regions."
                 />
                 <FeatureCard
-                  icon={<Video className="w-8 h-8 text-blue-500" />}
+                  icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="And lot more"
-                  description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
+                  description="Discover additional geotargeting insights to make data-driven decisions for your marketing campaigns and business strategy."
                 />
               </div>
+
+              <div className="w-full overflow-x-auto">
+                  <OrderReportHistory userId={'cbcafcd9-a6a9-44eb-893e-96dd316b4a4f'} />
+                </div>
+
             </div>
           )}
 
           {isLoaded && isSignedIn && mappbookUser && (
             <>
+            <InfoPopUp />
               <div>
-                <h2 className="text-2xl font-bold text-white mb-4">Amazon</h2>
-                <p className="text-gray-300 mb-6">Understand Amazon Seller Central Order Reports</p>
-                <FileUpload/>
+                <h2 className="text-2xl font-bold text-white mb-4">Geotargeting Analytics</h2>
+
+                <p className="text-gray-300 mb-6">How to download Amazon Seller Central Order Reports</p>
+
+                <ol className="list-disc pl-6 mb-6 text-gray-300 space-y-2">
+                  <li>Go to Amazon business analytics and navigate to "Reports</li>
+                  <li>Click on "Orders" and sort/filter as needed</li>
+                  <li>Name your report and click "Request Report</li>
+                  <li>Once processed, download the CSV file</li>
+                  <li>Upload the CSV file below</li>
+                </ol>
+
+                <FileUpload />
                 <div className="w-full overflow-x-auto">
                   <OrderReportHistory userId={mappbookUser.mappbook_user_id} />
                 </div>
               </div>
 
-              <div className="space-y-4 mb-6">
+              {/* <div className="space-y-4 mb-6">
                 <div className="text-center">
                   <h3 className="text-xl font-semibold text-white mb-2">Get Premium</h3>
                   <p className="text-gray-300">Understand Amazon Seller Central Order Reports</p>
@@ -164,7 +181,7 @@ const DashboardContainer = () => {
                 </div>
               </div>
 
-              <AddCredits />
+              <AddCredits /> */}
 
             </>
           )}
