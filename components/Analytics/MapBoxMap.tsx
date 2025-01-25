@@ -8,7 +8,8 @@ import InfoPopUp from "./InfoPopUp";
 import { nanoid } from 'nanoid';
 import { useUser } from '@clerk/nextjs';
 import SignInButton from './SignInButton';
-import OrderMarkers from './OrderMarkers';
+import PlotOrderBubbles from './PlotOrderBubbles';
+import PlotAllOrders from './PlotAllOrders';
 import { throttle } from 'lodash';
 import { track } from "@vercel/analytics";
 import { useReportContext } from '@/context/ReportContext';
@@ -32,22 +33,20 @@ const CONFIG = {
       MAX_RETRY_ATTEMPTS: 2,
     },
     fog: {
-      'horizon-blend': 0.4,          // More dramatic horizon blend
-      'color': '#ffa07a',           // Light salmon color for sunset effect
-      'high-color': '#4169e1',      // Royal blue for upper atmosphere
-      'space-color': '#191970',     // Midnight blue for space
+      'horizon-blend': 0.4,
+      'color': '#ffa07a',
+      'high-color': '#4169e1',
+      'space-color': '#191970',
       'star-intensity': 0.85
     },
     light: {
       anchor: 'viewport',
       color: '#ffffff',
-      intensity: 0.65,         // Brighter
-      position: [1.5, 90, 80]  // High angle, shorter shadows
+      intensity: 0.65,
+      position: [1.5, 90, 80]
     }
   }
 } as const;
-
-
 
 interface MapViewState {
   longitude: number;
@@ -69,8 +68,8 @@ const DEFAULT_VIEW_STATE: MapViewState = {
   pitch: 0,
   bearing: 0,
 };
+
 const MapboxMap: React.FC = () => {
-  // Refs
   const mapRef = useRef<MapRef>(null);
   const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
   const isMountedRef = useRef(true);
@@ -79,7 +78,6 @@ const MapboxMap: React.FC = () => {
   const mapContainerId = useRef(`map-container-${nanoid()}`);
   const { reportData } = useReportContext();
 
-  // State
   const [mapStatus, setMapStatus] = useState<MapStatus>({ status: 'loading' });
   const [viewState, setViewState] = useState<MapViewState>(DEFAULT_VIEW_STATE);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -87,13 +85,12 @@ const MapboxMap: React.FC = () => {
   const [totalDistance, setTotalDistance] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [persistentError, setPersistentError] = useState<string | null>(null);
+  const [showAllOrders, setShowAllOrders] = useState(false);
   const { isLoaded, isSignedIn, user } = useUser();
-
 
   const cleanup = () => {
     if (!isMountedRef.current) return;
 
-    // Clean up map instance
     if (mapInstanceRef.current) {
       const map = mapInstanceRef.current;
 
@@ -106,7 +103,6 @@ const MapboxMap: React.FC = () => {
         console.warn('Error cleaning up terrain:', e);
       }
 
-      // Remove event listeners
       eventListenersRef.current.forEach(({ type, listener }) => {
         try {
           if (map && typeof map.off === 'function') {
@@ -119,11 +115,9 @@ const MapboxMap: React.FC = () => {
       eventListenersRef.current = [];
 
       try {
-        // Get map container and parent before cleanup
         const container = map.getContainer();
         const parent = container?.parentNode;
 
-        // Remove layers and sources safely
         if (map.getStyle()) {
           const style = map.getStyle();
           style.layers?.forEach(layer => {
@@ -147,12 +141,10 @@ const MapboxMap: React.FC = () => {
           });
         }
 
-        // Remove map with fallback
         try {
           map.remove();
         } catch (e) {
           console.warn('Error removing map:', e);
-          // Fallback: manual container removal
           if (parent && container && parent.contains(container)) {
             try {
               parent.removeChild(container);
@@ -174,11 +166,10 @@ const MapboxMap: React.FC = () => {
     }
   };
 
-  // Throttle handlers that trigger frequently
   const handleMapMove = useCallback(
     throttle((evt) => {
       setViewState(evt.viewState);
-    }, 16), // ~60fps
+    }, 16),
     []
   );
 
@@ -210,15 +201,12 @@ const MapboxMap: React.FC = () => {
   };
 
   const handleMapError = () => {
-    // Capture error state first
     const errorMessage = "Unable to load map. Please refresh the page.";
     
-    // Track with useful error context
     track('RED - Drone - Map load failed', {
       timestamp: new Date().toISOString()
     });
 
-    // Then update UI state
     if (isMountedRef.current) {
       setMapStatus({
         status: 'error',
@@ -227,7 +215,7 @@ const MapboxMap: React.FC = () => {
     }
     setPersistentError(errorMessage);
     cleanup();
-};
+  };
 
   const handleMapLoad = useCallback(() => {
     if (!mapRef.current || mapInstanceRef.current || !isMountedRef.current) return;
@@ -237,7 +225,6 @@ const MapboxMap: React.FC = () => {
 
     mapInstanceRef.current = map;
 
-    // Handle general map errors
     const errorHandler = () => {
       if (isMountedRef.current) {
         handleMapError();
@@ -246,11 +233,10 @@ const MapboxMap: React.FC = () => {
     map.on('error', errorHandler);
     eventListenersRef.current.push({ type: 'error', listener: errorHandler });
 
-    // Handle WebGL context loss
     const canvas = map.getCanvas();
     if (canvas) {
       const contextLossHandler = (e: Event) => {
-        e.preventDefault();  // Prevent default handling
+        e.preventDefault();
         handleWebGLContextLoss();
       };
       canvas.addEventListener('webglcontextlost', contextLossHandler);
@@ -259,11 +245,10 @@ const MapboxMap: React.FC = () => {
         listener: contextLossHandler
       });
 
-      // Optional: Handle context restoration
       const contextRestoredHandler = () => {
         if (isMountedRef.current) {
           setMapStatus({ status: 'loading' });
-          map.resize();  // Force map redraw
+          map.resize();
         }
       };
       canvas.addEventListener('webglcontextrestored', contextRestoredHandler);
@@ -288,15 +273,12 @@ const MapboxMap: React.FC = () => {
         setMapStatus({ status: 'ready' });
       }
 
-
     } catch (e) {
       console.warn('Error initializing map:', e);
       handleMapError();
     }
   }, []);
 
-
-  // Lifecycle
   useEffect(() => {
     isMountedRef.current = true;
 
@@ -319,12 +301,12 @@ const MapboxMap: React.FC = () => {
   useEffect(() => {
     console.log("Report Data:", reportData);
   }, [reportData]);
+
   return (
     <div
       id={mapContainerId.current}
       className="relative w-full h-full"
     >
-
       {!isSignedIn && mapStatus.status === 'ready' && (
         <div className="absolute bottom-20 left-0 right-0 flex justify-center z-50 pointer-events-none">
           <div className="w-48 pointer-events-auto">
@@ -356,15 +338,12 @@ const MapboxMap: React.FC = () => {
         </div>
       )}
 
-      {/* MappBook Logo */}
       <div className="absolute top-2 left-2 z-50">
         <div className="bg-gray-800/90 p-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors border border-gray-700">
           <span className="font-bold text-xl text-blue-400">MappBook</span>
         </div>
       </div>
 
-
-      {/* Main map component */}
       <Map
         ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER}
@@ -387,22 +366,51 @@ const MapboxMap: React.FC = () => {
         maxZoom={20}
         renderWorldCopies={false}
       >
-        {mapStatus.status === 'ready' && <OrderMarkers orders={reportData?.orders || []} />}
+        {mapStatus.status === 'ready' && (
+          <>
+            {showAllOrders ? (
+              <PlotAllOrders orders={reportData?.orders || []} />
+            ) : (
+              <PlotOrderBubbles orders={reportData?.orders || []} />
+            )}
+          </>
+        )}
       </Map>
-      {/* <InfoPopUp /> */}
 
-      {/* Map UI Controls Group */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Map stats display */}
-        {viewState.zoom <= 12 &&
-          <div className="absolute top-28 right-2 bg-gray-800/90 text-gray-200 p-1 rounded space-y-2 font-mono text-xs md:text-sm z-50 border border-gray-700 pointer-events-auto">
-            {/* <div>Zoom: {viewState.zoom.toFixed(2)}</div> */}
-            {/* <div>Pitch: {viewState.pitch.toFixed(2)}°</div> */}
-          {/* <div>Total Orders: {reportData?.metadata.total_orders}</div> */}
-          </div>
-        }
+        <div className="absolute top-16 right-2 pointer-events-auto">
+          <div 
+            className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-64 cursor-pointer select-none border border-gray-700"
+            onClick={() => setShowAllOrders(!showAllOrders)}
+          >
+            {/* Labels Container */}
+            <div className="absolute inset-0 flex justify-between items-center z-10">
+              <div className="flex-1 flex justify-center items-center gap-1.5">
+                <span className={`text-sm font-medium transition-colors duration-150 ${!showAllOrders ? 'text-white' : 'text-gray-500'}`}>
+                  Group
+                </span>
+              </div>
+              <div className="flex-1 flex justify-center items-center gap-1.5">
+                <span className={`text-sm font-medium transition-colors duration-150 ${showAllOrders ? 'text-white' : 'text-gray-500'}`}>
+                  All Orders
+                </span>
+              </div>
+            </div>
 
-        {/* Status and Instructions */}
+            {/* Sliding Background */}
+            <div
+              className={`
+                absolute h-[34px] w-[49%] mx-[2px] rounded-full
+                bg-blue-500
+                transition-transform duration-150 ease-in-out
+                ${showAllOrders ? 'translate-x-[100%]' : 'translate-x-0'}
+              `}
+            />
+          </div>
+        </div>
+        
+        
+
         {mapStatus.status === 'loading' && (
           <div className="absolute top-16 right-2 text-gray-200 bg-gray-800/90 p-1 rounded text-right border font-mono text-xs md:text-sm border-gray-700 pointer-events-auto">
             {errorMessage ? (
@@ -413,7 +421,7 @@ const MapboxMap: React.FC = () => {
                   `Loading Map`}
                 {viewState.zoom >= CONFIG.map.drone.REQUIRED_ZOOM && (
                   <>
-                    {/* {points.length === 0 && 'Click to place first point'}
+                   {/* {points.length === 0 && 'Click to place first point'}
                     {points.length > 0 && !isAnimating &&
                       `Place point ${points.length + 1} within yellow circle (${points.length}/${CONFIG.map.drone.MAX_POINTS})`}
                     {isAnimating && 'Flying'} */}
@@ -423,12 +431,9 @@ const MapboxMap: React.FC = () => {
             )}
           </div>
         )}
-
       </div>
-     
     </div>
   );
 };
 
-// Use React.memo to prevent unnecessary re-renders
 export default React.memo(MapboxMap);
