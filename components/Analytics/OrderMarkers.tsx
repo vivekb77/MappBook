@@ -3,8 +3,9 @@ import { Marker } from 'react-map-gl';
 import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
 import _ from 'lodash';
 
-const COLORS_STATUS = ['#87CEEB', '#4682B4', '#0000CD', '#191970'];
-const COLORS_CHANNEL = ['#82ca9d', '#8884d8', '#ffc658', '#ff7300'];
+// Modern color schemes
+const COLORS_STATUS = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'];
+const COLORS_CHANNEL = ['#10b981', '#6366f1', '#f59e0b', '#ef4444'];
 
 const OrderVisualization = ({ orders = [] }) => {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -14,7 +15,6 @@ const OrderVisualization = ({ orders = [] }) => {
       .groupBy('ship_postal_code')
       .map((groupOrders) => {
         const totalOrders = groupOrders.length;
-        // Logarithmic scaling for better visualization of varied order volumes
         const baseSize = Math.log2(totalOrders + 1) * 30;
         const size = Math.max(60, Math.min(200, baseSize));
         
@@ -30,7 +30,7 @@ const OrderVisualization = ({ orders = [] }) => {
               name: status,
               value: (orders.length / totalOrders) * 100,
               count: orders.length,
-               type: 'status'
+              type: 'status'
             }))
             .value(),
           channelData: _.chain(groupOrders)
@@ -38,7 +38,8 @@ const OrderVisualization = ({ orders = [] }) => {
             .map((orders, channel) => ({
               name: channel,
               value: (orders.length / totalOrders) * 100,
-              count: orders.length
+              count: orders.length,
+              type: 'channel'
             }))
             .value()
         };
@@ -50,25 +51,20 @@ const OrderVisualization = ({ orders = [] }) => {
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
-    console.log(payload)
     const data = payload[0].payload;
-    const type = payload[0].name;
-    const label = type === "statusData" ? "Order Status" : "Sales Channel";
     return (
-      <div className="bg-white p-4 rounded shadow-lg border border-gray-200 min-w-[200px]">
-        <p className="font-semibold">{label}: {data.name}</p>
+      <div className="bg-white p-4 rounded shadow-lg border border-gray-200 min-w-[200px] z-50">
+        <p className="font-semibold">{data.type === 'status' ? 'Order Status' : 'Sales Channel'}: {data.name}</p>
         <p>{data.count} orders ({data.value.toFixed(1)}%)</p>
       </div>
     );
   };
 
-
   const InfoPanel = ({ location }) => {
     if (!location) return null;
-
+    
     return (
-      <div className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-sm">
-        {/* <h3 className="font-bold mb-2">Country: {location.}</h3> */}
+      <div className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-sm z-50">
         <h3 className="font-bold mb-2">Zip Code: {location.zipCode}</h3>
         <p className="mb-4">Total Orders: {location.totalOrders}</p>
         
@@ -124,10 +120,10 @@ const OrderVisualization = ({ orders = [] }) => {
             className="cursor-pointer transform hover:scale-110 transition-transform"
             onClick={() => setSelectedLocation(location)}
           >
-            <PieChart width={location.size} height={location.size}>
-            <Tooltip content={<CustomTooltip />} position={{ y: -90 }} />
-              <Pie
-                data={location.statusData}
+            <PieChart width={location.size} height={location.size} className="relative z-10">
+              <Tooltip content={<CustomTooltip />} position={{ y: -90 }} wrapperStyle={{ zIndex: 50 }} />
+              <Pie className="relative z-10"
+                data={location.statusData.map(d => ({...d, type: 'status'}))}
                 cx="50%"
                 cy="50%"
                 outerRadius={location.size * 0.3}
@@ -137,12 +133,12 @@ const OrderVisualization = ({ orders = [] }) => {
                   <Cell key={index} fill={COLORS_STATUS[index % COLORS_STATUS.length]} stroke="white" />
                 ))}
               </Pie>
-              <Pie
-                data={location.channelData}
+              <Pie className="relative z-10"
+                data={location.channelData.map(d => ({...d, type: 'channel'}))}
                 cx="50%"
                 cy="50%"
                 innerRadius={location.size * 0.35}
-                outerRadius={location.size * 0.45}
+                outerRadius={location.size * 0.5}
                 dataKey="value"
               >
                 {location.channelData.map((entry, index) => (
