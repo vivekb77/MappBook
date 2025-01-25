@@ -9,6 +9,7 @@ import { nanoid } from 'nanoid';
 import { useUser } from '@clerk/nextjs';
 import SignInButton from './SignInButton';
 import PlotOrderBubbles from './PlotOrderBubbles';
+import MapFilters from './MapFilters';
 import PlotAllOrders from './PlotAllOrders';
 import { throttle } from 'lodash';
 import { track } from "@vercel/analytics";
@@ -373,7 +374,9 @@ const MapboxMap: React.FC = () => {
             ) : (
               <PlotOrderBubbles orders={reportData?.orders || []} />
             )}
+            <MapFilters/>
           </>
+          
         )}
       </Map>
 
@@ -431,6 +434,7 @@ const MapboxMap: React.FC = () => {
             )}
           </div>
         )}
+        
       </div>
     </div>
   );
