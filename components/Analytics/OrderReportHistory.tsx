@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { track } from '@vercel/analytics';
+import { useUser } from '@clerk/nextjs';
 
 interface FootageHistoryItem {
   report_id: string;
@@ -37,6 +38,7 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
   const [footage, setFootage] = useState<FootageHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const { isLoaded, isSignedIn, user } = useUser();
   const { setReportData } = useReportContext();
   const [page, setPage] = useState(1);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -68,18 +70,18 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
         .range(0, PAGE_SIZE - 1);
-  
+
       if (data && data.length > 0) {
         setFootage(data);
         setSelectedReport(data[0].report_id);
         openReportOnMap(data[0]);
       }
     };
-  
+
     window.addEventListener('ReportAdded', handleReportAdded);
     return () => window.removeEventListener('ReportAdded', handleReportAdded);
   }, []);
-  
+
 
   useEffect(() => {
     if (footage.length > 0 && !selectedReport) {
@@ -253,14 +255,16 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
                   </div>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="opacity-0 group-hover:opacity-100"
-                onClick={(e) => handleDelete(foot, e)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
+
+              {isSignedIn && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="opacity-0 group-hover:opacity-100"
+                  onClick={(e) => handleDelete(foot, e)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>)}
             </div>
           ))}
 

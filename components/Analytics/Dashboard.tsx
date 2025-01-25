@@ -49,17 +49,17 @@ const DashboardContainer = () => {
   interface FeatureCardProps {
     icon: React.ReactNode;
     title: string;
-    description: string;
+    // description: string;
   }
 
-  const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
+  const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title }) => {
     return (
       <div className="bg-gray-800 p-6 rounded-xl w-full">
         <div className="mb-4 flex items-center gap-3">
           {icon}
           <h3 className="text-xl font-semibold text-white">{title}</h3>
         </div>
-        <p className="text-gray-300">{description}</p>
+        {/* <p className="text-gray-300">{description}</p> */}
       </div>
     );
   };
@@ -96,7 +96,7 @@ const DashboardContainer = () => {
           {isLoaded && !isSignedIn && (
             <div className="space-y-4">
               <div className="bg-gray-800 rounded-lg p-8 text-center">
-                <h2 className="text-3xl font-bold text-white mb-4">Welcome to MappBook</h2>
+                {/* <h2 className="text-3xl font-bold text-white mb-4">Welcome to MappBook</h2> */}
                 <p className="text-gray-300 mb-6">Geotargeting Analytics for Amazon Seller Central Orders</p>
                 <SignInButton />
               </div>
@@ -105,32 +105,32 @@ const DashboardContainer = () => {
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Identify best countries"
-                  description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
+                  // description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Where are my top customers located?"
-                  description="Most business owners rely on Google Analytics which does a commendable job but lacks indepth detail on customer locations across different regions."
+                  // description="Most business owners rely on Google Analytics which does a commendable job but lacks indepth detail on customer locations across different regions."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Which countries give me the highest revenue?"
-                  description="Get detailed insights into revenue generation by country to optimize your marketing strategies and resource allocation."
+                  // description="Get detailed insights into revenue generation by country to optimize your marketing strategies and resource allocation."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
-                  title="Which customers fall in a particular Continent/Country/State/County?"
-                  description="Drill down into specific geographic segments to understand customer distribution across different regional levels for targeted marketing."
+                  title="Which customers fall in a particular Country, State, County or ZIP code?"
+                  // description="Drill down into specific geographic segments to understand customer distribution across different regional levels for targeted marketing."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="How many customers are from a particular place?"
-                  description="Get precise customer counts by location to identify key markets and growth opportunities in specific regions."
+                  // description="Get precise customer counts by location to identify key markets and growth opportunities in specific regions."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="And lot more"
-                  description="Discover additional geotargeting insights to make data-driven decisions for your marketing campaigns and business strategy."
+                  // description="Discover additional geotargeting insights to make data-driven decisions for your marketing campaigns and business strategy."
                 />
               </div>
 

@@ -97,6 +97,15 @@ const FileUpload: React.FC = () => {
     setIsUploading(true);
     setError('');
 
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', mappbookUser?.mappbook_user_id || '');
+
+    await fetch('/api/upload-raw', {
+      method: 'POST',
+      body: formData
+    });
+
     try {
       const text = await file.text();
       Papa.parse<Record<string, string>>(text, {

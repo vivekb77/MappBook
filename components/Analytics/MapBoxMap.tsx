@@ -298,9 +298,9 @@ const MapboxMap: React.FC = () => {
     );
   }
 
-  useEffect(() => {
-    console.log("Report Data:", reportData);
-  }, [reportData]);
+  // useEffect(() => {
+  //   console.log("Report Data:", reportData);
+  // }, [reportData]);
 
   return (
     <div
@@ -380,7 +380,7 @@ const MapboxMap: React.FC = () => {
       </Map>
 
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-16 right-2 pointer-events-auto">
+        <div className="absolute top-4 right-2 pointer-events-auto">
           <div
             className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-64 cursor-pointer select-none border border-gray-700"
             onClick={() => setShowAllOrders(!showAllOrders)}
@@ -410,29 +410,6 @@ const MapboxMap: React.FC = () => {
             />
           </div>
         </div>
-
-
-
-        {mapStatus.status === 'loading' && (
-          <div className="absolute top-16 right-2 text-gray-200 bg-gray-800/90 p-1 rounded text-right border font-mono text-xs md:text-sm border-gray-700 pointer-events-auto">
-            {errorMessage ? (
-              <span className="text-red-400">{errorMessage}</span>
-            ) : (
-              <>
-                {viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM &&
-                  `Loading Map`}
-                {viewState.zoom >= CONFIG.map.drone.REQUIRED_ZOOM && (
-                  <>
-                    {/* {points.length === 0 && 'Click to place first point'}
-                    {points.length > 0 && !isAnimating &&
-                      `Place point ${points.length + 1} within yellow circle (${points.length}/${CONFIG.map.drone.MAX_POINTS})`}
-                    {isAnimating && 'Flying'} */}
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        )}
 
       </div>
     </div>

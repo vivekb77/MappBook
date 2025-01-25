@@ -149,7 +149,7 @@ const OrderFilters: React.FC = () => {
   };
 
   return (
-    <div className="absolute bottom-[10%] left-0 right-0 flex justify-center">
+    <div className="absolute bottom-[5%] left-0 right-0 flex justify-center">
       <div className="w-[80%] bg-white shadow-lg rounded-lg p-6">
         {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0) && (
           <div className="mb-4 flex justify-between items-center">
