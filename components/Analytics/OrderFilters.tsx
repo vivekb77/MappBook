@@ -5,15 +5,38 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { DateRange } from 'react-day-picker';
 
-const MapFilters = () => {
-  const { reportData, setReportData } = useReportContext();
-  const [dateRange, setDateRange] = useState({
-    from: null,
-    to: null
+interface Order {
+  purchase_date: string;
+  product_name: string;
+  item_price: number;
+  currency: string;
+}
+
+interface ReportData {
+  orders: Order[];
+  [key: string]: any;
+}
+
+interface OrderStats {
+  count: number;
+  totals: { [key: string]: number };
+}
+
+interface ReportContextType {
+  reportData: ReportData | null;
+  setReportData: (data: ReportData) => void;
+}
+
+const OrderFilters: React.FC = () => {
+  const { reportData, setReportData } = useReportContext() as ReportContextType;
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined
   });
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [originalData, setOriginalData] = useState(null);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [originalData, setOriginalData] = useState<ReportData | null>(null);
   const [isProductPopoverOpen, setIsProductPopoverOpen] = useState(false);
 
   useEffect(() => {
@@ -22,33 +45,33 @@ const MapFilters = () => {
     }
   }, [reportData]);
 
-  const getFilteredProducts = () => {
+  const getFilteredProducts = (): string[] => {
     if (!originalData?.orders) return [];
     
     let filteredOrders = [...originalData.orders];
-    if (dateRange.from && dateRange.to) {
+    if (dateRange?.from && dateRange?.to) {
       filteredOrders = filteredOrders.filter(order => {
         const orderDate = new Date(order.purchase_date);
-        const fromDate = new Date(dateRange.from);
+        const fromDate = new Date(dateRange.from!);
         fromDate.setHours(0,0,0,0);
-        const toDate = new Date(dateRange.to);
+        const toDate = new Date(dateRange.to!);
         toDate.setHours(23,59,59,999);
         return orderDate >= fromDate && orderDate <= toDate;
       });
     }
-    return [...new Set(filteredOrders.map(order => order.product_name))];
+    return filteredOrders.map(order => order.product_name).filter((value, index, self) => self.indexOf(value) === index);
   };
 
-  const getFilteredOrdersStats = () => {
+  const getFilteredOrdersStats = (): OrderStats => {
     if (!originalData?.orders) return { count: 0, totals: {} };
     
     let filteredOrders = [...originalData.orders];
-    if (dateRange.from && dateRange.to) {
+    if (dateRange?.from && dateRange?.to) {
       filteredOrders = filteredOrders.filter(order => {
         const orderDate = new Date(order.purchase_date);
-        const fromDate = new Date(dateRange.from);
+        const fromDate = new Date(dateRange.from!);
         fromDate.setHours(0,0,0,0);
-        const toDate = new Date(dateRange.to);
+        const toDate = new Date(dateRange.to!);
         toDate.setHours(23,59,59,999);
         return orderDate >= fromDate && orderDate <= toDate;
       });
@@ -58,7 +81,7 @@ const MapFilters = () => {
       filteredOrders = filteredOrders.filter(order => selectedProducts.includes(order.product_name));
     }
 
-    const totals = filteredOrders.reduce((acc, order) => {
+    const totals = filteredOrders.reduce((acc: { [key: string]: number }, order) => {
       const currency = order.currency || '?';
       acc[currency] = (acc[currency] || 0) + (order.item_price || 0);
       return acc;
@@ -73,17 +96,17 @@ const MapFilters = () => {
   const uniqueProducts = getFilteredProducts();
   const orderStats = getFilteredOrdersStats();
 
-  const filterData = () => {
+  const filterData = (): void => {
     if (!originalData) return;
 
     let filteredOrders = [...originalData.orders];
 
-    if (dateRange.from && dateRange.to) {
+    if (dateRange?.from && dateRange?.to) {
       filteredOrders = filteredOrders.filter(order => {
         const orderDate = new Date(order.purchase_date);
-        const fromDate = new Date(dateRange.from);
+        const fromDate = new Date(dateRange.from!);
         fromDate.setHours(0,0,0,0);
-        const toDate = new Date(dateRange.to);
+        const toDate = new Date(dateRange.to!);
         toDate.setHours(23,59,59,999);
         return orderDate >= fromDate && orderDate <= toDate;
       });
@@ -109,27 +132,26 @@ const MapFilters = () => {
     filterData();
   }, [selectedProducts]);
 
-  const handleReset = () => {
-    setDateRange({ from: null, to: null });
+  const handleReset = (): void => {
+    setDateRange({ from: undefined, to: undefined });
     setSelectedProducts([]);
     if (originalData) {
       setReportData(originalData);
     }
   };
 
-  const handleSelectAll = () => {
+  const handleSelectAll = (): void => {
     setSelectedProducts(uniqueProducts);
   };
 
-  const handleDeselectAll = () => {
+  const handleDeselectAll = (): void => {
     setSelectedProducts([]);
   };
 
   return (
     <div className="absolute bottom-[10%] left-0 right-0 flex justify-center">
       <div className="w-[80%] bg-white shadow-lg rounded-lg p-6">
-
-        {((dateRange.from && dateRange.to) || selectedProducts.length > 0) && (
+        {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0) && (
           <div className="mb-4 flex justify-between items-center">
             <div className="text-sm font-medium text-gray-700">
               Total Orders: {orderStats.count}
@@ -137,7 +159,10 @@ const MapFilters = () => {
             <div className="text-sm font-medium text-gray-700">
               {Object.entries(orderStats.totals).map(([currency, amount]) => (
                 <div key={currency}>
-                  {currency}: {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)}
+                  {currency}: {new Intl.NumberFormat('en-US', { 
+                    style: 'currency', 
+                    currency: currency === '?' ? 'USD' : currency 
+                  }).format(amount)}
                 </div>
               ))}
             </div>
@@ -151,7 +176,7 @@ const MapFilters = () => {
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange.from ? (
+                  {dateRange?.from ? (
                     dateRange.to ? (
                       <>
                         {format(dateRange.from, "MMM d, yyyy")} - {format(dateRange.to, "MMM d, yyyy")}
@@ -168,9 +193,9 @@ const MapFilters = () => {
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={dateRange.from}
-                  selected={{ from: dateRange.from, to: dateRange.to }}
-                  onSelect={setDateRange}
+                  defaultMonth={dateRange?.from}
+                  selected={dateRange}
+                  onSelect={(range) => setDateRange(range || undefined)}
                   numberOfMonths={2}
                 />
               </PopoverContent>
@@ -237,7 +262,7 @@ const MapFilters = () => {
           </div>
         </div>
 
-        {((dateRange.from && dateRange.to) || selectedProducts.length > 0) && (
+        {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0) && (
           <div className="mt-4 flex items-end">
             <button
               onClick={handleReset}
@@ -252,4 +277,4 @@ const MapFilters = () => {
   );
 };
 
-export default MapFilters;
+export default OrderFilters;

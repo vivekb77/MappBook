@@ -59,14 +59,27 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
   }, [page]);
 
   useEffect(() => {
-    const handleReportAdded = () => {
+    const handleReportAdded = async () => {
       setPage(1);
-      fetchOrderReport();
+      const { data } = await supabase
+        .from('Order_Analytics')
+        .select('report_id,created_at,total_orders_in_report,total_orders_processed_from_report')
+        .eq('mappbook_user_id', userId)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false })
+        .range(0, PAGE_SIZE - 1);
+  
+      if (data && data.length > 0) {
+        setFootage(data);
+        setSelectedReport(data[0].report_id);
+        openReportOnMap(data[0]);
+      }
     };
-
+  
     window.addEventListener('ReportAdded', handleReportAdded);
     return () => window.removeEventListener('ReportAdded', handleReportAdded);
   }, []);
+  
 
   useEffect(() => {
     if (footage.length > 0 && !selectedReport) {
