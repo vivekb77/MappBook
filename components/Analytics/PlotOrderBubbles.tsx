@@ -1,14 +1,25 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Marker } from 'react-map-gl';
 import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
 import _ from 'lodash';
 
-// Modern color schemes
 const COLORS_STATUS = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'];
 const COLORS_CHANNEL = ['#10b981', '#6366f1', '#f59e0b', '#ef4444'];
 
 const OrderVisualization = ({ orders = [] }) => {
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const panelRef = useRef(null);
+
+  const handleClickOutside = useCallback((event) => {
+    if (panelRef.current && !panelRef.current.contains(event.target)) {
+      setSelectedLocation(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [handleClickOutside]);
 
   const ordersByZip = useMemo(() => {
     return _.chain(orders)
@@ -64,7 +75,10 @@ const OrderVisualization = ({ orders = [] }) => {
     if (!location) return null;
     
     return (
-      <div className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-sm z-50">
+      <div 
+        ref={panelRef}
+        className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-sm z-50"
+      >
         <h3 className="font-bold mb-2">Zip Code: {location.zipCode}</h3>
         <p className="mb-4">Total Orders: {location.totalOrders}</p>
         
