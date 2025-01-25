@@ -39,7 +39,39 @@ const MapFilters = () => {
     return [...new Set(filteredOrders.map(order => order.product_name))];
   };
 
+  const getFilteredOrdersStats = () => {
+    if (!originalData?.orders) return { count: 0, totals: {} };
+    
+    let filteredOrders = [...originalData.orders];
+    if (dateRange.from && dateRange.to) {
+      filteredOrders = filteredOrders.filter(order => {
+        const orderDate = new Date(order.purchase_date);
+        const fromDate = new Date(dateRange.from);
+        fromDate.setHours(0,0,0,0);
+        const toDate = new Date(dateRange.to);
+        toDate.setHours(23,59,59,999);
+        return orderDate >= fromDate && orderDate <= toDate;
+      });
+    }
+    
+    if (selectedProducts.length > 0) {
+      filteredOrders = filteredOrders.filter(order => selectedProducts.includes(order.product_name));
+    }
+
+    const totals = filteredOrders.reduce((acc, order) => {
+      const currency = order.currency || '?';
+      acc[currency] = (acc[currency] || 0) + (order.item_price || 0);
+      return acc;
+    }, {});
+
+    return {
+      count: filteredOrders.length,
+      totals: totals
+    };
+  };
+
   const uniqueProducts = getFilteredProducts();
+  const orderStats = getFilteredOrdersStats();
 
   const filterData = () => {
     if (!originalData) return;
@@ -69,7 +101,6 @@ const MapFilters = () => {
 
   useEffect(() => {
     filterData();
-    // Reset selected products if they're no longer available in the date range
     const availableProducts = getFilteredProducts();
     setSelectedProducts(prev => prev.filter(p => availableProducts.includes(p)));
   }, [dateRange]);
@@ -86,9 +117,33 @@ const MapFilters = () => {
     }
   };
 
+  const handleSelectAll = () => {
+    setSelectedProducts(uniqueProducts);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedProducts([]);
+  };
+
   return (
     <div className="absolute bottom-[10%] left-0 right-0 flex justify-center">
       <div className="w-[80%] bg-white shadow-lg rounded-lg p-6">
+
+        {((dateRange.from && dateRange.to) || selectedProducts.length > 0) && (
+          <div className="mb-4 flex justify-between items-center">
+            <div className="text-sm font-medium text-gray-700">
+              Total Orders: {orderStats.count}
+            </div>
+            <div className="text-sm font-medium text-gray-700">
+              {Object.entries(orderStats.totals).map(([currency, amount]) => (
+                <div key={currency}>
+                  {currency}: {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-6 items-start">
           <div className="flex flex-col gap-2 flex-1">
             <label className="text-sm font-medium text-gray-700">Date Range</label>
@@ -136,7 +191,25 @@ const MapFilters = () => {
               </PopoverTrigger>
               <PopoverContent className="w-80">
                 <div className="space-y-4">
-                  <div className="grid gap-2">
+                  <div className="flex justify-between pb-2 border-b">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleSelectAll}
+                      className="text-xs"
+                    >
+                      Select All
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleDeselectAll}
+                      className="text-xs"
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
+                  <div className="grid gap-2 max-h-60 overflow-y-auto">
                     {uniqueProducts.map((product) => (
                       <div key={product} className="flex items-center">
                         <input
