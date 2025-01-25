@@ -389,7 +389,7 @@ const MapboxMap: React.FC = () => {
       >
         {mapStatus.status === 'ready' && <OrderMarkers orders={reportData?.orders || []} />}
       </Map>
-      <InfoPopUp />
+      {/* <InfoPopUp /> */}
 
       {/* Map UI Controls Group */}
       <div className="absolute inset-0 pointer-events-none">
@@ -403,14 +403,14 @@ const MapboxMap: React.FC = () => {
         }
 
         {/* Status and Instructions */}
-        {mapStatus.status === 'ready' && (
+        {mapStatus.status === 'loading' && (
           <div className="absolute top-16 right-2 text-gray-200 bg-gray-800/90 p-1 rounded text-right border font-mono text-xs md:text-sm border-gray-700 pointer-events-auto">
             {errorMessage ? (
               <span className="text-red-400">{errorMessage}</span>
             ) : (
               <>
                 {viewState.zoom < CONFIG.map.drone.REQUIRED_ZOOM &&
-                  `Select filters to view more`}
+                  `Loading Map`}
                 {viewState.zoom >= CONFIG.map.drone.REQUIRED_ZOOM && (
                   <>
                     {/* {points.length === 0 && 'Click to place first point'}
