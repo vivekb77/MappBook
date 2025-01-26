@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import Papa from 'papaparse';
 import { useMappbookUser } from '@/context/UserContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface OrderData {
   amazon_order_id: string;
@@ -39,10 +41,20 @@ interface ProcessedData {
   };
 }
 
+interface GeocodingSummary {
+  total: number;
+  successful: number;
+  failed: number;
+  errors: string[];
+}
+
 const FileUpload: React.FC = () => {
   const { mappbookUser } = useMappbookUser();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
+  const [geocodingSummary, setGeocodingSummary] = useState<GeocodingSummary | null>(null);
+  const [showSummary, setShowSummary] = useState(true);
+  const [totalOrdersInReport, setTotalOrdersInReport] = useState(true);
 
   const processOrderData = (data: Record<string, string>[]): ProcessedData => {
     const orders = data.map(row => ({
@@ -96,6 +108,8 @@ const FileUpload: React.FC = () => {
 
     setIsUploading(true);
     setError('');
+    setGeocodingSummary(null);
+    setShowSummary(true);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -137,6 +151,9 @@ const FileUpload: React.FC = () => {
               throw new Error('Failed to upload data');
             }
 
+            const result = await response.json();
+            setGeocodingSummary(result.geocoding_summary);
+
             event.target.value = '';
             setIsUploading(false);
             const event1 = new CustomEvent('ReportAdded');
@@ -146,7 +163,7 @@ const FileUpload: React.FC = () => {
             setIsUploading(false);
           }
         },
-        error: (error: Error, file?: Papa.LocalFile) => {
+        error: (error: Error) => {
           setError('Error parsing file');
           setIsUploading(false);
         }
@@ -155,6 +172,76 @@ const FileUpload: React.FC = () => {
       setError('Error reading file');
       setIsUploading(false);
     }
+  };
+
+  const renderGeocodingSummary = () => {
+    if (!geocodingSummary || !showSummary) return null;
+
+    const { total, successful, failed } = geocodingSummary;
+    const successRate = total > 0 ? Math.round((successful / total) * 100) : 0;
+
+    return (
+      <div className="space-y-4 mt-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                Geocoding Results
+              {failed === 0 ? (
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-yellow-500" />
+              )}
+              </div>
+              <button 
+                onClick={() => setShowSummary(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Total Orders</p>
+                <p className="text-2xl font-semibold">{total}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Successfully Geocoded</p>
+                <p className="text-2xl font-semibold text-green-500">{successful}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Failed</p>
+                <p className="text-2xl font-semibold text-red-500">{failed}</p>
+              </div>
+            </div>
+            
+            <div className="mt-4">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-green-500 h-2 rounded-full" 
+                  style={{ width: `${successRate}%` }}
+                />
+              </div>
+              <p className="text-sm text-center mt-1 text-gray-500">
+                {successRate}% Success Rate
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        { failed > 0 && (
+          <Alert variant="destructive">
+            <AlertDescription>
+              <div className="mt-2">
+                <p className="font-semibold mb-2">Some orders could not be geocoded because their postal codes were not found in our database.</p>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -183,6 +270,7 @@ const FileUpload: React.FC = () => {
       {error && (
         <p className="mt-2 text-sm text-red-500">{error}</p>
       )}
+      {renderGeocodingSummary()}
     </div>
   );
 };
