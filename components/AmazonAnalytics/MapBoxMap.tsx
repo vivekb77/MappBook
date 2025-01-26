@@ -17,7 +17,8 @@ import { useReportContext } from '@/context/ReportContext';
 const CONFIG = {
   map: {
     styles: {
-      satellite: "mapbox://styles/mapbox/satellite-streets-v9",
+      globe: "mapbox://styles/mapbox/satellite-streets-v12",
+      flat:"mapbox://styles/mapbox/satellite-streets-v9"
     },
     drone: {
       ROTATION_DURATION: 0,
@@ -87,6 +88,7 @@ const MapboxMap: React.FC = () => {
   const [persistentError, setPersistentError] = useState<string | null>(null);
   const [showAllOrders, setShowAllOrders] = useState(false);
   const { isLoaded, isSignedIn, user } = useUser();
+  const [mapStyle, setMapStyle] = useState<'flat' | 'globe'>('flat');
 
   const cleanup = () => {
     if (!isMountedRef.current) return;
@@ -277,6 +279,8 @@ const MapboxMap: React.FC = () => {
       console.warn('Error initializing map:', e);
       handleMapError();
     }
+
+    
   }, []);
 
   useEffect(() => {
@@ -349,7 +353,7 @@ const MapboxMap: React.FC = () => {
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN_MAPP_LOGGED_IN_USER}
         {...viewState}
         onMove={!isAnimating ? evt => setViewState(evt.viewState) : undefined}
-        mapStyle={CONFIG.map.styles.satellite}
+        mapStyle={CONFIG.map.styles[mapStyle]}
         style={{ width: '100%', height: '100%' }}
         onLoad={handleMapLoad}
         onError={handleMapError}
@@ -381,38 +385,53 @@ const MapboxMap: React.FC = () => {
 
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-4 right-2 pointer-events-auto">
-          <div
-            className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-64 cursor-pointer select-none border border-gray-700"
-            onClick={() => setShowAllOrders(!showAllOrders)}
-          >
-            {/* Labels Container */}
-            <div className="absolute inset-0 flex justify-between items-center z-10">
-              <div className="flex-1 flex justify-center items-center gap-1.5">
-                <span className={`text-sm font-medium transition-colors duration-150 ${!showAllOrders ? 'text-white' : 'text-gray-500'}`}>
-                  By ZIP
-                </span>
+          <div className="flex flex-col gap-2">
+
+          
+
+            <div
+              className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-64 cursor-pointer select-none border border-gray-700"
+              onClick={() => setMapStyle(mapStyle === 'flat' ? 'globe' : 'flat')}
+            >
+              <div className="absolute inset-0 flex justify-between items-center z-10">
+                <div className="flex-1 flex justify-center items-center gap-1.5">
+                  <span className={`text-sm font-medium transition-colors duration-150 ${mapStyle === 'flat' ? 'text-white' : 'text-gray-500'}`}>
+                    Flat
+                  </span>
+                </div>
+                <div className="flex-1 flex justify-center items-center gap-1.5">
+                  <span className={`text-sm font-medium transition-colors duration-150 ${mapStyle === 'globe' ? 'text-white' : 'text-gray-500'}`}>
+                    Globe
+                  </span>
+                </div>
               </div>
-              <div className="flex-1 flex justify-center items-center gap-1.5">
-                <span className={`text-sm font-medium transition-colors duration-150 ${showAllOrders ? 'text-white' : 'text-gray-500'}`}>
-                  All Locations
-                </span>
-              </div>
+              <div className={`absolute h-[34px] w-[49%] mx-[2px] rounded-full bg-blue-500 transition-transform duration-150 ease-in-out ${mapStyle === 'globe' ? 'translate-x-[100%]' : 'translate-x-0'}`} />
             </div>
 
-            {/* Sliding Background */}
             <div
-              className={`
-                absolute h-[34px] w-[49%] mx-[2px] rounded-full
-                bg-blue-500
-                transition-transform duration-150 ease-in-out
-                ${showAllOrders ? 'translate-x-[100%]' : 'translate-x-0'}
-              `}
-            />
+              className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-64 cursor-pointer select-none border border-gray-700"
+              onClick={() => setShowAllOrders(!showAllOrders)}
+            >
+              <div className="absolute inset-0 flex justify-between items-center z-10">
+                <div className="flex-1 flex justify-center items-center gap-1.5">
+                  <span className={`text-sm font-medium transition-colors duration-150 ${!showAllOrders ? 'text-white' : 'text-gray-500'}`}>
+                    By ZIP
+                  </span>
+                </div>
+                <div className="flex-1 flex justify-center items-center gap-1.5">
+                  <span className={`text-sm font-medium transition-colors duration-150 ${showAllOrders ? 'text-white' : 'text-gray-500'}`}>
+                    Individual
+                  </span>
+                </div>
+              </div>
+              <div className={`absolute h-[34px] w-[49%] mx-[2px] rounded-full bg-blue-500 transition-transform duration-150 ease-in-out ${showAllOrders ? 'translate-x-[100%]' : 'translate-x-0'}`} />
+            </div>
           </div>
         </div>
-
       </div>
     </div>
+
+   
   );
 };
 

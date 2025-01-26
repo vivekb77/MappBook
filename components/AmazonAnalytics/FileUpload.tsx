@@ -101,7 +101,7 @@ const FileUpload: React.FC = () => {
     formData.append('file', file);
     formData.append('userId', mappbookUser?.mappbook_user_id || '');
 
-    await fetch('/api/upload-raw', {
+    await fetch('/api/amazon-upload-raw', {
       method: 'POST',
       body: formData
     });
@@ -121,7 +121,7 @@ const FileUpload: React.FC = () => {
           const processedData = processOrderData(results.data);
 
           try {
-            const response = await fetch('/api/upload-orders', {
+            const response = await fetch('/api/amazon-upload-orders', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -173,7 +173,7 @@ const FileUpload: React.FC = () => {
         />
         <Upload className="w-5 h-5 mr-2 text-blue-500" />
         <span className="text-sm text-gray-200">
-          {isUploading ? 'Uploading...' : 'Upload Order Report'}
+          {isUploading ? 'Processing...' : 'Upload Order Report'}
         </span>
       </label>
       {error && (

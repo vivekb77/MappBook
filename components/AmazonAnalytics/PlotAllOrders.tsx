@@ -49,7 +49,7 @@ const getIconColor = (status: string): string => {
   return colors[status] || 'text-black-400';
 };
 
-const OFFSET_AMOUNT = 0.001; // Approximately 110 meters at the equator
+const OFFSET_AMOUNT = 0.01; // Approximately 11000 meters at the equator
 
 const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [] }) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);

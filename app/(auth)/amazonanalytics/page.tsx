@@ -6,8 +6,8 @@ import { useUser } from '@clerk/nextjs'
 import dynamic from 'next/dynamic'
 import { ReportContext } from '@/context/ReportContext';
 
-const Dashboard = dynamic(() => import('@/components/Analytics/Dashboard'))
-const MapboxMap = dynamic(() => import('@/components/Analytics/MapBoxMap'))
+const Dashboard = dynamic(() => import('@/components/AmazonAnalytics/Dashboard'))
+const MapboxMap = dynamic(() => import('@/components/AmazonAnalytics/MapBoxMap'))
 
 export default function Create() {
   const { isLoaded } = useUser()

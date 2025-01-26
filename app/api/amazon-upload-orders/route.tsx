@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       order_data.orders = ordersWithCoordinates;
   
       const { data: insertedData, error } = await supabase
-        .from('Order_Analytics')
+        .from('Amazon_Order_Analytics')
         .insert([{
           mappbook_user_id,
           report_date,

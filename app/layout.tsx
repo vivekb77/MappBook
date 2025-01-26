@@ -8,7 +8,7 @@ import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'MappBook.com',
-  description: 'Create Stunning Drone-Like Footage Using Maps',
+  description: 'Geotargeting Analytics for Amazon Seller Central Order Reports',
   robots: {
     index: true,
     follow: true,

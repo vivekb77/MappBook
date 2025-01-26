@@ -64,7 +64,7 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
     const handleReportAdded = async () => {
       setPage(1);
       const { data } = await supabase
-        .from('Order_Analytics')
+        .from('Amazon_Order_Analytics')
         .select('report_id,created_at,total_orders_in_report,total_orders_processed_from_report')
         .eq('mappbook_user_id', userId)
         .eq('is_deleted', false)
@@ -102,7 +102,7 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
       const end = start + PAGE_SIZE - 1;
 
       const { data, error, count } = await supabase
-        .from('Order_Analytics')
+        .from('Amazon_Order_Analytics')
         .select('report_id,created_at,total_orders_in_report,total_orders_processed_from_report', { count: 'exact' })
         .eq('mappbook_user_id', userId)
         .eq('is_deleted', false)
@@ -120,11 +120,11 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
         }
       }
     } catch (error) {
-      track('RED - Drone - Footage data pull from supabase failed', {
+      track('RED - Amazon - Report data pull from supabase failed', {
         user_id: userId
       });
-      console.error('Error fetching drone footage history:', error);
-      showToast('Failed to fetch drone footage history. Please try again.', 'error');
+      console.error('Error fetching amazon report history:', error);
+      showToast('Failed to fetch amazon report history. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -138,26 +138,26 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
 
   const confirmDelete = async () => {
     if (!footageToDelete?.report_id) {
-      showToast('Invalid footage selected', 'error');
+      showToast('Invalid report selected', 'error');
       return;
     }
 
     try {
       const { error } = await supabase
-        .from('Order_Analytics')
+        .from('Amazon_Order_Analytics')
         .update({ is_deleted: true })
         .eq('report_id', footageToDelete.report_id);
 
       if (error) throw error;
 
       setFootage(prev => prev.filter(v => v.report_id !== footageToDelete.report_id));
-      showToast('Footage deleted successfully');
+      showToast('Report deleted successfully');
     } catch (error) {
-      track('RED - Drone - Delete Footage failed', {
+      track('RED - Amazon - Delete Report failed', {
         user_id: userId
       });
-      console.error('Error deleting Footage:', error);
-      showToast('Failed to delete Footage. Please try again.', 'error');
+      console.error('Error deleting report:', error);
+      showToast('Failed to delete report. Please try again.', 'error');
     } finally {
       setDeleteDialogOpen(false);
       setFootageToDelete(null);
@@ -170,7 +170,7 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
       setLoading(true);
 
       const { data, error } = await supabase
-        .from('Order_Analytics')
+        .from('Amazon_Order_Analytics')
         .select('order_data')
         .eq('report_id', foot.report_id)
         .single();
@@ -181,7 +181,7 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
         setReportData(data.order_data);
       }
     } catch (error) {
-      track('RED - Drone - Report data fetch failed', {
+      track('RED - Amazon - Report data fetch failed', {
         user_id: userId
       });
       console.error('Error fetching report data:', error);

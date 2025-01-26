@@ -45,119 +45,6 @@ const VideoThumbnail = ({ title, thumbnail, onClick }: VideoThumbnailProps) => {
   );
 };
 
-const VideoGallery = () => {
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-
-  const videos = [
-    {
-      title: "Grassland Flyover",
-      thumbnail: "/drone/landingpagevideo1cover.png",
-      videoUrl: "https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/map-animation-videos/landingpagevideo1.mov?t=2025-01-03T00%3A50%3A29.242Z"
-    },
-    {
-      title: "Desert Flyover",
-      thumbnail: "/drone/landingpagevideo2cover.png",
-      videoUrl: "https://ugjwmywvzxkfkohaxseg.supabase.co/storage/v1/object/public/map-animation-videos/landingpagevideo2.mov?t=2025-01-03T00%3A50%3A57.801Z"
-    }
-     // {
-    //   title: "New York City Flyover",
-    //   thumbnail: "",
-    //   videoUrl: ""
-    // },
-    // {
-    //   title: "Grand Canyon Tour",
-    //   thumbnail: "",
-    //   videoUrl: ""
-    // },
-    // {
-    //   title: "Tokyo Night Flight",
-    //   thumbnail: "",
-    //   videoUrl: ""
-    // },
-    // {
-    //   // /render/2e73db7a-4dac-4764-b712-e1b325981192
-    //   // render/e1019458-187d-47e1-86f4-731dd38765b0
-    //   title: "Paris Landmarks",
-    //   thumbnail: "",
-    //   videoUrl: ""
-    // }
-  ];
-
-  return (
-    <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {videos.map((video, index) => (
-          <VideoThumbnail
-            key={index}
-            {...video}
-            onClick={() => setSelectedVideo(video.videoUrl)}
-          />
-        ))}
-      </div>
-
-      {selectedVideo && (
-        <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
-          <DialogContent className="sm:max-w-[90vw] h-[80vh] p-0 bg-transparent border-0 rounded-xl">
-            <div className="relative w-full h-full">
-              <Player
-                component={() => {
-                  const videoRef = React.useRef<HTMLVideoElement>(null);
-
-                  React.useEffect(() => {
-                    // Track video play when component mounts
-                    const videoTitle = videos.find(v => v.videoUrl === selectedVideo)?.title || 'Unknown';
-                    track('Drone - Landing page video played', {
-                      videoTitle
-                    });
-                  }, []);
-
-                  React.useEffect(() => {
-                    if (videoRef.current) {
-                      videoRef.current.addEventListener('loadedmetadata', () => {
-                        if (videoRef.current) {
-                          const width = videoRef.current.videoWidth;
-                          const height = videoRef.current.videoHeight;
-                          videoRef.current.style.width = `${width}px`;
-                          videoRef.current.style.height = `${height}px`;
-                        }
-                      });
-                    }
-                  }, []);
-
-                  return (
-                    <div className="w-full h-full bg-black">
-                      <video
-                        ref={videoRef}
-                        src={selectedVideo}
-                        controls
-                        autoPlay
-                        className="w-full h-full rounded-lg"
-                      />
-                    </div>
-                  );
-                }}
-                durationInFrames={1000}
-                compositionWidth={1520}
-                compositionHeight={1080}
-                fps={30}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                }}
-              />
-              <button
-                onClick={() => setSelectedVideo(null)}
-                className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 rounded-full hover:bg-opacity-70 transition-all"
-              >
-                <X className="w-6 h-6 text-white" />
-              </button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-    </>
-  );
-};
 
 const LandingPage = () => {
   return (
@@ -202,11 +89,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Video Gallery Section */}
-      <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold mb-8 text-center">Featured Creations</h2>
-        <VideoGallery />
-      </section>
 
       {/* Features */}
       <section className="container mx-auto px-4 py-16">

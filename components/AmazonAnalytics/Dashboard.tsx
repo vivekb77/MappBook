@@ -31,7 +31,7 @@ const DashboardContainer = () => {
   const handleLogout = async () => {
     const { success, error } = await logout();
     if (!success) {
-      track('RED - Drone - Logout failed');
+      track('RED - Amazon - Logout failed');
     }
   };
 
