@@ -32,8 +32,8 @@ type OrderVisualizationProps = {
   orders?: Order[];
 };
 
-const COLORS_STATUS = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'];
-const COLORS_CHANNEL = ['#10b981', '#6366f1', '#f59e0b', '#ef4444'];
+const COLORS_STATUS = ['#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65','#4FC3F7', '#2196F3', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63']; 
+const COLORS_CHANNEL = ['#4FC3F7', '#2196F3', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63', '#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65']; 
 
 const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [] }) => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);

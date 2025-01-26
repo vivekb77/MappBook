@@ -49,32 +49,31 @@ const getIconColor = (status: string): string => {
   return colors[status] || 'text-black-400';
 };
 
-const OFFSET_AMOUNT = 0.01; // Approximately 11000 meters at the equator
-
 const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [] }) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const ORDERS_PER_CIRCLE = 12;
+  const BASE_OFFSET = 0.003;
+  const locationMap = new Map<string, number>();
 
-  const adjustedOrders = useMemo(() => {
-    const locationMap = new Map<string, number>();
+  const adjustedOrders = orders.map(order => {
+    const key = `${order.shipped_to_latitude},${order.shipped_to_longitude}`;
+    const count = locationMap.get(key) || 0;
+    locationMap.set(key, count + 1);
 
-    return orders.map(order => {
-      const key = `${order.shipped_to_latitude},${order.shipped_to_longitude}`;
-      const count = locationMap.get(key) || 0;
-      locationMap.set(key, count + 1);
+    if (count > 0) {
+      const circle = Math.floor(count / ORDERS_PER_CIRCLE);
+      const position = count % ORDERS_PER_CIRCLE;
+      const angle = (2 * Math.PI * position) / ORDERS_PER_CIRCLE;
+      const offset = BASE_OFFSET * (circle + 1);
 
-      if (count > 0) {
-        // Create a circular pattern around the original point
-        const angle = (2 * Math.PI * count) / 8;
-        return {
-          ...order,
-          shipped_to_latitude: order.shipped_to_latitude + OFFSET_AMOUNT * Math.sin(angle),
-          shipped_to_longitude: order.shipped_to_longitude + OFFSET_AMOUNT * Math.cos(angle)
-        };
-      }
-
-      return order;
-    });
-  }, [orders]);
+      return {
+        ...order,
+        shipped_to_latitude: order.shipped_to_latitude + offset * Math.sin(angle),
+        shipped_to_longitude: order.shipped_to_longitude + offset * Math.cos(angle)
+      };
+    }
+    return order;
+  });
 
   return (
     <>

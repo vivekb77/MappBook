@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
 import { logout } from '../utils/auth';
-import { Camera, Globe, Video, Coins, Instagram } from 'lucide-react';
+import { Camera, Globe, Video, Coins, Instagram, ChevronUp, ChevronDown } from 'lucide-react';
 import SignInButton from './SignInButton';
 import { track } from '@vercel/analytics';
 import AddCredits from './BuyPremium';
@@ -21,6 +21,7 @@ const DashboardContainer = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { mappbookUser, setMappbookUser } = useMappbookUser();
   const [isLoading, setIsLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (isLoaded) {
@@ -98,70 +99,92 @@ const DashboardContainer = () => {
               <div className="bg-gray-800 rounded-lg p-8 text-center">
                 {/* <h2 className="text-3xl font-bold text-white mb-4">Welcome to MappBook</h2> */}
                 <p className="text-gray-300 mb-6">Geotargeting Analytics for Amazon Seller Central Orders</p>
+
                 <SignInButton />
+
+                <p className="text-gray-300 mt-8 mb-6">Do you ever struggle to pin down an understanding of where your customers are?</p>
               </div>
 
               <div className="flex flex-col gap-4 mt-8">
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Identify best countries"
-                  // description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
+                // description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Where are my top customers located?"
-                  // description="Most business owners rely on Google Analytics which does a commendable job but lacks indepth detail on customer locations across different regions."
+                // description="Most business owners rely on Google Analytics which does a commendable job but lacks indepth detail on customer locations across different regions."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Which countries give me the highest revenue?"
-                  // description="Get detailed insights into revenue generation by country to optimize your marketing strategies and resource allocation."
+                // description="Get detailed insights into revenue generation by country to optimize your marketing strategies and resource allocation."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="Which customers fall in a particular Country, State, County or ZIP code?"
-                  // description="Drill down into specific geographic segments to understand customer distribution across different regional levels for targeted marketing."
+                // description="Drill down into specific geographic segments to understand customer distribution across different regional levels for targeted marketing."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="How many customers are from a particular place?"
-                  // description="Get precise customer counts by location to identify key markets and growth opportunities in specific regions."
+                // description="Get precise customer counts by location to identify key markets and growth opportunities in specific regions."
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
                   title="And lot more"
-                  // description="Discover additional geotargeting insights to make data-driven decisions for your marketing campaigns and business strategy."
+                // description="Discover additional geotargeting insights to make data-driven decisions for your marketing campaigns and business strategy."
                 />
               </div>
 
               <div className="w-full overflow-x-auto">
-                  <OrderReportHistory userId={'cbcafcd9-a6a9-44eb-893e-96dd316b4a4f'} />
-                </div>
+                <OrderReportHistory userId={'cbcafcd9-a6a9-44eb-893e-96dd316b4a4f'} />
+              </div>
 
             </div>
           )}
 
           {isLoaded && isSignedIn && mappbookUser && (
             <>
-            <InfoPopUp />
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">Geotargeting Analytics</h2>
+              {/* <InfoPopUp /> */}
+              <div className="max-w-4xl mx-auto space-y-8">
+                <div className="text-center space-y-4">
+                  <h2 className="text-3xl font-bold text-white">Geotargeting Analytics</h2>
+                  <p className="text-gray-300">Location Intelligence for Amazon Sellers</p>
+                  <p className="text-gray-300">Understand and visualise exactly where your audience is located</p>
+                </div>
 
-                <p className="text-gray-300 mb-6">How to download Amazon Seller Central Order Reports</p>
+                <div className="space-y-6">
+                  <button
+                    onClick={() => setIsVisible(!isVisible)}
+                    className="w-full flex items-center justify-between bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors duration-200"
+                  >
+                    <span>How to download Amazon Seller Central Order Reports</span>
+                    {isVisible ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                  </button>
 
-                <ol className="list-disc pl-6 mb-6 text-gray-300 space-y-2">
-                  <li>Login: First, sellers must log into their Amazon Seller Central account.</li>
-                  <li>Navigate to Reports: Usually found in the main navigation bar, this section contains various sales, inventory, and performance reports.</li>
-                  <li>Locate the ‘All Orders Report’: Within the Reports section, sellers can find and select the specific “All Orders Report”.</li>
-                  <li>Select Date Range (max 28 days): Amazon allows sellers to pull reports based on specific dates. Choose last 28 days.</li>
-                  <li>Download: Once the report has been generated, there will typically be an option to download it. The report is often available in different formats .csv or .txt.</li>
-                  <li>Upload the CSV file below</li>
-                  <li>Note: 'ship-postal-code' should be available in order data, though Amazon may limit access to complete address information after 28 days.</li>
-                </ol>
-
-                <FileUpload />
-                <div className="w-full overflow-x-auto">
-                  <OrderReportHistory userId={mappbookUser.mappbook_user_id} />
+                  {isVisible && (
+                    <div className="bg-gray-800 p-8 rounded-lg">
+                      <ol className="list-disc pl-6 text-gray-300 space-y-3">
+                        <li>Login: First, sellers must log into their Amazon Seller Central account.</li>
+                        <li>Navigate to Reports: Usually found in the main navigation bar, this section contains various sales, inventory, and performance reports.</li>
+                        <li>Locate the 'All Orders Report': Within the Reports section, sellers can find and select the specific "All Orders Report".</li>
+                        <li>Select Date Range (max 28 days): Amazon allows sellers to pull reports based on specific dates. Choose last 28 days.</li>
+                        <li>Download: Once the report has been generated, there will typically be an option to download it. The report is often available in different formats .csv or .txt.</li>
+                        <li>Upload the CSV file below</li>
+                        <li>Note: 'ship-postal-code' should be available in order data, though Amazon may limit access to complete address information after 28 days.</li>
+                        <li>Need help - Send us a message by clicking contact button at the bottom of page.</li>
+                      </ol>
+                    </div>
+                  )}
+                </div>
+                <DesktopRecommendationBanner />
+                <div className="space-y-6">
+                  <FileUpload />
+                  <div className="w-full overflow-x-auto">
+                    <OrderReportHistory userId={mappbookUser.mappbook_user_id} />
+                  </div>
                 </div>
               </div>
 
@@ -190,7 +213,7 @@ const DashboardContainer = () => {
 
 
         </div>
-        <DesktopRecommendationBanner />
+        
       </div>
 
       <div className="border-t border-gray-800 bg-gray-900 mt-auto">

@@ -47,15 +47,15 @@ const OrderFilters: React.FC = () => {
 
   const getFilteredProducts = (): string[] => {
     if (!originalData?.orders) return [];
-    
+
     let filteredOrders = [...originalData.orders];
     if (dateRange?.from && dateRange?.to) {
       filteredOrders = filteredOrders.filter(order => {
         const orderDate = new Date(order.purchase_date);
         const fromDate = new Date(dateRange.from!);
-        fromDate.setHours(0,0,0,0);
+        fromDate.setHours(0, 0, 0, 0);
         const toDate = new Date(dateRange.to!);
-        toDate.setHours(23,59,59,999);
+        toDate.setHours(23, 59, 59, 999);
         return orderDate >= fromDate && orderDate <= toDate;
       });
     }
@@ -64,19 +64,19 @@ const OrderFilters: React.FC = () => {
 
   const getFilteredOrdersStats = (): OrderStats => {
     if (!originalData?.orders) return { count: 0, totals: {} };
-    
+
     let filteredOrders = [...originalData.orders];
     if (dateRange?.from && dateRange?.to) {
       filteredOrders = filteredOrders.filter(order => {
         const orderDate = new Date(order.purchase_date);
         const fromDate = new Date(dateRange.from!);
-        fromDate.setHours(0,0,0,0);
+        fromDate.setHours(0, 0, 0, 0);
         const toDate = new Date(dateRange.to!);
-        toDate.setHours(23,59,59,999);
+        toDate.setHours(23, 59, 59, 999);
         return orderDate >= fromDate && orderDate <= toDate;
       });
     }
-    
+
     if (selectedProducts.length > 0) {
       filteredOrders = filteredOrders.filter(order => selectedProducts.includes(order.product_name));
     }
@@ -105,9 +105,9 @@ const OrderFilters: React.FC = () => {
       filteredOrders = filteredOrders.filter(order => {
         const orderDate = new Date(order.purchase_date);
         const fromDate = new Date(dateRange.from!);
-        fromDate.setHours(0,0,0,0);
+        fromDate.setHours(0, 0, 0, 0);
         const toDate = new Date(dateRange.to!);
-        toDate.setHours(23,59,59,999);
+        toDate.setHours(23, 59, 59, 999);
         return orderDate >= fromDate && orderDate <= toDate;
       });
     }
@@ -157,14 +157,21 @@ const OrderFilters: React.FC = () => {
               Total Orders: {orderStats.count}
             </div>
             <div className="text-sm font-medium text-gray-700">
-              {Object.entries(orderStats.totals).map(([currency, amount]) => (
-                <div key={currency}>
-                  {currency}: {new Intl.NumberFormat('en-US', { 
-                    style: 'currency', 
-                    currency: currency === '?' ? 'USD' : currency 
-                  }).format(amount)}
-                </div>
-              ))}
+              {Object.entries(orderStats.totals).map(([currency, amount]) => {
+                // Only format if we have a valid currency code
+                const formattedAmount = currency !== '?'
+                  ? new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: currency
+                  }).format(amount)
+                  : `${amount}`; // Just show the number for unknown currency
+
+                return (
+                  <div key={currency} className="py-1">
+                    {currency}: {formattedAmount}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -217,16 +224,16 @@ const OrderFilters: React.FC = () => {
               <PopoverContent className="w-80">
                 <div className="space-y-4">
                   <div className="flex justify-between pb-2 border-b">
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="sm"
                       onClick={handleSelectAll}
                       className="text-xs"
                     >
                       Select All
                     </Button>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="sm"
                       onClick={handleDeselectAll}
                       className="text-xs"

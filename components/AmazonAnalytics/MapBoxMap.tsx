@@ -13,6 +13,7 @@ import PlotAllOrders from './PlotAllOrders';
 import { throttle } from 'lodash';
 import { track } from "@vercel/analytics";
 import { useReportContext } from '@/context/ReportContext';
+import InfoPopUp from "./InfoPopUp";
 
 const CONFIG = {
   map: {
@@ -381,6 +382,7 @@ const MapboxMap: React.FC = () => {
           </>
 
         )}
+        <InfoPopUp />
       </Map>
 
       <div className="absolute inset-0 pointer-events-none">
