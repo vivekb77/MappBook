@@ -150,11 +150,13 @@ const DashboardContainer = () => {
                 <p className="text-gray-300 mb-6">How to download Amazon Seller Central Order Reports</p>
 
                 <ol className="list-disc pl-6 mb-6 text-gray-300 space-y-2">
-                  <li>Go to Amazon business analytics and navigate to "Reports</li>
-                  <li>Click on "Orders" and sort/filter as needed</li>
-                  <li>Name your report and click "Request Report</li>
-                  <li>Once processed, download the CSV file</li>
+                  <li>Login: First, sellers must log into their Amazon Seller Central account.</li>
+                  <li>Navigate to Reports: Usually found in the main navigation bar, this section contains various sales, inventory, and performance reports.</li>
+                  <li>Locate the ‘All Orders Report’: Within the Reports section, sellers can find and select the specific “All Orders Report”.</li>
+                  <li>Select Date Range (max 28 days): Amazon allows sellers to pull reports based on specific dates. Choose last 28 days.</li>
+                  <li>Download: Once the report has been generated, there will typically be an option to download it. The report is often available in different formats .csv or .txt.</li>
                   <li>Upload the CSV file below</li>
+                  <li>Note: 'ship-postal-code' should be available in order data, though Amazon may limit access to complete address information after 28 days.</li>
                 </ol>
 
                 <FileUpload />

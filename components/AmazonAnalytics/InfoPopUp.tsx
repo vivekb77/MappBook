@@ -49,7 +49,7 @@ const GeotargetingInfo = () => {
               </ul>
             </div>
 
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
                 <Globe className="w-5 h-5 text-blue-600" />
                 Advanced Features
@@ -60,7 +60,7 @@ const GeotargetingInfo = () => {
                 <li>• Seasonal campaign planning</li>
                 <li>• Geographic performance tracking</li>
               </ul>
-            </div>
+            </div> */}
           </div>
         </DialogContent>
       </Dialog>

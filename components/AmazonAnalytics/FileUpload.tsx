@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
 import Papa from 'papaparse';
 import { useMappbookUser } from '@/context/UserContext';
 
@@ -171,7 +171,11 @@ const FileUpload: React.FC = () => {
           className="hidden"
           disabled={isUploading}
         />
-        <Upload className="w-5 h-5 mr-2 text-blue-500" />
+        {isUploading ? (
+          <Loader2 className="w-5 h-5 mr-2 text-blue-500 animate-spin" />
+        ) : (
+          <Upload className="w-5 h-5 mr-2 text-blue-500" />
+        )}
         <span className="text-sm text-gray-200">
           {isUploading ? 'Processing...' : 'Upload Order Report'}
         </span>
