@@ -54,7 +54,7 @@ const FileUpload: React.FC = () => {
   const [error, setError] = useState('');
   const [geocodingSummary, setGeocodingSummary] = useState<GeocodingSummary | null>(null);
   const [showSummary, setShowSummary] = useState(true);
-  const [totalOrdersInReport, setTotalOrdersInReport] = useState(true);
+  const [totalOrdersInReport, setTotalOrdersInReport] = useState(0);
 
   const processOrderData = (data: Record<string, string>[]): ProcessedData => {
     const orders = data.map(row => ({
@@ -133,6 +133,7 @@ const FileUpload: React.FC = () => {
           }
 
           const processedData = processOrderData(results.data);
+          setTotalOrdersInReport(processedData.metadata.total_orders);
 
           try {
             const response = await fetch('/api/amazon-upload-orders', {
@@ -178,7 +179,7 @@ const FileUpload: React.FC = () => {
     if (!geocodingSummary || !showSummary) return null;
 
     const { total, successful, failed } = geocodingSummary;
-    const successRate = total > 0 ? Math.round((successful / total) * 100) : 0;
+    const successRate = totalOrdersInReport > 0 ? Math.round((successful / totalOrdersInReport) * 100) : 0;
 
     return (
       <div className="space-y-4 mt-4">
@@ -205,7 +206,7 @@ const FileUpload: React.FC = () => {
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <p className="text-sm text-gray-500">Total Orders</p>
-                <p className="text-2xl font-semibold">{total}</p>
+                <p className="text-2xl font-semibold">{totalOrdersInReport}</p>
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-500">Successfully Geocoded</p>

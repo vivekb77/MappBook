@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       mappbook_user_id: string;
     } = await request.json();
     const API_KEY = process.env.POSITIONSTACK_API_KEY;
-
+    const total_order_came_in_report = order_data.orders.length
     let successfulGeocodes = 0;
     let failedOrders: Order[] = [];
     const errors: GeocodingError[] = [];
@@ -57,13 +57,13 @@ export async function POST(request: Request) {
         }
 
         const geoData = await response.json();
-        
+
         if (geoData.error) {
           throw new Error(geoData.error.message || 'API Error');
         }
 
         const location = geoData.data?.[0];
-        
+
         if (location?.latitude && location?.longitude && location.confidence === 1) {
           successfulGeocodes++;
           return {
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         }
 
         throw new Error('No coordinates found');
-        
+
       } catch (error) {
         if (retryCount < MAX_RETRIES) {
           await delay(RATE_LIMIT_DELAY * Math.pow(2, retryCount));
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
     const processOrderBatch = async (orders: Order[]): Promise<Order[]> => {
       const validOrders = orders.filter(order => order.ship_postal_code && order.ship_country);
       const invalidOrders = orders.filter(order => !order.ship_postal_code || !order.ship_country);
-      
+
       invalidOrders.forEach(order => {
         errors.push({
           postal_code: order.ship_postal_code || '',
@@ -125,13 +125,13 @@ export async function POST(request: Request) {
     if (failedOrders.length > 0) {
       await delay(RATE_LIMIT_DELAY * 2);
       const retriedResults = await processOrderBatch(failedOrders);
-      
+
       // Replace failed orders with retried results
       ordersWithCoordinates.forEach((order, index) => {
         if (!order.shipped_to_latitude && !order.shipped_to_longitude) {
           const retriedOrder = retriedResults.find(
-            r => r.ship_postal_code === order.ship_postal_code && 
-                 r.ship_country === order.ship_country
+            r => r.ship_postal_code === order.ship_postal_code &&
+              r.ship_country === order.ship_country
           );
           if (retriedOrder?.shipped_to_latitude) {
             ordersWithCoordinates[index] = retriedOrder;
@@ -140,8 +140,8 @@ export async function POST(request: Request) {
       });
     }
 
-    order_data.orders = ordersWithCoordinates.filter(order => 
-      order.shipped_to_latitude !== null && 
+    order_data.orders = ordersWithCoordinates.filter(order =>
+      order.shipped_to_latitude !== null &&
       order.shipped_to_longitude !== null
     );
 
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
         mappbook_user_id,
         report_date,
         order_data,
-        total_orders_in_report: order_data.orders.length,
+        total_orders_in_report: total_order_came_in_report,
         total_orders_processed_from_report: successfulGeocodes,
       }])
       .select()
@@ -163,15 +163,15 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       geocoding_summary: {
-        total: order_data.orders.length,
+        total: total_order_came_in_report,
         successful: successfulGeocodes,
-        failed: errors.length/2
+        failed: errors.length / 2
       }
     });
 
   } catch (error) {
     console.error('Server error:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Something went wrong',
       message: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
