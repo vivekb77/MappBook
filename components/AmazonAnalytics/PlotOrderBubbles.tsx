@@ -106,7 +106,7 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [] }) 
     return (
       <div 
         ref={panelRef}
-        className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-sm z-50"
+        className="absolute top-2 right-2 bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-sm z-50"
       >
         <h3 className="font-bold mb-2">Zip Code: {location.zipCode}</h3>
         <p className="mb-4">Total Orders: {location.totalOrders}</p>

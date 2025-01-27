@@ -386,13 +386,13 @@ const MapboxMap: React.FC = () => {
       </Map>
 
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-4 right-2 pointer-events-auto">
+        <div className="absolute top-2 right-2 pointer-events-auto">
           <div className="flex flex-col gap-2">
 
           
 
             <div
-              className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-64 cursor-pointer select-none border border-gray-700"
+              className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-48 cursor-pointer select-none border border-gray-700"
               onClick={() => setMapStyle(mapStyle === 'flat' ? 'globe' : 'flat')}
             >
               <div className="absolute inset-0 flex justify-between items-center z-10">
@@ -411,7 +411,7 @@ const MapboxMap: React.FC = () => {
             </div>
 
             <div
-              className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-64 cursor-pointer select-none border border-gray-700"
+              className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-48 cursor-pointer select-none border border-gray-700"
               onClick={() => setShowAllOrders(!showAllOrders)}
             >
               <div className="absolute inset-0 flex justify-between items-center z-10">
@@ -431,6 +431,8 @@ const MapboxMap: React.FC = () => {
           </div>
         </div>
       </div>
+
+
     </div>
 
    
