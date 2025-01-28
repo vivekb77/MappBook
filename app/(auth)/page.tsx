@@ -36,9 +36,9 @@ const LandingPage = () => {
             {/* <span className="text-yellow-400 font-semibold">Trusted by 5,000+ Amazon Sellers</span> */}
           </div>
           <h1 className="text-5xl font-bold mb-6 leading-tight">
-            Transform Your Amazon Business with<br />
+            Location Analytics for<br />
             <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Intelligent Geotargeting
+              Amazon Sellers
             </span>
           </h1>
           <p className="text-xl text-gray-300 mb-8">
@@ -46,7 +46,7 @@ const LandingPage = () => {
           </p>
           <Link href="/amazonanalytics">
             <button className="px-8 py-4 bg-blue-500 rounded-lg text-lg font-semibold hover:bg-blue-600 transition transform hover:scale-105">
-              Start Analyzing Free Trial →
+              Interactive Demo →
             </button>
           </Link>
           <p className="mt-4 text-sm text-gray-400">No credit card required</p>
