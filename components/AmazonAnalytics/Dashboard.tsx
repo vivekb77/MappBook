@@ -98,7 +98,7 @@ const DashboardContainer = () => {
             <div className="space-y-4">
               <div className="bg-gray-800 rounded-lg p-8 text-center">
                 {/* <h2 className="text-3xl font-bold text-white mb-4">Welcome to MappBook</h2> */}
-                <p className="text-gray-300 mb-6">Geotargeting Analytics for Amazon Seller Central Orders</p>
+                <p className="text-gray-300 mb-6">Location Analytics for Amazon Sellers</p>
 
                 <SignInButton />
 
@@ -108,33 +108,23 @@ const DashboardContainer = () => {
               <div className="flex flex-col gap-4 mt-8">
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
-                  title="Identify best countries"
-                // description="Geotargeting is one of the important strategies used by Marketers. But what, business owners struggle most with is identifying the geographies that they customers come from."
+                  title="Customer Geographic Distribution"
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
-                  title="Where are my top customers located?"
-                // description="Most business owners rely on Google Analytics which does a commendable job but lacks indepth detail on customer locations across different regions."
+                  title="Regional Revenue Performance"
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
-                  title="Which countries give me the highest revenue?"
-                // description="Get detailed insights into revenue generation by country to optimize your marketing strategies and resource allocation."
+                  title="Regional Product Performance Map"
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
-                  title="Which customers fall in a particular Country, State, County or ZIP code?"
-                // description="Drill down into specific geographic segments to understand customer distribution across different regional levels for targeted marketing."
+                  title="Geographic Return Rate Analysis"
                 />
                 <FeatureCard
                   icon={<Globe className="w-8 h-8 text-blue-500" />}
-                  title="How many customers are from a particular place?"
-                // description="Get precise customer counts by location to identify key markets and growth opportunities in specific regions."
-                />
-                <FeatureCard
-                  icon={<Globe className="w-8 h-8 text-blue-500" />}
-                  title="And lot more"
-                // description="Discover additional geotargeting insights to make data-driven decisions for your marketing campaigns and business strategy."
+                  title="Channel Success by Location"
                 />
               </div>
 
@@ -150,9 +140,9 @@ const DashboardContainer = () => {
               {/* <InfoPopUp /> */}
               <div className="max-w-4xl mx-auto space-y-8">
                 <div className="text-center space-y-4">
-                  <h2 className="text-3xl font-bold text-white">Geotargeting Analytics</h2>
+                  {/* <h2 className="text-3xl font-bold text-white">Geotargeting Analytics</h2> */}
                   <p className="text-gray-300">Location Intelligence for Amazon Sellers</p>
-                  <p className="text-gray-300">Understand and visualise exactly where your audience is located</p>
+                  {/* <p className="text-gray-300">Understand and visualise exactly where your audience is located</p> */}
                 </div>
 
                 <div className="space-y-6">
@@ -187,33 +177,12 @@ const DashboardContainer = () => {
                   </div>
                 </div>
               </div>
-
-              {/* <div className="space-y-4 mb-6">
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold text-white mb-2">Get Premium</h3>
-                  <p className="text-gray-300">Understand Amazon Seller Central Order Reports</p>
-                </div>
-
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-white font-medium">1 month Premium</span>
-                      <span className="text-green-400 font-bold">$5</span>
-                    </div>
-                    <p className="text-gray-400 text-sm">Perfect small to medium sellers</p>
-                  </div>
-
-                </div>
-              </div>
-
-              <AddCredits /> */}
-
             </>
           )}
 
 
         </div>
-        
+
       </div>
 
       <div className="border-t border-gray-800 bg-gray-900 mt-auto">
