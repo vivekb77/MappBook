@@ -74,13 +74,21 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
       if (data && data.length > 0) {
         setFootage(data);
         setSelectedReport(data[0].report_id);
-        openReportOnMap(data[0]);
+        
+        // First open the report to get the new data
+        const newReportData = await openReportOnMap(data[0]);
+        
+        // Then dispatch reset event with the new data
+        window.dispatchEvent(new CustomEvent('resetOrderFilters', { 
+          detail: newReportData 
+        }));
       }
     };
 
     window.addEventListener('ReportAdded', handleReportAdded);
     return () => window.removeEventListener('ReportAdded', handleReportAdded);
-  }, []);
+    
+}, []);
 
 
   useEffect(() => {

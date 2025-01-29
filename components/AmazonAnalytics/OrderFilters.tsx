@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, SetStateAction, Dispatch } from 'react';
 import { useReportContext } from '@/context/ReportContext';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { CalendarIcon, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Order {
   purchase_date: string;
@@ -26,8 +26,8 @@ interface OrderStats {
 }
 
 interface ReportContextType {
-  reportData: ReportData | null;
-  setReportData: (data: ReportData) => void;
+  reportData: any | null;
+  setReportData: Dispatch<SetStateAction<any | null>>;
 }
 
 const OrderFilters: React.FC = () => {
@@ -42,26 +42,34 @@ const OrderFilters: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    if (reportData) {
+    if (reportData && !originalData) {
       setOriginalData(reportData);
     }
   }, [reportData]);
 
   useEffect(() => {
-    const handleReset = () => {
+    const handleReset = (event: CustomEvent) => { 
+      // First clear the data states
+      setOriginalData(null);
+      setReportData(null);
+  
+      // Get new data from the event
+      const newReportData = event.detail;
+      if (newReportData) {
+        setOriginalData(newReportData);
+        setReportData(newReportData);
+        console.log("reports set" + JSON.stringify(newReportData));
+      }
+  
+      // Finally clear the filter states
       setDateRange({ from: undefined, to: undefined });
       setSelectedProducts([]);
-
-      if (reportData) {
-        setOriginalData(reportData);
-        setReportData(reportData);
-      }
     };
-
-    window.addEventListener('resetOrderFilters', handleReset);
-    return () => window.removeEventListener('resetOrderFilters', handleReset);
-  }, [reportData, setReportData]);
-
+  
+    window.addEventListener('resetOrderFilters', handleReset as EventListener);
+    return () => window.removeEventListener('resetOrderFilters', handleReset as EventListener);
+  }, []);
+  
   const getFilteredProducts = (): string[] => {
     if (!originalData?.orders) return [];
 
@@ -76,9 +84,7 @@ const OrderFilters: React.FC = () => {
         return orderDate >= fromDate && orderDate <= toDate;
       });
     }
-
-    const uniqueProducts = Array.from(new Set(filteredOrders.map(order => order.product_name)));
-    return uniqueProducts;
+    return filteredOrders.map(order => order.product_name).filter((value, index, self) => self.indexOf(value) === index);
   };
 
   const getFilteredOrdersStats = (): OrderStats => {
@@ -154,15 +160,13 @@ const OrderFilters: React.FC = () => {
   const handleReset = (): void => {
     setDateRange({ from: undefined, to: undefined });
     setSelectedProducts([]);
-
-    if (reportData) {
-      setOriginalData(reportData);
-      setReportData(reportData);
+    if (originalData) {
+      setReportData(originalData);
     }
   };
 
   const handleSelectAll = (): void => {
-    setSelectedProducts([...uniqueProducts]);
+    setSelectedProducts(uniqueProducts);
   };
 
   const handleDeselectAll = (): void => {
@@ -263,7 +267,7 @@ const OrderFilters: React.FC = () => {
                       </Button>
                     </div>
                     <div className="grid gap-2 max-h-60 overflow-y-auto px-1">
-                      {uniqueProducts.map((product) => {
+                    {uniqueProducts.map((product) => {
                         const productId = `product-${product.replace(/\s+/g, '-').toLowerCase()}`;
                         return (
                           <div key={productId} className="flex items-center space-x-2">
@@ -306,7 +310,7 @@ const OrderFilters: React.FC = () => {
           )}
         </div>
       </div>
-
+      
       <button
         onClick={() => setIsVisible(!isVisible)}
         className="absolute bottom-10 right-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
