@@ -9,6 +9,7 @@ interface OrderData {
   amazon_order_id: string;
   merchant_order_id: string;
   purchase_date: string;
+  last_updated_date: string;
   order_status: string;
   fulfillment_channel: string;
   sales_channel: string;
@@ -24,12 +25,18 @@ interface OrderData {
   item_tax: number;
   shipping_price: number;
   shipping_tax: number;
+  gift_wrap_price: number;
+  gift_wrap_tax: number;
+  item_promotion_discount: number;
+  ship_promotion_discount: number;
   ship_city: string;
   ship_state: string;
   ship_postal_code: string;
   ship_country: string;
-  ship_from_postal_code: string;
-  ship_from_country: string;
+  promotion_ids: string;
+  is_business_order: boolean;
+  purchase_order_number: string;
+  price_designation: string;
 }
 
 interface ProcessedData {
@@ -57,41 +64,65 @@ const FileUpload: React.FC = () => {
   const [totalOrdersInReport, setTotalOrdersInReport] = useState(0);
 
   const processOrderData = (data: Record<string, string>[]): ProcessedData => {
-    const orders = data.map(row => ({
-      amazon_order_id: row['amazon-order-id'] || '',
-      merchant_order_id: row['merchant-order-id'] || '',
-      purchase_date: row['purchase-date'] || '',
-      order_status: row['order-status'] || '',
-      fulfillment_channel: row['fulfillment-channel'] || '',
-      sales_channel: row['sales-channel'] || '',
-      order_channel: row['order-channel'] || '',
-      ship_service_level: row['ship-service-level'] || '',
-      product_name: row['product-name'] || '',
-      sku: row['sku'] || '',
-      asin: row['asin'] || '',
-      item_status: row['item-status'] || '',
-      quantity: parseInt(row['quantity']) || 0,
-      currency: row['currency'] || '',
-      item_price: parseFloat(row['item-price']) || 0,
-      item_tax: parseFloat(row['item-tax']) || 0,
-      shipping_price: parseFloat(row['shipping-price']) || 0,
-      shipping_tax: parseFloat(row['shipping-tax']) || 0,
-      ship_city: row['ship-city'] || '',
-      ship_state: row['ship-state'] || '',
-      ship_postal_code: row['ship-postal-code'] || '',
-      ship_country: row['ship-country'] || '',
-      ship_from_postal_code: row['actual-ship-from-address-postal-code'] || '',
-      ship_from_country: row['actual-ship-from-address-country'] || ''
-    }));
+    try {
+      const orders = data.map((row, index) => {
+        // Validate required fields
+        if (!row['amazon-order-id']) {
+          throw new Error(`Row ${index + 1}: Missing amazon-order-id`);
+        }
+        if (!row['ship-postal-code'] || !row['ship-country']) {
+          throw new Error(`Row ${index + 1}: Missing shipping information`);
+        }
 
-    return {
-      orders,
-      metadata: {
-        total_orders: orders.length,
-        unique_locations: new Set(orders.map(o => `${o.ship_postal_code}-${o.ship_country}`)).size,
-        processing_timestamp: new Date().toISOString()
-      }
-    };
+        return {
+          amazon_order_id: row['amazon-order-id'],
+          merchant_order_id: row['merchant-order-id'] || '',
+          purchase_date: row['purchase-date'] || '',
+          last_updated_date: row['last-updated-date'] || '',
+          order_status: row['order-status'] || '',
+          fulfillment_channel: row['fulfillment-channel'] || '',
+          sales_channel: row['sales-channel'] || '',
+          order_channel: row['order-channel'] || '',
+          ship_service_level: row['ship-service-level'] || '',
+          product_name: row['product-name'] || '',
+          sku: row['sku'] || '',
+          asin: row['asin'] || '',
+          item_status: row['item-status'] || '',
+          quantity: parseInt(row['quantity']) || 0,
+          currency: row['currency'] || '',
+          item_price: parseFloat(row['item-price']) || 0,
+          item_tax: parseFloat(row['item-tax']) || 0,
+          shipping_price: parseFloat(row['shipping-price']) || 0,
+          shipping_tax: parseFloat(row['shipping-tax']) || 0,
+          gift_wrap_price: parseFloat(row['gift-wrap-price']) || 0,
+          gift_wrap_tax: parseFloat(row['gift-wrap-tax']) || 0,
+          item_promotion_discount: parseFloat(row['item-promotion-discount']) || 0,
+          ship_promotion_discount: parseFloat(row['ship-promotion-discount']) || 0,
+          ship_city: row['ship-city'] || '',
+          ship_state: row['ship-state'] || '',
+          ship_postal_code: row['ship-postal-code'] || '',
+          ship_country: row['ship-country'] || '',
+          promotion_ids: row['promotion-ids'] || '',
+          is_business_order: typeof row['is-business-order'] === 'string' 
+            ? row['is-business-order'].toLowerCase() === 'true'
+            : Boolean(row['is-business-order']),
+          purchase_order_number: row['purchase-order-number'] || '',
+          price_designation: row['price-designation'] || ''
+        };
+      });
+
+      return {
+        orders,
+        metadata: {
+          total_orders: orders.length,
+          unique_locations: new Set(orders.map(o => `${o.ship_postal_code}-${o.ship_country}`)).size,
+          processing_timestamp: new Date().toISOString()
+        }
+      };
+    } catch (error) {
+      console.error('Error processing order data:', error);
+      throw error;
+    }
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,31 +142,86 @@ const FileUpload: React.FC = () => {
     setGeocodingSummary(null);
     setShowSummary(true);
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('userId', mappbookUser?.mappbook_user_id || '');
-
-    await fetch('/api/amazon-upload-raw', {
-      method: 'POST',
-      body: formData
-    });
-
     try {
       const text = await file.text();
-      Papa.parse<Record<string, string>>(text, {
+      
+      // Analyze the first few lines to detect the delimiter
+      const sampleLines = text.split('\n').slice(0, 5);
+      
+      // Count occurrences of potential delimiters
+      const delimiterCounts = {
+        tab: sampleLines.every(line => line.includes('\t')),
+        comma: sampleLines.every(line => line.includes(',')),
+      };
+      
+      let delimiter = ','; // default
+      if (delimiterCounts.tab && !delimiterCounts.comma) {
+        delimiter = '\t';
+      } else if (delimiterCounts.comma && !delimiterCounts.tab) {
+        delimiter = ',';
+      } else if (delimiterCounts.tab && delimiterCounts.comma) {
+        // If both are present, prefer tab for Amazon reports
+        delimiter = '\t';
+      }
+      
+      // Clean up the header line to ensure proper tab delimitation
+      const lines = text.split('\n');
+      const fixedHeader = lines[0]
+        .replace(/amazon-order-id merchant-order-id/, 'amazon-order-id\tmerchant-order-id')
+        .replace(/\s+/g, '\t');
+      const fixedText = [fixedHeader, ...lines.slice(1)].join('\n');
+
+      Papa.parse<Record<string, string>>(fixedText, {
         header: true,
-        skipEmptyLines: true,
+        skipEmptyLines: 'greedy',
+        delimiter: delimiter,
+        dynamicTyping: true,
+        transformHeader: (header) => {
+          const cleaned = header.trim().toLowerCase();
+          return cleaned;
+        },
         complete: async (results: Papa.ParseResult<Record<string, string>>) => {
           if (results.errors.length > 0) {
-            setError('Error parsing file');
+            
+            const errorDetails = results.errors[0];
+            let errorMessage = `Error parsing file: ${errorDetails.message} at row ${errorDetails.row}`;
+            
+            setError(errorMessage);
             setIsUploading(false);
             return;
           }
 
-          const processedData = processOrderData(results.data);
-          setTotalOrdersInReport(processedData.metadata.total_orders);
+          if (results.data.length === 0) {
+            setError('No data found in file');
+            setIsUploading(false);
+            return;
+          }
+
+          // Validate headers
+          const requiredHeaders = ['amazon-order-id', 'ship-postal-code', 'ship-country'];
+          const headers = Object.keys(results.data[0]);
+          const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+          
+          if (missingHeaders.length > 0) {
+            setError(`Missing required columns: ${missingHeaders.join(', ')}`);
+            setIsUploading(false);
+            return;
+          }
 
           try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('userId', mappbookUser?.mappbook_user_id || '');
+
+            // Upload raw file
+            await fetch('/api/amazon-upload-raw', {
+              method: 'POST',
+              body: formData
+            });
+
+            const processedData = processOrderData(results.data);
+            setTotalOrdersInReport(processedData.metadata.total_orders);
+
             const response = await fetch('/api/amazon-upload-orders', {
               method: 'POST',
               headers: {
@@ -160,20 +246,25 @@ const FileUpload: React.FC = () => {
             const event1 = new CustomEvent('ReportAdded');
             window.dispatchEvent(event1);
           } catch (error) {
-            setError('Failed to upload data');
+            console.error('Processing error:', error);
+            setError(error instanceof Error ? error.message : 'Failed to process data');
             setIsUploading(false);
           }
         },
-        error: (error: Error) => {
-          setError('Error parsing file');
+        error: (error: Error, file?: Papa.LocalFile) => {
+          console.error('Parse error:', error);
+          setError(`Error parsing file: ${error.message}`);
           setIsUploading(false);
         }
       });
     } catch (error) {
+      console.error('File reading error:', error);
       setError('Error reading file');
       setIsUploading(false);
     }
   };
+
+  // ... rest of the component (renderGeocodingSummary and return statement) remains the same
 
   const renderGeocodingSummary = () => {
     if (!geocodingSummary || !showSummary) return null;
