@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Marker, Popup } from 'react-map-gl';
 import { Package } from 'lucide-react';
-
-
+import _ from 'lodash';
 
 interface Order {
   currency: string;
@@ -23,7 +22,17 @@ interface Order {
 
 interface OrderMarkersProps {
   orders: Order[];
+  zoom: number;
 }
+
+interface GroupedOrders {
+  latitude: number;
+  longitude: number;
+  orders: Order[];
+  count: number;
+}
+
+const ZOOM_THRESHOLD = 10;
 
 const getStatusColor = (status: string): string => {
   const colors: Record<string, string> = {
@@ -37,54 +46,55 @@ const getStatusColor = (status: string): string => {
   return colors[status] || 'bg-gray-600/90 hover:bg-gray-600 border-gray-500';
 };
 
-const getIconColor = (status: string): string => {
-  const colors: Record<string, string> = {
-    'Shipped': 'text-black-400',
-    'Pending': 'text-black-400',
-    'Cancelled': 'text-black-400',
-    'Processing': 'text-black-400',
-    'Delivered': 'text-black-400',
-    'Returned': 'text-black-400',
-  };
-  return colors[status] || 'text-black-400';
-};
-
-const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [] }) => {
+const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [], zoom }) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>();
-  
-  const adjustedOrders = useMemo(() => {
-    const locationMap = new Map<string, number>();
-    const ORDERS_PER_CIRCLE = 12;
-    const BASE_OFFSET = 0.003;
+  const [selectedGroup, setSelectedGroup] = useState<GroupedOrders | null>(null);
 
-    return orders.map(order => {
-      const key = `${order.shipped_to_latitude},${order.shipped_to_longitude}`;
-      const count = locationMap.get(key) || 0;
-      locationMap.set(key, count + 1);
-
-      if (count > 0) {
-        const circle = Math.floor(count / ORDERS_PER_CIRCLE);
-        const position = count % ORDERS_PER_CIRCLE;
-        const angle = (2 * Math.PI * position) / ORDERS_PER_CIRCLE;
-        const offset = BASE_OFFSET * (circle + 1);
-
+  const ordersData = useMemo(() => {
+    // Group orders by location
+    const grouped = _.chain(orders)
+      .groupBy(order => `${order.shipped_to_latitude},${order.shipped_to_longitude}`)
+      .map((groupOrders, key): GroupedOrders => {
+        const [lat, lng] = key.split(',').map(Number);
         return {
-          ...order,
-          shipped_to_latitude: order.shipped_to_latitude + offset * Math.sin(angle),
-          shipped_to_longitude: order.shipped_to_longitude + offset * Math.cos(angle)
+          latitude: lat,
+          longitude: lng,
+          orders: groupOrders,
+          count: groupOrders.length
         };
-      }
-      return order;
-    });
+      })
+      .value();
+
+    // Separate single orders and groups
+    const singles = grouped.filter(g => g.count === 1).map(g => g.orders[0]);
+    const groups = grouped.filter(g => g.count > 1);
+
+    return { singles, groups };
   }, [orders]);
 
-  // Rest of the component remains the same
+  // Calculate circle size based on count and zoom
+  const getCircleSize = (count: number) => {
+    const baseSize = Math.max(35, Math.min(60, 25 + Math.log2(count) * 10));
+    const zoomFactor = Math.max(1, zoom / 8);
+    return Math.round(baseSize * zoomFactor);
+  };
+
+  // Calculate offset for individual orders within a group
+  const getOrderOffset = (index: number, total: number) => {
+    const RADIUS = 0.0003; // Base radius for the circle
+    const angle = (2 * Math.PI * index) / total;
+    return {
+      lat: RADIUS * Math.sin(angle),
+      lng: RADIUS * Math.cos(angle)
+    };
+  };
 
   return (
     <>
-      {adjustedOrders.map((order, index) => (
+      {/* Render individual orders */}
+      {ordersData.singles.map((order, index) => (
         <Marker
-          key={index}
+          key={`single-${index}`}
           longitude={order.shipped_to_longitude}
           latitude={order.shipped_to_latitude}
           anchor="top"
@@ -93,13 +103,13 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [] }) => {
             className={`p-2 rounded-lg shadow-lg transition-colors cursor-pointer ${getStatusColor(order.order_status)}`}
             onClick={() => setSelectedOrder(order)}
           >
-            <Package className={`h-4 w-4 ${getIconColor(order.order_status)}`} />
+            <Package className="h-4 w-4 text-black-400" />
           </div>
-
+          {/* Single order popup */}
           {selectedOrder === order && (
             <Popup
-              latitude={selectedOrder.shipped_to_latitude}
-              longitude={selectedOrder.shipped_to_longitude}
+              latitude={order.shipped_to_latitude}
+              longitude={order.shipped_to_longitude}
               anchor="bottom"
               onClose={() => setSelectedOrder(null)}
               closeButton={false}
@@ -108,15 +118,11 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [] }) => {
               className="rounded-xl shadow-2xl z-30"
             >
               <div className="p-4 bg-white rounded-xl">
-
+                {/* Existing popup content */}
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-bold text-gray-900">
-                      {order.ship_city}
-                    </h3>
-                    <p className="text-gray-500 text-sm">
-                      {order.ship_postal_code}
-                    </p>
+                    <h3 className="font-bold text-gray-900">{order.ship_city}</h3>
+                    <p className="text-gray-500 text-sm">{order.ship_postal_code}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.order_status === 'Shipped' ? 'bg-green-100 text-green-800' :
                       order.order_status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -125,7 +131,6 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [] }) => {
                     {order.order_status}
                   </span>
                 </div>
-
                 <div className="space-y-3 border-t border-gray-100 pt-4">
                   <div>
                     <h4 className="font-medium text-gray-900">{order.product_name}</h4>
@@ -162,6 +167,139 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [] }) => {
             </Popup>
           )}
         </Marker>
+      ))}
+
+      {/* Render grouped markers */}
+      {ordersData.groups.map((group, groupIndex) => (
+        <>
+          {zoom < ZOOM_THRESHOLD ? (
+            // Show group marker when zoomed out
+            <Marker
+              key={`group-${groupIndex}`}
+              longitude={group.longitude}
+              latitude={group.latitude}
+              anchor="center"
+            >
+              <div
+                className="bg-blue-500 text-white rounded-full cursor-pointer hover:bg-blue-600 transition-colors shadow-lg flex items-center justify-center"
+                style={{
+                  width: `${getCircleSize(group.count)}px`,
+                  height: `${getCircleSize(group.count)}px`,
+                }}
+                onClick={() => setSelectedGroup(group)}
+              >
+                <span className="font-bold">{group.count}</span>
+              </div>
+              {selectedGroup === group && (
+                <Popup
+                  latitude={group.latitude}
+                  longitude={group.longitude}
+                  anchor="bottom"
+                  onClose={() => setSelectedGroup(null)}
+                  closeButton={false}
+                  closeOnClick={false}
+                  closeOnMove={true}
+                  className="rounded-xl shadow-2xl z-30"
+                >
+                  <div className="p-4 bg-white rounded-xl">
+                    <h3 className="font-bold text-lg mb-2">Order Group</h3>
+                    <p className="text-gray-600 mb-2">Total Orders: {group.count}</p>
+                    <div className="max-h-48 overflow-y-auto">
+                      {group.orders.map((order, idx) => (
+                        <div key={idx} className="border-t py-2 first:border-t-0">
+                          <p className="font-medium">{order.product_name}</p>
+                          <p className="text-sm text-gray-500">
+                            Status: {order.order_status} | Qty: {order.quantity}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Popup>
+              )}
+            </Marker>
+          ) : (
+            // Show individual orders within group when zoomed in
+            group.orders.map((order, orderIndex) => {
+              const offset = getOrderOffset(orderIndex, group.orders.length);
+              return (
+                <Marker
+                  key={`group-${groupIndex}-order-${orderIndex}`}
+                  longitude={group.longitude + offset.lng}
+                  latitude={group.latitude + offset.lat}
+                  anchor="top"
+                >
+                  <div
+                    className={`p-2 rounded-lg shadow-lg transition-colors cursor-pointer ${getStatusColor(order.order_status)}`}
+                    onClick={() => setSelectedOrder(order)}
+                  >
+                    <Package className="h-4 w-4 text-black-400" />
+                  </div>
+                  {/* Individual order popup */}
+
+                  {selectedOrder === order && (
+                    <Popup
+                      latitude={group.latitude + offset.lat}
+                      longitude={group.longitude + offset.lng}
+                      anchor="bottom"
+                      onClose={() => setSelectedOrder(null)}
+                      closeButton={false}
+                      closeOnClick={false}
+                      closeOnMove={true}
+                      className="rounded-xl shadow-2xl z-30"
+                    >
+                      {/* Same popup content as single orders */}
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-bold text-gray-900">{order.ship_city}</h3>
+                          <p className="text-gray-500 text-sm">{order.ship_postal_code}</p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.order_status === 'Shipped' ? 'bg-green-100 text-green-800' :
+                            order.order_status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                          }`}>
+                          {order.order_status}
+                        </span>
+                      </div>
+                      <div className="space-y-3 border-t border-gray-100 pt-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900">{order.product_name}</h4>
+                          <div className="mt-1 flex items-center gap-4">
+                            <span className="text-sm text-gray-500">Qty: {order.quantity}</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {order.item_price.toFixed(2)} {order.currency}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-500">Order ID</p>
+                            <p className="font-medium text-gray-900">{order.amazon_order_id}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Order Date</p>
+                            <p className="font-medium text-gray-900">
+                              {new Date(order.purchase_date).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Order Channel</p>
+                            <p className="font-medium text-gray-900">{order.order_channel}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Sales Channel</p>
+                            <p className="font-medium text-gray-900">{order.sales_channel}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </Popup>
+                  )}
+                </Marker>
+              );
+            })
+          )}
+        </>
       ))}
     </>
   );

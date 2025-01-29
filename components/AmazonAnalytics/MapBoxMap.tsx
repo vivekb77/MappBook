@@ -19,7 +19,7 @@ const CONFIG = {
   map: {
     styles: {
       globe: "mapbox://styles/mapbox/satellite-streets-v12",
-      flat:"mapbox://styles/mapbox/satellite-streets-v9"
+      flat: "mapbox://styles/mapbox/satellite-streets-v9"
     },
     drone: {
       ROTATION_DURATION: 0,
@@ -281,7 +281,7 @@ const MapboxMap: React.FC = () => {
       handleMapError();
     }
 
-    
+
   }, []);
 
   useEffect(() => {
@@ -374,9 +374,15 @@ const MapboxMap: React.FC = () => {
         {mapStatus.status === 'ready' && (
           <>
             {showAllOrders ? (
-              <PlotAllOrders orders={reportData?.orders || []} />
+              <PlotAllOrders
+                orders={reportData?.orders || []}
+                zoom={viewState.zoom}
+              />
             ) : (
-              <PlotOrderBubbles orders={reportData?.orders || []} />
+              <PlotOrderBubbles
+                orders={reportData?.orders || []}
+                zoom={viewState.zoom}
+              />
             )}
             <OrderFilters />
           </>
@@ -389,7 +395,7 @@ const MapboxMap: React.FC = () => {
         <div className="absolute top-2 right-2 pointer-events-auto">
           <div className="flex flex-col gap-2">
 
-          
+
 
             <div
               className="relative h-[38px] rounded-full bg-gray-800/90 flex items-center w-48 cursor-pointer select-none border border-gray-700"
@@ -435,7 +441,7 @@ const MapboxMap: React.FC = () => {
 
     </div>
 
-   
+
   );
 };
 

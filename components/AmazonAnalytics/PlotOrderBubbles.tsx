@@ -30,12 +30,13 @@ type ChartData = {
 
 type OrderVisualizationProps = {
   orders?: Order[];
+  zoom: number;
 };
 
 const COLORS_STATUS = ['#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65','#4FC3F7', '#2196F3', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63']; 
 const COLORS_CHANNEL = ['#4FC3F7', '#2196F3', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63', '#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65']; 
 
-const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [] }) => {
+const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zoom }) => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -50,13 +51,25 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [] }) 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [handleClickOutside]);
 
+  // Calculate size based on zoom level
+  const getMarkerSize = (ordersCount: number, currentZoom: number) => {
+    // Base size calculation
+    const baseSize = Math.log2(ordersCount + 1) * 20;
+    
+    // Zoom scaling - exponential growth with zoom
+    const zoomFactor = Math.pow(1.2, currentZoom - 4); // 1.2^(zoom-4)
+    
+    // Apply zoom scaling with bounds
+    const scaledSize = baseSize * zoomFactor;
+    return Math.max(40, Math.min(400, scaledSize));
+  };
+
   const ordersByZip = useMemo(() => {
     return _.chain(orders)
       .groupBy('ship_postal_code')
       .map((groupOrders) => {
         const totalOrders = groupOrders.length;
-        const baseSize = Math.log2(totalOrders + 1) * 30;
-        const size = Math.max(60, Math.min(200, baseSize));
+        const size = getMarkerSize(totalOrders, zoom);
         
         const location: Location = {
           latitude: groupOrders[0].shipped_to_latitude,
@@ -87,7 +100,7 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [] }) 
         return location;
       })
       .value();
-  }, [orders]);
+  }, [orders, zoom]); // Include zoom in dependencies
 
   const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
@@ -152,46 +165,51 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [] }) 
 
   return (
     <>
-      {ordersByZip.map((location, index) => (
-        <Marker
-          key={index}
-          longitude={location.longitude}
-          latitude={location.latitude}
-          anchor="center"
-        >
-          <div 
-            className="cursor-pointer transform hover:scale-110 transition-transform"
-            onClick={() => setSelectedLocation(location)}
+      {ordersByZip.map((location, index) => {
+        const pieSize = location.size;
+        return (
+          <Marker
+            key={index}
+            longitude={location.longitude}
+            latitude={location.latitude}
+            anchor="center"
           >
-            <PieChart width={location.size} height={location.size} className="relative z-10">
-              <Tooltip content={<CustomTooltip />} position={{ y: -90 }} wrapperStyle={{ zIndex: 50 }} />
-              <Pie className="relative z-10"
-                data={location.statusData}
-                cx="50%"
-                cy="50%"
-                outerRadius={location.size * 0.3}
-                dataKey="value"
-              >
-                {location.statusData.map((entry, index) => (
-                  <Cell key={index} fill={COLORS_STATUS[index % COLORS_STATUS.length]} stroke="white" />
-                ))}
-              </Pie>
-              <Pie className="relative z-10"
-                data={location.channelData}
-                cx="50%"
-                cy="50%"
-                innerRadius={location.size * 0.35}
-                outerRadius={location.size * 0.5}
-                dataKey="value"
-              >
-                {location.channelData.map((entry, index) => (
-                  <Cell key={index} fill={COLORS_CHANNEL[index % COLORS_CHANNEL.length]} stroke="white" />
-                ))}
-              </Pie>
-            </PieChart>
-          </div>
-        </Marker>
-      ))}
+            <div 
+              className="cursor-pointer transform hover:scale-110 transition-transform"
+              onClick={() => setSelectedLocation(location)}
+            >
+              <PieChart width={pieSize} height={pieSize} className="relative z-10">
+                <Tooltip content={<CustomTooltip />} position={{ y: -90 }} wrapperStyle={{ zIndex: 50 }} />
+                <Pie 
+                  className="relative z-10"
+                  data={location.statusData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={pieSize * 0.3}
+                  dataKey="value"
+                >
+                  {location.statusData.map((entry, index) => (
+                    <Cell key={index} fill={COLORS_STATUS[index % COLORS_STATUS.length]} stroke="white" />
+                  ))}
+                </Pie>
+                <Pie 
+                  className="relative z-10"
+                  data={location.channelData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={pieSize * 0.35}
+                  outerRadius={pieSize * 0.5}
+                  dataKey="value"
+                >
+                  {location.channelData.map((entry, index) => (
+                    <Cell key={index} fill={COLORS_CHANNEL[index % COLORS_CHANNEL.length]} stroke="white" />
+                  ))}
+                </Pie>
+              </PieChart>
+            </div>
+          </Marker>
+        );
+      })}
       
       <InfoPanel location={selectedLocation} />
     </>
