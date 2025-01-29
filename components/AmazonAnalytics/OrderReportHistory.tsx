@@ -178,6 +178,7 @@ const OrderReportHistory = ({ userId }: FootageHistoryProps) => {
       if (error) throw error;
 
       if (data) {
+        window.dispatchEvent(new Event('resetOrderFilters'));
         setReportData(data.order_data);
       }
     } catch (error) {

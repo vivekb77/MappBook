@@ -3,6 +3,7 @@ import { useReportContext } from '@/context/ReportContext';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CalendarIcon, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
@@ -41,13 +42,26 @@ const OrderFilters: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    if (reportData && !originalData) {
+    if (reportData) {
       setOriginalData(reportData);
     }
   }, [reportData]);
 
-  // Rest of the existing functions...
-  
+  useEffect(() => {
+    const handleReset = () => {
+      setDateRange({ from: undefined, to: undefined });
+      setSelectedProducts([]);
+
+      if (reportData) {
+        setOriginalData(reportData);
+        setReportData(reportData);
+      }
+    };
+
+    window.addEventListener('resetOrderFilters', handleReset);
+    return () => window.removeEventListener('resetOrderFilters', handleReset);
+  }, [reportData, setReportData]);
+
   const getFilteredProducts = (): string[] => {
     if (!originalData?.orders) return [];
 
@@ -62,7 +76,9 @@ const OrderFilters: React.FC = () => {
         return orderDate >= fromDate && orderDate <= toDate;
       });
     }
-    return filteredOrders.map(order => order.product_name).filter((value, index, self) => self.indexOf(value) === index);
+
+    const uniqueProducts = Array.from(new Set(filteredOrders.map(order => order.product_name)));
+    return uniqueProducts;
   };
 
   const getFilteredOrdersStats = (): OrderStats => {
@@ -138,13 +154,15 @@ const OrderFilters: React.FC = () => {
   const handleReset = (): void => {
     setDateRange({ from: undefined, to: undefined });
     setSelectedProducts([]);
-    if (originalData) {
-      setReportData(originalData);
+
+    if (reportData) {
+      setOriginalData(reportData);
+      setReportData(reportData);
     }
   };
 
   const handleSelectAll = (): void => {
-    setSelectedProducts(uniqueProducts);
+    setSelectedProducts([...uniqueProducts]);
   };
 
   const handleDeselectAll = (): void => {
@@ -244,27 +262,31 @@ const OrderFilters: React.FC = () => {
                         Deselect All
                       </Button>
                     </div>
-                    <div className="grid gap-2 max-h-60 overflow-y-auto">
-                      {uniqueProducts.map((product) => (
-                        <div key={product} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={product}
-                            checked={selectedProducts.includes(product)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedProducts([...selectedProducts, product]);
-                              } else {
-                                setSelectedProducts(selectedProducts.filter(p => p !== product));
-                              }
-                            }}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <label htmlFor={product} className="ml-2 text-sm">
-                            {product}
-                          </label>
-                        </div>
-                      ))}
+                    <div className="grid gap-2 max-h-60 overflow-y-auto px-1">
+                      {uniqueProducts.map((product) => {
+                        const productId = `product-${product.replace(/\s+/g, '-').toLowerCase()}`;
+                        return (
+                          <div key={productId} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={productId}
+                              checked={selectedProducts.includes(product)}
+                              onCheckedChange={(checked) => {
+                                if (checked === true) {
+                                  setSelectedProducts(prev => [...prev, product]);
+                                } else if (checked === false) {
+                                  setSelectedProducts(prev => prev.filter(p => p !== product));
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor={productId}
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {product}
+                            </label>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </PopoverContent>
@@ -284,7 +306,7 @@ const OrderFilters: React.FC = () => {
           )}
         </div>
       </div>
-      
+
       <button
         onClick={() => setIsVisible(!isVisible)}
         className="absolute bottom-10 right-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
