@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
 import { logout } from '../utils/auth';
-import { Camera, Globe, Video, Coins, Instagram, ChevronUp, ChevronDown } from 'lucide-react';
+import { Users, TrendingUp, Package2, RotateCcw, Store, ChevronUp, ChevronDown } from 'lucide-react';
 import SignInButton from './SignInButton';
 import { track } from '@vercel/analytics';
 import AddCredits from './BuyPremium';
@@ -107,23 +107,23 @@ const DashboardContainer = () => {
 
               <div className="flex flex-col gap-4 mt-8">
                 <FeatureCard
-                  icon={<Globe className="w-8 h-8 text-blue-500" />}
+                  icon={<Users className="w-8 h-8 text-blue-500" />}
                   title="Customer Geographic Distribution"
                 />
                 <FeatureCard
-                  icon={<Globe className="w-8 h-8 text-blue-500" />}
+                  icon={<TrendingUp className="w-8 h-8 text-blue-500" />}
                   title="Regional Revenue Performance"
                 />
                 <FeatureCard
-                  icon={<Globe className="w-8 h-8 text-blue-500" />}
+                  icon={<Package2 className="w-8 h-8 text-blue-500" />}
                   title="Regional Product Performance Map"
                 />
                 <FeatureCard
-                  icon={<Globe className="w-8 h-8 text-blue-500" />}
+                  icon={<RotateCcw className="w-8 h-8 text-blue-500" />}
                   title="Geographic Return Rate Analysis"
                 />
                 <FeatureCard
-                  icon={<Globe className="w-8 h-8 text-blue-500" />}
+                  icon={<Store className="w-8 h-8 text-blue-500" />}
                   title="Channel Success by Location"
                 />
               </div>

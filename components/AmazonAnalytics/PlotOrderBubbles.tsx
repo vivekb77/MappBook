@@ -33,8 +33,8 @@ type OrderVisualizationProps = {
   zoom: number;
 };
 
-const COLORS_STATUS = ['#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65','#4FC3F7', '#2196F3', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63']; 
-const COLORS_CHANNEL = ['#4FC3F7', '#2196F3', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63', '#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65']; 
+const COLORS_STATUS = ['#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65', '#4FC3F7', '#2196F3', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63'];
+const COLORS_CHANNEL = ['#2196F3', '#4FC3F7', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63', '#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65'];
 
 const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zoom }) => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
@@ -55,10 +55,10 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
   const getMarkerSize = (ordersCount: number, currentZoom: number) => {
     // Base size calculation
     const baseSize = Math.log2(ordersCount + 1) * 20;
-    
+
     // Zoom scaling - exponential growth with zoom
     const zoomFactor = Math.pow(1.2, currentZoom - 4); // 1.2^(zoom-4)
-    
+
     // Apply zoom scaling with bounds
     const scaledSize = baseSize * zoomFactor;
     return Math.max(40, Math.min(400, scaledSize));
@@ -70,7 +70,7 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
       .map((groupOrders) => {
         const totalOrders = groupOrders.length;
         const size = getMarkerSize(totalOrders, zoom);
-        
+
         const location: Location = {
           latitude: groupOrders[0].shipped_to_latitude,
           longitude: groupOrders[0].shipped_to_longitude,
@@ -96,7 +96,7 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
             }))
             .value()
         };
-        
+
         return location;
       })
       .value();
@@ -115,22 +115,22 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
 
   const InfoPanel: React.FC<{ location: Location | null }> = ({ location }) => {
     if (!location) return null;
-    
+
     return (
-      <div 
+      <div
         ref={panelRef}
         className="absolute top-2 right-2 bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-sm z-50"
       >
         <h3 className="font-bold mb-2">Zip Code: {location.zipCode}</h3>
         <p className="mb-4">Total Orders: {location.totalOrders}</p>
-        
+
         <div className="space-y-4">
           <div>
             <h4 className="font-semibold mb-2">Order Status</h4>
             <div className="grid grid-cols-2 gap-2">
               {location.statusData.map((status, idx) => (
                 <div key={idx} className="flex items-center">
-                  <div 
+                  <div
                     className="w-3 h-3 rounded-full mr-2"
                     style={{ backgroundColor: COLORS_STATUS[idx % COLORS_STATUS.length] }}
                   />
@@ -141,13 +141,13 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
               ))}
             </div>
           </div>
-          
+
           <div>
             <h4 className="font-semibold mb-2">Sales Channels</h4>
             <div className="grid grid-cols-2 gap-2">
               {location.channelData.map((channel, idx) => (
                 <div key={idx} className="flex items-center">
-                  <div 
+                  <div
                     className="w-3 h-3 rounded-full mr-2"
                     style={{ backgroundColor: COLORS_CHANNEL[idx % COLORS_CHANNEL.length] }}
                   />
@@ -174,13 +174,13 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
             latitude={location.latitude}
             anchor="center"
           >
-            <div 
+            <div
               className="cursor-pointer transform hover:scale-110 transition-transform"
               onClick={() => setSelectedLocation(location)}
             >
               <PieChart width={pieSize} height={pieSize} className="relative z-10">
                 <Tooltip content={<CustomTooltip />} position={{ y: -90 }} wrapperStyle={{ zIndex: 50 }} />
-                <Pie 
+                <Pie
                   className="relative z-10"
                   data={location.statusData}
                   cx="50%"
@@ -192,7 +192,7 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
                     <Cell key={index} fill={COLORS_STATUS[index % COLORS_STATUS.length]} stroke="white" />
                   ))}
                 </Pie>
-                <Pie 
+                <Pie
                   className="relative z-10"
                   data={location.channelData}
                   cx="50%"
@@ -202,7 +202,7 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
                   dataKey="value"
                 >
                   {location.channelData.map((entry, index) => (
-                    <Cell key={index} fill={COLORS_CHANNEL[index % COLORS_CHANNEL.length]} stroke="white" />
+                    <Cell key={index} fill={COLORS_CHANNEL[index % COLORS_CHANNEL.length]} stroke="black" />
                   ))}
                 </Pie>
               </PieChart>
@@ -210,7 +210,7 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
           </Marker>
         );
       })}
-      
+
       <InfoPanel location={selectedLocation} />
     </>
   );

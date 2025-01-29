@@ -183,16 +183,15 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [], zoom }) => {
 
               <div
                 style={{
-                  width: `${getCircleSize(group.count)}px`,
-                  height: `${getCircleSize(group.count)}px`,
+                  padding: `${Math.max(4, getCircleSize(group.count) / 8)}px`,
                   background: `linear-gradient(to bottom right, ${COLORS_STATUS[0]}, ${COLORS_STATUS[1]})`,
                   color: 'white',
-                  borderRadius: '9999px',
+                  borderRadius: '6px',
                   cursor: 'pointer',
                   boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  gap: '2px',
                   border: `2px solid ${COLORS_STATUS[0]}`,
                   transition: 'all 300ms ease-in-out'
                 }}
@@ -206,7 +205,8 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [], zoom }) => {
                 }}
                 onClick={() => setSelectedGroup(group)}
               >
-                <span style={{ fontWeight: 'bold' }}>{group.count}</span>
+                <Package className="h-4 w-4 text-black" size={Math.max(12, getCircleSize(group.count) / 4)} />
+                <span className="font-bold text-xs text-black" style={{ fontWeight: 'bold', fontSize: '12px' }}>{group.count}</span>
               </div>
 
               {selectedGroup === group && (
@@ -221,7 +221,7 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [], zoom }) => {
                   className="rounded-xl shadow-2xl z-30"
                 >
                   <div className="p-4 bg-white rounded-xl">
-                    <h3 className="font-bold text-lg mb-2">Order Group</h3>
+                    <h3 className="font-bold mb-2">ZIP code: {group.orders[0].ship_postal_code}</h3>
                     <p className="text-gray-600 mb-2">Total Orders: {group.count}</p>
                     <div className="max-h-48 overflow-y-auto">
                       {group.orders.map((order, idx) => (
