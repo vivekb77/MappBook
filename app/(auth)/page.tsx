@@ -44,7 +44,7 @@ const LandingPage = () => {
           <p className="text-xl text-gray-300 mb-8">
             Unlock hidden revenue opportunities with location-based analytics, customer mapping, and regional strategy optimization for Amazon FBA and FBM sellers.
           </p>
-          <Link href="/amazonanalytics">
+          <Link href="/amazon-analytics">
             <button className="px-8 py-4 bg-blue-500 rounded-lg text-lg font-semibold hover:bg-blue-600 transition transform hover:scale-105">
               Interactive Demo →
             </button>

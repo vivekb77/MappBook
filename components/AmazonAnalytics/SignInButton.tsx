@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-const SignInButton = ({ redirectUrl = '/amazonanalytics' }) => {
+const SignInButton = ({ redirectUrl = '/amazon-analytics' }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
