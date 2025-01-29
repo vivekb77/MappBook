@@ -33,7 +33,7 @@ interface GroupedOrders {
 }
 
 const ZOOM_THRESHOLD = 10;
-
+const COLORS_STATUS = ['#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65', '#4FC3F7', '#2196F3', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63'];
 const getStatusColor = (status: string): string => {
   const colors: Record<string, string> = {
     'Shipped': 'bg-blue-600 hover:bg-blue-700 border-blue-500',
@@ -125,8 +125,8 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [], zoom }) => {
                     <p className="text-gray-500 text-sm">{order.ship_postal_code}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.order_status === 'Shipped' ? 'bg-green-100 text-green-800' :
-                      order.order_status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
+                    order.order_status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
                     }`}>
                     {order.order_status}
                   </span>
@@ -180,16 +180,35 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [], zoom }) => {
               latitude={group.latitude}
               anchor="center"
             >
+
               <div
-                className="bg-blue-500 text-white rounded-full cursor-pointer hover:bg-blue-600 transition-colors shadow-lg flex items-center justify-center"
                 style={{
                   width: `${getCircleSize(group.count)}px`,
                   height: `${getCircleSize(group.count)}px`,
+                  background: `linear-gradient(to bottom right, ${COLORS_STATUS[0]}, ${COLORS_STATUS[1]})`,
+                  color: 'white',
+                  borderRadius: '9999px',
+                  cursor: 'pointer',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: `2px solid ${COLORS_STATUS[0]}`,
+                  transition: 'all 300ms ease-in-out'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = `linear-gradient(to bottom right, ${COLORS_STATUS[1]}, ${COLORS_STATUS[2]})`;
+                  e.currentTarget.style.border = `2px solid ${COLORS_STATUS[1]}`;
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = `linear-gradient(to bottom right, ${COLORS_STATUS[0]}, ${COLORS_STATUS[1]})`;
+                  e.currentTarget.style.border = `2px solid ${COLORS_STATUS[0]}`;
                 }}
                 onClick={() => setSelectedGroup(group)}
               >
-                <span className="font-bold">{group.count}</span>
+                <span style={{ fontWeight: 'bold' }}>{group.count}</span>
               </div>
+
               {selectedGroup === group && (
                 <Popup
                   latitude={group.latitude}
@@ -255,8 +274,8 @@ const PlotAllOrders: React.FC<OrderMarkersProps> = ({ orders = [], zoom }) => {
                           <p className="text-gray-500 text-sm">{order.ship_postal_code}</p>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.order_status === 'Shipped' ? 'bg-green-100 text-green-800' :
-                            order.order_status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
+                          order.order_status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
                           }`}>
                           {order.order_status}
                         </span>
