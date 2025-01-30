@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
-import { DateRange } from 'react-day-picker';
+import { DateRange, DayProps } from 'react-day-picker';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface Order {
@@ -30,6 +30,11 @@ interface ReportContextType {
   setReportData: Dispatch<SetStateAction<any | null>>;
 }
 
+interface DateStats {
+  count: number;
+  total: number;
+}
+
 const OrderFilters: React.FC = () => {
   const { reportData, setReportData } = useReportContext() as ReportContextType;
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -40,36 +45,64 @@ const OrderFilters: React.FC = () => {
   const [originalData, setOriginalData] = useState<ReportData | null>(null);
   const [isProductPopoverOpen, setIsProductPopoverOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [ordersByDate, setOrdersByDate] = useState<{ [key: string]: DateStats }>({});
 
   useEffect(() => {
     if (reportData && !originalData) {
       setOriginalData(reportData);
+      calculateOrdersByDate(reportData.orders);
     }
   }, [reportData]);
 
   useEffect(() => {
-    const handleReset = (event: CustomEvent) => { 
-      // First clear the data states
+    const handleReset = (event: CustomEvent) => {
       setOriginalData(null);
       setReportData(null);
-  
-      // Get new data from the event
+
       const newReportData = event.detail;
       if (newReportData) {
         setOriginalData(newReportData);
         setReportData(newReportData);
-        console.log("reports set" + JSON.stringify(newReportData));
+        calculateOrdersByDate(newReportData.orders);
       }
-  
-      // Finally clear the filter states
+
       setDateRange({ from: undefined, to: undefined });
       setSelectedProducts([]);
     };
-  
+
     window.addEventListener('resetOrderFilters', handleReset as EventListener);
     return () => window.removeEventListener('resetOrderFilters', handleReset as EventListener);
   }, []);
-  
+
+  const calculateOrdersByDate = (orders: Order[]) => {
+    const orderStats: { [key: string]: DateStats } = {};
+    orders.forEach(order => {
+      const dateKey = format(new Date(order.purchase_date), 'yyyy-MM-dd');
+      if (!orderStats[dateKey]) {
+        orderStats[dateKey] = { count: 0, total: 0 };
+      }
+      orderStats[dateKey].count += 1;
+      orderStats[dateKey].total += (order.item_price || 0);
+    });
+    setOrdersByDate(orderStats);
+  };
+
+  const DayWithOrders = (props: DayProps) => {
+    const dateKey = format(props.date, 'yyyy-MM-dd');
+    const dayStats = ordersByDate[dateKey] || { count: 0, total: 0 };
+    
+    return (
+      <div className={`flex flex-col items-center p-1.5 rounded-md ${dayStats.count > 0 ? 'bg-gray-50' : ''} hover:opacity-75`}>
+        <div className="text-sm font-medium">{format(props.date, 'd')}</div>
+        {dayStats.count > 0 && (
+          <div className="text-xs text-gray-500">
+            ({dayStats.count})
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const getFilteredProducts = (): string[] => {
     if (!originalData?.orders) return [];
 
@@ -84,7 +117,9 @@ const OrderFilters: React.FC = () => {
         return orderDate >= fromDate && orderDate <= toDate;
       });
     }
-    return filteredOrders.map(order => order.product_name).filter((value, index, self) => self.indexOf(value) === index);
+    return filteredOrders
+      .map(order => order.product_name)
+      .filter((value, index, self) => self.indexOf(value) === index);
   };
 
   const getFilteredOrdersStats = (): OrderStats => {
@@ -103,7 +138,9 @@ const OrderFilters: React.FC = () => {
     }
 
     if (selectedProducts.length > 0) {
-      filteredOrders = filteredOrders.filter(order => selectedProducts.includes(order.product_name));
+      filteredOrders = filteredOrders.filter(order => 
+        selectedProducts.includes(order.product_name)
+      );
     }
 
     const totals = filteredOrders.reduce((acc: { [key: string]: number }, order) => {
@@ -117,9 +154,6 @@ const OrderFilters: React.FC = () => {
       totals: totals
     };
   };
-
-  const uniqueProducts = getFilteredProducts();
-  const orderStats = getFilteredOrdersStats();
 
   const filterData = (): void => {
     if (!originalData) return;
@@ -138,7 +172,9 @@ const OrderFilters: React.FC = () => {
     }
 
     if (selectedProducts.length > 0) {
-      filteredOrders = filteredOrders.filter(order => selectedProducts.includes(order.product_name));
+      filteredOrders = filteredOrders.filter(order => 
+        selectedProducts.includes(order.product_name)
+      );
     }
 
     setReportData({
@@ -166,12 +202,15 @@ const OrderFilters: React.FC = () => {
   };
 
   const handleSelectAll = (): void => {
-    setSelectedProducts(uniqueProducts);
+    setSelectedProducts(getFilteredProducts());
   };
 
   const handleDeselectAll = (): void => {
     setSelectedProducts([]);
   };
+
+  const uniqueProducts = getFilteredProducts();
+  const orderStats = getFilteredOrdersStats();
 
   return (
     <>
@@ -229,6 +268,9 @@ const OrderFilters: React.FC = () => {
                     selected={dateRange}
                     onSelect={(range) => setDateRange(range || undefined)}
                     numberOfMonths={2}
+                    components={{
+                      Day: DayWithOrders
+                    }}
                   />
                 </PopoverContent>
               </Popover>
@@ -267,7 +309,7 @@ const OrderFilters: React.FC = () => {
                       </Button>
                     </div>
                     <div className="grid gap-2 max-h-60 overflow-y-auto px-1">
-                    {uniqueProducts.map((product) => {
+                      {uniqueProducts.map((product) => {
                         const productId = `product-${product.replace(/\s+/g, '-').toLowerCase()}`;
                         return (
                           <div key={productId} className="flex items-center space-x-2">
@@ -278,7 +320,9 @@ const OrderFilters: React.FC = () => {
                                 if (checked === true) {
                                   setSelectedProducts(prev => [...prev, product]);
                                 } else if (checked === false) {
-                                  setSelectedProducts(prev => prev.filter(p => p !== product));
+                                  setSelectedProducts(prev => 
+                                    prev.filter(p => p !== product)
+                                  );
                                 }
                               }}
                             />
