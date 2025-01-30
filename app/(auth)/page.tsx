@@ -66,7 +66,7 @@ const LandingPage = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent">
             <div className="absolute bottom-0 left-0 right-0 p-6 text-center">
-              <p className="text-gray-300">Watch Your Data Come to Life</p>
+              {/* <p className="text-gray-300">Watch Your Data Come to Life</p> */}
             </div>
           </div>
         </div>
@@ -75,65 +75,65 @@ const LandingPage = () => {
       {/* New Use Cases Section */}
       <section className="container mx-auto px-4 py-7">
         <div className="bg-gray-800 rounded-xl p-8">
-          <h2 className="text-2xl font-bold mb-6">Powerful Use Cases</h2>
+          <h2 className="text-2xl font-bold mb-6">Revenue-Driving Insights</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gray-900 p-6 rounded-lg">
               <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Globe className="w-6 h-6 text-blue-400" />
-                Location-based Insights
+                Market Intelligence
               </h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-blue-400 rounded-full mt-2" />
-                  <span>Analyze orders with detailed location data</span>
+                  <span>Identify high-performing regions to focus growth</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-blue-400 rounded-full mt-2" />
-                  <span>Find best performing Products by geographic regions</span>
+                  <span>Discover untapped markets with growth potential</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-blue-400 rounded-full mt-2" />
-                  <span>Track orders, sales channels and revenue by region</span>
+                  <span>Track competitor-free zones for expansion</span>
                 </li>
               </ul>
             </div>
             <div className="bg-gray-900 p-6 rounded-lg">
               <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Target className="w-6 h-6 text-blue-400" />
-                Strategic Applications
+                Cost Optimization
               </h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-blue-400 rounded-full mt-2" />
-                  <span>Send location-specific holiday promotions</span>
+                  <span>Reduce shipping costs with smart inventory placement</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-blue-400 rounded-full mt-2" />
-                  <span>Optimize ad spend by excluding low-performing regions</span>
+                  <span>Minimize returns by identifying problem regions</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-blue-400 rounded-full mt-2" />
-                  <span>Create region-specific discount campaigns</span>
+                  <span>Optimize PPC spend based on regional performance</span>
                 </li>
               </ul>
             </div>
             <div className="bg-gray-900 p-6 rounded-lg">
               <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <BarChart className="w-6 h-6 text-blue-400" />
-                Product Performance Tracking
+                Growth Strategy
               </h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-blue-400 rounded-full mt-2" />
-                  <span>Track top products for specific regions by quantity sold and revenue contribution</span>
+                  <span>Create data-driven regional marketing campaigns</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-blue-400 rounded-full mt-2" />
-                  <span>Monitor refund rates and identify products needing attention or discontinuation</span>
+                  <span>Tailor product offerings to regional preferences</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-blue-400 rounded-full mt-2" />
-                  <span>Analyze bundling opportunities and optimize pricing strategies</span>
+                  <span>Scale successful strategies to similar regions</span>
                 </li>
               </ul>
             </div>

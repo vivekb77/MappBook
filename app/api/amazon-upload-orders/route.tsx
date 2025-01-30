@@ -39,11 +39,10 @@ export async function POST(request: Request) {
 
     const geocodeOrder = async (order: Order, retryCount = 0): Promise<Order> => {
       try {
-        const query = encodeURIComponent(`${order.ship_postal_code},${order.ship_country}`);
+        // const query = encodeURIComponent(`${order.ship_postal_code}&country=${order.ship_country}`);
         const response = await fetch(
-          `http://api.positionstack.com/v1/forward?access_key=${API_KEY}&query=${query}`
+          `http://api.positionstack.com/v1/forward?access_key=${API_KEY}&query=${order.ship_postal_code}&country=${order.ship_country}`
         );
-
         if (response.status === 429) {
           if (retryCount < MAX_RETRIES) {
             await delay(RATE_LIMIT_DELAY * Math.pow(2, retryCount));
@@ -76,6 +75,7 @@ export async function POST(request: Request) {
         throw new Error('No coordinates found');
 
       } catch (error) {
+        // console.error('Whyy man whyy: ', error);
         if (retryCount < MAX_RETRIES) {
           await delay(RATE_LIMIT_DELAY * Math.pow(2, retryCount));
           return geocodeOrder(order, retryCount + 1);
