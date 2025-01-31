@@ -44,8 +44,8 @@ const OrderFilters: React.FC = () => {
     to: undefined
   });
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
-  const [selectedChannel, setSelectedChannel] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<string[]>([]);
   const [originalData, setOriginalData] = useState<ReportData | null>(null);
   const [isProductPopoverOpen, setIsProductPopoverOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -62,8 +62,8 @@ const OrderFilters: React.FC = () => {
     const handleReset = (event: CustomEvent) => {
       setOriginalData(null);
       setReportData(null);
-      setSelectedStatus('');
-      setSelectedChannel('');
+      setSelectedStatus([]);
+      setSelectedChannel([]);
 
       const newReportData = event.detail;
       if (newReportData) {
@@ -113,17 +113,15 @@ const OrderFilters: React.FC = () => {
       });
     }
 
-    // Apply status filter
-    if (selectedStatus) {
+    if (selectedStatus.length > 0) {
       filteredOrders = filteredOrders.filter(order =>
-        order.order_status === selectedStatus
+        selectedStatus.includes(order.order_status)
       );
     }
 
-    // Apply channel filter
-    if (selectedChannel) {
+    if (selectedChannel.length > 0) {
       filteredOrders = filteredOrders.filter(order =>
-        order.sales_channel === selectedChannel
+        selectedChannel.includes(order.sales_channel)
       );
     }
 
@@ -147,15 +145,15 @@ const OrderFilters: React.FC = () => {
       });
     }
 
-    if (selectedStatus) {
+    if (selectedStatus.length > 0) {
       filteredOrders = filteredOrders.filter(order =>
-        order.order_status === selectedStatus
+        selectedStatus.includes(order.order_status)
       );
     }
 
-    if (selectedChannel) {
+    if (selectedChannel.length > 0) {
       filteredOrders = filteredOrders.filter(order =>
-        order.sales_channel === selectedChannel
+        selectedChannel.includes(order.sales_channel)
       );
     }
 
@@ -182,7 +180,6 @@ const OrderFilters: React.FC = () => {
 
     let filteredOrders = [...originalData.orders];
 
-    // Apply all filters
     if (dateRange?.from && dateRange?.to) {
       filteredOrders = filteredOrders.filter(order => {
         const orderDate = new Date(order.purchase_date);
@@ -194,15 +191,15 @@ const OrderFilters: React.FC = () => {
       });
     }
 
-    if (selectedStatus) {
+    if (selectedStatus.length > 0) {
       filteredOrders = filteredOrders.filter(order =>
-        order.order_status === selectedStatus
+        selectedStatus.includes(order.order_status)
       );
     }
 
-    if (selectedChannel) {
+    if (selectedChannel.length > 0) {
       filteredOrders = filteredOrders.filter(order =>
-        order.sales_channel === selectedChannel
+        selectedChannel.includes(order.sales_channel)
       );
     }
 
@@ -231,19 +228,35 @@ const OrderFilters: React.FC = () => {
   const handleReset = (): void => {
     setDateRange({ from: undefined, to: undefined });
     setSelectedProducts([]);
-    setSelectedStatus('');
-    setSelectedChannel('');
+    setSelectedStatus([]);
+    setSelectedChannel([]);
     if (originalData) {
       setReportData(originalData);
     }
   };
 
-  const handleSelectAll = (): void => {
+  const handleSelectAllProducts = (): void => {
     setSelectedProducts(getFilteredProducts());
   };
 
-  const handleDeselectAll = (): void => {
+  const handleDeselectAllProducts = (): void => {
     setSelectedProducts([]);
+  };
+
+  const handleSelectAllStatus = () => {
+    setSelectedStatus(uniqueStatuses);
+  };
+
+  const handleDeselectAllStatus = () => {
+    setSelectedStatus([]);
+  };
+
+  const handleSelectAllChannels = () => {
+    setSelectedChannel(uniqueChannels);
+  };
+
+  const handleDeselectAllChannels = () => {
+    setSelectedChannel([]);
   };
 
   const uniqueProducts = getFilteredProducts();
@@ -378,7 +391,7 @@ const OrderFilters: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={handleSelectAll}
+                        onClick={handleSelectAllProducts}
                         className="text-xs"
                       >
                         Select All
@@ -386,7 +399,7 @@ const OrderFilters: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={handleDeselectAll}
+                        onClick={handleDeselectAllProducts}
                         className="text-xs"
                       >
                         Deselect All
@@ -431,8 +444,8 @@ const OrderFilters: React.FC = () => {
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
-                    {selectedStatus ? (
-                      selectedStatus
+                    {selectedStatus.length > 0 ? (
+                      `${selectedStatus.length} selected`
                     ) : (
                       <span>Select status</span>
                     )}
@@ -444,10 +457,18 @@ const OrderFilters: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setSelectedStatus('')}
+                        onClick={handleSelectAllStatus}
                         className="text-xs"
                       >
-                        Clear Selection
+                        Select All
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDeselectAllStatus}
+                        className="text-xs"
+                      >
+                        Deselect All
                       </Button>
                     </div>
                     <div className="grid gap-2 max-h-60 overflow-y-auto px-1">
@@ -457,12 +478,12 @@ const OrderFilters: React.FC = () => {
                           <div key={statusId} className="flex items-center space-x-2">
                             <Checkbox
                               id={statusId}
-                              checked={selectedStatus === status}
+                              checked={selectedStatus.includes(status)}
                               onCheckedChange={(checked) => {
                                 if (checked) {
-                                  setSelectedStatus(status);
+                                  setSelectedStatus(prev => [...prev, status]);
                                 } else {
-                                  setSelectedStatus('');
+                                  setSelectedStatus(prev => prev.filter(s => s !== status));
                                 }
                               }}
                             />
@@ -486,8 +507,8 @@ const OrderFilters: React.FC = () => {
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
-                    {selectedChannel ? (
-                      selectedChannel
+                    {selectedChannel.length > 0 ? (
+                      `${selectedChannel.length} selected`
                     ) : (
                       <span>Select channel</span>
                     )}
@@ -499,10 +520,18 @@ const OrderFilters: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setSelectedChannel('')}
+                        onClick={handleSelectAllChannels}
                         className="text-xs"
                       >
-                        Clear Selection
+                        Select All
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDeselectAllChannels}
+                        className="text-xs"
+                      >
+                        Deselect All
                       </Button>
                     </div>
                     <div className="grid gap-2 max-h-60 overflow-y-auto px-1">
@@ -512,12 +541,12 @@ const OrderFilters: React.FC = () => {
                           <div key={channelId} className="flex items-center space-x-2">
                             <Checkbox
                               id={channelId}
-                              checked={selectedChannel === channel}
+                              checked={selectedChannel.includes(channel)}
                               onCheckedChange={(checked) => {
                                 if (checked) {
-                                  setSelectedChannel(channel);
+                                  setSelectedChannel(prev => [...prev, channel]);
                                 } else {
-                                  setSelectedChannel('');
+                                  setSelectedChannel(prev => prev.filter(c => c !== channel));
                                 }
                               }}
                             />
@@ -534,11 +563,12 @@ const OrderFilters: React.FC = () => {
                   </div>
                 </PopoverContent>
               </Popover>
+
             </div>
 
           </div>
 
-          {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0) && (
+          {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0 || selectedStatus.length > 0 || selectedChannel.length > 0) && (
             <div className="mt-4 flex items-end">
               <button
                 onClick={handleReset}
