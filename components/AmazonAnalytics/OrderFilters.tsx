@@ -7,9 +7,7 @@ import { BarChart, CalendarIcon, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { Checkbox } from '@/components/ui/checkbox';
-import OrderSankeyStats from './OrderSankeyStats';
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@radix-ui/react-dialog';
-import { DialogHeader } from '../ui/dialog';
+import RevenueChart from './RevenueChart';
 
 interface Order {
   purchase_date: string;
@@ -55,7 +53,6 @@ const OrderFilters: React.FC = () => {
   const [isProductPopoverOpen, setIsProductPopoverOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [ordersByDate, setOrdersByDate] = useState<{ [key: string]: DateStats }>({});
-  const [showRevenue, setShowRevenue] = useState(false);
 
   useEffect(() => {
     if (reportData && !originalData) {
@@ -310,24 +307,8 @@ const OrderFilters: React.FC = () => {
     <>
       <div className={`absolute bottom-[7%] left-0 right-0 flex justify-center transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <div className="w-[90%] bg-white shadow-lg rounded-lg p-6">
-          <div className="relative w-full">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="mb-2">
-                  <BarChart className="mr-2 h-4 w-4" />
-                  Revenue
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[calc(100vh-14rem)] w-[800px] h-[calc(100vh-16rem)] min-h-[400px] max-h-[800px] bg-white rounded-lg shadow-2xl border border-gray-200 backdrop-blur-sm bg-opacity-95 overflow-auto z-50">
-                <DialogHeader className="sticky top-0 bg-white z-10 px-6 py-4 border-b">
-                  <DialogTitle className="text-xs font-semibold">Revenue Flow Analysis</DialogTitle>
-                </DialogHeader>
-                <div className="w-full h-[calc(100%-4rem)] p-6 overflow-auto">
-                  <OrderSankeyStats orderStats={getFilteredOrdersStats()} />
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+
+          <RevenueChart orderStats={getFilteredOrdersStats()} />
 
           <div className="flex flex-wrap gap-6 items-start">
             <div className="flex flex-col gap-2 flex-1">
