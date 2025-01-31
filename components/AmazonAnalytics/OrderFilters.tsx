@@ -7,6 +7,7 @@ import { CalendarIcon, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { Checkbox } from '@/components/ui/checkbox';
+import OrderSankeyStats from './OrderSankeyStats';
 
 interface Order {
   purchase_date: string;
@@ -22,11 +23,13 @@ interface ReportData {
   [key: string]: any;
 }
 
+
 interface OrderStats {
   count: number;
   totals: { [key: string]: number };
+  statusCounts: { [key: string]: number };
+  statusTotals: { [status: string]: { [currency: string]: number } };
 }
-
 interface ReportContextType {
   reportData: any | null;
   setReportData: Dispatch<SetStateAction<any | null>>;
@@ -130,50 +133,86 @@ const OrderFilters: React.FC = () => {
       .filter((value, index, self) => self.indexOf(value) === index);
   };
 
+
+  
   const getFilteredOrdersStats = (): OrderStats => {
-    if (!originalData?.orders) return { count: 0, totals: {} };
-
-    let filteredOrders = [...originalData.orders];
-    if (dateRange?.from && dateRange?.to) {
-      filteredOrders = filteredOrders.filter(order => {
-        const orderDate = new Date(order.purchase_date);
-        const fromDate = new Date(dateRange.from!);
+      if (!originalData?.orders) {
+        return {
+          count: 0,
+          totals: {},
+          statusCounts: {},
+          statusTotals: {}
+        };
+      }
+  
+      let filteredOrders = [...originalData.orders];
+  
+      // Apply filters
+      if (dateRange?.from && dateRange?.to) {
+        const fromDate = new Date(dateRange.from);
+        const toDate = new Date(dateRange.to);
         fromDate.setHours(0, 0, 0, 0);
-        const toDate = new Date(dateRange.to!);
         toDate.setHours(23, 59, 59, 999);
-        return orderDate >= fromDate && orderDate <= toDate;
+        
+        filteredOrders = filteredOrders.filter(order => {
+          const orderDate = new Date(order.purchase_date);
+          return orderDate >= fromDate && orderDate <= toDate;
+        });
+      }
+  
+      if (selectedStatus.length > 0) {
+        filteredOrders = filteredOrders.filter(order => 
+          selectedStatus.includes(order.order_status)
+        );
+      }
+  
+      if (selectedChannel.length > 0) {
+        filteredOrders = filteredOrders.filter(order => 
+          selectedChannel.includes(order.sales_channel)
+        );
+      }
+  
+      if (selectedProducts.length > 0) {
+        filteredOrders = filteredOrders.filter(order => 
+          selectedProducts.includes(order.product_name)
+        );
+      }
+  
+      // Calculate all statistics in a single pass
+      const stats = filteredOrders.reduce((acc, order) => {
+        const status = order.order_status || 'Unknown';
+        const currency = order.currency || '?';
+        const price = Number(order.item_price) || 0;
+  
+        // Update overall totals by currency
+        acc.totals[currency] = (acc.totals[currency] || 0) + price;
+  
+        // Update status counts
+        acc.statusCounts[status] = (acc.statusCounts[status] || 0) + 1;
+  
+        // Update status totals by currency
+        if (!acc.statusTotals[status]) {
+          acc.statusTotals[status] = {};
+        }
+        if (!acc.statusTotals[status][currency]) {
+          acc.statusTotals[status][currency] = 0;
+        }
+        acc.statusTotals[status][currency] += price;
+  
+        return acc;
+      }, {
+        totals: {} as { [key: string]: number },
+        statusCounts: {} as { [key: string]: number },
+        statusTotals: {} as { [status: string]: { [currency: string]: number } }
       });
-    }
-
-    if (selectedStatus.length > 0) {
-      filteredOrders = filteredOrders.filter(order =>
-        selectedStatus.includes(order.order_status)
-      );
-    }
-
-    if (selectedChannel.length > 0) {
-      filteredOrders = filteredOrders.filter(order =>
-        selectedChannel.includes(order.sales_channel)
-      );
-    }
-
-    if (selectedProducts.length > 0) {
-      filteredOrders = filteredOrders.filter(order =>
-        selectedProducts.includes(order.product_name)
-      );
-    }
-
-    const totals = filteredOrders.reduce((acc: { [key: string]: number }, order) => {
-      const currency = order.currency || '?';
-      acc[currency] = (acc[currency] || 0) + (order.item_price || 0);
-      return acc;
-    }, {});
-
-    return {
-      count: filteredOrders.length,
-      totals: totals
+  
+      return {
+        count: filteredOrders.length,
+        totals: stats.totals,
+        statusCounts: stats.statusCounts,
+        statusTotals: stats.statusTotals
+      };
     };
-  };
 
   const filterData = (): void => {
     if (!originalData) return;
@@ -267,30 +306,13 @@ const OrderFilters: React.FC = () => {
   return (
     <>
       <div className={`absolute bottom-[7%] left-0 right-0 flex justify-center transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <div className="w-[80%] bg-white shadow-lg rounded-lg p-6">
-          {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0 || selectedStatus || selectedChannel) && (
-            <div className="mb-4 flex justify-between items-center">
-              <div className="text-sm font-medium text-gray-700">
-                Total Orders: {orderStats.count}
-              </div>
-              <div className="text-sm font-medium text-gray-700">
-                {Object.entries(orderStats.totals).map(([currency, amount]) => {
-                  const formattedAmount = currency !== '?'
-                    ? new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: currency
-                    }).format(amount)
-                    : `${amount}`;
-
-                  return (
-                    <div key={currency} className="py-1">
-                      {currency}: {formattedAmount}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+        <div className="w-[90%] bg-white shadow-lg rounded-lg p-6">
+          {/* {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0 || selectedStatus.length > 0 || selectedChannel.length > 0) && (
+           
+          )} */}
+          <div className="w-full">
+          <OrderSankeyStats orderStats={getFilteredOrdersStats()} />
+          </div>
 
           <div className="flex flex-wrap gap-6 items-start">
             <div className="flex flex-col gap-2 flex-1">
