@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
-import { DateRange, DayProps } from 'react-day-picker';
+import { DateRange } from 'react-day-picker';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface Order {
@@ -87,22 +87,6 @@ const OrderFilters: React.FC = () => {
     setOrdersByDate(orderStats);
   };
 
-  const DayWithOrders = (props: DayProps) => {
-    const dateKey = format(props.date, 'yyyy-MM-dd');
-    const dayStats = ordersByDate[dateKey] || { count: 0, total: 0 };
-    
-    return (
-      <div className={`flex flex-col items-center p-1.5 rounded-md ${dayStats.count > 0 ? 'bg-gray-50' : ''} hover:opacity-75`}>
-        <div className="text-sm font-medium">{format(props.date, 'd')}</div>
-        {dayStats.count > 0 && (
-          <div className="text-xs text-gray-500">
-            ({dayStats.count})
-          </div>
-        )}
-      </div>
-    );
-  };
-
   const getFilteredProducts = (): string[] => {
     if (!originalData?.orders) return [];
 
@@ -138,7 +122,7 @@ const OrderFilters: React.FC = () => {
     }
 
     if (selectedProducts.length > 0) {
-      filteredOrders = filteredOrders.filter(order => 
+      filteredOrders = filteredOrders.filter(order =>
         selectedProducts.includes(order.product_name)
       );
     }
@@ -172,7 +156,7 @@ const OrderFilters: React.FC = () => {
     }
 
     if (selectedProducts.length > 0) {
-      filteredOrders = filteredOrders.filter(order => 
+      filteredOrders = filteredOrders.filter(order =>
         selectedProducts.includes(order.product_name)
       );
     }
@@ -260,16 +244,61 @@ const OrderFilters: React.FC = () => {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-4" align="start">
                   <Calendar
                     initialFocus
                     mode="range"
                     defaultMonth={dateRange?.from}
                     selected={dateRange}
-                    onSelect={(range) => setDateRange(range || undefined)}
-                    numberOfMonths={2}
-                    components={{
-                      Day: DayWithOrders
+                    onSelect={(range: DateRange | undefined) => setDateRange(range)}
+                    numberOfMonths={1}
+                    modifiers={{
+                      'high-orders': (date: Date) => {
+                        const dateKey = format(date, 'yyyy-MM-dd');
+                        const stats = ordersByDate[dateKey];
+                        return stats?.count > 10;
+                      },
+                      'medium-orders': (date: Date) => {
+                        const dateKey = format(date, 'yyyy-MM-dd');
+                        const stats = ordersByDate[dateKey];
+                        return stats?.count > 5 && stats?.count <= 10;
+                      },
+                      'low-orders': (date: Date) => {
+                        const dateKey = format(date, 'yyyy-MM-dd');
+                        const stats = ordersByDate[dateKey];
+                        return stats?.count > 0 && stats?.count <= 5;
+                      }
+                    }}
+                    modifiersStyles={{
+                      'high-orders': { backgroundColor: '#93C5FD' },  // bg-blue-300
+                      'medium-orders': { backgroundColor: '#BFDBFE' }, // bg-blue-200
+                      'low-orders': { backgroundColor: '#DBEAFE' }    // bg-blue-100
+                    }}
+                    classNames={{
+                      day: 'relative h-14 w-14 p-0 font-normal aria-selected:opacity-100 rounded-lg',
+                      day_selected: 'bg-blue-500/20 text-blue-900 border-2 border-blue-500 rounded-lg',
+                      day_today: 'font-bold',
+                      day_outside: 'text-gray-500 opacity-50',
+                      day_disabled: 'text-gray-500',
+                      day_hidden: 'invisible',
+                      day_range_start: 'border-2 border-blue-500 rounded-l-lg',
+                      day_range_end: 'border-2 border-blue-500 rounded-r-lg',
+                      day_range_middle: 'border-t-2 border-b-2 border-blue-500'
+                    }}
+                    formatters={{
+                      formatCaption: (date: Date) => format(date, 'MMMM yyyy'),
+                      formatDay: (date: Date) => {
+                        const dateKey = format(date, 'yyyy-MM-dd');
+                        const stats = ordersByDate[dateKey];
+                        return (
+                          <>
+                            <div>{format(date, 'd')}</div>
+                            {stats?.count > 0 && (
+                              <div className="text-xs text-blue-600">({stats.count})</div>
+                            )}
+                          </>
+                        );
+                      }
                     }}
                   />
                 </PopoverContent>
@@ -320,7 +349,7 @@ const OrderFilters: React.FC = () => {
                                 if (checked === true) {
                                   setSelectedProducts(prev => [...prev, product]);
                                 } else if (checked === false) {
-                                  setSelectedProducts(prev => 
+                                  setSelectedProducts(prev =>
                                     prev.filter(p => p !== product)
                                   );
                                 }
@@ -354,7 +383,7 @@ const OrderFilters: React.FC = () => {
           )}
         </div>
       </div>
-      
+
       <button
         onClick={() => setIsVisible(!isVisible)}
         className="absolute bottom-10 right-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
