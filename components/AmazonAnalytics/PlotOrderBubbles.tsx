@@ -9,6 +9,7 @@ type Order = {
   shipped_to_longitude: number;
   order_status: string;
   sales_channel: string;
+  fulfillment_channel: string;
 };
 
 type Location = {
@@ -19,13 +20,14 @@ type Location = {
   zipCode: string;
   statusData: ChartData[];
   channelData: ChartData[];
+  fulfillmentData: ChartData[];
 };
 
 type ChartData = {
   name: string;
   value: number;
   count: number;
-  type: 'status' | 'channel';
+  type: 'status' | 'channel' | 'fulfillment';
 };
 
 type OrderVisualizationProps = {
@@ -35,6 +37,7 @@ type OrderVisualizationProps = {
 
 const COLORS_STATUS = ['#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65', '#4FC3F7', '#2196F3', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63'];
 const COLORS_CHANNEL = ['#2196F3', '#4FC3F7', '#1976D2', '#9C27B0', '#BA68C8', '#E91E63', '#F06292', '#F44336', '#EF5350', '#FF5722', '#FF8A65'];
+const COLORS_FULFILLMENT = ['#4CAF50', '#81C784', '#66BB6A', '#43A047', '#388E3C', '#2E7D32', '#1B5E20'];
 
 const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zoom }) => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
@@ -51,15 +54,9 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [handleClickOutside]);
 
-  // Calculate size based on zoom level
   const getMarkerSize = (ordersCount: number, currentZoom: number) => {
-    // Base size calculation
     const baseSize = Math.log2(ordersCount + 1) * 20;
-
-    // Zoom scaling - exponential growth with zoom
-    const zoomFactor = Math.pow(1.2, currentZoom - 4); // 1.2^(zoom-4)
-
-    // Apply zoom scaling with bounds
+    const zoomFactor = Math.pow(1.2, currentZoom - 4);
     const scaledSize = baseSize * zoomFactor;
     return Math.max(40, Math.min(400, scaledSize));
   };
@@ -94,20 +91,33 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
               count: orders.length,
               type: 'channel' as const
             }))
+            .value(),
+          fulfillmentData: _.chain(groupOrders)
+            .groupBy('fulfillment_channel')
+            .map((orders, channel) => ({
+              name: channel,
+              value: (orders.length / totalOrders) * 100,
+              count: orders.length,
+              type: 'fulfillment' as const
+            }))
             .value()
         };
 
         return location;
       })
       .value();
-  }, [orders, zoom]); // Include zoom in dependencies
+  }, [orders, zoom]);
 
   const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload as ChartData;
     return (
       <div className="bg-white p-4 rounded shadow-lg border border-gray-200 min-w-[200px] z-50">
-        <p className="font-semibold">{data.type === 'status' ? 'Order Status' : 'Sales Channel'}: {data.name}</p>
+        <p className="font-semibold">
+          {data.type === 'status' ? 'Order Status' : 
+           data.type === 'channel' ? 'Sales Channel' : 
+           'Fulfillment Channel'}: {data.name}
+        </p>
         <p>{data.count} orders ({data.value.toFixed(1)}%)</p>
       </div>
     );
@@ -150,6 +160,23 @@ const OrderVisualization: React.FC<OrderVisualizationProps> = ({ orders = [], zo
                   <div
                     className="w-3 h-3 rounded-full mr-2"
                     style={{ backgroundColor: COLORS_CHANNEL[idx % COLORS_CHANNEL.length] }}
+                  />
+                  <span className="text-sm">
+                    {channel.name}: {channel.count}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Fulfillment Channels</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {location.fulfillmentData.map((channel, idx) => (
+                <div key={idx} className="flex items-center">
+                  <div
+                    className="w-3 h-3 rounded-full mr-2"
+                    style={{ backgroundColor: COLORS_FULFILLMENT[idx % COLORS_FULFILLMENT.length] }}
                   />
                   <span className="text-sm">
                     {channel.name}: {channel.count}
