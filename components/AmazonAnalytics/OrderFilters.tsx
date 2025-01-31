@@ -13,6 +13,8 @@ interface Order {
   product_name: string;
   item_price: number;
   currency: string;
+  order_status: string;
+  sales_channel: string;
 }
 
 interface ReportData {
@@ -42,6 +44,8 @@ const OrderFilters: React.FC = () => {
     to: undefined
   });
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [selectedChannel, setSelectedChannel] = useState<string>('');
   const [originalData, setOriginalData] = useState<ReportData | null>(null);
   const [isProductPopoverOpen, setIsProductPopoverOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -58,6 +62,8 @@ const OrderFilters: React.FC = () => {
     const handleReset = (event: CustomEvent) => {
       setOriginalData(null);
       setReportData(null);
+      setSelectedStatus('');
+      setSelectedChannel('');
 
       const newReportData = event.detail;
       if (newReportData) {
@@ -73,6 +79,11 @@ const OrderFilters: React.FC = () => {
     window.addEventListener('resetOrderFilters', handleReset as EventListener);
     return () => window.removeEventListener('resetOrderFilters', handleReset as EventListener);
   }, []);
+
+  const getUniqueValues = (field: keyof Order): string[] => {
+    if (!originalData?.orders) return [];
+    return Array.from(new Set(originalData.orders.map(order => order[field] as string))).filter(Boolean);
+  };
 
   const calculateOrdersByDate = (orders: Order[]) => {
     const orderStats: { [key: string]: DateStats } = {};
@@ -101,6 +112,21 @@ const OrderFilters: React.FC = () => {
         return orderDate >= fromDate && orderDate <= toDate;
       });
     }
+
+    // Apply status filter
+    if (selectedStatus) {
+      filteredOrders = filteredOrders.filter(order =>
+        order.order_status === selectedStatus
+      );
+    }
+
+    // Apply channel filter
+    if (selectedChannel) {
+      filteredOrders = filteredOrders.filter(order =>
+        order.sales_channel === selectedChannel
+      );
+    }
+
     return filteredOrders
       .map(order => order.product_name)
       .filter((value, index, self) => self.indexOf(value) === index);
@@ -119,6 +145,18 @@ const OrderFilters: React.FC = () => {
         toDate.setHours(23, 59, 59, 999);
         return orderDate >= fromDate && orderDate <= toDate;
       });
+    }
+
+    if (selectedStatus) {
+      filteredOrders = filteredOrders.filter(order =>
+        order.order_status === selectedStatus
+      );
+    }
+
+    if (selectedChannel) {
+      filteredOrders = filteredOrders.filter(order =>
+        order.sales_channel === selectedChannel
+      );
     }
 
     if (selectedProducts.length > 0) {
@@ -144,6 +182,7 @@ const OrderFilters: React.FC = () => {
 
     let filteredOrders = [...originalData.orders];
 
+    // Apply all filters
     if (dateRange?.from && dateRange?.to) {
       filteredOrders = filteredOrders.filter(order => {
         const orderDate = new Date(order.purchase_date);
@@ -153,6 +192,18 @@ const OrderFilters: React.FC = () => {
         toDate.setHours(23, 59, 59, 999);
         return orderDate >= fromDate && orderDate <= toDate;
       });
+    }
+
+    if (selectedStatus) {
+      filteredOrders = filteredOrders.filter(order =>
+        order.order_status === selectedStatus
+      );
+    }
+
+    if (selectedChannel) {
+      filteredOrders = filteredOrders.filter(order =>
+        order.sales_channel === selectedChannel
+      );
     }
 
     if (selectedProducts.length > 0) {
@@ -171,7 +222,7 @@ const OrderFilters: React.FC = () => {
     filterData();
     const availableProducts = getFilteredProducts();
     setSelectedProducts(prev => prev.filter(p => availableProducts.includes(p)));
-  }, [dateRange]);
+  }, [dateRange, selectedStatus, selectedChannel]);
 
   useEffect(() => {
     filterData();
@@ -180,6 +231,8 @@ const OrderFilters: React.FC = () => {
   const handleReset = (): void => {
     setDateRange({ from: undefined, to: undefined });
     setSelectedProducts([]);
+    setSelectedStatus('');
+    setSelectedChannel('');
     if (originalData) {
       setReportData(originalData);
     }
@@ -195,12 +248,14 @@ const OrderFilters: React.FC = () => {
 
   const uniqueProducts = getFilteredProducts();
   const orderStats = getFilteredOrdersStats();
+  const uniqueStatuses = getUniqueValues('order_status');
+  const uniqueChannels = getUniqueValues('sales_channel');
 
   return (
     <>
       <div className={`absolute bottom-[7%] left-0 right-0 flex justify-center transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <div className="w-[80%] bg-white shadow-lg rounded-lg p-6">
-          {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0) && (
+          {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0 || selectedStatus || selectedChannel) && (
             <div className="mb-4 flex justify-between items-center">
               <div className="text-sm font-medium text-gray-700">
                 Total Orders: {orderStats.count}
@@ -369,6 +424,118 @@ const OrderFilters: React.FC = () => {
                 </PopoverContent>
               </Popover>
             </div>
+
+
+            <div className="flex flex-col gap-2 flex-1">
+              <label className="text-sm font-medium text-gray-700">Order Status</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    {selectedStatus ? (
+                      selectedStatus
+                    ) : (
+                      <span>Select status</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-4">
+                    <div className="flex justify-between pb-2 border-b">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedStatus('')}
+                        className="text-xs"
+                      >
+                        Clear Selection
+                      </Button>
+                    </div>
+                    <div className="grid gap-2 max-h-60 overflow-y-auto px-1">
+                      {uniqueStatuses.map((status) => {
+                        const statusId = `status-${status.replace(/\s+/g, '-').toLowerCase()}`;
+                        return (
+                          <div key={statusId} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={statusId}
+                              checked={selectedStatus === status}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedStatus(status);
+                                } else {
+                                  setSelectedStatus('');
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor={statusId}
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {status}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex flex-col gap-2 flex-1">
+              <label className="text-sm font-medium text-gray-700">Sales Channel</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    {selectedChannel ? (
+                      selectedChannel
+                    ) : (
+                      <span>Select channel</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-4">
+                    <div className="flex justify-between pb-2 border-b">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedChannel('')}
+                        className="text-xs"
+                      >
+                        Clear Selection
+                      </Button>
+                    </div>
+                    <div className="grid gap-2 max-h-60 overflow-y-auto px-1">
+                      {uniqueChannels.map((channel) => {
+                        const channelId = `channel-${channel.replace(/\s+/g, '-').toLowerCase()}`;
+                        return (
+                          <div key={channelId} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={channelId}
+                              checked={selectedChannel === channel}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedChannel(channel);
+                                } else {
+                                  setSelectedChannel('');
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor={channelId}
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {channel}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
           </div>
 
           {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0) && (
