@@ -3,11 +3,13 @@ import { useReportContext } from '@/context/ReportContext';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, Eye, EyeOff } from 'lucide-react';
+import { BarChart, CalendarIcon, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { Checkbox } from '@/components/ui/checkbox';
 import OrderSankeyStats from './OrderSankeyStats';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@radix-ui/react-dialog';
+import { DialogHeader } from '../ui/dialog';
 
 interface Order {
   purchase_date: string;
@@ -53,6 +55,7 @@ const OrderFilters: React.FC = () => {
   const [isProductPopoverOpen, setIsProductPopoverOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [ordersByDate, setOrdersByDate] = useState<{ [key: string]: DateStats }>({});
+  const [showRevenue, setShowRevenue] = useState(false);
 
   useEffect(() => {
     if (reportData && !originalData) {
@@ -134,85 +137,85 @@ const OrderFilters: React.FC = () => {
   };
 
 
-  
+
   const getFilteredOrdersStats = (): OrderStats => {
-      if (!originalData?.orders) {
-        return {
-          count: 0,
-          totals: {},
-          statusCounts: {},
-          statusTotals: {}
-        };
-      }
-  
-      let filteredOrders = [...originalData.orders];
-  
-      // Apply filters
-      if (dateRange?.from && dateRange?.to) {
-        const fromDate = new Date(dateRange.from);
-        const toDate = new Date(dateRange.to);
-        fromDate.setHours(0, 0, 0, 0);
-        toDate.setHours(23, 59, 59, 999);
-        
-        filteredOrders = filteredOrders.filter(order => {
-          const orderDate = new Date(order.purchase_date);
-          return orderDate >= fromDate && orderDate <= toDate;
-        });
-      }
-  
-      if (selectedStatus.length > 0) {
-        filteredOrders = filteredOrders.filter(order => 
-          selectedStatus.includes(order.order_status)
-        );
-      }
-  
-      if (selectedChannel.length > 0) {
-        filteredOrders = filteredOrders.filter(order => 
-          selectedChannel.includes(order.sales_channel)
-        );
-      }
-  
-      if (selectedProducts.length > 0) {
-        filteredOrders = filteredOrders.filter(order => 
-          selectedProducts.includes(order.product_name)
-        );
-      }
-  
-      // Calculate all statistics in a single pass
-      const stats = filteredOrders.reduce((acc, order) => {
-        const status = order.order_status || 'Unknown';
-        const currency = order.currency || '?';
-        const price = Number(order.item_price) || 0;
-  
-        // Update overall totals by currency
-        acc.totals[currency] = (acc.totals[currency] || 0) + price;
-  
-        // Update status counts
-        acc.statusCounts[status] = (acc.statusCounts[status] || 0) + 1;
-  
-        // Update status totals by currency
-        if (!acc.statusTotals[status]) {
-          acc.statusTotals[status] = {};
-        }
-        if (!acc.statusTotals[status][currency]) {
-          acc.statusTotals[status][currency] = 0;
-        }
-        acc.statusTotals[status][currency] += price;
-  
-        return acc;
-      }, {
-        totals: {} as { [key: string]: number },
-        statusCounts: {} as { [key: string]: number },
-        statusTotals: {} as { [status: string]: { [currency: string]: number } }
-      });
-  
+    if (!originalData?.orders) {
       return {
-        count: filteredOrders.length,
-        totals: stats.totals,
-        statusCounts: stats.statusCounts,
-        statusTotals: stats.statusTotals
+        count: 0,
+        totals: {},
+        statusCounts: {},
+        statusTotals: {}
       };
+    }
+
+    let filteredOrders = [...originalData.orders];
+
+    // Apply filters
+    if (dateRange?.from && dateRange?.to) {
+      const fromDate = new Date(dateRange.from);
+      const toDate = new Date(dateRange.to);
+      fromDate.setHours(0, 0, 0, 0);
+      toDate.setHours(23, 59, 59, 999);
+
+      filteredOrders = filteredOrders.filter(order => {
+        const orderDate = new Date(order.purchase_date);
+        return orderDate >= fromDate && orderDate <= toDate;
+      });
+    }
+
+    if (selectedStatus.length > 0) {
+      filteredOrders = filteredOrders.filter(order =>
+        selectedStatus.includes(order.order_status)
+      );
+    }
+
+    if (selectedChannel.length > 0) {
+      filteredOrders = filteredOrders.filter(order =>
+        selectedChannel.includes(order.sales_channel)
+      );
+    }
+
+    if (selectedProducts.length > 0) {
+      filteredOrders = filteredOrders.filter(order =>
+        selectedProducts.includes(order.product_name)
+      );
+    }
+
+    // Calculate all statistics in a single pass
+    const stats = filteredOrders.reduce((acc, order) => {
+      const status = order.order_status || 'Unknown';
+      const currency = order.currency || '?';
+      const price = Number(order.item_price) || 0;
+
+      // Update overall totals by currency
+      acc.totals[currency] = (acc.totals[currency] || 0) + price;
+
+      // Update status counts
+      acc.statusCounts[status] = (acc.statusCounts[status] || 0) + 1;
+
+      // Update status totals by currency
+      if (!acc.statusTotals[status]) {
+        acc.statusTotals[status] = {};
+      }
+      if (!acc.statusTotals[status][currency]) {
+        acc.statusTotals[status][currency] = 0;
+      }
+      acc.statusTotals[status][currency] += price;
+
+      return acc;
+    }, {
+      totals: {} as { [key: string]: number },
+      statusCounts: {} as { [key: string]: number },
+      statusTotals: {} as { [status: string]: { [currency: string]: number } }
+    });
+
+    return {
+      count: filteredOrders.length,
+      totals: stats.totals,
+      statusCounts: stats.statusCounts,
+      statusTotals: stats.statusTotals
     };
+  };
 
   const filterData = (): void => {
     if (!originalData) return;
@@ -307,11 +310,23 @@ const OrderFilters: React.FC = () => {
     <>
       <div className={`absolute bottom-[7%] left-0 right-0 flex justify-center transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <div className="w-[90%] bg-white shadow-lg rounded-lg p-6">
-          {/* {((dateRange?.from && dateRange?.to) || selectedProducts.length > 0 || selectedStatus.length > 0 || selectedChannel.length > 0) && (
-           
-          )} */}
-          <div className="w-full">
-          <OrderSankeyStats orderStats={getFilteredOrdersStats()} />
+          <div className="relative w-full">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="mb-2">
+                  <BarChart className="mr-2 h-4 w-4" />
+                  Revenue
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[calc(100vh-14rem)] w-[800px] h-[calc(100vh-16rem)] min-h-[400px] max-h-[800px] bg-white rounded-lg shadow-2xl border border-gray-200 backdrop-blur-sm bg-opacity-95 overflow-auto z-50">
+                <DialogHeader className="sticky top-0 bg-white z-10 px-6 py-4 border-b">
+                  <DialogTitle className="text-xs font-semibold">Revenue Flow Analysis</DialogTitle>
+                </DialogHeader>
+                <div className="w-full h-[calc(100%-4rem)] p-6 overflow-auto">
+                  <OrderSankeyStats orderStats={getFilteredOrdersStats()} />
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="flex flex-wrap gap-6 items-start">
