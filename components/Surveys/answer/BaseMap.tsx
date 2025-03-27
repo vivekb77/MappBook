@@ -46,9 +46,9 @@ const BaseMap: React.FC<BaseMapProps> = ({
   children
 }) => {
   const svgRef = useRef<HTMLDivElement>(null);
-  let lastDistance = 0;
-  let lastX = 0;
-  let lastY = 0;
+  const isDragging = useRef<boolean>(false);
+  const lastPosition = useRef({ x: 0, y: 0 });
+  const lastDistance = useRef<number>(0);
 
   // Handle mouse wheel zoom
   const handleWheel = (e: WheelEvent) => {
@@ -62,27 +62,24 @@ const BaseMap: React.FC<BaseMapProps> = ({
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return; // Only left mouse button
     
-    lastX = e.clientX;
-    lastY = e.clientY;
+    isDragging.current = true;
+    lastPosition.current = { x: e.clientX, y: e.clientY };
+  };
+
+      const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging.current) return;
     
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const dx = moveEvent.clientX - lastX;
-      const dy = moveEvent.clientY - lastY;
-      
-      setTranslateX(translateX + dx / scale);
-      setTranslateY(translateY + dy / scale);
-      
-      lastX = moveEvent.clientX;
-      lastY = moveEvent.clientY;
-    };
+    const dx = e.clientX - lastPosition.current.x;
+    const dy = e.clientY - lastPosition.current.y;
     
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
+    setTranslateX(translateX + dx / scale);
+    setTranslateY(translateY + dy / scale);
     
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    lastPosition.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
   };
 
   // Touch handlers for mobile devices
@@ -91,13 +88,13 @@ const BaseMap: React.FC<BaseMapProps> = ({
       // Get distance between two touches for pinch zoom
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
-      lastDistance = Math.hypot(
+      lastDistance.current = Math.hypot(
         touch2.clientX - touch1.clientX,
         touch2.clientY - touch1.clientY
       );
     } else if (e.touches.length === 1) {
-      lastX = e.touches[0].clientX;
-      lastY = e.touches[0].clientY;
+      isDragging.current = true;
+      lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
   };
 
@@ -113,46 +110,56 @@ const BaseMap: React.FC<BaseMapProps> = ({
         touch2.clientY - touch1.clientY
       );
       
-      if (lastDistance > 0) {
-        const newScale = scale * (currentDistance / lastDistance);
+      if (lastDistance.current > 0) {
+        const newScale = scale * (currentDistance / lastDistance.current);
         if (newScale >= 0.5 && newScale <= 5) {
           setScale(newScale);
         }
       }
       
-      lastDistance = currentDistance;
+      lastDistance.current = currentDistance;
     } 
     // Handle single touch drag
-    else if (e.touches.length === 1) {
-      const dx = e.touches[0].clientX - lastX;
-      const dy = e.touches[0].clientY - lastY;
+    else if (e.touches.length === 1 && isDragging.current) {
+      const dx = e.touches[0].clientX - lastPosition.current.x;
+      const dy = e.touches[0].clientY - lastPosition.current.y;
       
       setTranslateX(translateX + dx / scale);
       setTranslateY(translateY + dy / scale);
       
-      lastX = e.touches[0].clientX;
-      lastY = e.touches[0].clientY;
+      lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
   };
 
   const handleTouchEnd = () => {
-    lastDistance = 0;
+    isDragging.current = false;
+    lastDistance.current = 0;
   };
 
   // Add event listeners
   useEffect(() => {
     const svg = svgRef.current;
     if (svg) {
+      // Add wheel event for zooming
       svg.addEventListener('wheel', handleWheel, { passive: false });
-      svg.addEventListener('touchstart', handleTouchStart);
+      
+      // Add touch events for mobile
+      svg.addEventListener('touchstart', handleTouchStart, { passive: true });
       svg.addEventListener('touchmove', handleTouchMove, { passive: false });
-      svg.addEventListener('touchend', handleTouchEnd);
+      svg.addEventListener('touchend', handleTouchEnd, { passive: true });
+      
+      // Add global mouse events for dragging
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
       
       return () => {
+        // Remove all listeners on cleanup
         svg.removeEventListener('wheel', handleWheel);
         svg.removeEventListener('touchstart', handleTouchStart);
         svg.removeEventListener('touchmove', handleTouchMove);
         svg.removeEventListener('touchend', handleTouchEnd);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
       };
     }
   }, [scale, translateX, translateY]);
@@ -197,8 +204,8 @@ const BaseMap: React.FC<BaseMapProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-100 w-full h-full">
-      <div className="bg-green-800 px-4 py-3 md:px-5 md:py-3 rounded-lg mx-2.5 md:mx-2.5 my-2.5 md:my-2 shadow-md">
+    <div className="flex flex-col bg-gray-100 w-full h-full">
+      <div className="bg-green-800 px-4 py-3 md:px-5 md:py-3 rounded-lg mx-2.5 md:mx-2.5 mt-2.5 mb-2 md:my-2 shadow-md">
         <div className="flex justify-center items-center mb-1">
           <FaTrophy className="mx-2 text-2xl text-yellow-400" />
           <h1 className="text-xl font-bold text-center text-white m-0">IPL Fan Map 2025</h1>
@@ -208,7 +215,7 @@ const BaseMap: React.FC<BaseMapProps> = ({
       </div>
       
       <div 
-        className="flex-1 mx-2.5 rounded-lg overflow-hidden bg-white shadow-md cursor-grab relative"
+        className="flex-1 h-full mx-2.5 mb-2.5 rounded-lg overflow-hidden bg-white shadow-md cursor-grab relative touch-action-none select-none"
         ref={svgRef}
         onMouseDown={handleMouseDown}
       >
@@ -245,8 +252,8 @@ const BaseMap: React.FC<BaseMapProps> = ({
                 <path
                   key={`state-${index}`}
                   d={pathData}
-                  fill="#e6f2ff"  // Light cricket green background
-                  stroke="#0066cc"  // Cricket green border
+                  fill="#e6f2ff"  // Light blue background
+                  stroke="#0066cc"  // Blue border
                   strokeWidth="1"
                   fillOpacity="0.9"
                 />
