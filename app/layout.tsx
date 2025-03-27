@@ -8,7 +8,7 @@ import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'MappBook.com',
-  description: 'Location Intelligence for Amazon Sellers',
+  description: 'Location Intelligence',
   robots: {
     index: true,
     follow: true,
@@ -16,13 +16,13 @@ export const metadata: Metadata = {
   // Add additional metadata for better SEO
   openGraph: {
     title: 'MappBook.com',
-    description: 'Location Intelligence for Amazon Sellers',
+    description: 'Location Intelligence',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MappBook.com',
-    description: 'Location Intelligence for Amazon Sellers',
+    description: 'Location Intelligence',
   }
 };
 

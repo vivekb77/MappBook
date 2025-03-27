@@ -1,7 +1,7 @@
 // components/MapContainer.tsx
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { FaPlus, FaMinus, FaSyncAlt } from 'react-icons/fa';
+import { FaPlus, FaMinus, FaSyncAlt, FaShareAlt } from 'react-icons/fa';
 import Link from 'next/link';
 
 // Import our custom components
@@ -70,6 +70,9 @@ const MapContainer: React.FC = () => {
   // State for displaying selected hexagon and team at the top
   const [userHomeHexagon, setUserHomeHexagon] = useState<string | null>(null);
   const [userTeam, setUserTeam] = useState<string>("");
+
+  // State for share URL notification
+  const [showShareNotification, setShowShareNotification] = useState<boolean>(false);
 
   // Generate or retrieve a user ID on component mount
   useEffect(() => {
@@ -270,6 +273,36 @@ const MapContainer: React.FC = () => {
     setUserTeam(team);
   };
 
+  // Function to copy share URL to clipboard
+  const copyShareURL = () => {
+    if (typeof window !== 'undefined') {
+      // Create a URL with relevant parameters
+      const baseURL = window.location.origin + window.location.pathname;
+      const params = new URLSearchParams();
+      
+      if (userHomeHexagon) params.append('hexagon', userHomeHexagon);
+      if (userTeam) params.append('team', userTeam);
+      if (userId) params.append('id', userId);
+      
+      const shareURL = baseURL;
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(shareURL)
+        .then(() => {
+          // Show notification
+          setShowShareNotification(true);
+          // Hide notification after 3 seconds
+          setTimeout(() => {
+            setShowShareNotification(false);
+          }, 3000);
+        })
+        .catch(err => {
+          console.error('Error copying text: ', err);
+          alert('Failed to copy URL to clipboard.');
+        });
+    }
+  };
+
   // Calculate viewbox dimensions from GeoJSON data
   const calculateViewBox = (geoJson: GeoJSON): ViewBox => {
     try {
@@ -406,13 +439,13 @@ const MapContainer: React.FC = () => {
 
   return (
     <div className="relative flex flex-col h-screen w-full bg-gray-100 overflow-hidden">
-      {/* New header to display hexagon and team selection */}
-      {(userHomeHexagon || userTeam) && (
-        <div 
-          className="w-full shadow-md z-10"
-          style={userTeam ? {backgroundColor: getTeamColor(userTeam)} : {backgroundColor: '#1A5D1A'}}
-        >
-          <div className="flex justify-between items-center flex-wrap max-w-7xl mx-auto w-full px-4 py-3">
+      {/* Header to display hexagon and team selection */}
+      <div 
+        className="w-full shadow-md z-10"
+        style={userTeam ? {backgroundColor: getTeamColor(userTeam)} : {backgroundColor: '#1A5D1A'}}
+      >
+        <div className="flex justify-between items-center flex-wrap max-w-7xl mx-auto w-full px-4 py-3">
+          <div className="flex flex-wrap items-center">
             {userHomeHexagon && (
               <div className="flex items-center mr-5 my-1">
                 <span className="text-white font-semibold text-sm md:text-base mr-1">Your Region:</span>
@@ -426,8 +459,31 @@ const MapContainer: React.FC = () => {
               </div>
             )}
           </div>
+          
+          {/* Add the See Results button to the top right */}
+          <div className="flex items-center space-x-2">
+            {/* Share URL Button */}
+            <button 
+              onClick={copyShareURL}
+              className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+              aria-label="Share URL"
+            >
+              <FaShareAlt className="mr-1" />
+              <span>Share</span>
+            </button>
+            
+            {/* See Results Button */}
+            <Link href="/iplfandommap" passHref>
+              <button 
+                className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+                aria-label="See fandom map results"
+              >
+                <span>See Results</span>
+              </button>
+            </Link>
+          </div>
         </div>
-      )}
+      </div>
 
       <div className="flex-1 relative w-full h-full bg-white flex items-center justify-center">
         <BaseMap
@@ -472,6 +528,13 @@ const MapContainer: React.FC = () => {
             <FaSyncAlt />
           </button>
         </div>
+
+        {/* URL Share notification */}
+        {showShareNotification && (
+          <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-green-800 text-white px-4 py-2 rounded-lg shadow-lg z-20 transition-opacity duration-300">
+            URL copied!
+          </div>
+        )}
       </div>
       
       {/* Hexagon Info Panel */}
@@ -493,16 +556,6 @@ const MapContainer: React.FC = () => {
           {isPanelVisible ? "Hide Panel" : "Set Favourite IPL Team"}
         </span>
       </button>
-      
-      {/* See Results Button - fixed position at bottom-right */}
-      <Link href="/fandommap" passHref>
-        <button 
-          className="fixed bottom-56 md:bottom-48 right-5 bg-gray-800 hover:bg-gray-700 px-3 py-2 md:px-4 md:py-2.5 rounded-lg z-10 shadow-md border-none flex items-center text-white font-semibold text-xs md:text-sm cursor-pointer"
-          aria-label="See fandom map results"
-        >
-          <span>See Results</span>
-        </button>
-      </Link>
     </div>
   );
 };

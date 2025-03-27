@@ -124,8 +124,16 @@ const BaseMap: React.FC<BaseMapProps> = ({
       const dx = e.touches[0].clientX - lastPosition.current.x;
       const dy = e.touches[0].clientY - lastPosition.current.y;
       
-      setTranslateX(translateX + dx / scale);
-      setTranslateY(translateY + dy / scale);
+      // Calculate new positions with boundaries
+      const newTranslateX = translateX + dx / scale;
+      const newTranslateY = translateY + dy / scale;
+      
+      // Limit panning to prevent going too far from the map
+      // Using the same boundary logic as in mouse movement
+      const maxPanDistance = Math.max(viewBox.width, viewBox.height) * 0.5;
+      
+      setTranslateX(Math.max(Math.min(newTranslateX, maxPanDistance), -maxPanDistance));
+      setTranslateY(Math.max(Math.min(newTranslateY, maxPanDistance), -maxPanDistance));
       
       lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
