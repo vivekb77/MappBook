@@ -353,7 +353,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
           textAnchor="middle"
           fill="#000"
         >
-          Loading hexagon data...
+          Loading data...
         </text>
       </g>
     );

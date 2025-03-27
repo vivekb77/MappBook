@@ -1,23 +1,7 @@
-// components/HexagonDrawing.tsx
+// components/HexagonDrawing.js
 import React from 'react';
 
-// Hexagon interface
-interface Hexagon {
-  id: string;
-  number: number;
-  points: string;
-  centerX: number;
-  centerY: number;
-}
-
-interface HexagonDrawingProps {
-  hexagons: Hexagon[];
-  selectedHexagon: Hexagon | null;
-  userHomeHexagon: number | null; // User's saved home hexagon
-  onHexagonClick: (hexagon: Hexagon) => void;
-}
-
-const HexagonDrawing: React.FC<HexagonDrawingProps> = ({ 
+const HexagonDrawing = ({ 
   hexagons, 
   selectedHexagon, 
   userHomeHexagon,
@@ -36,7 +20,7 @@ const HexagonDrawing: React.FC<HexagonDrawingProps> = ({
   };
 
   // Helper function to determine hexagon fill color
-  const getHexagonFillColor = (hexagon: Hexagon) => {
+  const getHexagonFillColor = (hexagon) => {
     // First priority: currently selected hexagon
     if (selectedHexagon?.id === hexagon.id) {
       return hexColors.selected;
@@ -52,7 +36,7 @@ const HexagonDrawing: React.FC<HexagonDrawingProps> = ({
   };
 
   // Helper function to determine text color
-  const getTextColor = (hexagon: Hexagon) => {
+  const getTextColor = (hexagon) => {
     if (selectedHexagon?.id === hexagon.id) {
       return hexColors.textSelected;
     }
@@ -65,7 +49,7 @@ const HexagonDrawing: React.FC<HexagonDrawingProps> = ({
   };
 
   // Helper function to determine stroke color and width
-  const getStrokeProperties = (hexagon: Hexagon) => {
+  const getStrokeProperties = (hexagon) => {
     const isSelected = selectedHexagon?.id === hexagon.id;
     const isUserHome = userHomeHexagon && hexagon.number === userHomeHexagon;
     
@@ -91,8 +75,8 @@ const HexagonDrawing: React.FC<HexagonDrawingProps> = ({
               strokeWidth={strokeProps.strokeWidth}
               fillOpacity="0.85"
               onClick={() => onHexagonClick(hexagon)}
-              style={{ cursor: 'pointer' }}
               aria-label={`Hexagon region ${hexagon.number}${isUserHome ? ', your home region' : ''}`}
+              style={{ cursor: 'pointer' }}
             />
             <text
               x={hexagon.centerX}
@@ -101,6 +85,7 @@ const HexagonDrawing: React.FC<HexagonDrawingProps> = ({
               fontWeight={isSelected || isUserHome ? "bold" : "normal"}
               textAnchor="middle"
               fill={getTextColor(hexagon)}
+              pointerEvents="none"
             >
               {hexagon.number}
             </text>

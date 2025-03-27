@@ -1,50 +1,9 @@
-// components/BaseMap.tsx
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+// components/BaseMap.js
+import React, { useRef, useEffect } from 'react';
+import { FaTrophy, FaBaseballBall } from 'react-icons/fa';
 
-// Type definitions
-interface Geometry {
-  type: string;
-  coordinates: any[];
-}
-
-interface Feature {
-  type: string;
-  properties: {
-    name?: string;
-    [key: string]: any;
-  };
-  geometry: Geometry;
-}
-
-interface GeoJSON {
-  type: string;
-  features: Feature[];
-}
-
-interface ViewBoxType {
-  width: number;
-  height: number;
-  minLon: number;
-  maxLon: number;
-  minLat: number;
-  maxLat: number;
-}
-
-interface BaseMapProps {
-  viewBox: ViewBoxType;
-  scale: number;
-  translateX: number;
-  translateY: number;
-  setScale: React.Dispatch<React.SetStateAction<number>>;
-  setTranslateX: React.Dispatch<React.SetStateAction<number>>;
-  setTranslateY: React.Dispatch<React.SetStateAction<number>>;
-  children?: React.ReactNode;
-  title?: string;
-  subtitle?: string;
-  geoJsonPath?: string; // Path to the GeoJSON file in public folder
-}
-
-const BaseMap: React.FC<BaseMapProps> = ({
+const BaseMap = ({
+  geoJsonData,
   viewBox,
   scale,
   translateX,
@@ -52,57 +11,122 @@ const BaseMap: React.FC<BaseMapProps> = ({
   setScale,
   setTranslateX,
   setTranslateY,
-  children,
-  title = "Survey Map",
-  subtitle = "Interactive geographic survey visualization",
-  geoJsonPath = "/data/india-states.json" // Default path
+  children
 }) => {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
-  const [isPinching, setIsPinching] = useState(false);
-  const [lastDistance, setLastDistance] = useState(0);
-  const [geoJsonData, setGeoJsonData] = useState<GeoJSON | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const svgRef = useRef(null);
+  let lastDistance = 0;
+  let lastX = 0;
+  let lastY = 0;
 
-  // Load GeoJSON directly from public folder
-  useEffect(() => {
-    const loadGeoJson = async () => {
-      try {
-        const response = await fetch(geoJsonPath);
-        if (!response.ok) {
-          throw new Error(`Failed to load GeoJSON from ${geoJsonPath}`);
-        }
-        const data = await response.json();
-        setGeoJsonData(data);
-      } catch (error) {
-        console.error('Error loading GeoJSON:', error);
-        // Fallback to a simple polygon
-        setGeoJsonData({
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              properties: { name: "Sample Region" },
-              geometry: {
-                type: "Polygon",
-                coordinates: [[
-                  [-5, -5], [5, -5], [5, 5], [-5, 5], [-5, -5]
-                ]]
-              }
-            }
-          ]
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  // Handle mouse wheel zoom
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const scaleChange = e.deltaY * -0.01;
+    const newScale = Math.max(0.5, Math.min(5, scale + scaleChange));
+    setScale(newScale);
+  };
+
+  // Handle mouse drag for panning
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return; // Only left mouse button
+    
+    lastX = e.clientX;
+    lastY = e.clientY;
+    
+    const handleMouseMove = (moveEvent) => {
+      const dx = moveEvent.clientX - lastX;
+      const dy = moveEvent.clientY - lastY;
+      
+      setTranslateX(translateX + dx / scale);
+      setTranslateY(translateY + dy / scale);
+      
+      lastX = moveEvent.clientX;
+      lastY = moveEvent.clientY;
     };
+    
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
-    loadGeoJson();
-  }, [geoJsonPath]);
+  // Touch handlers for mobile devices
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      // Get distance between two touches for pinch zoom
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      lastDistance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+    } else if (e.touches.length === 1) {
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+    }
+  };
 
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    
+    // Handle pinch zoom
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const currentDistance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+      
+      if (lastDistance > 0) {
+        const newScale = scale * (currentDistance / lastDistance);
+        if (newScale >= 0.5 && newScale <= 5) {
+          setScale(newScale);
+        }
+      }
+      
+      lastDistance = currentDistance;
+    } 
+    // Handle single touch drag
+    else if (e.touches.length === 1) {
+      const dx = e.touches[0].clientX - lastX;
+      const dy = e.touches[0].clientY - lastY;
+      
+      setTranslateX(translateX + dx / scale);
+      setTranslateY(translateY + dy / scale);
+      
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    lastDistance = 0;
+  };
+
+  // Add event listeners
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (svg) {
+      svg.addEventListener('wheel', handleWheel, { passive: false });
+      svg.addEventListener('touchstart', handleTouchStart);
+      svg.addEventListener('touchmove', handleTouchMove, { passive: false });
+      svg.addEventListener('touchend', handleTouchEnd);
+      
+      return () => {
+        svg.removeEventListener('wheel', handleWheel);
+        svg.removeEventListener('touchstart', handleTouchStart);
+        svg.removeEventListener('touchmove', handleTouchMove);
+        svg.removeEventListener('touchend', handleTouchEnd);
+      };
+    }
+  }, [scale, translateX, translateY]);
+  
   // Function to convert GeoJSON coordinates to SVG path
-  const coordinatesToPath = (coordinates: number[][][], viewBox: ViewBoxType): string => {
+  const coordinatesToPath = (coordinates, viewBox) => {
     if (!coordinates || !coordinates.length || !coordinates[0] || !coordinates[0].length) {
       return '';
     }
@@ -140,145 +164,34 @@ const BaseMap: React.FC<BaseMapProps> = ({
     }
   };
 
-  // Mouse events for panning
-  const handleMouseDown = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
-    if (e.button === 0) { // Left mouse button
-      setIsDragging(true);
-      setLastPosition({ x: e.clientX, y: e.clientY });
-    }
-  }, []);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
-    if (isDragging) {
-      const dx = e.clientX - lastPosition.x;
-      const dy = e.clientY - lastPosition.y;
-      
-      setTranslateX(prev => prev + dx / scale);
-      setTranslateY(prev => prev + dy / scale);
-      
-      setLastPosition({ x: e.clientX, y: e.clientY });
-    }
-  }, [isDragging, lastPosition, scale, setTranslateX, setTranslateY]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  // Wheel event for zooming
-  const handleWheel = useCallback((e: React.WheelEvent<SVGSVGElement>) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    const newScale = Math.max(0.5, Math.min(5, scale + delta));
-    setScale(newScale);
-  }, [scale, setScale]);
-
-  // Touch events for mobile
-  const handleTouchStart = useCallback((e: React.TouchEvent<SVGSVGElement>) => {
-    if (e.touches.length === 1) {
-      // Single touch for panning
-      setIsDragging(true);
-      setLastPosition({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-    } else if (e.touches.length === 2) {
-      // Two touches for pinch zoom
-      setIsPinching(true);
-      const distance = getDistanceBetweenTouches(e.touches[0], e.touches[1]);
-      setLastDistance(distance);
-    }
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent<SVGSVGElement>) => {
-    e.preventDefault();
-    
-    if (isDragging && e.touches.length === 1) {
-      // Handle panning
-      const dx = e.touches[0].clientX - lastPosition.x;
-      const dy = e.touches[0].clientY - lastPosition.y;
-      
-      setTranslateX(prev => prev + dx / scale);
-      setTranslateY(prev => prev + dy / scale);
-      
-      setLastPosition({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-    } else if (isPinching && e.touches.length === 2) {
-      // Handle pinch zoom
-      const currentDistance = getDistanceBetweenTouches(e.touches[0], e.touches[1]);
-      
-      if (lastDistance > 0) {
-        const factor = currentDistance / lastDistance;
-        const newScale = Math.max(0.5, Math.min(5, scale * factor));
-        setScale(newScale);
-      }
-      
-      setLastDistance(currentDistance);
-    }
-  }, [isDragging, isPinching, lastPosition, lastDistance, scale, setTranslateX, setTranslateY, setScale]);
-
-  const handleTouchEnd = useCallback(() => {
-    setIsDragging(false);
-    setIsPinching(false);
-    setLastDistance(0);
-  }, []);
-
-  // Helper function to calculate distance between two touch points
-  const getDistanceBetweenTouches = (touch1: React.Touch, touch2: React.Touch): number => {
-    return Math.sqrt(
-      Math.pow(touch2.clientX - touch1.clientX, 2) +
-      Math.pow(touch2.clientY - touch1.clientY, 2)
-    );
-  };
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="flex flex-col h-full w-full bg-gray-50">
-        <div className="bg-green-800 py-3 px-5 rounded-lg mx-4 mt-4 mb-2 shadow-md">
-          <h2 className="text-xl font-bold text-white text-center">{title}</h2>
-        </div>
-        <div className="flex-1 mx-4 mb-4 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-800"></div>
-            <p className="mt-2 text-green-800">Loading map data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col h-full w-full bg-gray-50">
-      <div className="bg-green-800 py-3 px-5 rounded-lg mx-4 mt-4 mb-2 shadow-md">
-        <div className="flex items-center justify-center mb-1">
-          <svg className="w-6 h-6 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-          </svg>
-          <h2 className="text-xl font-bold text-white text-center">{title}</h2>
-          <svg className="w-6 h-6 text-yellow-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-          </svg>
+    <div className="container">
+      <div className="titleContainer">
+        <div className="titleRow">
+          <FaTrophy className="titleIcon" style={{ color: '#FFD700' }} />
+          <h1 className="mainTitle">IPL Fan Map 2025</h1>
+          <FaBaseballBall className="titleIcon" style={{ color: '#FFD700' }} />
         </div>
-        <p className="text-sm text-gray-100 text-center">{subtitle}</p>
+        <p className="subtitle">Vote for your favourite team and see who's winning India's heart</p>
       </div>
-      <div className="flex-1 mx-4 mb-4 rounded-lg overflow-hidden bg-white shadow-md">
-        <svg
-          ref={svgRef}
-          width="100%"
-          height="100%"
+      
+      <div 
+        className="mapContainer"
+        ref={svgRef}
+        onMouseDown={handleMouseDown}
+      >
+        <svg 
+          width="100%" 
+          height="100%" 
           viewBox={`0 0 ${viewBox.width} ${viewBox.height}`}
-          className="touch-none"
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+          aria-label="Interactive map of India with hexagonal regions"
         >
           {/* Using transform-origin to zoom from center */}
           <g 
             transform={`translate(${viewBox.width/2}, ${viewBox.height/2}) scale(${scale}) translate(${translateX - viewBox.width/2}, ${translateY - viewBox.height/2})`}
           >
-            {/* Draw map */}
-            {geoJsonData && geoJsonData.features.map((feature, index) => {
+            {/* Draw India map */}
+            {geoJsonData.features.map((feature, index) => {
               let pathData = '';
               
               try {
@@ -297,10 +210,10 @@ const BaseMap: React.FC<BaseMapProps> = ({
               
               return (
                 <path
-                  key={`region-${index}`}
+                  key={`state-${index}`}
                   d={pathData}
-                  fill="#e6f2ff"  // Light background
-                  stroke="#0066cc"  // Border
+                  fill="#e6f2ff"  // Light cricket green background
+                  stroke="#0066cc"  // Cricket green border
                   strokeWidth="1"
                   fillOpacity="0.9"
                 />
@@ -312,6 +225,58 @@ const BaseMap: React.FC<BaseMapProps> = ({
           </g>
         </svg>
       </div>
+
+      <style jsx>{`
+        .container {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          background-color: #F5F5F5;
+        }
+        .titleContainer {
+          background-color: #1A5D1A;
+          padding: 12px 20px;
+          border-radius: 10px;
+          margin: 10px 10px 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .titleRow {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-bottom: 5px;
+        }
+        .titleIcon {
+          margin: 0 8px;
+          font-size: 24px;
+        }
+        .mainTitle {
+          font-size: 20px;
+          font-weight: bold;
+          text-align: center;
+          color: #ffffff;
+          margin: 0;
+        }
+        .subtitle {
+          font-size: 14px;
+          text-align: center;
+          color: #E0F2F1;
+          font-weight: 500;
+          margin: 0;
+        }
+        .mapContainer {
+          flex: 1;
+          margin: 10px;
+          border-radius: 10px;
+          overflow: hidden;
+          background-color: #fff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          cursor: grab;
+        }
+        .mapContainer:active {
+          cursor: grabbing;
+        }
+      `}</style>
     </div>
   );
 };
