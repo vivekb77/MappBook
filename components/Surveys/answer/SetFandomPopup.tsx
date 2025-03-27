@@ -235,7 +235,6 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
   return (
     <div className="info-panel">
       <div className="header-row">
-        <FiMapPin className="header-icon" />
         <h2 className="info-panel-title">Set Your IPL Team</h2>
       </div>
       
@@ -260,7 +259,6 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
           {/* Team Selection Dropdown */}
           <div className="dropdown-container">
             <div className="label-container">
-              <FiMapPin className="label-icon" />
               <span className="label-text">Your favorite IPL team:</span>
             </div>
             <select
@@ -295,7 +293,7 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
             ) : (
               <>
                 <FiSave className="button-icon" />
-                <span>Save My Selection</span>
+                <span>Save</span>
               </>
             )}
           </button>

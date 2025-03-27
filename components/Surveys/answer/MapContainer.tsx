@@ -488,11 +488,12 @@ const MapContainer: React.FC = () => {
         onClick={togglePanelVisibility}
         aria-label="Toggle team selection panel"
       >
-        <FaSyncAlt className="buttonIcon" />
         <span>
           {isPanelVisible ? "Hide Panel" : "Set Favourite IPL Team"}
         </span>
       </button>
+
+      
 
       <style jsx>{`
         .container {

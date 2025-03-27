@@ -3,7 +3,7 @@ import React from 'react';
 import { BarChart, MapPin, Target, Layers, Globe, Users, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { track } from '@vercel/analytics';
-import SurveyMapDemo from '@/components/Surveys/DemoMap';
+// import SurveyMapDemo from '@/components/Surveys/DemoMap';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -71,7 +71,7 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-        <SurveyMapDemo/>
+        {/* <SurveyMapDemo/> */}
       </section>
 
       {/* Use Cases Section */}
