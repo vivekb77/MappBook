@@ -93,7 +93,7 @@ const HexagonDrawing: React.FC<HexagonDrawingProps> = ({
         const strokeProps = getStrokeProperties(hexagon);
         
         return (
-          <g key={hexagon.id}>
+          <g key={hexagon.id} className="cursor-pointer">
             <polygon
               points={hexagon.points}
               fill={getHexagonFillColor(hexagon)}
@@ -102,7 +102,6 @@ const HexagonDrawing: React.FC<HexagonDrawingProps> = ({
               fillOpacity="0.85"
               onClick={() => onHexagonClick(hexagon)}
               aria-label={`Hexagon region ${hexagon.number}${isUserHome ? ', your home region' : ''}`}
-              style={{ cursor: 'pointer' }}
             />
             <text
               x={hexagon.centerX}
@@ -112,6 +111,7 @@ const HexagonDrawing: React.FC<HexagonDrawingProps> = ({
               textAnchor="middle"
               fill={getTextColor(hexagon)}
               pointerEvents="none"
+              className="select-none"
             >
               {hexagon.number}
             </text>

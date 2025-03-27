@@ -243,38 +243,43 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
 
   return (
     <>
-      <div className="info-panel">
-        <div className="header-row">
-          <h2 className="info-panel-title">Set Your IPL Team</h2>
+      <div className="fixed bottom-20 left-5 bg-white rounded-xl p-4 min-w-[280px] max-w-[320px] shadow-md z-50">
+        <div className="flex justify-center items-center mb-4 pb-3 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-green-800 text-center m-0">Set Your IPL Team</h2>
         </div>
         
         {isLoading ? (
-          <div className="loading-container">
-            <div className="spinner"></div>
-            <p className="loading-text">Loading your preferences...</p>
+          <div className="flex flex-col items-center justify-center p-6">
+            <div className="w-8 h-8 border-3 border-green-800/30 border-t-green-800 rounded-full animate-spin"></div>
+            <p className="mt-3 text-green-800 text-base font-medium">Loading your preferences...</p>
           </div>
         ) : (
           <>
             {/* Home Hexagon Selection */}
-            <div className="row-container">
-              <div className="label-container">
-                <FiMapPin className="label-icon" />
-                <span className="label-text">Your Region:</span>
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+              <div className="flex items-center flex-2">
+                <FiMapPin className="mr-1.5 text-green-800" />
+                <span className="text-sm text-gray-800">Your Region:</span>
               </div>
-              <span className="value-text">
+              <span className="text-base font-bold text-green-800 flex-1 text-right">
                 {selectedHexagon ? selectedHexagon.number : (homeHexagon ? homeHexagon : 'Click on map to select')}
               </span>
             </div>
             
             {/* Team Selection Dropdown */}
-            <div className="dropdown-container">
-              <div className="label-container">
-                <span className="label-text">Your favorite IPL team:</span>
+            <div className="mb-5 w-full">
+              <div className="flex items-center">
+                <span className="text-sm text-gray-800">Your favorite IPL team:</span>
               </div>
               <select
-                className="team-select"
+                className="mt-2 w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-sm appearance-none bg-no-repeat"
                 value={selectedTeam}
                 onChange={(e) => setSelectedTeam(e.target.value)}
+                style={{
+                  backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A5D1A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundPosition: 'right 12px center',
+                  backgroundSize: '16px'
+                }}
               >
                 <option value="">Select a team</option>
                 {IPL_TEAMS.map((team) => (
@@ -285,276 +290,37 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
             
             {/* Validation Error Message */}
             {validationError && (
-              <div className="error-container">
-                <FiAlertCircle className="error-icon" />
-                <span className="error-text">{validationError}</span>
+              <div className="flex items-center bg-red-50 p-2.5 rounded-lg mb-3">
+                <FiAlertCircle className="mr-1.5 text-red-600" />
+                <span className="text-red-600 text-sm flex-1">{validationError}</span>
               </div>
             )}
             
             {/* Save Button */}
             <button 
-              className="save-button"
+              className="bg-green-800 text-white p-3 rounded-lg border-none w-full flex items-center justify-center text-base font-semibold cursor-pointer mt-2 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed hover:opacity-90"
               style={{ backgroundColor: selectedTeam ? getTeamColor() : '#1A5D1A' }}
               onClick={saveUserPreferences}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <div className="small-spinner"></div>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
-                  <FiSave className="button-icon" />
+                  <FiSave className="mr-2" />
                   <span>Save</span>
                 </>
               )}
             </button>
             
             {/* See Results Button */}
-            <Link href="/fandommap" passHref>
-              <button className="results-button">
+            {/* <Link href="/fandommap" passHref>
+              <button className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg border-none w-full flex items-center justify-center text-base font-semibold cursor-pointer mt-3 transition-bg">
                 <span>See Results</span>
               </button>
-            </Link>
+            </Link> */}
           </>
         )}
-
-        <style jsx>{`
-          .info-panel {
-            position: fixed;
-            bottom: 80px;
-            left: 20px;
-            background-color: white;
-            border-radius: 12px;
-            padding: 16px;
-            min-width: 280px;
-            max-width: 320px;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-          }
-          .header-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #eee;
-          }
-          .header-icon {
-            margin-right: 8px;
-            color: #1A5D1A;
-          }
-          .info-panel-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1A5D1A;
-            text-align: center;
-            margin: 0;
-          }
-          .row-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #eee;
-          }
-          .label-container {
-            display: flex;
-            align-items: center;
-            flex: 2;
-          }
-          .label-icon {
-            margin-right: 6px;
-            color: #1A5D1A;
-          }
-          .label-text {
-            font-size: 15px;
-            color: #333;
-          }
-          .value-text {
-            font-size: 16px;
-            font-weight: bold;
-            color: #1A5D1A;
-            flex: 1;
-            text-align: right;
-          }
-          .dropdown-container {
-            margin-bottom: 20px;
-            width: 100%;
-          }
-          .team-select {
-            margin-top: 8px;
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f8f8f8;
-            font-size: 15px;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A5D1A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-          }
-          .button-icon {
-            margin-right: 8px;
-          }
-          .save-button {
-            background-color: #1A5D1A;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: opacity 0.2s;
-          }
-          .save-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-          }
-          .save-button:hover:not(:disabled) {
-            opacity: 0.9;
-          }
-          .results-button {
-            background-color: #333;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 12px;
-            transition: background-color 0.2s;
-          }
-          .results-button:hover {
-            background-color: #555;
-          }
-          .error-container {
-            display: flex;
-            align-items: center;
-            background-color: #FFEBEE;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-          }
-          .error-icon {
-            margin-right: 6px;
-            color: #E60023;
-          }
-          .error-text {
-            color: #E60023;
-            font-size: 14px;
-            flex: 1;
-          }
-          .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-          }
-          .loading-text {
-            margin-top: 12px;
-            color: #1A5D1A;
-            font-size: 16px;
-            font-weight: 500;
-          }
-          .spinner {
-            border: 3px solid rgba(26, 93, 26, 0.3);
-            border-radius: 50%;
-            border-top: 3px solid #1A5D1A;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-          }
-          .small-spinner {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 2px solid white;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-          }
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-
-          /* Responsive styles */
-          @media (max-width: 768px) {
-            .info-panel {
-              bottom: 70px;
-              left: 10px;
-              min-width: 260px;
-              max-width: 300px;
-              padding: 12px;
-            }
-            .header-row {
-              margin-bottom: 12px;
-              padding-bottom: 8px;
-            }
-            .info-panel-title {
-              font-size: 16px;
-            }
-            .row-container {
-              margin-bottom: 12px;
-              padding-bottom: 8px;
-            }
-            .label-text {
-              font-size: 14px;
-            }
-            .value-text {
-              font-size: 14px;
-            }
-            .team-select {
-              padding: 6px 10px;
-              font-size: 14px;
-            }
-            .save-button {
-              padding: 10px;
-              font-size: 14px;
-            }
-          }
-
-          @media (max-width: 480px) {
-            .info-panel {
-              bottom: 60px;
-              left: 5px;
-              right: 5px;
-              max-width: calc(100% - 10px);
-              width: calc(100% - 10px);
-            }
-            .header-icon {
-              font-size: 14px;
-            }
-            .info-panel-title {
-              font-size: 15px;
-            }
-            .label-container {
-              flex: 1.5;
-            }
-            .label-text {
-              font-size: 13px;
-            }
-            .value-text {
-              font-size: 13px;
-            }
-            .loading-text {
-              font-size: 14px;
-            }
-          }
-        `}</style>
       </div>
 
       {/* Success Notification */}

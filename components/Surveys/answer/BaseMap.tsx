@@ -197,18 +197,18 @@ const BaseMap: React.FC<BaseMapProps> = ({
   };
 
   return (
-    <div className="container">
-      <div className="titleContainer">
-        <div className="titleRow">
-          <FaTrophy className="titleIcon" style={{ color: '#FFD700' }} />
-          <h1 className="mainTitle">IPL Fan Map 2025</h1>
-          <FaBaseballBall className="titleIcon" style={{ color: '#FFD700' }} />
+    <div className="flex-1 flex flex-col bg-gray-100 w-full h-full">
+      <div className="bg-green-800 px-4 py-3 md:px-5 md:py-3 rounded-lg mx-2.5 md:mx-2.5 my-2.5 md:my-2 shadow-md">
+        <div className="flex justify-center items-center mb-1">
+          <FaTrophy className="mx-2 text-2xl text-yellow-400" />
+          <h1 className="text-xl font-bold text-center text-white m-0">IPL Fan Map 2025</h1>
+          <FaBaseballBall className="mx-2 text-2xl text-yellow-400" />
         </div>
-        <p className="subtitle">Vote for your favourite team and see who's winning India's heart</p>
+        <p className="text-sm text-center text-teal-50 font-medium m-0">Vote for your favourite team and see who's winning India's heart</p>
       </div>
       
       <div 
-        className="mapContainer"
+        className="flex-1 mx-2.5 rounded-lg overflow-hidden bg-white shadow-md cursor-grab relative"
         ref={svgRef}
         onMouseDown={handleMouseDown}
       >
@@ -217,6 +217,7 @@ const BaseMap: React.FC<BaseMapProps> = ({
           height="100%" 
           viewBox={`0 0 ${viewBox.width} ${viewBox.height}`}
           aria-label="Interactive map of India with hexagonal regions"
+          className="active:cursor-grabbing"
         >
           {/* Using transform-origin to zoom from center */}
           <g 
@@ -257,97 +258,6 @@ const BaseMap: React.FC<BaseMapProps> = ({
           </g>
         </svg>
       </div>
-
-      <style jsx>{`
-        .container {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          background-color: #F5F5F5;
-          width: 100%;
-          height: 100%;
-        }
-        .titleContainer {
-          background-color: #1A5D1A;
-          padding: 12px 20px;
-          border-radius: 10px;
-          margin: 10px 10px 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        .titleRow {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          margin-bottom: 5px;
-        }
-        .titleIcon {
-          margin: 0 8px;
-          font-size: 24px;
-        }
-        .mainTitle {
-          font-size: 20px;
-          font-weight: bold;
-          text-align: center;
-          color: #ffffff;
-          margin: 0;
-        }
-        .subtitle {
-          font-size: 14px;
-          text-align: center;
-          color: #E0F2F1;
-          font-weight: 500;
-          margin: 0;
-        }
-        .mapContainer {
-          flex: 1;
-          margin: 10px;
-          border-radius: 10px;
-          overflow: hidden;
-          background-color: #fff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          cursor: grab;
-          position: relative;
-        }
-        .mapContainer:active {
-          cursor: grabbing;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-          .titleContainer {
-            margin: 5px 5px 5px;
-            padding: 8px 10px;
-          }
-          .titleIcon {
-            font-size: 20px;
-            margin: 0 5px;
-          }
-          .mainTitle {
-            font-size: 18px;
-          }
-          .subtitle {
-            font-size: 12px;
-          }
-          .mapContainer {
-            margin: 5px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .titleRow {
-            flex-wrap: wrap;
-          }
-          .titleIcon {
-            font-size: 18px;
-          }
-          .mainTitle {
-            font-size: 16px;
-          }
-          .subtitle {
-            font-size: 11px;
-          }
-        }
-      `}</style>
     </div>
   );
 };

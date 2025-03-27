@@ -397,39 +397,39 @@ const MapContainer: React.FC = () => {
 
   if (!geoJsonData) {
     return (
-      <div className="errorContainer">
-        <p className="errorText">Loading map data...</p>
-        <div className="loadingSpinner"></div>
+      <div className="flex flex-col justify-center items-center p-5 h-screen bg-gray-100">
+        <p className="text-lg text-green-800 text-center mb-5 font-medium">Loading map data...</p>
+        <div className="w-10 h-10 border-4 border-green-800 border-t-green-800 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="container">
+    <div className="relative flex flex-col h-screen w-full bg-gray-100 overflow-hidden">
       {/* New header to display hexagon and team selection */}
       {(userHomeHexagon || userTeam) && (
         <div 
-          className="headerBanner"
-          style={userTeam ? {backgroundColor: getTeamColor(userTeam)} : undefined}
+          className="w-full shadow-md z-10"
+          style={userTeam ? {backgroundColor: getTeamColor(userTeam)} : {backgroundColor: '#1A5D1A'}}
         >
-          <div className="headerContent">
+          <div className="flex justify-between items-center flex-wrap max-w-7xl mx-auto w-full px-4 py-3">
             {userHomeHexagon && (
-              <div className="headerItem">
-                <span className="headerLabel">Your Region:</span>
-                <span className="headerValue">{userHomeHexagon}</span>
+              <div className="flex items-center mr-5 my-1">
+                <span className="text-white font-semibold text-sm md:text-base mr-1">Your Region:</span>
+                <span className="text-white text-base md:text-lg font-bold">{userHomeHexagon}</span>
               </div>
             )}
             {userTeam && (
-              <div className="headerItem">
-                <span className="headerLabel">Fan of:</span>
-                <span className="headerValue">{userTeam}</span>
+              <div className="flex items-center my-1">
+                <span className="text-white font-semibold text-sm md:text-base mr-1">Fan of:</span>
+                <span className="text-white text-base md:text-lg font-bold">{userTeam}</span>
               </div>
             )}
           </div>
         </div>
       )}
 
-      <div className="mapContainer">
+      <div className="flex-1 relative w-full h-full bg-white flex items-center justify-center">
         <BaseMap
           geoJsonData={geoJsonData}
           viewBox={viewBox}
@@ -449,23 +449,23 @@ const MapContainer: React.FC = () => {
         </BaseMap>
 
         {/* Overlay Zoom Control Buttons */}
-        <div className="zoomControls">
+        <div className="absolute right-5 bottom-16 bg-white bg-opacity-90 rounded-lg overflow-hidden shadow-md z-10">
           <button 
-            className="zoomButton"
+            className="w-10 h-10 md:w-10 md:h-10 flex justify-center items-center border-none bg-transparent text-green-800 cursor-pointer text-base border-b border-gray-200 hover:bg-gray-100"
             onClick={zoomIn}
             aria-label="Zoom in"
           >
             <FaPlus />
           </button>
           <button 
-            className="zoomButton"
+            className="w-10 h-10 md:w-10 md:h-10 flex justify-center items-center border-none bg-transparent text-green-800 cursor-pointer text-base border-b border-gray-200 hover:bg-gray-100"
             onClick={zoomOut}
             aria-label="Zoom out"
           >
             <FaMinus />
           </button>
           <button 
-            className="zoomButton"
+            className="w-10 h-10 md:w-10 md:h-10 flex justify-center items-center border-none bg-transparent text-green-800 cursor-pointer text-base hover:bg-gray-100"
             onClick={resetView}
             aria-label="Reset view"
           >
@@ -485,7 +485,7 @@ const MapContainer: React.FC = () => {
       
       {/* Toggle button for panel - fixed position at bottom-left */}
       <button 
-        className="toggleButton"
+        className="fixed bottom-5 left-5 bg-green-800 px-3 py-2 md:px-4 md:py-2.5 rounded-lg z-10 shadow-md border-none flex items-center text-white font-semibold text-xs md:text-sm cursor-pointer"
         onClick={togglePanelVisibility}
         aria-label="Toggle team selection panel"
       >
@@ -497,215 +497,14 @@ const MapContainer: React.FC = () => {
       {/* See Results Button - fixed position at bottom-right */}
       <Link href="/fandommap" passHref>
         <button 
-          className="resultsButton"
+          className="fixed bottom-56 md:bottom-48 right-5 bg-gray-800 hover:bg-gray-700 px-3 py-2 md:px-4 md:py-2.5 rounded-lg z-10 shadow-md border-none flex items-center text-white font-semibold text-xs md:text-sm cursor-pointer"
           aria-label="See fandom map results"
         >
           <span>See Results</span>
         </button>
       </Link>
-
-      <style jsx>{`
-        .container {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          height: 100vh;
-          width: 100%;
-          background-color: #F5F5F5;
-          overflow: hidden;
-        }
-        .mapContainer {
-          flex: 1;
-          position: relative;
-          width: 100%;
-          height: 100%;
-          background-color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .errorContainer {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          padding: 20px;
-          height: 100vh;
-          background-color: #F5F5F5;
-        }
-        .errorText {
-          font-size: 18px;
-          color: #1A5D1A;
-          text-align: center;
-          margin-bottom: 20px;
-          font-weight: 500;
-        }
-        .loadingSpinner {
-          border: 4px solid rgba(26, 93, 26, 0.3);
-          border-radius: 50%;
-          border-top: 4px solid #1A5D1A;
-          width: 40px;
-          height: 40px;
-          animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        .headerBanner {
-          background-color: #1A5D1A;
-          padding: 12px 15px;
-          width: 100%;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-          z-index: 10;
-        }
-        .headerContent {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          max-width: 1400px;
-          margin: 0 auto;
-          width: 100%;
-        }
-        .headerItem {
-          display: flex;
-          align-items: center;
-          margin-right: 20px;
-          margin-bottom: 5px;
-          margin-top: 5px;
-        }
-        .headerLabel {
-          color: white;
-          font-weight: 600;
-          font-size: 14px;
-          margin-right: 5px;
-        }
-        .headerValue {
-          color: white;
-          font-size: 16px;
-          font-weight: bold;
-        }
-        .toggleButton {
-          position: fixed;
-          bottom: 20px;
-          left: 20px;
-          background-color: #1A5D1A;
-          padding: 10px 15px;
-          border-radius: 8px;
-          z-index: 10;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-          border: none;
-          display: flex;
-          align-items: center;
-          color: white;
-          font-weight: 600;
-          font-size: 14px;
-          cursor: pointer;
-        }
-        .resultsButton {
-          position: fixed;
-          bottom: 200px;
-          right: 20px;
-          background-color: #333;
-          padding: 10px 15px;
-          border-radius: 8px;
-          z-index: 10;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-          border: none;
-          display: flex;
-          align-items: center;
-          color: white;
-          font-weight: 600;
-          font-size: 14px;
-          cursor: pointer;
-        }
-        .resultsButton:hover {
-          background-color: #555;
-        }
-        .buttonIcon {
-          margin-right: 8px;
-        }
-        .zoomControls {
-          position: absolute;
-          right: 20px;
-          bottom: 60px;
-          background-color: rgba(255, 255, 255, 0.9);
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          z-index: 10;
-        }
-        .zoomButton {
-          width: 40px;
-          height: 40px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          border: none;
-          background-color: transparent;
-          color: #1A5D1A;
-          cursor: pointer;
-          font-size: 16px;
-          border-bottom: 1px solid rgba(238, 238, 238, 0.7);
-        }
-        .zoomButton:last-child {
-          border-bottom: none;
-        }
-        .zoomButton:hover {
-          background-color: rgba(240, 240, 240, 0.8);
-        }
-
-        /* Responsive design adjustments */
-        @media (max-width: 768px) {
-          .headerBanner {
-            padding: 8px 10px;
-          }
-          .headerContent {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-          .headerItem {
-            margin-right: 0;
-            margin-bottom: 4px;
-          }
-          .headerLabel {
-            font-size: 12px;
-          }
-          .headerValue {
-            font-size: 14px;
-          }
-          
-          .zoomControls {
-            right: 10px;
-            bottom: 10px;
-          }
-          .zoomButton {
-            width: 32px;
-            height: 32px;
-            font-size: 14px;
-          }
-          .toggleButton {
-            bottom: 15px;
-            left: 10px;
-            padding: 8px 12px;
-            font-size: 12px;
-          }
-          .resultsButton {
-            bottom: 120px;
-            right: 10px;
-            padding: 8px 12px;
-            font-size: 12px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .buttonIcon {
-            margin-right: 0;
-          }
-        }
-      `}</style>
     </div>
   );
 };
+
 export default MapContainer;
