@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { FaPlus, FaMinus, FaSyncAlt } from 'react-icons/fa';
+import Link from 'next/link';
 
 // Import our custom components
 import BaseMap from './BaseMap';
@@ -492,8 +493,16 @@ const MapContainer: React.FC = () => {
           {isPanelVisible ? "Hide Panel" : "Set Favourite IPL Team"}
         </span>
       </button>
-
       
+      {/* See Results Button - fixed position at bottom-right */}
+      <Link href="/fandommap" passHref>
+        <button 
+          className="resultsButton"
+          aria-label="See fandom map results"
+        >
+          <span>See Results</span>
+        </button>
+      </Link>
 
       <style jsx>{`
         .container {
@@ -594,6 +603,26 @@ const MapContainer: React.FC = () => {
           font-size: 14px;
           cursor: pointer;
         }
+        .resultsButton {
+          position: fixed;
+          bottom: 200px;
+          right: 20px;
+          background-color: #333;
+          padding: 10px 15px;
+          border-radius: 8px;
+          z-index: 10;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border: none;
+          display: flex;
+          align-items: center;
+          color: white;
+          font-weight: 600;
+          font-size: 14px;
+          cursor: pointer;
+        }
+        .resultsButton:hover {
+          background-color: #555;
+        }
         .buttonIcon {
           margin-right: 8px;
         }
@@ -656,10 +685,21 @@ const MapContainer: React.FC = () => {
             height: 32px;
             font-size: 14px;
           }
+          .toggleButton {
+            bottom: 15px;
+            left: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+          }
+          .resultsButton {
+            bottom: 120px;
+            right: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+          }
         }
 
         @media (max-width: 480px) {
-         
           .buttonIcon {
             margin-right: 0;
           }
@@ -668,5 +708,4 @@ const MapContainer: React.FC = () => {
     </div>
   );
 };
-
 export default MapContainer;

@@ -1,6 +1,7 @@
 // components/SetFandomPopup.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { FiMapPin, FiSave, FiAlertCircle } from 'react-icons/fi';
+import Link from 'next/link';
 import SuccessNotification from '../answer/SaveTeam';
 
 // TypeScript interfaces
@@ -306,6 +307,13 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
                 </>
               )}
             </button>
+            
+            {/* See Results Button */}
+            <Link href="/fandommap" passHref>
+              <button className="results-button">
+                <span>See Results</span>
+              </button>
+            </Link>
           </>
         )}
 
@@ -413,6 +421,25 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
           .save-button:hover:not(:disabled) {
             opacity: 0.9;
           }
+          .results-button {
+            background-color: #333;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: background-color 0.2s;
+          }
+          .results-button:hover {
+            background-color: #555;
+          }
           .error-container {
             display: flex;
             align-items: center;
@@ -466,7 +493,13 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
 
           /* Responsive styles */
           @media (max-width: 768px) {
-           
+            .info-panel {
+              bottom: 70px;
+              left: 10px;
+              min-width: 260px;
+              max-width: 300px;
+              padding: 12px;
+            }
             .header-row {
               margin-bottom: 12px;
               padding-bottom: 8px;
@@ -495,7 +528,13 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
           }
 
           @media (max-width: 480px) {
-           
+            .info-panel {
+              bottom: 60px;
+              left: 5px;
+              right: 5px;
+              max-width: calc(100% - 10px);
+              width: calc(100% - 10px);
+            }
             .header-icon {
               font-size: 14px;
             }
