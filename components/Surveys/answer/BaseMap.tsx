@@ -1,8 +1,40 @@
-// components/BaseMap.js
-import React, { useRef, useEffect } from 'react';
+// components/BaseMap.tsx
+import React, { useRef, useEffect, ReactNode } from 'react';
 import { FaTrophy, FaBaseballBall } from 'react-icons/fa';
 
-const BaseMap = ({
+interface ViewBox {
+  width: number;
+  height: number;
+  minLon: number;
+  maxLon: number;
+  minLat: number;
+  maxLat: number;
+}
+
+interface GeoJSON {
+  type: string;
+  features: Array<{
+    geometry: {
+      type: string;
+      coordinates: any[];
+    };
+    properties: Record<string, any>;
+  }>;
+}
+
+interface BaseMapProps {
+  geoJsonData: GeoJSON;
+  viewBox: ViewBox;
+  scale: number;
+  translateX: number;
+  translateY: number;
+  setScale: (scale: number) => void;
+  setTranslateX: (x: number) => void;
+  setTranslateY: (y: number) => void;
+  children?: ReactNode;
+}
+
+const BaseMap: React.FC<BaseMapProps> = ({
   geoJsonData,
   viewBox,
   scale,
@@ -13,13 +45,13 @@ const BaseMap = ({
   setTranslateY,
   children
 }) => {
-  const svgRef = useRef(null);
+  const svgRef = useRef<HTMLDivElement>(null);
   let lastDistance = 0;
   let lastX = 0;
   let lastY = 0;
 
   // Handle mouse wheel zoom
-  const handleWheel = (e) => {
+  const handleWheel = (e: WheelEvent) => {
     e.preventDefault();
     const scaleChange = e.deltaY * -0.01;
     const newScale = Math.max(0.5, Math.min(5, scale + scaleChange));
@@ -27,13 +59,13 @@ const BaseMap = ({
   };
 
   // Handle mouse drag for panning
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return; // Only left mouse button
     
     lastX = e.clientX;
     lastY = e.clientY;
     
-    const handleMouseMove = (moveEvent) => {
+    const handleMouseMove = (moveEvent: MouseEvent) => {
       const dx = moveEvent.clientX - lastX;
       const dy = moveEvent.clientY - lastY;
       
@@ -54,7 +86,7 @@ const BaseMap = ({
   };
 
   // Touch handlers for mobile devices
-  const handleTouchStart = (e) => {
+  const handleTouchStart = (e: TouchEvent) => {
     if (e.touches.length === 2) {
       // Get distance between two touches for pinch zoom
       const touch1 = e.touches[0];
@@ -69,7 +101,7 @@ const BaseMap = ({
     }
   };
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = (e: TouchEvent) => {
     e.preventDefault();
     
     // Handle pinch zoom
@@ -126,7 +158,7 @@ const BaseMap = ({
   }, [scale, translateX, translateY]);
   
   // Function to convert GeoJSON coordinates to SVG path
-  const coordinatesToPath = (coordinates, viewBox) => {
+  const coordinatesToPath = (coordinates: number[][][], viewBox: ViewBox): string => {
     if (!coordinates || !coordinates.length || !coordinates[0] || !coordinates[0].length) {
       return '';
     }
@@ -232,6 +264,8 @@ const BaseMap = ({
           display: flex;
           flex-direction: column;
           background-color: #F5F5F5;
+          width: 100%;
+          height: 100%;
         }
         .titleContainer {
           background-color: #1A5D1A;
@@ -272,9 +306,46 @@ const BaseMap = ({
           background-color: #fff;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           cursor: grab;
+          position: relative;
         }
         .mapContainer:active {
           cursor: grabbing;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+          .titleContainer {
+            margin: 5px 5px 5px;
+            padding: 8px 10px;
+          }
+          .titleIcon {
+            font-size: 20px;
+            margin: 0 5px;
+          }
+          .mainTitle {
+            font-size: 18px;
+          }
+          .subtitle {
+            font-size: 12px;
+          }
+          .mapContainer {
+            margin: 5px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .titleRow {
+            flex-wrap: wrap;
+          }
+          .titleIcon {
+            font-size: 18px;
+          }
+          .mainTitle {
+            font-size: 16px;
+          }
+          .subtitle {
+            font-size: 11px;
+          }
         }
       `}</style>
     </div>

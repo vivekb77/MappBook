@@ -1,6 +1,30 @@
-// components/SetFandomPopup.js
+// components/SetFandomPopup.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import {  FiMapPin, FiSave, FiAlertCircle } from 'react-icons/fi';
+import { FiMapPin, FiSave, FiAlertCircle } from 'react-icons/fi';
+
+// TypeScript interfaces
+interface Hexagon {
+  id: string;
+  number: number;
+  points: string;
+  centerX: number;
+  centerY: number;
+}
+
+interface SetFandomPopupProps {
+  selectedHexagon: Hexagon | null;
+  isVisible: boolean;
+  onToggleVisibility: () => void;
+  userId: string;
+  onTeamSelect: (hexagon: string, team: string) => void;
+}
+
+interface StoredPreferences {
+  homeHexagon: number;
+  team: string;
+  lastUpdated: string;
+  version: number;
+}
 
 // IPL teams array
 const IPL_TEAMS = [
@@ -17,7 +41,7 @@ const IPL_TEAMS = [
 ];
 
 // Team colors for the IPL teams
-const TEAM_COLORS = {
+const TEAM_COLORS: Record<string, string> = {
   'Mumbai Indians': '#0078D7',
   'Chennai Super Kings': '#FFCC00',
   'Royal Challengers Bengaluru': '#1F1F1F',
@@ -34,18 +58,18 @@ const TEAM_COLORS = {
 const STORAGE_KEY = 'userTeamPreference';
 const STORAGE_VERSION = 1;
 
-const SetFandomPopup = ({ 
+const SetFandomPopup: React.FC<SetFandomPopupProps> = ({ 
   selectedHexagon, 
   isVisible, 
   onToggleVisibility,
   userId,
   onTeamSelect
 }) => {
-  const [selectedTeam, setSelectedTeam] = useState('');
-  const [homeHexagon, setHomeHexagon] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [validationError, setValidationError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [homeHexagon, setHomeHexagon] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [validationError, setValidationError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   
   // Use ref to store the callback to avoid dependency issues
   const onTeamSelectRef = useRef(onTeamSelect);
@@ -63,7 +87,7 @@ const SetFandomPopup = ({
         if (typeof window !== 'undefined') {
           const savedPrefs = localStorage.getItem(STORAGE_KEY);
           if (savedPrefs) {
-            const prefs = JSON.parse(savedPrefs);
+            const prefs = JSON.parse(savedPrefs) as StoredPreferences;
             
             // Validate the data
             const isValidTeam = prefs.team && IPL_TEAMS.includes(prefs.team);
@@ -83,7 +107,7 @@ const SetFandomPopup = ({
             
             // Only call the parent callback if we have valid data and the callback exists
             if (isValidHexagon && isValidTeam && onTeamSelectRef.current) {
-              onTeamSelectRef.current(prefs.homeHexagon, prefs.team);
+              onTeamSelectRef.current(prefs.homeHexagon.toString(), prefs.team);
             }
           }
         }
@@ -117,7 +141,7 @@ const SetFandomPopup = ({
   if (!isVisible) return null;
 
   // Get the appropriate color for the selected team or default to cricket green
-  const getTeamColor = () => {
+  const getTeamColor = (): string => {
     return selectedTeam ? TEAM_COLORS[selectedTeam] || '#1A5D1A' : '#1A5D1A';
   };
 
@@ -176,7 +200,7 @@ const SetFandomPopup = ({
       // Success
       // Only now do we update the parent component with the new values
       if (onTeamSelectRef.current) {
-        onTeamSelectRef.current(hexagonToSave, selectedTeam);
+        onTeamSelectRef.current(hexagonToSave.toString(), selectedTeam);
       }
       
       // Update our internal hexagon state to match what we've saved
@@ -431,6 +455,70 @@ const SetFandomPopup = ({
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+          .info-panel {
+            bottom: 70px;
+            left: 10px;
+            min-width: 260px;
+            max-width: 300px;
+            padding: 12px;
+          }
+          .header-row {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+          }
+          .info-panel-title {
+            font-size: 16px;
+          }
+          .row-container {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+          }
+          .label-text {
+            font-size: 14px;
+          }
+          .value-text {
+            font-size: 14px;
+          }
+          .team-select {
+            padding: 6px 10px;
+            font-size: 14px;
+          }
+          .save-button {
+            padding: 10px;
+            font-size: 14px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .info-panel {
+            bottom: 60px;
+            left: 5px;
+            right: 5px;
+            max-width: calc(100% - 10px);
+            width: calc(100% - 10px);
+          }
+          .header-icon {
+            font-size: 14px;
+          }
+          .info-panel-title {
+            font-size: 15px;
+          }
+          .label-container {
+            flex: 1.5;
+          }
+          .label-text {
+            font-size: 13px;
+          }
+          .value-text {
+            font-size: 13px;
+          }
+          .loading-text {
+            font-size: 14px;
+          }
         }
       `}</style>
     </div>

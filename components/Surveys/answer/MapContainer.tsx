@@ -1,4 +1,4 @@
-// components/MapContainer.js
+// components/MapContainer.tsx
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { FaPlus, FaMinus, FaSyncAlt } from 'react-icons/fa';
@@ -11,15 +11,50 @@ import SetFandomPopup from './SetFandomPopup';
 // Import GeoJSON directly
 import indiaStatesGeoJson from '../../../public/india-states.json';
 
-const MapContainer = () => {
-  const [geoJsonData, setGeoJsonData] = useState(indiaStatesGeoJson);
-  const [scale, setScale] = useState(1);
-  const [translateX, setTranslateX] = useState(0);
-  const [translateY, setTranslateY] = useState(0);
-  const [hexagons, setHexagons] = useState([]);
-  const [selectedHexagon, setSelectedHexagon] = useState(null);
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
-  const [viewBox, setViewBox] = useState({ 
+// TypeScript interfaces
+interface ViewBox {
+  width: number;
+  height: number;
+  minLon: number;
+  maxLon: number;
+  minLat: number;
+  maxLat: number;
+}
+
+interface Hexagon {
+  id: string;
+  number: number;
+  points: string;
+  centerX: number;
+  centerY: number;
+}
+
+interface Feature {
+  geometry: {
+    type: string;
+    coordinates: any[];
+  };
+  properties: Record<string, any>;
+}
+
+interface GeoJSON {
+  type: string;
+  features: Feature[];
+}
+
+interface TeamColors {
+  [key: string]: string;
+}
+
+const MapContainer: React.FC = () => {
+  const [geoJsonData, setGeoJsonData] = useState<GeoJSON>(indiaStatesGeoJson as GeoJSON);
+  const [scale, setScale] = useState<number>(1);
+  const [translateX, setTranslateX] = useState<number>(0);
+  const [translateY, setTranslateY] = useState<number>(0);
+  const [hexagons, setHexagons] = useState<Hexagon[]>([]);
+  const [selectedHexagon, setSelectedHexagon] = useState<Hexagon | null>(null);
+  const [isPanelVisible, setIsPanelVisible] = useState<boolean>(false);
+  const [viewBox, setViewBox] = useState<ViewBox>({ 
     width: 900, 
     height: 800, 
     minLon: 68, // Use approximate India bounding box values
@@ -29,11 +64,11 @@ const MapContainer = () => {
   });
 
   // User ID state to identify specific browser/user
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState<string>("");
 
   // State for displaying selected hexagon and team at the top
-  const [userHomeHexagon, setUserHomeHexagon] = useState(null);
-  const [userTeam, setUserTeam] = useState("");
+  const [userHomeHexagon, setUserHomeHexagon] = useState<string | null>(null);
+  const [userTeam, setUserTeam] = useState<string>("");
 
   // Generate or retrieve a user ID on component mount
   useEffect(() => {
@@ -54,13 +89,6 @@ const MapContainer = () => {
     getOrCreateUserId();
   }, []);
 
-  // No need to fetch GeoJSON data as we're importing it directly
-  // This effect is just here in case you want to add additional data loading in the future
-  useEffect(() => {
-    // We could add additional data loading here if needed
-    // For now, we're just using the directly imported GeoJSON
-  }, []);
-
   // Calculate viewbox and generate hexagons once we have the map data
   useEffect(() => {
     if (geoJsonData) {
@@ -71,7 +99,7 @@ const MapContainer = () => {
   }, [geoJsonData]);
 
   // Generate hexagons dynamically across the India map
-  const generateHexagonsFromData = (viewBox) => {
+  const generateHexagonsFromData = (viewBox: ViewBox) => {
     try {
       // Convert 120km to pixels based on map scale
       // For this, we need to know the real-world dimensions of India in the map
@@ -111,7 +139,7 @@ const MapContainer = () => {
       const startX = -horizontalSpacing;
       const startY = -verticalSpacing;
       
-      const hexList = [];
+      const hexList: Hexagon[] = [];
       let hexNumber = 1;
       
       // Create a grid of hexagons
@@ -149,7 +177,7 @@ const MapContainer = () => {
   };
 
   // Function to check if a point is inside India using point-in-polygon algorithm
-  const isPointInsideIndia = (lon, lat, geoJson) => {
+  const isPointInsideIndia = (lon: number, lat: number, geoJson: GeoJSON): boolean => {
     if (!geoJson || !geoJson.features) return false;
     
     try {
@@ -174,7 +202,7 @@ const MapContainer = () => {
   };
 
   // Ray casting algorithm for point in polygon
-  const isPointInPolygon = (lon, lat, polygon) => {
+  const isPointInPolygon = (lon: number, lat: number, polygon: number[][]): boolean => {
     if (!polygon || !Array.isArray(polygon)) return false;
     
     try {
@@ -200,9 +228,9 @@ const MapContainer = () => {
   };
 
   // Calculate hexagon corner points
-  const calculateHexagonPoints = (centerX, centerY, radius) => {
+  const calculateHexagonPoints = (centerX: number, centerY: number, radius: number): string => {
     try {
-      const points = [];
+      const points: string[] = [];
       
       for (let i = 0; i < 6; i++) {
         const angleDeg = 60 * i - 30;
@@ -220,7 +248,7 @@ const MapContainer = () => {
   };
 
   // Handle hexagon click
-  const handleHexagonClick = (hexagon) => {
+  const handleHexagonClick = (hexagon: Hexagon) => {
     // Update the selectedHexagon state with the clicked hexagon
     setSelectedHexagon(hexagon);
     
@@ -236,13 +264,13 @@ const MapContainer = () => {
   };
 
   // New callback for receiving team selection data
-  const handleTeamSelection = (hexagon, team) => {
+  const handleTeamSelection = (hexagon: string, team: string) => {
     setUserHomeHexagon(hexagon);
     setUserTeam(team);
   };
 
   // Calculate viewbox dimensions from GeoJSON data
-  const calculateViewBox = (geoJson) => {
+  const calculateViewBox = (geoJson: GeoJSON): ViewBox => {
     try {
       // Start with reasonable defaults for India instead of Infinity
       let minLon = 68;  // Approximate western boundary of India
@@ -253,7 +281,7 @@ const MapContainer = () => {
       // Only update if we find valid coordinates that are more extreme
       geoJson.features.forEach(feature => {
         if (feature.geometry.type === 'Polygon') {
-          feature.geometry.coordinates[0].forEach(point => {
+          feature.geometry.coordinates[0].forEach((point: string | any[]) => {
             if (Array.isArray(point) && point.length >= 2 && 
                 isFinite(point[0]) && isFinite(point[1])) {
               minLon = Math.min(minLon, point[0]);
@@ -264,7 +292,7 @@ const MapContainer = () => {
           });
         } else if (feature.geometry.type === 'MultiPolygon') {
           feature.geometry.coordinates.forEach(polygon => {
-            polygon[0].forEach(point => {
+            polygon[0].forEach((point: string | any[]) => {
               if (Array.isArray(point) && point.length >= 2 && 
                   isFinite(point[0]) && isFinite(point[1])) {
                 minLon = Math.min(minLon, point[0]);
@@ -281,9 +309,27 @@ const MapContainer = () => {
       const lonPadding = (maxLon - minLon) * 0.05;
       const latPadding = (maxLat - minLat) * 0.05;
 
-      // Calculate aspect ratio
-      const mapWidth = 900;
-      const mapHeight = (mapWidth * (maxLat - minLat)) / (maxLon - minLon);
+      // Calculate aspect ratio and adjust for screen size
+      let mapWidth = 900;
+      
+      // Make the width responsive to screen size
+      if (typeof window !== 'undefined') {
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        
+        // Adjust based on screen orientation and size
+        if (screenWidth < 768) {
+          mapWidth = screenWidth * 0.95;
+        } else if (screenWidth < 1200) {
+          mapWidth = screenWidth * 0.9;
+        } else {
+          mapWidth = Math.min(screenWidth * 0.85, 1400);
+        }
+      }
+      
+      // Calculate height based on the geographical aspect ratio
+      const geoAspectRatio = (maxLat - minLat) / (maxLon - minLon);
+      const mapHeight = mapWidth * geoAspectRatio;
 
       return {
         minLon: minLon - lonPadding,
@@ -308,6 +354,19 @@ const MapContainer = () => {
     }
   };
 
+  // Add window resize handler
+  useEffect(() => {
+    const handleResize = () => {
+      if (geoJsonData) {
+        const recalculatedViewBox = calculateViewBox(geoJsonData);
+        setViewBox(recalculatedViewBox);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [geoJsonData]);
+
   // Zoom control functions
   const zoomIn = () => setScale(Math.min(scale + 0.2, 5));
   const zoomOut = () => setScale(Math.max(scale - 0.2, 0.5));
@@ -318,8 +377,8 @@ const MapContainer = () => {
   };
 
   // Get team color based on team name
-  const getTeamColor = (teamName) => {
-    const teamColors = {
+  const getTeamColor = (teamName: string): string => {
+    const teamColors: TeamColors = {
       'Chennai Super Kings': '#FFCC00',
       'Delhi Capitals': '#0052CC',
       'Gujarat Titans': '#1DA1F2',
@@ -350,7 +409,7 @@ const MapContainer = () => {
       {(userHomeHexagon || userTeam) && (
         <div 
           className="headerBanner"
-          style={userTeam ? {backgroundColor: getTeamColor(userTeam)} : null}
+          style={userTeam ? {backgroundColor: getTeamColor(userTeam)} : undefined}
         >
           <div className="headerContent">
             {userHomeHexagon && (
@@ -387,31 +446,31 @@ const MapContainer = () => {
             onHexagonClick={handleHexagonClick}
           />
         </BaseMap>
-      </div>
 
-      {/* Zoom Control Buttons */}
-      <div className="zoomControls">
-        <button 
-          className="zoomButton"
-          onClick={zoomIn}
-          aria-label="Zoom in"
-        >
-          <FaPlus />
-        </button>
-        <button 
-          className="zoomButton"
-          onClick={zoomOut}
-          aria-label="Zoom out"
-        >
-          <FaMinus />
-        </button>
-        <button 
-          className="zoomButton"
-          onClick={resetView}
-          aria-label="Reset view"
-        >
-          <FaSyncAlt />
-        </button>
+        {/* Overlay Zoom Control Buttons */}
+        <div className="zoomControls">
+          <button 
+            className="zoomButton"
+            onClick={zoomIn}
+            aria-label="Zoom in"
+          >
+            <FaPlus />
+          </button>
+          <button 
+            className="zoomButton"
+            onClick={zoomOut}
+            aria-label="Zoom out"
+          >
+            <FaMinus />
+          </button>
+          <button 
+            className="zoomButton"
+            onClick={resetView}
+            aria-label="Reset view"
+          >
+            <FaSyncAlt />
+          </button>
+        </div>
       </div>
       
       {/* Hexagon Info Panel */}
@@ -441,15 +500,19 @@ const MapContainer = () => {
           display: flex;
           flex-direction: column;
           height: 100vh;
+          width: 100%;
           background-color: #F5F5F5;
+          overflow: hidden;
         }
         .mapContainer {
           flex: 1;
-          margin: 10px;
-          border-radius: 10px;
-          overflow: hidden;
+          position: relative;
+          width: 100%;
+          height: 100%;
           background-color: #fff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .errorContainer {
           display: flex;
@@ -491,6 +554,9 @@ const MapContainer = () => {
           justify-content: space-between;
           align-items: center;
           flex-wrap: wrap;
+          max-width: 1400px;
+          margin: 0 auto;
+          width: 100%;
         }
         .headerItem {
           display: flex;
@@ -531,10 +597,10 @@ const MapContainer = () => {
           margin-right: 8px;
         }
         .zoomControls {
-          position: fixed;
+          position: absolute;
           right: 20px;
           bottom: 20px;
-          background-color: white;
+          background-color: rgba(255, 255, 255, 0.9);
           border-radius: 8px;
           overflow: hidden;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -547,17 +613,65 @@ const MapContainer = () => {
           justify-content: center;
           align-items: center;
           border: none;
-          background-color: white;
+          background-color: transparent;
           color: #1A5D1A;
           cursor: pointer;
           font-size: 16px;
-          border-bottom: 1px solid #eee;
+          border-bottom: 1px solid rgba(238, 238, 238, 0.7);
         }
         .zoomButton:last-child {
           border-bottom: none;
         }
         .zoomButton:hover {
-          background-color: #f0f0f0;
+          background-color: rgba(240, 240, 240, 0.8);
+        }
+
+        /* Responsive design adjustments */
+        @media (max-width: 768px) {
+          .headerBanner {
+            padding: 8px 10px;
+          }
+          .headerContent {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .headerItem {
+            margin-right: 0;
+            margin-bottom: 4px;
+          }
+          .headerLabel {
+            font-size: 12px;
+          }
+          .headerValue {
+            font-size: 14px;
+          }
+          .toggleButton {
+            bottom: 10px;
+            left: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+          }
+          .zoomControls {
+            right: 10px;
+            bottom: 10px;
+          }
+          .zoomButton {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .toggleButton span {
+            display: none;
+          }
+          .toggleButton {
+            padding: 8px;
+          }
+          .buttonIcon {
+            margin-right: 0;
+          }
         }
       `}</style>
     </div>
