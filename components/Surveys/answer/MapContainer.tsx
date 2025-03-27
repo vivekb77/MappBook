@@ -600,7 +600,7 @@ const MapContainer: React.FC = () => {
         .zoomControls {
           position: absolute;
           right: 20px;
-          bottom: 20px;
+          bottom: 60px;
           background-color: rgba(255, 255, 255, 0.9);
           border-radius: 8px;
           overflow: hidden;
@@ -646,12 +646,7 @@ const MapContainer: React.FC = () => {
           .headerValue {
             font-size: 14px;
           }
-          .toggleButton {
-            bottom: 10px;
-            left: 10px;
-            padding: 8px 12px;
-            font-size: 12px;
-          }
+          
           .zoomControls {
             right: 10px;
             bottom: 10px;
@@ -664,12 +659,7 @@ const MapContainer: React.FC = () => {
         }
 
         @media (max-width: 480px) {
-          .toggleButton span {
-            display: none;
-          }
-          .toggleButton {
-            padding: 8px;
-          }
+         
           .buttonIcon {
             margin-right: 0;
           }

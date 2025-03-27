@@ -466,13 +466,7 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
 
           /* Responsive styles */
           @media (max-width: 768px) {
-            .info-panel {
-              bottom: 70px;
-              left: 10px;
-              min-width: 260px;
-              max-width: 300px;
-              padding: 12px;
-            }
+           
             .header-row {
               margin-bottom: 12px;
               padding-bottom: 8px;
@@ -501,13 +495,7 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
           }
 
           @media (max-width: 480px) {
-            .info-panel {
-              bottom: 60px;
-              left: 5px;
-              right: 5px;
-              max-width: calc(100% - 10px);
-              width: calc(100% - 10px);
-            }
+           
             .header-icon {
               font-size: 14px;
             }
