@@ -554,7 +554,7 @@ const MapContainer: React.FC = () => {
         aria-label="Toggle team selection panel"
       >
         <span>
-          {isPanelVisible ? "Hide Panel" : "Set Favourite IPL Team"}
+          {isPanelVisible ? "Hide Panel" : "Set your Favourite IPL Team"}
         </span>
       </button>
     </div>

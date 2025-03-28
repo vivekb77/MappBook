@@ -73,6 +73,14 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
   const [validationError, setValidationError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showSuccessNotification, setShowSuccessNotification] = useState<boolean>(false);
+  const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
+  
+  // Original data reference to check if the data has been changed
+  const originalDataRef = useRef<{team: string, hexagon: number | null}>({
+    team: '',
+    hexagon: null
+  });
 
   // Use ref to store the callback to avoid dependency issues
   const onTeamSelectRef = useRef(onTeamSelect);
@@ -102,15 +110,18 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
             // Only update state if data is valid
             if (isValidTeam) {
               setSelectedTeam(prefs.team);
+              originalDataRef.current.team = prefs.team;
             }
 
             if (isValidHexagon) {
               setHomeHexagon(prefs.homeHexagon);
+              originalDataRef.current.hexagon = prefs.homeHexagon;
             }
 
             // Only call the parent callback if we have valid data and the callback exists
             if (isValidHexagon && isValidTeam && onTeamSelectRef.current) {
               onTeamSelectRef.current(prefs.homeHexagon.toString(), prefs.team);
+              setIsSaved(true);
             }
           }
         }
@@ -121,6 +132,7 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
         // Reset to safe defaults
         setSelectedTeam('');
         setHomeHexagon(null);
+        originalDataRef.current = { team: '', hexagon: null };
       } finally {
         setIsLoading(false);
       }
@@ -137,8 +149,28 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
 
       // Clear any previous validation errors when a new hexagon is selected
       setValidationError('');
+      
+      // Check if data has changed
+      checkIfDataChanged(selectedTeam, selectedHexagon.number);
     }
-  }, [selectedHexagon]);
+  }, [selectedHexagon, selectedTeam]);
+
+  // Check if data is changed when team selection changes
+  useEffect(() => {
+    const hexagonToCheck = selectedHexagon ? selectedHexagon.number : homeHexagon;
+    checkIfDataChanged(selectedTeam, hexagonToCheck);
+  }, [selectedTeam, homeHexagon, selectedHexagon]);
+
+  // Function to check if the data has been changed from original/saved values
+  const checkIfDataChanged = (team: string, hexagon: number | null) => {
+    if (team !== originalDataRef.current.team || hexagon !== originalDataRef.current.hexagon) {
+      setIsDataChanged(true);
+      // If data is changed, we need to save before showing results
+      setIsSaved(false);
+    } else {
+      setIsDataChanged(false);
+    }
+  };
 
   // Handle notification close
   const handleNotificationClose = () => {
@@ -211,6 +243,16 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
 
       // Update our internal hexagon state to match what we've saved
       setHomeHexagon(hexagonToSave);
+      
+      // Update original data reference
+      originalDataRef.current = {
+        team: selectedTeam,
+        hexagon: hexagonToSave
+      };
+      
+      // Mark as saved and no longer changed
+      setIsSaved(true);
+      setIsDataChanged(false);
 
       // Show success notification instead of alert
       setShowSuccessNotification(true);
@@ -309,26 +351,34 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
               </div>
             )}
 
-          {/* Save Button */}
-          <button
+            {/* Data Changed Message */}
+            {isDataChanged && !validationError && (
+              <div className="flex items-center bg-yellow-50 p-2.5 rounded-lg mb-3">
+                <FiAlertCircle className="mr-1.5 text-yellow-600" />
+                <span className="text-yellow-600 text-sm flex-1">Please save before viewing results.</span>
+              </div>
+            )}
+
+            {/* Save Button */}
+            <button
               className="bg-green-800 text-white p-3 rounded-lg border-none w-full flex items-center justify-center text-base font-semibold cursor-pointer mt-2 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed hover:opacity-90"
               style={{ backgroundColor: selectedTeam ? getTeamColor() : '#1A5D1A' }}
               onClick={saveUserPreferences}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (!isDataChanged && isSaved)}
             >
               {isSubmitting ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
                   <FiSave className="mr-2" />
-                  <span>Save</span>
+                  <span>{(!isDataChanged && isSaved) ? 'Saved' : 'Save'}</span>
                 </>
               )}
             </button>
             
             {/* See Results Button */}
             <div className="mt-3">
-              {showSuccessNotification || (homeHexagon && selectedTeam) ? (
+              {(isSaved && !isDataChanged) ? (
                 <Link href="/iplfandommap" passHref>
                   <button 
                     className="bg-white text-green-800 hover:bg-gray-100 p-3 rounded-lg border border-gray-300 w-full flex items-center justify-center text-base font-semibold cursor-pointer transition-all"
