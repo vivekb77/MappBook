@@ -71,13 +71,13 @@
   }
 
   /* Full Height Element Utility */
-  .h-screen-dynamic {
+  /* .h-screen-dynamic {
     height: calc(var(--vh) * 100);
   }
   
   .min-h-screen-dynamic {
     min-height: calc(var(--vh) * 100);
-  }
+  } */
 }
 
 /* Image Interaction Prevention */
