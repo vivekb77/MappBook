@@ -1,9 +1,10 @@
 "use client"
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link'; // Added Link import
-import { FaShareAlt } from 'react-icons/fa'; // Added FaShareAlt import
+import Link from 'next/link';
+import { FaShareAlt, FaFilter } from 'react-icons/fa';
 import TeamDistributionModal from './GlobalPopup';
+import FilterByTeams from './FilterByTeam';
 
 // Dynamically import the HexagonPopup component to prevent SSR issues
 const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
@@ -104,11 +105,14 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const [selectedHexagon, setSelectedHexagon] = useState<Hexagon | null>(null);
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [showDistributionModal, setShowDistributionModal] = useState(false);
+  const [showTeamFilter, setShowTeamFilter] = useState(false);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [popupData, setPopupData] = useState<HexagonData | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [showShareNotification, setShowShareNotification] = useState<boolean>(false);
+  
   // Team colors for the IPL teams
   const teamColors = {
     'Chennai Super Kings': '#FFDC00',     // Yellow
@@ -135,6 +139,29 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
     minLat: 8,
     maxLat: 37
   });
+
+  // Handle team selection
+  const handleTeamSelect = (team: string) => {
+    setSelectedTeams(prev => {
+      // If already selected, remove it
+      if (prev.includes(team)) {
+        return prev.filter(t => t !== team);
+      }
+      
+      // If we already have 2 teams, replace the oldest one
+      if (prev.length >= 2) {
+        return [prev[1], team];
+      }
+      
+      // Otherwise, add it to the selection
+      return [...prev, team];
+    });
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setSelectedTeams([]);
+  };
 
   // Function to copy current URL to clipboard
   const copyShareURL = () => {
@@ -363,9 +390,8 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const closePopup = () => {
     setShowPopup(false);
   };
-
+  
   return (
-    // <div className="h-screen flex flex-col bg-gray-100 overflow-hidden">
     <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
       {/* Metadata Display */}
       <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow mx-4 mt-4 mb-2">
@@ -422,6 +448,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
               selectedHexagon={selectedHexagon}
               onHexagonClick={handleHexagonClick}
               onDataFetched={handleDataFetched}
+              selectedTeams={selectedTeams}
             />
           </g>
 
@@ -497,6 +524,17 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         </div>
       </div>
 
+      {/* Filter Button */}
+      <div className="fixed right-16 bottom-32 bg-green-700 rounded-full shadow-md">
+        <button
+          className="w-12 h-12 flex items-center justify-center hover:bg-green-800 rounded-full transition-colors"
+          onClick={() => setShowTeamFilter(true)}
+          aria-label="Filter teams"
+        >
+          <FaFilter className="text-white" />
+        </button>
+      </div>
+
       {/* Zoom Control Buttons */}
       <div className="fixed right-6 bottom-6 bg-white rounded-lg overflow-hidden shadow-md">
         <button
@@ -531,20 +569,29 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           </svg>
         </button>
       </div>
+
       {/* URL Share notification */}
       {showShareNotification && (
         <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-red-800 text-white px-4 py-2 rounded-lg shadow-lg z-20 transition-opacity duration-300">
           URL copied!
         </div>
       )}
+
       {/* Team Distribution Modal Component */}
       <TeamDistributionModal
         showModal={showDistributionModal}
         onClose={() => setShowDistributionModal(false)}
         mapData={mapData}
       />
-    </div>
-  );
-};
 
-export default MapContainer;
+      {/* Team Filter Modal Component */}
+      <FilterByTeams
+        showModal={showTeamFilter}
+        onClose={() => setShowTeamFilter(false)}
+        selectedTeams={selectedTeams}
+        onSelectTeam={handleTeamSelect}
+        onResetFilters={resetFilters}
+      />
+    </div>
+  );}
+  export default MapContainer;

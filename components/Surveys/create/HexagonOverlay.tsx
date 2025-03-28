@@ -59,6 +59,7 @@ interface HexagonOverlayProps {
   selectedHexagon: Hexagon | null;
   onHexagonClick: (hexagon: Hexagon, hexagonData: HexagonData) => void;
   onDataFetched: (data: any) => void;
+  selectedTeams: string[];
 }
 
 const HexagonOverlay: React.FC<HexagonOverlayProps> = ({ 
@@ -66,10 +67,12 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
   viewBox, 
   selectedHexagon,
   onHexagonClick,
-  onDataFetched
+  onDataFetched,
+  selectedTeams
 }) => {
   const [hexagons, setHexagons] = useState<Hexagon[]>([]);
   const [hexagonData, setHexagonData] = useState<HexagonData[]>([]);
+  const [filteredHexagonData, setFilteredHexagonData] = useState<HexagonData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,6 +101,29 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
     fetchHexagonData();
   }, []);
 
+  useEffect(() => {
+    // Filter hexagon data based on selected teams
+    if (selectedTeams.length === 0) {
+      // If no teams selected, show all data
+      setFilteredHexagonData(hexagonData);
+    } else if (selectedTeams.length === 1) {
+      // If one team selected, filter hexagons where this team appears
+      setFilteredHexagonData(
+        hexagonData.filter(data => 
+          data.teams.some(team => team.team === selectedTeams[0])
+        )
+      );
+    } else if (selectedTeams.length === 2) {
+      // If two teams selected, filter hexagons where both teams appear
+      setFilteredHexagonData(
+        hexagonData.filter(data => 
+          data.teams.some(team => team.team === selectedTeams[0]) &&
+          data.teams.some(team => team.team === selectedTeams[1])
+        )
+      );
+    }
+  }, [selectedTeams, hexagonData]);
+
   // Function to fetch data from the API endpoint
   const fetchHexagonData = async () => {
     setIsLoading(true);
@@ -114,7 +140,9 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
       const data = await response.json();
       
       if (data.success && data.data) {
-        setHexagonData(data.data.hexagons || []);
+        const hexagons = data.data.hexagons || [];
+        setHexagonData(hexagons);
+        setFilteredHexagonData(hexagons);
         // Pass the complete data to parent component
         onDataFetched(data);
       } else {
@@ -275,7 +303,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
   // Function to get fill color based on team and dominance percentage
   const getHexagonFillColor = (hexNumber: number): string => {
     // Find data for this hexagon
-    const data = hexagonData.find(data => data.home_hexagon === hexNumber);
+    const data = filteredHexagonData.find(data => data.home_hexagon === hexNumber);
     
     if (!data) {
       return "#e8e8e8"; // Lighter color for hexagons without data
@@ -319,7 +347,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
   // Handle hexagon click - send data to parent component
   const handleHexagonClick = (hexagon: Hexagon) => {
     // Only handle click if there's data for this hexagon
-    const data = hexagonData.find(data => data.home_hexagon === hexagon.number);
+    const data = filteredHexagonData.find(data => data.home_hexagon === hexagon.number);
     if (data) {
       onHexagonClick(hexagon, data);
     }
@@ -397,8 +425,9 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
 
   return (
     <>
+      {/* Render hexagons */}
       {hexagons.map((hexagon) => {
-        const hasData = hexagonData.some(data => data.home_hexagon === hexagon.number);
+        const hasData = filteredHexagonData.some(data => data.home_hexagon === hexagon.number);
         
         return (
           <g key={hexagon.id}>
@@ -428,6 +457,40 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
           </g>
         );
       })}
+
+      {/* Filter indicator */}
+      {selectedTeams.length > 0 && (
+        <g transform={`translate(${viewBox.width - 200}, ${viewBox.height - 120})`}>
+          <rect
+            x="0"
+            y="0"
+            width="320"
+            height="50"
+            rx="6"
+            fill="white"
+            fillOpacity="0.9"
+            stroke="#D1D5DB"
+            strokeWidth="1"
+          />
+          <text
+            x="10"
+            y="20"
+            fontSize="12"
+            fontWeight="bold"
+            fill="#111827"
+          >
+            Filtered by:
+          </text>
+          <text
+            x="10"
+            y="38"
+            fontSize="12"
+            fill="#111827"
+          >
+            {selectedTeams.join(" vs ")}
+          </text>
+        </g>
+      )}
     </>
   );
 };
