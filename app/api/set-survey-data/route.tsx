@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { deviceId, homeHexagon, team, timestamp } = body;
     
-    console.log(body)
+    // console.log(body)
 
 
     // Validate required fields

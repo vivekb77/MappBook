@@ -45,7 +45,7 @@ export async function GET() {
     });
     
     // Add cache control headers (1 hour = 3600 seconds)
-    response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+    response.headers.set('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=86400');
     
     // Return the response with cache headers
     return response;

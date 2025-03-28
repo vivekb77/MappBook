@@ -473,6 +473,10 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
             <button
               className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
               aria-label="follow us on insta"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open("https://www.instagram.com/mappbook/", "_blank");
+              }}
             >
               <span>Follow us on Insta</span>
             </button>
@@ -482,6 +486,10 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
             <button
               className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
               aria-label="follow us on X"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open("https://x.com/mappbook", "_blank");
+              }}
             >
               <span>Follow us on X</span>
             </button>
