@@ -112,7 +112,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const [popupData, setPopupData] = useState<HexagonData | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [showShareNotification, setShowShareNotification] = useState<boolean>(false);
-  
+
   // Team colors for the IPL teams
   const teamColors = {
     'Chennai Super Kings': '#FFDC00',     // Yellow
@@ -147,12 +147,12 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       if (prev.includes(team)) {
         return prev.filter(t => t !== team);
       }
-      
+
       // If we already have 2 teams, replace the oldest one
       if (prev.length >= 2) {
         return [prev[1], team];
       }
-      
+
       // Otherwise, add it to the selection
       return [...prev, team];
     });
@@ -390,7 +390,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const closePopup = () => {
     setShowPopup(false);
   };
-  
+
   return (
     <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
       {/* Metadata Display */}
@@ -485,7 +485,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           {/* See Results Button */}
           <Link href="/" passHref>
             <button
-              className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+              className="bg-blue-600 text-white hover:bg-blue-700 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
               aria-label="See fandom map results"
             >
               <span>Set you favourite IPL team</span>
@@ -593,5 +593,6 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         onResetFilters={resetFilters}
       />
     </div>
-  );}
-  export default MapContainer;
+  );
+}
+export default MapContainer;

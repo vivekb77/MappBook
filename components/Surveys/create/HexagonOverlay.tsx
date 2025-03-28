@@ -300,33 +300,62 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
     }
   };
 
-  // Function to get fill color based on team and dominance percentage
-  const getHexagonFillColor = (hexNumber: number): string => {
-    // Find data for this hexagon
-    const data = filteredHexagonData.find(data => data.home_hexagon === hexNumber);
+// Function to get fill color based on team and dominance percentage
+const getHexagonFillColor = (hexNumber: number): string => {
+  // Find data for this hexagon
+  const data = filteredHexagonData.find(data => data.home_hexagon === hexNumber);
+  
+  if (!data) {
+    return "#e8e8e8"; // Lighter color for hexagons without data
+  }
+  
+  // Special handling for when two teams are selected
+  if (selectedTeams.length === 2) {
+    // Find the percentage for each of the selected teams
+    const team1Data = data.teams.find(team => team.team === selectedTeams[0]);
+    const team2Data = data.teams.find(team => team.team === selectedTeams[1]);
     
-    if (!data) {
-      return "#e8e8e8"; // Lighter color for hexagons without data
-    }
+    // Get the percentages (default to 0 if team not found)
+    const team1Percentage = team1Data ? team1Data.percentage : 0;
+    const team2Percentage = team2Data ? team2Data.percentage : 0;
     
-    const team = data.dominant_team;
-    const baseColor = teamColors[team as keyof typeof teamColors] || "#cccccc";
-    
-    // Adjust color shade based on dominance percentage
-    if (data.dominance_percentage >= 75) {
-      // Darken the color for high dominance (75-100%)
-      return adjustColorShade(baseColor, -30); // Darker
-    } else if (data.dominance_percentage >= 50) {
-      // Slightly darken for medium dominance (50-75%)
-      return adjustColorShade(baseColor, -15); // Slightly darker
-    } else if (data.dominance_percentage >= 25) {
-      // Use base color for low-medium dominance (25-50%)
-      return baseColor;
+    // Determine which team has higher percentage
+    if (team1Percentage > team2Percentage) {
+      const baseColor = teamColors[selectedTeams[0] as keyof typeof teamColors] || "#cccccc";
+      // Adjust intensity based on the difference between teams
+      const dominanceRatio = team1Percentage / (team1Percentage + team2Percentage) * 100;
+      return getColorByDominance(baseColor, dominanceRatio);
     } else {
-      // Lighten for very low dominance (<25%)
-      return adjustColorShade(baseColor, 30); // Lighter
+      const baseColor = teamColors[selectedTeams[1] as keyof typeof teamColors] || "#cccccc";
+      // Adjust intensity based on the difference between teams
+      const dominanceRatio = team2Percentage / (team1Percentage + team2Percentage) * 100;
+      return getColorByDominance(baseColor, dominanceRatio);
     }
-  };
+  }
+  
+  // Default behavior for single team or all teams view
+  const team = data.dominant_team;
+  const baseColor = teamColors[team as keyof typeof teamColors] || "#cccccc";
+  
+  return getColorByDominance(baseColor, data.dominance_percentage);
+};
+
+// Helper function to adjust color based on dominance percentage
+const getColorByDominance = (baseColor: string, dominancePercentage: number): string => {
+  if (dominancePercentage >= 75) {
+    // Darken the color for high dominance (75-100%)
+    return adjustColorShade(baseColor, -30); // Darker
+  } else if (dominancePercentage >= 50) {
+    // Slightly darken for medium dominance (50-75%)
+    return adjustColorShade(baseColor, -15); // Slightly darker
+  } else if (dominancePercentage >= 25) {
+    // Use base color for low-medium dominance (25-50%)
+    return baseColor;
+  } else {
+    // Lighten for very low dominance (<25%)
+    return adjustColorShade(baseColor, 30); // Lighter
+  }
+};
 
   // Function to adjust color shade (darken/lighten)
   const adjustColorShade = (hex: string, percent: number): string => {
@@ -460,7 +489,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
 
       {/* Filter indicator */}
       {selectedTeams.length > 0 && (
-        <g transform={`translate(${viewBox.width - 200}, ${viewBox.height - 120})`}>
+        <g transform={`translate(${viewBox.width - 500}, ${viewBox.height - 120})`}>
           <rect
             x="0"
             y="0"
