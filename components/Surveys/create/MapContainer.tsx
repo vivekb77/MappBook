@@ -442,7 +442,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       </div>
 
       {/* Bottom Control Bar */}
-      <div className="fixed bottom-10 left-6 flex flex-col gap-4">
+      <div className="fixed bottom-12 left-6 flex flex-col gap-4">
         {/* Share and See Results Buttons */}
         <div className="flex items-center space-x-2">
           {/* Share URL Button */}
@@ -462,6 +462,28 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
               aria-label="See fandom map results"
             >
               <span>Set you favourite IPL team</span>
+            </button>
+          </Link>
+        </div>
+      </div>
+
+      <div className="fixed bottom-2 left-6 flex flex-col gap-4">
+        <div className="flex items-center space-x-2">
+          <Link href="https://www.instagram.com/mappbook/" passHref>
+            <button
+              className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+              aria-label="follow us on insta"
+            >
+              <span>Follow us on Insta</span>
+            </button>
+          </Link>
+
+          <Link href="https://x.com/mappbook" passHref>
+            <button
+              className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+              aria-label="follow us on X"
+            >
+              <span>Follow us on X</span>
             </button>
           </Link>
         </div>

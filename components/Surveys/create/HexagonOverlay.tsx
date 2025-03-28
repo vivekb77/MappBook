@@ -150,7 +150,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
       const pixelsPerKmLat = viewBox.height / indiaHeightKm;
       
       // 120km in pixels (approximation)
-      const hexSidePixels = 100 * ((pixelsPerKmLong + pixelsPerKmLat) / 2);
+      const hexSidePixels = 100.7 * ((pixelsPerKmLong + pixelsPerKmLat) / 2);
       
       // Size of hexagons
       const hexRadius = hexSidePixels;
