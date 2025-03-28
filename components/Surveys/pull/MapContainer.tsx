@@ -485,7 +485,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
               className="bg-blue-600 text-white hover:bg-blue-700 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
               aria-label="See fandom map results"
             >
-              <span>Set you favourite IPL team</span>
+              <span>Choose your favourite IPL team</span>
             </button>
           </Link>
         </div>

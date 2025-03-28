@@ -53,7 +53,7 @@ const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
         <div className="flex justify-between items-center border-b border-gray-200 px-6 py-2">
           <div className="flex items-center">
-            <h2 className="text-x font-bold text-gray-800">IPL Team Fandom Distribution</h2>
+            <h2 className="text-x font-bold text-gray-800">IPL 2025 Leaderboard</h2>
           </div>
           <button 
             className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100"

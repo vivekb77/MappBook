@@ -8,7 +8,7 @@ import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'MappBook.com',
-  description: 'Location Intelligence',
+  description: 'IPL Fan Map 2025 - Vote for your favourite IPL team',
   robots: {
     index: true,
     follow: true,
@@ -16,16 +16,24 @@ export const metadata: Metadata = {
   // Add additional metadata for better SEO
   openGraph: {
     title: 'MappBook.com',
-    description: 'Location Intelligence',
+    description: 'IPL Fan Map 2025 - Vote for your favourite IPL team',
     type: 'website',
+    images: [
+      {
+        url: 'https://www.mappbook.com/twitter-card.png',
+        width: 1200,
+        height: 628,
+        alt: 'IPL Fan Map 2025 - Vote for your favourite IPL team on MappBook.com',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MappBook.com',
-    description: 'Location Intelligence',
+    description: 'IPL Fan Map 2025 - Vote for your favourite IPL team',
+    images: ['https://www.mappbook.com/twitter-card.png'],
   }
 };
-
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -63,6 +71,7 @@ export default function RootLayout({
             rdt('track', 'PageVisit');
           `}
         </Script>
+
       </head>
       {/* <body className="min-h-screen-dynamic"> */}
       <body className="min-h-screen-dynamic overflow-x-hidden">
