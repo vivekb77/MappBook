@@ -61,7 +61,7 @@ const SurveyCreatePage: React.FC = () => {
       <div className="flex items-center justify-center h-screen bg-gray-100 overflow-hidden">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700 mb-4"></div>
-          <p className="text-gray-700 text-lg">Loading map data...</p>
+          <p className="text-gray-700 text-lg">Loading map data</p>
         </div>
       </div>
     );

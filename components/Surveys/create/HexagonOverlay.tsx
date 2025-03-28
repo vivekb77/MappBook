@@ -278,7 +278,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
     const data = hexagonData.find(data => data.home_hexagon === hexNumber);
     
     if (!data) {
-      return "#e0e0e0"; // Default color for hexagons without data
+      return "#e8e8e8"; // Lighter color for hexagons without data
     }
     
     const team = data.dominant_team;
@@ -329,15 +329,49 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
   if (isLoading && hexagonData.length === 0) {
     return (
       <g>
+        {/* Semi-transparent background */}
+        <rect 
+          x={viewBox.width / 2 - 100}
+          y={viewBox.height / 2 - 60}
+          width="200"
+          height="120"
+          rx="10"
+          fill="white"
+          fillOpacity="0.9"
+          stroke="#E2E8F0"
+          strokeWidth="1"
+        />
+        
+        {/* Border-style spinner - similar to the reference */}
+        <path
+          d="M 50 34 A 16 16 0 0 1 66 50"
+          fill="none" 
+          stroke="#1D4ED8"  
+          strokeWidth="2"
+          strokeLinecap="round"
+          transform={`translate(${viewBox.width / 2 - 50}, ${viewBox.height / 2 - 50})`}
+        >
+          <animateTransform 
+            attributeName="transform" 
+            type="rotate" 
+            from="0 50 50" 
+            to="360 50 50" 
+            dur="0.8s" 
+            repeatCount="indefinite"
+            additive="sum"
+          />
+        </path>
+  
+        {/* Loading Text */}
         <text
           x={viewBox.width / 2}
-          y={viewBox.height / 2}
+          y={viewBox.height / 2 + 30}
           fontSize="16"
-          fontWeight="bold"
+          fontWeight="normal"
           textAnchor="middle"
-          fill="#000"
+          fill="#4B5563"
         >
-          Loading data...
+          Loading map data
         </text>
       </g>
     );
@@ -371,10 +405,10 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
             <polygon
               points={hexagon.points}
               fill={hasData ? getHexagonFillColor(hexagon.number) : 
-                    (selectedHexagon?.id === hexagon.id ? "#F44336" : "#e0e0e0")}
-              stroke="#555555"
+                    (selectedHexagon?.id === hexagon.id ? "#F44336" : "#e8e8e8")}
+              stroke="#dddddd"
               strokeWidth="1"
-              fillOpacity="0.8"
+              fillOpacity="0.9"
               onClick={hasData ? () => handleHexagonClick(hexagon) : undefined}
               style={{ cursor: hasData ? 'pointer' : 'default' }}
               aria-label={hasData ? `Hexagon region ${hexagon.number}` : undefined}

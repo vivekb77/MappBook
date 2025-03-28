@@ -1,6 +1,8 @@
 "use client"
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link'; // Added Link import
+import { FaShareAlt } from 'react-icons/fa'; // Added FaShareAlt import
 import TeamDistributionModal from './GlobalPopup';
 
 // Dynamically import the HexagonPopup component to prevent SSR issues
@@ -106,7 +108,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupData, setPopupData] = useState<HexagonData | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-
+  const [showShareNotification, setShowShareNotification] = useState<boolean>(false);
   // Team colors for the IPL teams
   const teamColors = {
     'Chennai Super Kings': '#FFDC00',     // Yellow
@@ -120,11 +122,11 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
     'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
     'Sunrisers Hyderabad': '#FF6500'      // Orange
   };
-  
+
   // Pan constraints
   const MAX_PAN_X = 500;
   const MAX_PAN_Y = 500;
-  
+
   const [viewBox, setViewBox] = useState<ViewBoxType>({
     width: 900,
     height: 800,
@@ -133,6 +135,31 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
     minLat: 8,
     maxLat: 37
   });
+
+  // Function to copy current URL to clipboard
+  const copyShareURL = () => {
+    if (typeof window !== 'undefined') {
+      // Create a URL with relevant parameters
+      const baseURL = window.location.origin + window.location.pathname;
+
+      const shareURL = baseURL;
+
+      // Copy to clipboard
+      navigator.clipboard.writeText(shareURL)
+        .then(() => {
+          // Show notification
+          setShowShareNotification(true);
+          // Hide notification after 3 seconds
+          setTimeout(() => {
+            setShowShareNotification(false);
+          }, 3000);
+        })
+        .catch(err => {
+          console.error('Error copying text: ', err);
+          alert('Failed to copy URL to clipboard.');
+        });
+    }
+  };
 
   // Calculate viewbox once we have the map data
   useEffect(() => {
@@ -254,9 +281,9 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
       const newTranslateX = translateX + dx / scale;
       const newTranslateY = translateY + dy / scale;
-      
+
       const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
-      
+
       setTranslateX(constrainedX);
       setTranslateY(constrainedY);
       setLastX(e.clientX);
@@ -284,9 +311,9 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
       const newTranslateX = translateX + dx / scale;
       const newTranslateY = translateY + dy / scale;
-      
+
       const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
-      
+
       setTranslateX(constrainedX);
       setTranslateY(constrainedY);
       setLastX(e.touches[0].clientX);
@@ -338,7 +365,8 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100 overflow-hidden">
+    // <div className="h-screen flex flex-col bg-gray-100 overflow-hidden">
+      <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
       {/* Metadata Display */}
       <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow mx-4 mt-4 mb-2">
         <div className="flex items-center">
@@ -351,7 +379,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
             </span>
           )}
         </div>
-        <button 
+        <button
           className="bg-green-700 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-800 transition-colors"
           onClick={() => setShowDistributionModal(true)}
         >
@@ -360,7 +388,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       </div>
 
       {/* Map Container */}
-      <div 
+      <div
         ref={mapContainerRef}
         className="flex-1 bg-white mx-4 mb-4 rounded-lg shadow-md overflow-hidden touch-none relative"
         onMouseDown={handleMouseDown}
@@ -378,6 +406,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           width="100%"
           height="100%"
           viewBox={`0 0 ${viewBox.width} ${viewBox.height}`}
+          style={{ background: "#f5f5f5" }}
         >
           <g transform={`translate(${viewBox.width / 2 + translateX}, ${viewBox.height / 2 + translateY}) scale(${scale}) translate(${-viewBox.width / 2}, ${-viewBox.height / 2})`}>
             {/* India Base Map Component */}
@@ -395,12 +424,12 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
               onDataFetched={handleDataFetched}
             />
           </g>
-          
+
           {/* Render popup outside of the transform group */}
           {showPopup && popupData && (
-            <HexagonPopup 
-              popupData={popupData} 
-              position={{x: 0, y: 0}}
+            <HexagonPopup
+              popupData={popupData}
+              position={{ x: 0, y: 0 }}
               viewBox={{
                 width: viewBox.width,
                 height: viewBox.height
@@ -412,9 +441,35 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         </svg>
       </div>
 
+      {/* Bottom Control Bar */}
+      <div className="fixed bottom-10 left-6 flex flex-col gap-4">
+        {/* Share and See Results Buttons */}
+        <div className="flex items-center space-x-2">
+          {/* Share URL Button */}
+          <button
+            onClick={copyShareURL}
+            className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+            aria-label="Share URL"
+          >
+            <FaShareAlt className="mr-1" />
+            <span>Share</span>
+          </button>
+
+          {/* See Results Button */}
+          <Link href="/" passHref>
+            <button
+              className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+              aria-label="See fandom map results"
+            >
+              <span>Set you favourite IPL team</span>
+            </button>
+          </Link>
+        </div>
+      </div>
+
       {/* Zoom Control Buttons */}
       <div className="fixed right-6 bottom-6 bg-white rounded-lg overflow-hidden shadow-md">
-        <button 
+        <button
           className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
           onClick={() => setScale(Math.min(scale + 0.2, 5))}
           aria-label="Zoom in"
@@ -423,7 +478,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
         </button>
-        <button 
+        <button
           className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
           onClick={() => setScale(Math.max(scale - 0.2, 0.5))}
           aria-label="Zoom out"
@@ -432,7 +487,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
           </svg>
         </button>
-        <button 
+        <button
           className="w-10 h-10 flex items-center justify-center hover:bg-gray-100"
           onClick={() => {
             setScale(1);
@@ -446,7 +501,12 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           </svg>
         </button>
       </div>
-
+      {/* URL Share notification */}
+      {showShareNotification && (
+        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-red-800 text-white px-4 py-2 rounded-lg shadow-lg z-20 transition-opacity duration-300">
+          URL copied!
+        </div>
+      )}
       {/* Team Distribution Modal Component */}
       <TeamDistributionModal
         showModal={showDistributionModal}
