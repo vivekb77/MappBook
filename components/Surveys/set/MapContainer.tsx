@@ -474,7 +474,7 @@ const MapContainer: React.FC = () => {
             </button>
             
             {/* See Results Button */}
-            <Link href="/iplfandommap" passHref>
+            <Link href="/ipl-fandom-map" passHref>
               <button 
                 className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
                 aria-label="See fandom map results"

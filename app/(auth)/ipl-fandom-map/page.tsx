@@ -26,7 +26,7 @@ interface GeoJSON {
 }
 
 // Dynamically import MapContainer to prevent SSR issues
-const MapContainerWithNoSSR = dynamic(() => import('../../../components/Surveys/create/MapContainer'), {
+const MapContainerWithNoSSR = dynamic(() => import('../../../components/Surveys/pull/MapContainer'), {
   ssr: false,
 });
 

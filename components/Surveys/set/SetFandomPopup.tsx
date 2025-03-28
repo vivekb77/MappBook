@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiMapPin, FiSave, FiAlertCircle } from 'react-icons/fi';
 import Link from 'next/link';
-import SuccessNotification from '../answer/SaveTeam';
+import SuccessNotification from './SaveTeam';
 
 // TypeScript interfaces
 interface Hexagon {
@@ -379,7 +379,7 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
             {/* See Results Button */}
             <div className="mt-3">
               {(isSaved && !isDataChanged) ? (
-                <Link href="/iplfandommap" passHref>
+                <Link href="/ipl-fandom-map" passHref>
                   <button 
                     className="bg-white text-green-800 hover:bg-gray-100 p-3 rounded-lg border border-gray-300 w-full flex items-center justify-center text-base font-semibold cursor-pointer transition-all"
                     style={{ color: selectedTeam ? getTeamColor() : '#1A5D1A' }}
