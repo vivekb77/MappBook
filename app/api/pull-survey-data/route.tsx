@@ -37,12 +37,18 @@ export async function GET() {
       );
     }
 
-    // Return the successful response with the data
-    return NextResponse.json({ 
+    // Create response with the data
+    const response = NextResponse.json({ 
       success: true, 
       data: analysisData,
       timestamp: new Date().toISOString()
     });
+    
+    // Add cache control headers (1 hour = 3600 seconds)
+    response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+    
+    // Return the response with cache headers
+    return response;
     
   } catch (error) {
     // Catch any unexpected errors
