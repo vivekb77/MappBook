@@ -26,15 +26,6 @@ export const metadata: Metadata = {
   }
 };
 
-// export const viewport: Viewport = {
-//   width: 'device-width',
-//   initialScale: 1,
-//   maximumScale: 1,
-//   minimumScale: 1,
-//   userScalable: false,
-//   viewportFit: 'cover',
-// };
-
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -49,6 +40,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1519931816826082"
+          crossOrigin="anonymous"></script>
+
         {/* Google Tag Manager Script - Strategy: afterInteractive ensures it loads after page interaction */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-16818860554"
