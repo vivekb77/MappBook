@@ -438,7 +438,8 @@ const MapContainer: React.FC = () => {
   }
 
   return (
-    <div className="relative flex flex-col h-screen w-full bg-gray-100 overflow-hidden">
+    // <div className="relative flex flex-col h-screen w-full bg-gray-100 overflow-hidden">
+      <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
       {/* Header to display hexagon and team selection */}
       <div 
         className="w-full shadow-md z-10"
@@ -531,7 +532,7 @@ const MapContainer: React.FC = () => {
 
         {/* URL Share notification */}
         {showShareNotification && (
-          <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-green-800 text-white px-4 py-2 rounded-lg shadow-lg z-20 transition-opacity duration-300">
+          <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-red-800 text-white px-4 py-2 rounded-lg shadow-lg z-20 transition-opacity duration-300">
             URL copied!
           </div>
         )}

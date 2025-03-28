@@ -68,7 +68,7 @@ const SurveyCreatePage: React.FC = () => {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden">
+    <div className="h-screen w-screen">
       <MapContainerWithNoSSR geoJsonData={geoJsonData} />
     </div>
   );
