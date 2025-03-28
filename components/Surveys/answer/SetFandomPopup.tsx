@@ -309,8 +309,8 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
               </div>
             )}
 
-            {/* Save Button */}
-            <button
+          {/* Save Button */}
+          <button
               className="bg-green-800 text-white p-3 rounded-lg border-none w-full flex items-center justify-center text-base font-semibold cursor-pointer mt-2 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed hover:opacity-90"
               style={{ backgroundColor: selectedTeam ? getTeamColor() : '#1A5D1A' }}
               onClick={saveUserPreferences}
@@ -325,6 +325,29 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
                 </>
               )}
             </button>
+            
+            {/* See Results Button */}
+            <div className="mt-3">
+              {showSuccessNotification || (homeHexagon && selectedTeam) ? (
+                <Link href="/iplfandommap" passHref>
+                  <button 
+                    className="bg-white text-green-800 hover:bg-gray-100 p-3 rounded-lg border border-gray-300 w-full flex items-center justify-center text-base font-semibold cursor-pointer transition-all"
+                    style={{ color: selectedTeam ? getTeamColor() : '#1A5D1A' }}
+                    aria-label="See fandom map results"
+                  >
+                    <span>See Results</span>
+                  </button>
+                </Link>
+              ) : (
+                <button 
+                  className="bg-gray-100 text-gray-400 p-3 rounded-lg border border-gray-200 w-full flex items-center justify-center text-base font-semibold cursor-not-allowed opacity-70 transition-all"
+                  disabled
+                  aria-label="Save your preferences first to see results"
+                >
+                  <span>Save to See Results</span>
+                </button>
+              )}
+            </div>
           </>
         )}
       </div>
