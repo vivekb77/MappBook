@@ -64,7 +64,8 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className="min-h-screen-dynamic">
+      {/* <body className="min-h-screen-dynamic"> */}
+      <body className="min-h-screen-dynamic overflow-x-hidden">
         <CSPostHogProvider>
           <ViewportHandler />
           {children}

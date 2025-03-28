@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 
 // Types
@@ -82,6 +82,12 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [showDistributionModal, setShowDistributionModal] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Pan constraints
+  const MAX_PAN_X = 500;
+  const MAX_PAN_Y = 500;
+  
   const [viewBox, setViewBox] = useState<ViewBoxType>({
     width: 900,
     height: 800,
@@ -98,6 +104,25 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       setViewBox(calculatedViewBox);
     }
   }, [geoJsonData]);
+
+  // Add non-passive wheel event listener to fix preventDefault issue
+  useEffect(() => {
+    const mapContainer = mapContainerRef.current;
+    if (!mapContainer) return;
+
+    const handleWheelEvent = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      const newScale = Math.max(0.5, Math.min(5, scale + delta));
+      setScale(newScale);
+    };
+
+    mapContainer.addEventListener('wheel', handleWheelEvent, { passive: false });
+
+    return () => {
+      mapContainer.removeEventListener('wheel', handleWheelEvent);
+    };
+  }, [scale]);
 
   // Handle map data received from hexagon overlay
   const handleDataFetched = (data: MapData) => {
@@ -171,7 +196,14 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
     }
   };
 
-  // Map interaction handlers for web
+  // Function to constrain panning within limits
+  const constrainTranslation = (x: number, y: number): [number, number] => {
+    const constrainedX = Math.max(-MAX_PAN_X, Math.min(MAX_PAN_X, x));
+    const constrainedY = Math.max(-MAX_PAN_Y, Math.min(MAX_PAN_Y, y));
+    return [constrainedX, constrainedY];
+  };
+
+  // Map interaction handlers for mouse
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setLastX(e.clientX);
@@ -183,9 +215,13 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       const dx = e.clientX - lastX;
       const dy = e.clientY - lastY;
 
-      setTranslateX(translateX + dx / scale);
-      setTranslateY(translateY + dy / scale);
-
+      const newTranslateX = translateX + dx / scale;
+      const newTranslateY = translateY + dy / scale;
+      
+      const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
+      
+      setTranslateX(constrainedX);
+      setTranslateY(constrainedY);
       setLastX(e.clientX);
       setLastY(e.clientY);
     }
@@ -195,11 +231,61 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
     setIsDragging(false);
   };
 
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    const newScale = Math.max(0.5, Math.min(5, scale + delta));
-    setScale(newScale);
+  // Touch event handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      setLastX(e.touches[0].clientX);
+      setLastY(e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDragging && e.touches.length === 1) {
+      const dx = e.touches[0].clientX - lastX;
+      const dy = e.touches[0].clientY - lastY;
+
+      const newTranslateX = translateX + dx / scale;
+      const newTranslateY = translateY + dy / scale;
+      
+      const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
+      
+      setTranslateX(constrainedX);
+      setTranslateY(constrainedY);
+      setLastX(e.touches[0].clientX);
+      setLastY(e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Pinch to zoom handler
+  const [lastDistance, setLastDistance] = useState<number | null>(null);
+
+  const handleTouchZoom = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      // Calculate the distance between two fingers
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+
+      // If we have a previous distance, calculate the zoom
+      if (lastDistance !== null) {
+        const delta = distance - lastDistance;
+        const zoomFactor = delta * 0.01;
+        const newScale = Math.max(0.5, Math.min(5, scale + zoomFactor));
+        setScale(newScale);
+      }
+
+      setLastDistance(distance);
+    } else {
+      setLastDistance(null);
+    }
   };
 
   // Handle hexagon click
@@ -231,18 +317,23 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
       {/* Map Container */}
       <div 
-        className="flex-1 bg-white mx-4 mb-4 rounded-lg shadow-md overflow-hidden"
+        ref={mapContainerRef}
+        className="flex-1 bg-white mx-4 mb-4 rounded-lg shadow-md overflow-hidden touch-none"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={(e) => {
+          handleTouchMove(e);
+          handleTouchZoom(e);
+        }}
+        onTouchEnd={handleTouchEnd}
       >
         <svg
           width="100%"
           height="100%"
           viewBox={`0 0 ${viewBox.width} ${viewBox.height}`}
-          className="touch-none"
         >
           <g transform={`translate(${viewBox.width / 2 + translateX}, ${viewBox.height / 2 + translateY}) scale(${scale}) translate(${-viewBox.width / 2}, ${-viewBox.height / 2})`}>
             {/* India Base Map Component */}
