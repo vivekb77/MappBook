@@ -87,16 +87,6 @@ const HexagonPopup: React.FC<HexagonPopupProps> = ({
   
   return (
     <g pointerEvents="all">
-      {/* Semi-transparent overlay */}
-      <rect
-        x="0"
-        y="0"
-        width={viewBox.width}
-        height={viewBox.height}
-        fill="rgba(0, 0, 0, 0.2)"
-        onClick={onClose}
-        style={{ cursor: 'pointer' }}
-      />
       
       {/* Popup container with shadow */}
       <rect

@@ -366,7 +366,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
   return (
     // <div className="h-screen flex flex-col bg-gray-100 overflow-hidden">
-      <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
+    <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
       {/* Metadata Display */}
       <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow mx-4 mt-4 mb-2">
         <div className="flex items-center">
@@ -390,7 +390,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       {/* Map Container */}
       <div
         ref={mapContainerRef}
-        className="flex-1 bg-white mx-4 mb-4 rounded-lg shadow-md overflow-hidden touch-none relative"
+        className="w-full h-full bg-white rounded-lg shadow-md overflow-hidden touch-none relative"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
