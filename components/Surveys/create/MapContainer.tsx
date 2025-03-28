@@ -3,6 +3,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import TeamDistributionModal from './GlobalPopup';
 
+// Dynamically import the HexagonPopup component to prevent SSR issues
+const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
+  ssr: false,
+});
+
 // Types
 interface Hexagon {
   id: string;
@@ -69,6 +74,21 @@ const HexagonOverlayWithNoSSR = dynamic(() => import('./HexagonOverlay'), {
   ssr: false,
 });
 
+// Team data interface
+interface TeamData {
+  team: string;
+  count: number;
+  percentage: number;
+}
+
+interface HexagonData {
+  teams: TeamData[];
+  total_fans: number;
+  home_hexagon: number;
+  dominant_team: string;
+  dominance_percentage: number;
+}
+
 interface MapContainerProps {
   geoJsonData: GeoJSON;
 }
@@ -83,7 +103,23 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [showDistributionModal, setShowDistributionModal] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupData, setPopupData] = useState<HexagonData | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+
+  // Team colors for the IPL teams
+  const teamColors = {
+    'Chennai Super Kings': '#FFDC00',     // Yellow
+    'Delhi Capitals': '#0033A0',          // Blue
+    'Gujarat Titans': '#39B6FF',          // Light Blue
+    'Kolkata Knight Riders': '#552583',   // Purple
+    'Lucknow Super Giants': '#005CB9',    // Royal Blue
+    'Mumbai Indians': '#004C93',          // Blue
+    'Punjab Kings': '#ED1B24',            // Red
+    'Rajasthan Royals': '#FF69B4',        // Pink
+    'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
+    'Sunrisers Hyderabad': '#FF6500'      // Orange
+  };
   
   // Pan constraints
   const MAX_PAN_X = 500;
@@ -290,8 +326,15 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   };
 
   // Handle hexagon click
-  const handleHexagonClick = (hexagon: Hexagon) => {
+  const handleHexagonClick = (hexagon: Hexagon, hexagonData: HexagonData) => {
     setSelectedHexagon(hexagon);
+    setPopupData(hexagonData);
+    setShowPopup(true);
+  };
+
+  // Close popup
+  const closePopup = () => {
+    setShowPopup(false);
   };
 
   return (
@@ -319,7 +362,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       {/* Map Container */}
       <div 
         ref={mapContainerRef}
-        className="flex-1 bg-white mx-4 mb-4 rounded-lg shadow-md overflow-hidden touch-none"
+        className="flex-1 bg-white mx-4 mb-4 rounded-lg shadow-md overflow-hidden touch-none relative"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -352,6 +395,20 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
               onDataFetched={handleDataFetched}
             />
           </g>
+          
+          {/* Render popup outside of the transform group */}
+          {showPopup && popupData && (
+            <HexagonPopup 
+              popupData={popupData} 
+              position={{x: 0, y: 0}}
+              viewBox={{
+                width: viewBox.width,
+                height: viewBox.height
+              }}
+              onClose={closePopup}
+              teamColors={teamColors}
+            />
+          )}
         </svg>
       </div>
 

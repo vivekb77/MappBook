@@ -1,7 +1,5 @@
-
 // components/HexagonOverlay.tsx
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 
 // Team data interface
 interface TeamData {
@@ -59,26 +57,19 @@ interface HexagonOverlayProps {
   geoJsonData: GeoJSON;
   viewBox: ViewBoxType;
   selectedHexagon: Hexagon | null;
-  onHexagonClick: (hexagon: Hexagon) => void;
+  onHexagonClick: (hexagon: Hexagon, hexagonData: HexagonData) => void;
   onDataFetched: (data: any) => void;
 }
-
-// Dynamically import the HexagonPopup component to prevent SSR issues
-const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
-  ssr: false,
-});
 
 const HexagonOverlay: React.FC<HexagonOverlayProps> = ({ 
   geoJsonData, 
   viewBox, 
-  selectedHexagon, 
+  selectedHexagon,
   onHexagonClick,
-  onDataFetched 
+  onDataFetched
 }) => {
   const [hexagons, setHexagons] = useState<Hexagon[]>([]);
   const [hexagonData, setHexagonData] = useState<HexagonData[]>([]);
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupData, setPopupData] = useState<HexagonData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -325,20 +316,13 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
   };
 
-  // Handle hexagon click - show popup with data
+  // Handle hexagon click - send data to parent component
   const handleHexagonClick = (hexagon: Hexagon) => {
     // Only handle click if there's data for this hexagon
     const data = hexagonData.find(data => data.home_hexagon === hexagon.number);
     if (data) {
-      onHexagonClick(hexagon);
-      setPopupData(data);
-      setShowPopup(true);
+      onHexagonClick(hexagon, data);
     }
-  };
-
-  // Close popup
-  const closePopup = () => {
-    setShowPopup(false);
   };
 
   // Show loading state while fetching data
@@ -410,20 +394,6 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
           </g>
         );
       })}
-
-      {/* Popup to display hexagon details */}
-      {showPopup && popupData && (
-        <HexagonPopup 
-          popupData={popupData} 
-          position={{x: 0, y: 0}}
-          viewBox={{
-            width: viewBox.width,
-            height: viewBox.height
-          }}
-          onClose={closePopup}
-          teamColors={teamColors}
-        />
-      )}
     </>
   );
 };
