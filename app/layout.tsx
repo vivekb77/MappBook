@@ -20,9 +20,9 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://www.mappbook.com/twitter-card.png',
-        width: 1200,
-        height: 628,
+        url: 'https://www.mappbook.com/social-share-card-image.png',
+        width: 800,
+        height: 418,
         alt: 'IPL Fan Map 2025 - Vote for your favourite IPL team on MappBook.com',
       },
     ],
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'MappBook.com',
     description: 'IPL Fan Map 2025 - Vote for your favourite IPL team',
-    images: ['https://www.mappbook.com/twitter-card.png'],
+    images: ['https://www.mappbook.com/social-share-card-image.png'],
   }
 };
 export const viewport: Viewport = {

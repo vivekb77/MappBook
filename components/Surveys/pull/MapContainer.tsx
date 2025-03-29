@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FaShareAlt, FaFilter } from 'react-icons/fa';
 import TeamDistributionModal from './GlobalPopup';
 import FilterByTeams from './FilterByTeam';
+import {Instagram, Twitter} from 'lucide-react';
 
 // Dynamically import the HexagonPopup component to prevent SSR issues
 const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
@@ -406,7 +407,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           className="bg-green-700 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-800 transition-colors"
           onClick={() => setShowDistributionModal(true)}
         >
-          <span>IPL Team Fandom</span>
+          <span>Leaderboard!!</span>
         </button>
       </div>
 
@@ -491,6 +492,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         </div>
       </div>
 
+
       <div className="fixed bottom-2 left-6 flex flex-col gap-4">
         <div className="flex items-center space-x-2">
           <Link href="https://www.instagram.com/mappbook/" passHref>
@@ -502,7 +504,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
                 window.open("https://www.instagram.com/mappbook/", "_blank");
               }}
             >
-              <span>Follow us on Insta</span>
+              <Instagram size={20} />
             </button>
           </Link>
 
@@ -515,7 +517,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
                 window.open("https://x.com/mappbook", "_blank");
               }}
             >
-              <span>Follow us on X</span>
+              <Twitter size={20} />
             </button>
           </Link>
         </div>
