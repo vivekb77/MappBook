@@ -62,9 +62,9 @@ interface HexagonOverlayProps {
   selectedTeams: string[];
 }
 
-const HexagonOverlay: React.FC<HexagonOverlayProps> = ({ 
-  geoJsonData, 
-  viewBox, 
+const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
+  geoJsonData,
+  viewBox,
   selectedHexagon,
   onHexagonClick,
   onDataFetched,
@@ -79,15 +79,15 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
   // Team colors for the IPL teams
   const teamColors = {
     'Chennai Super Kings': '#FFDC00',     // Yellow
-    'Delhi Capitals': '#0033A0',          // Blue
     'Gujarat Titans': '#39B6FF',          // Light Blue
     'Kolkata Knight Riders': '#552583',   // Purple
-    'Lucknow Super Giants': '#005CB9',    // Royal Blue
-    'Mumbai Indians': '#004C93',          // Blue
     'Punjab Kings': '#ED1B24',            // Red
     'Rajasthan Royals': '#FF69B4',        // Pink
     'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
-    'Sunrisers Hyderabad': '#FF6500'      // Orange
+    'Sunrisers Hyderabad': '#FF6500',     // Orange,
+    'Lucknow Super Giants': '#3496ff',    // Blue with yellow/gold accent
+    'Mumbai Indians': '#00305a',         // Deep blue with light blue accent
+    'Delhi Capitals': '#0033A0',         // Red with navy blue accent
   };
 
   useEffect(() => {
@@ -109,14 +109,14 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
     } else if (selectedTeams.length === 1) {
       // If one team selected, filter hexagons where this team appears
       setFilteredHexagonData(
-        hexagonData.filter(data => 
+        hexagonData.filter(data =>
           data.teams.some(team => team.team === selectedTeams[0])
         )
       );
     } else if (selectedTeams.length === 2) {
       // If two teams selected, filter hexagons where both teams appear
       setFilteredHexagonData(
-        hexagonData.filter(data => 
+        hexagonData.filter(data =>
           data.teams.some(team => team.team === selectedTeams[0]) &&
           data.teams.some(team => team.team === selectedTeams[1])
         )
@@ -128,17 +128,17 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
   const fetchHexagonData = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // In a real application, you would fetch from your API
       const response = await fetch('/api/pull-survey-data');
-      
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.data) {
         const hexagons = data.data.hexagons || [];
         setHexagonData(hexagons);
@@ -164,53 +164,53 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
       const indiaLongSpan = viewBox.maxLon - viewBox.minLon; // in degrees
       // Approximate height of India in degrees of latitude (8°N to 37°N)
       const indiaLatSpan = viewBox.maxLat - viewBox.minLat; // in degrees
-      
+
       // Approximate width and height of India in km
       const indiaWidthKm = 3000;
       const indiaHeightKm = 3200;
-      
+
       // Calculate scales
       const kmPerLongDegree = indiaWidthKm / indiaLongSpan;
       const kmPerLatDegree = indiaHeightKm / indiaLatSpan;
-      
+
       // Calculate pixel per km
       const pixelsPerKmLong = viewBox.width / indiaWidthKm;
       const pixelsPerKmLat = viewBox.height / indiaHeightKm;
-      
+
       // 120km in pixels (approximation)
       const hexSidePixels = 100.7 * ((pixelsPerKmLong + pixelsPerKmLat) / 2);
-      
+
       // Size of hexagons
       const hexRadius = hexSidePixels;
       const horizontalSpacing = hexRadius * Math.sqrt(3);
       const verticalSpacing = hexRadius * 1.5;
-      
+
       // Calculate how many hexagons we need to cover the map
       const cols = Math.ceil(viewBox.width / horizontalSpacing) + 2; // Add extra columns for offset rows
       const rows = Math.ceil(viewBox.height / verticalSpacing) + 2; // Add a bit of margin
-      
+
       // Calculate the starting point for the hexagon grid
       const startX = -horizontalSpacing;
       const startY = -verticalSpacing;
-      
+
       const hexList: Hexagon[] = [];
       let hexNumber = 1;
-      
+
       // Create a grid of hexagons
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
           const offsetX = (row % 2) * (horizontalSpacing / 2);
           const x = startX + (col * horizontalSpacing) + offsetX;
           const y = startY + (row * verticalSpacing);
-          
+
           // Convert pixel coordinates back to lat/lon
           const lon = ((x / viewBox.width) * (viewBox.maxLon - viewBox.minLon)) + viewBox.minLon;
           const lat = viewBox.maxLat - ((y / viewBox.height) * (viewBox.maxLat - viewBox.minLat));
-          
+
           // Check if the hexagon's center is likely inside India using the point-in-polygon algorithm
           if (isPointInsideIndia(lon, lat, geoJsonData)) {
             const points = calculateHexagonPoints(x, y, hexRadius);
-            
+
             hexList.push({
               id: `hex-${row}-${col}`,
               number: hexNumber++,
@@ -221,7 +221,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
           }
         }
       }
-      
+
       setHexagons(hexList);
     } catch (error) {
       console.error('Error generating hexagons:', error);
@@ -232,7 +232,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
   // Function to check if a point is inside India using point-in-polygon algorithm
   const isPointInsideIndia = (lon: number, lat: number, geoJson: GeoJSON): boolean => {
     if (!geoJson || !geoJson.features) return false;
-    
+
     try {
       for (const feature of geoJson.features) {
         if (feature.geometry.type === 'Polygon') {
@@ -250,25 +250,25 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
     } catch (error) {
       console.error('Error in point-in-polygon check:', error);
     }
-    
+
     return false;
   };
-  
+
   // Ray casting algorithm for point in polygon
   const isPointInPolygon = (lon: number, lat: number, polygon: number[][]): boolean => {
     if (!polygon || !Array.isArray(polygon)) return false;
-    
+
     try {
       let inside = false;
       for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
         const xi = polygon[i][0], yi = polygon[i][1];
         const xj = polygon[j][0], yj = polygon[j][1];
-        
+
         // Skip invalid coordinates
         if (xi === undefined || yi === undefined || xj === undefined || yj === undefined) {
           continue;
         }
-        
+
         const intersect = ((yi > lat) !== (yj > lat)) &&
           (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
@@ -284,7 +284,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
   const calculateHexagonPoints = (centerX: number, centerY: number, radius: number): string => {
     try {
       const points = [];
-      
+
       for (let i = 0; i < 6; i++) {
         const angleDeg = 60 * i - 30;
         const angleRad = (Math.PI / 180) * angleDeg;
@@ -292,7 +292,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
         const y = centerY + radius * Math.sin(angleRad);
         points.push(`${x},${y}`);
       }
-      
+
       return points.join(' ');
     } catch (error) {
       console.error('Error calculating hexagon points:', error);
@@ -300,62 +300,62 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
     }
   };
 
-// Function to get fill color based on team and dominance percentage
-const getHexagonFillColor = (hexNumber: number): string => {
-  // Find data for this hexagon
-  const data = filteredHexagonData.find(data => data.home_hexagon === hexNumber);
-  
-  if (!data) {
-    return "#e8e8e8"; // Lighter color for hexagons without data
-  }
-  
-  // Special handling for when two teams are selected
-  if (selectedTeams.length === 2) {
-    // Find the percentage for each of the selected teams
-    const team1Data = data.teams.find(team => team.team === selectedTeams[0]);
-    const team2Data = data.teams.find(team => team.team === selectedTeams[1]);
-    
-    // Get the percentages (default to 0 if team not found)
-    const team1Percentage = team1Data ? team1Data.percentage : 0;
-    const team2Percentage = team2Data ? team2Data.percentage : 0;
-    
-    // Determine which team has higher percentage
-    if (team1Percentage > team2Percentage) {
-      const baseColor = teamColors[selectedTeams[0] as keyof typeof teamColors] || "#cccccc";
-      // Adjust intensity based on the difference between teams
-      const dominanceRatio = team1Percentage / (team1Percentage + team2Percentage) * 100;
-      return getColorByDominance(baseColor, dominanceRatio);
-    } else {
-      const baseColor = teamColors[selectedTeams[1] as keyof typeof teamColors] || "#cccccc";
-      // Adjust intensity based on the difference between teams
-      const dominanceRatio = team2Percentage / (team1Percentage + team2Percentage) * 100;
-      return getColorByDominance(baseColor, dominanceRatio);
-    }
-  }
-  
-  // Default behavior for single team or all teams view
-  const team = data.dominant_team;
-  const baseColor = teamColors[team as keyof typeof teamColors] || "#cccccc";
-  
-  return getColorByDominance(baseColor, data.dominance_percentage);
-};
+  // Function to get fill color based on team and dominance percentage
+  const getHexagonFillColor = (hexNumber: number): string => {
+    // Find data for this hexagon
+    const data = filteredHexagonData.find(data => data.home_hexagon === hexNumber);
 
-// Helper function to adjust color based on dominance percentage
-const getColorByDominance = (baseColor: string, dominancePercentage: number): string => {
-  if (dominancePercentage >= 75) {
-    // Darken the color for high dominance (75-100%)
-    return adjustColorShade(baseColor, -30); // Darker
-  } else if (dominancePercentage >= 50) {
-    // Slightly darken for medium dominance (50-75%)
-    return adjustColorShade(baseColor, -15); // Slightly darker
-  } else if (dominancePercentage >= 25) {
-    // Use base color for low-medium dominance (25-50%)
-    return baseColor;
-  } else {
-    // Lighten for very low dominance (<25%)
-    return adjustColorShade(baseColor, 30); // Lighter
-  }
-};
+    if (!data) {
+      return "#e8e8e8"; // Lighter color for hexagons without data
+    }
+
+    // Special handling for when two teams are selected
+    if (selectedTeams.length === 2) {
+      // Find the percentage for each of the selected teams
+      const team1Data = data.teams.find(team => team.team === selectedTeams[0]);
+      const team2Data = data.teams.find(team => team.team === selectedTeams[1]);
+
+      // Get the percentages (default to 0 if team not found)
+      const team1Percentage = team1Data ? team1Data.percentage : 0;
+      const team2Percentage = team2Data ? team2Data.percentage : 0;
+
+      // Determine which team has higher percentage
+      if (team1Percentage > team2Percentage) {
+        const baseColor = teamColors[selectedTeams[0] as keyof typeof teamColors] || "#cccccc";
+        // Adjust intensity based on the difference between teams
+        const dominanceRatio = team1Percentage / (team1Percentage + team2Percentage) * 100;
+        return getColorByDominance(baseColor, dominanceRatio);
+      } else {
+        const baseColor = teamColors[selectedTeams[1] as keyof typeof teamColors] || "#cccccc";
+        // Adjust intensity based on the difference between teams
+        const dominanceRatio = team2Percentage / (team1Percentage + team2Percentage) * 100;
+        return getColorByDominance(baseColor, dominanceRatio);
+      }
+    }
+
+    // Default behavior for single team or all teams view
+    const team = data.dominant_team;
+    const baseColor = teamColors[team as keyof typeof teamColors] || "#cccccc";
+
+    return getColorByDominance(baseColor, data.dominance_percentage);
+  };
+
+  // Helper function to adjust color based on dominance percentage
+  const getColorByDominance = (baseColor: string, dominancePercentage: number): string => {
+    if (dominancePercentage >= 75) {
+      // Darken the color for high dominance (75-100%)
+      return adjustColorShade(baseColor, -30); // Darker
+    } else if (dominancePercentage >= 50) {
+      // Slightly darken for medium dominance (50-75%)
+      return adjustColorShade(baseColor, -15); // Slightly darker
+    } else if (dominancePercentage >= 25) {
+      // Use base color for low-medium dominance (25-50%)
+      return baseColor;
+    } else {
+      // Lighten for very low dominance (<25%)
+      return adjustColorShade(baseColor, 30); // Lighter
+    }
+  };
 
   // Function to adjust color shade (darken/lighten)
   const adjustColorShade = (hex: string, percent: number): string => {
@@ -387,7 +387,7 @@ const getColorByDominance = (baseColor: string, dominancePercentage: number): st
     return (
       <g>
         {/* Semi-transparent background */}
-        <rect 
+        <rect
           x={viewBox.width / 2 - 100}
           y={viewBox.height / 2 - 60}
           width="200"
@@ -398,27 +398,27 @@ const getColorByDominance = (baseColor: string, dominancePercentage: number): st
           stroke="#E2E8F0"
           strokeWidth="1"
         />
-        
+
         {/* Border-style spinner - similar to the reference */}
         <path
           d="M 50 34 A 16 16 0 0 1 66 50"
-          fill="none" 
-          stroke="#1D4ED8"  
+          fill="none"
+          stroke="#1D4ED8"
           strokeWidth="2"
           strokeLinecap="round"
           transform={`translate(${viewBox.width / 2 - 50}, ${viewBox.height / 2 - 50})`}
         >
-          <animateTransform 
-            attributeName="transform" 
-            type="rotate" 
-            from="0 50 50" 
-            to="360 50 50" 
-            dur="0.8s" 
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            from="0 50 50"
+            to="360 50 50"
+            dur="0.8s"
             repeatCount="indefinite"
             additive="sum"
           />
         </path>
-  
+
         {/* Loading Text */}
         <text
           x={viewBox.width / 2}
@@ -457,13 +457,13 @@ const getColorByDominance = (baseColor: string, dominancePercentage: number): st
       {/* Render hexagons */}
       {hexagons.map((hexagon) => {
         const hasData = filteredHexagonData.some(data => data.home_hexagon === hexagon.number);
-        
+
         return (
           <g key={hexagon.id}>
             <polygon
               points={hexagon.points}
-              fill={hasData ? getHexagonFillColor(hexagon.number) : 
-                    (selectedHexagon?.id === hexagon.id ? "#F44336" : "#e8e8e8")}
+              fill={hasData ? getHexagonFillColor(hexagon.number) :
+                (selectedHexagon?.id === hexagon.id ? "#F44336" : "#e8e8e8")}
               stroke="#dddddd"
               strokeWidth="1"
               fillOpacity="0.9"

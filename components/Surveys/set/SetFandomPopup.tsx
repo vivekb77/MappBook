@@ -44,16 +44,16 @@ const IPL_TEAMS = [
 
 // Team colors for the IPL teams
 const TEAM_COLORS: Record<string, string> = {
-  'Mumbai Indians': '#0078D7',
-  'Chennai Super Kings': '#FFCC00',
-  'Royal Challengers Bengaluru': '#1F1F1F',
-  'Kolkata Knight Riders': '#6A0DAD',
-  'Delhi Capitals': '#0052CC',
-  'Punjab Kings': '#E60023',
-  'Rajasthan Royals': '#FF1493',
-  'Sunrisers Hyderabad': '#FF5700',
-  'Gujarat Titans': '#1DA1F2',
-  'Lucknow Super Giants': '#004D98'
+  'Chennai Super Kings': '#FFDC00',     // Yellow
+    'Gujarat Titans': '#39B6FF',          // Light Blue
+    'Kolkata Knight Riders': '#552583',   // Purple
+    'Punjab Kings': '#ED1B24',            // Red
+    'Rajasthan Royals': '#FF69B4',        // Pink
+    'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
+    'Sunrisers Hyderabad': '#FF6500',     // Orange,
+    'Lucknow Super Giants': '#3496ff',    // Blue with yellow/gold accent
+    'Mumbai Indians': '#00305a',         // Deep blue with light blue accent
+    'Delhi Capitals': '#0033A0',         // Red with navy blue accen
 };
 
 // Storage constants

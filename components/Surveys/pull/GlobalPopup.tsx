@@ -36,16 +36,16 @@ const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
 
   // Team colors mapping
   const teamColors: { [key: string]: string } = {
-    'Chennai Super Kings': '#FFDC00',
-    'Delhi Capitals': '#0033A0',
-    'Gujarat Titans': '#39B6FF',
-    'Kolkata Knight Riders': '#552583',
-    'Lucknow Super Giants': '#005CB9',
-    'Mumbai Indians': '#004C93',
-    'Punjab Kings': '#ED1B24',
-    'Rajasthan Royals': '#FF69B4',
-    'Royal Challengers Bengaluru': '#2B2A29',
-    'Sunrisers Hyderabad': '#FF6500'
+    'Chennai Super Kings': '#FFDC00',     // Yellow
+    'Gujarat Titans': '#39B6FF',          // Light Blue
+    'Kolkata Knight Riders': '#552583',   // Purple
+    'Punjab Kings': '#ED1B24',            // Red
+    'Rajasthan Royals': '#FF69B4',        // Pink
+    'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
+    'Sunrisers Hyderabad': '#FF6500',     // Orange,
+    'Lucknow Super Giants': '#3496ff',    // Blue with yellow/gold accent
+    'Mumbai Indians': '#00305a',         // Deep blue with light blue accent
+    'Delhi Capitals': '#0033A0',         // Red with navy blue accent
   };
 
   return (

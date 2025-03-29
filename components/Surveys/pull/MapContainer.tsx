@@ -116,16 +116,16 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
   // Team colors for the IPL teams
   const teamColors = {
-    'Chennai Super Kings': '#FFDC00',     // Yellow
-    'Delhi Capitals': '#0033A0',          // Blue
+'Chennai Super Kings': '#FFDC00',     // Yellow
     'Gujarat Titans': '#39B6FF',          // Light Blue
     'Kolkata Knight Riders': '#552583',   // Purple
-    'Lucknow Super Giants': '#005CB9',    // Royal Blue
-    'Mumbai Indians': '#004C93',          // Blue
     'Punjab Kings': '#ED1B24',            // Red
     'Rajasthan Royals': '#FF69B4',        // Pink
     'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
-    'Sunrisers Hyderabad': '#FF6500'      // Orange
+    'Sunrisers Hyderabad': '#FF6500',     // Orange,
+    'Lucknow Super Giants': '#3496ff',    // Blue with yellow/gold accent
+    'Mumbai Indians': '#00305a',         // Deep blue with light blue accent
+    'Delhi Capitals': '#0033A0',         // Red with navy blue accent
   };
 
   // Pan constraints
