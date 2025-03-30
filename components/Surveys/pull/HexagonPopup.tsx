@@ -1,5 +1,5 @@
 // components/HexagonPopup.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
 // Team data interface
@@ -42,6 +42,10 @@ const HexagonPopup: React.FC<HexagonPopupProps> = ({
 }) => {
   // State to track if we're on a mobile device
   const [isMobile, setIsMobile] = useState(false);
+  // Ref for the popup container
+  const popupRef = useRef<HTMLDivElement>(null);
+  // State to track if content needs scrolling
+  const [needsScroll, setNeedsScroll] = useState(false);
   
   // Check viewport size on mount and when window resizes
   useEffect(() => {
@@ -59,8 +63,29 @@ const HexagonPopup: React.FC<HexagonPopupProps> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
   
-  // Calculate dynamic height based on team count
+  // Calculate dynamic width based on device
   const popupWidth = isMobile ? 320 : 400;
+  
+  // Check if content needs scrolling
+  useEffect(() => {
+    const checkScrollNeeded = () => {
+      if (popupRef.current) {
+        const viewportHeight = window.innerHeight;
+        const popupHeight = popupRef.current.getBoundingClientRect().height;
+        
+        // Add some padding to account for positioning
+        setNeedsScroll(popupHeight + 40 > viewportHeight);
+      }
+    };
+    
+    // Check on mount and when data changes
+    checkScrollNeeded();
+    
+    // Also check when window is resized
+    window.addEventListener('resize', checkScrollNeeded);
+    
+    return () => window.removeEventListener('resize', checkScrollNeeded);
+  }, [popupData]);
   
   // Handler for outside clicks
   const handleOutsideClick = (e: React.MouseEvent) => {
@@ -76,9 +101,13 @@ const HexagonPopup: React.FC<HexagonPopupProps> = ({
       className="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-start justify-end p-2"
       onClick={handleOutsideClick}
     >
-      <div className="pointer-events-auto">
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden" style={{ width: popupWidth + 'px' }}>
-          {/* Header */}
+      <div 
+        className="pointer-events-auto max-h-screen flex flex-col"
+        style={{ width: popupWidth + 'px' }}
+        ref={popupRef}
+      >
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden flex flex-col max-h-full">
+          {/* Header - fixed position */}
           <div className="bg-blue-700 px-6 py-4 relative">
             <h2 className="text-center text-white font-bold text-x md:text-xl">
               Region {popupData.home_hexagon}
@@ -93,8 +122,8 @@ const HexagonPopup: React.FC<HexagonPopupProps> = ({
             </button>
           </div>
           
-          {/* Content */}
-          <div className="p-6">
+          {/* Content - scrollable area */}
+          <div className={`p-6 ${needsScroll ? 'overflow-y-auto' : ''}`} style={{ maxHeight: needsScroll ? 'calc(100vh - 120px)' : 'none' }}>
             {/* Total Fans */}
             <div className="flex justify-between items-center">
               <span className="font-bold text-gray-800 text-x md:text-x">Total Fans:</span>
@@ -106,7 +135,6 @@ const HexagonPopup: React.FC<HexagonPopupProps> = ({
             {/* Divider */}
             <hr className="my-4 border-gray-200" />
            
-            
             {/* Team breakdown with name and bar stacked vertically */}
             <div className="space-y-6">
               {popupData.teams.map((team, index) => (

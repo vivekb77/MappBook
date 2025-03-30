@@ -471,8 +471,8 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
               style={{ cursor: hasData ? 'pointer' : 'default' }}
               aria-label={hasData ? `Hexagon region ${hexagon.number}` : undefined}
             />
-            {/* Display hexagon number */}
-            <text
+           {/* Display hexagon number with selection prevention */}
+           <text
               x={hexagon.centerX}
               y={hexagon.centerY}
               fontSize="12"
@@ -480,6 +480,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
               textAnchor="middle"
               fill="#000"
               pointerEvents="none"
+              style={{ userSelect: "none", WebkitUserSelect: "none", MozUserSelect: "none", msUserSelect: "none" }}
             >
               {hexagon.number}
             </text>
