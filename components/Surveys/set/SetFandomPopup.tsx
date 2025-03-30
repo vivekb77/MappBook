@@ -175,6 +175,11 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
   // Handle notification close
   const handleNotificationClose = () => {
     setShowSuccessNotification(false);
+    // Removed onToggleVisibility call to keep the panel visible after saving
+  };
+
+  // Function to hide panel when user clicks on "Click on map to select"
+  const handleSelectOnMap = () => {
     onToggleVisibility();
   };
 
@@ -303,9 +308,18 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
                 <FiMapPin className="mr-1.5 text-green-800" />
                 <span className="text-sm text-gray-800">Your Region:</span>
               </div>
-              <span className="text-base font-bold text-green-800 flex-1 text-right">
-                {selectedHexagon ? selectedHexagon.number : (homeHexagon ? homeHexagon : 'Click on map to select')}
-              </span>
+              {selectedHexagon || homeHexagon ? (
+                <span className="text-base font-bold text-green-800 flex-1 text-right">
+                  {selectedHexagon ? selectedHexagon.number : homeHexagon}
+                </span>
+              ) : (
+                <button 
+                  onClick={handleSelectOnMap} 
+                  className="text-base font-bold text-blue-600 flex-1 text-right border-none bg-transparent cursor-pointer hover:text-blue-800"
+                >
+                  Click on map to select
+                </button>
+              )}
             </div>
 
             {/* Team Selection Dropdown */}

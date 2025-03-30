@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { FaShareAlt, FaFilter } from 'react-icons/fa';
 import TeamDistributionModal from './GlobalPopup';
 import FilterByTeams from './FilterByTeam';
-import {Instagram, Twitter} from 'lucide-react';
+import { Instagram, Twitter } from 'lucide-react';
 
 // Dynamically import the HexagonPopup component to prevent SSR issues
 const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
@@ -116,7 +116,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
   // Team colors for the IPL teams
   const teamColors = {
-'Chennai Super Kings': '#FFDC00',     // Yellow
+    'Chennai Super Kings': '#FFDC00',     // Yellow
     'Gujarat Titans': '#39B6FF',          // Light Blue
     'Kolkata Knight Riders': '#552583',   // Purple
     'Punjab Kings': '#ED1B24',            // Red
@@ -466,51 +466,63 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         </svg>
       </div>
 
-      {/* Bottom Control Bar */}
-      <div className="fixed bottom-12 left-6 flex flex-col gap-4">
-        {/* Share and See Results Buttons */}
-        <div className="flex items-center space-x-2">
-          {/* Share URL Button */}
+
+
+      {/* Bottom Right Control Group */}
+      <div className="fixed right-6 bottom-6 flex flex-col gap-4 items-end">
+        {/* Filter Button - Top */}
+        {/* Filter Button */}
+        <div className="bg-green-700 rounded-full shadow-md">
           <button
-            onClick={copyShareURL}
-            className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
-            aria-label="Share URL"
+            className="w-12 h-12 flex items-center justify-center hover:bg-green-800 rounded-full transition-colors"
+            onClick={() => setShowTeamFilter(true)}
+            aria-label="Filter teams"
           >
-            <FaShareAlt className="mr-1" />
-            <span>Share</span>
+            <FaFilter className="text-white" />
           </button>
-
-          {/* See Results Button */}
-          <Link href="/" passHref>
-            <button
-              className="bg-blue-600 text-white hover:bg-blue-700 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
-              aria-label="See fandom map results"
-            >
-              <span>Choose your favourite IPL team</span>
-            </button>
-          </Link>
         </div>
-      </div>
 
+        {/* Zoom Control Buttons - Middle */}
+        <div className="bg-white rounded-lg overflow-hidden shadow-md">
+          <button
+            className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
+            onClick={() => setScale(Math.min(scale + 0.2, 5))}
+            aria-label="Zoom in"
+          >
+            <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+          <button
+            className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
+            onClick={() => setScale(Math.max(scale - 0.2, 0.5))}
+            aria-label="Zoom out"
+          >
+            <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
+            </svg>
+          </button>
+          <button
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100"
+            onClick={() => {
+              setScale(1);
+              setTranslateX(0);
+              setTranslateY(0);
+            }}
+            aria-label="Reset view"
+          >
+            <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
 
-      <div className="fixed bottom-2 left-6 flex flex-col gap-4">
-        <div className="flex items-center space-x-2">
-          <Link href="https://www.instagram.com/mappbook/" passHref>
-            <button
-              className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
-              aria-label="follow us on insta"
-              onClick={(e) => {
-                e.preventDefault();
-                window.open("https://www.instagram.com/mappbook/", "_blank");
-              }}
-            >
-              <Instagram size={20} />
-            </button>
-          </Link>
+        {/* Social Media Buttons - Bottom */}
+        <div className="flex gap-2">
 
           <Link href="https://x.com/mappbook" passHref>
             <button
-              className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+              className="bg-white text-green-800 hover:bg-gray-100 p-2 rounded-lg shadow-sm border-none flex items-center justify-center cursor-pointer"
               aria-label="follow us on X"
               onClick={(e) => {
                 e.preventDefault();
@@ -523,50 +535,34 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         </div>
       </div>
 
-      {/* Filter Button */}
-      <div className="fixed right-16 bottom-32 bg-green-700 rounded-full shadow-md">
-        <button
-          className="w-12 h-12 flex items-center justify-center hover:bg-green-800 rounded-full transition-colors"
-          onClick={() => setShowTeamFilter(true)}
-          aria-label="Filter teams"
-        >
-          <FaFilter className="text-white" />
-        </button>
-      </div>
+      {/* Bottom Left Control Group - Vertically stacked */}
+      <div className="fixed bottom-6 left-6 flex flex-col gap-3">
+        {/* Choose IPL Team Button */}
+        <Link href="/" passHref>
+          <button
+            className="bg-blue-600 text-white hover:bg-blue-700 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-full"
+            aria-label="See fandom map results"
+          >
+            <span>Choose your favourite IPL team</span>
+          </button>
+        </Link>
+        {/* Share message */}
+        <div className="text-sm font-medium text-green-800 bg-white px-3 py-2 rounded-lg shadow-sm">
+          Help your team conquer more regions!
+          {/* <strong>Apni team ke liye kshetra jeeto!</strong> */}
+        </div>
 
-      {/* Zoom Control Buttons */}
-      <div className="fixed right-6 bottom-6 bg-white rounded-lg overflow-hidden shadow-md">
+        {/* Share Button */}
         <button
-          className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
-          onClick={() => setScale(Math.min(scale + 0.2, 5))}
-          aria-label="Zoom in"
+          onClick={copyShareURL}
+          className="bg-white text-green-800 hover:bg-gray-100 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-full"
+          aria-label="Share URL"
         >
-          <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
+          <FaShareAlt className="mr-2" />
+          <span>Copy link to Share</span>
         </button>
-        <button
-          className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
-          onClick={() => setScale(Math.max(scale - 0.2, 0.5))}
-          aria-label="Zoom out"
-        >
-          <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
-          </svg>
-        </button>
-        <button
-          className="w-10 h-10 flex items-center justify-center hover:bg-gray-100"
-          onClick={() => {
-            setScale(1);
-            setTranslateX(0);
-            setTranslateY(0);
-          }}
-          aria-label="Reset view"
-        >
-          <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </button>
+
+
       </div>
 
       {/* URL Share notification */}
