@@ -129,8 +129,8 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   };
 
   // Pan constraints
-  const MAX_PAN_X = 500;
-  const MAX_PAN_Y = 500;
+  const MAX_PAN_X = 1000;
+  const MAX_PAN_Y = 1000;
 
   const [viewBox, setViewBox] = useState<ViewBoxType>({
     width: 900,
@@ -297,28 +297,32 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
   // Map interaction handlers for mouse
   const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent text selection during drag
     setIsDragging(true);
     setLastX(e.clientX);
     setLastY(e.clientY);
   };
-
+  
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging) {
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
-
-      const newTranslateX = translateX + dx / scale;
-      const newTranslateY = translateY + dy / scale;
-
-      const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
-
-      setTranslateX(constrainedX);
-      setTranslateY(constrainedY);
-      setLastX(e.clientX);
-      setLastY(e.clientY);
-    }
+    if (!isDragging) return;
+    
+    // Calculate movement deltas
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    
+    // Apply scaling factor to make movement feel more natural
+    const panSensitivity = 1.5;
+    const newTranslateX = translateX + (dx / scale) * panSensitivity;
+    const newTranslateY = translateY + (dy / scale) * panSensitivity;
+    
+    const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
+    
+    setTranslateX(constrainedX);
+    setTranslateY(constrainedY);
+    setLastX(e.clientX);
+    setLastY(e.clientY);
   };
-
+ 
   const handleMouseUp = () => {
     setIsDragging(false);
   };
@@ -333,20 +337,25 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (isDragging && e.touches.length === 1) {
-      const dx = e.touches[0].clientX - lastX;
-      const dy = e.touches[0].clientY - lastY;
-
-      const newTranslateX = translateX + dx / scale;
-      const newTranslateY = translateY + dy / scale;
-
-      const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
-
-      setTranslateX(constrainedX);
-      setTranslateY(constrainedY);
-      setLastX(e.touches[0].clientX);
-      setLastY(e.touches[0].clientY);
-    }
+    if (!isDragging || e.touches.length !== 1) return;
+    
+    // Prevent default browser behavior
+    e.preventDefault();
+    
+    const dx = e.touches[0].clientX - lastX;
+    const dy = e.touches[0].clientY - lastY;
+    
+    // Higher sensitivity for touch
+    const touchPanSensitivity = 2.0;
+    const newTranslateX = translateX + (dx / scale) * touchPanSensitivity;
+    const newTranslateY = translateY + (dy / scale) * touchPanSensitivity;
+    
+    const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
+    
+    setTranslateX(constrainedX);
+    setTranslateY(constrainedY);
+    setLastX(e.touches[0].clientX);
+    setLastY(e.touches[0].clientY);
   };
 
   const handleTouchEnd = () => {
@@ -425,6 +434,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           handleTouchZoom(e);
         }}
         onTouchEnd={handleTouchEnd}
+        style={{ touchAction: 'none' }}
       >
         <svg
           width="100%"
