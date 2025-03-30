@@ -83,6 +83,11 @@ const MapContainer: React.FC = () => {
   const [lastX, setLastX] = useState<number>(0);
   const [lastY, setLastY] = useState<number>(0);
   const animationRef = useRef<number | null>(null);
+  
+  // New flag to track if user performed a zoom or multi-touch gesture
+  const wasMultiTouchRef = useRef<boolean>(false);
+  // Track the touch start time
+  const touchStartTimeRef = useRef<number>(0);
 
   // Generate or retrieve a user ID on component mount
   useEffect(() => {
@@ -263,12 +268,15 @@ const MapContainer: React.FC = () => {
 
   // Handle hexagon click
   const handleHexagonClick = (hexagon: Hexagon) => {
-    // Update the selectedHexagon state with the clicked hexagon
-    setSelectedHexagon(hexagon);
+    // Only select a hexagon if we didn't just finish a multi-touch gesture
+    if (!wasMultiTouchRef.current) {
+      // Update the selectedHexagon state with the clicked hexagon
+      setSelectedHexagon(hexagon);
 
-    // Show the panel if it's not already visible
-    if (!isPanelVisible) {
-      setIsPanelVisible(true);
+      // Show the panel if it's not already visible
+      if (!isPanelVisible) {
+        setIsPanelVisible(true);
+      }
     }
   };
 
@@ -466,16 +474,30 @@ const MapContainer: React.FC = () => {
     isDraggingRef.current = false;
   };
 
-  // Enhanced touch movement handler with adaptive sensitivity
+  // Modified touch handlers to track multi-touch gestures
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Record the touch start time
+    touchStartTimeRef.current = Date.now();
+    
+    // Reset multi-touch flag at the beginning of each touch sequence
+    wasMultiTouchRef.current = false;
+    
     if (e.touches.length === 1) {
       setIsDragging(true);
       setLastX(e.touches[0].clientX);
       setLastY(e.touches[0].clientY);
+    } else if (e.touches.length === 2) {
+      // Mark this as a multi-touch interaction
+      wasMultiTouchRef.current = true;
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    // If we detect more than one touch at any point, mark it as multi-touch
+    if (e.touches.length > 1) {
+      wasMultiTouchRef.current = true;
+    }
+    
     if (!isDragging || e.touches.length !== 1) return;
 
     // Calculate movement deltas
@@ -507,9 +529,12 @@ const MapContainer: React.FC = () => {
     setLastY(e.touches[0].clientY);
   };
 
-  // Touch zoom handler
+  // Modified touch zoom handler
   const handleTouchZoom = (e: React.TouchEvent) => {
     if (e.touches.length !== 2) return;
+    
+    // Mark as multi-touch operation
+    wasMultiTouchRef.current = true;
 
     // Get distance between two touches for pinch zoom
     const touch1 = e.touches[0];
@@ -534,9 +559,21 @@ const MapContainer: React.FC = () => {
     setLastTouchDistance(currentDistance);
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
     setIsDragging(false);
     setLastTouchDistance(null);
+    
+    // Calculate touch duration
+    const touchDuration = Date.now() - touchStartTimeRef.current;
+    
+    // For better UX, we'll keep the multi-touch flag active for a short period
+    // This prevents accidental hexagon selection right after zooming
+    if (wasMultiTouchRef.current) {
+      // Keep the flag true, and reset it after a short delay
+      setTimeout(() => {
+        wasMultiTouchRef.current = false;
+      }, 300); // 300ms should be enough to prevent accidental taps
+    }
   };
 
   // Add event listeners for mouse events
