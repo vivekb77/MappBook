@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 // Import our custom components
 import BaseMap from './BaseMap';
-import HexagonDrawing from './HexagonDrawing';
+import HexagonDrawing from './HexagonOverlay';
 import SetFandomPopup from './SetFandomPopup';
 
 // Import GeoJSON directly

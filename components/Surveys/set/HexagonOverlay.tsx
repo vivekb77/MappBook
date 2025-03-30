@@ -1,4 +1,4 @@
-// components/HexagonDrawing.tsx
+// components/HexagonOverlay.tsx
 import React from 'react';
 
 interface Hexagon {
