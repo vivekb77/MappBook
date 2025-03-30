@@ -1,6 +1,5 @@
 // components/HexagonPopup.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useEffect } from 'react';
 
 // Team data interface
 interface TeamData {
@@ -42,10 +41,6 @@ const HexagonPopup: React.FC<HexagonPopupProps> = ({
 }) => {
   // State to track if we're on a mobile device
   const [isMobile, setIsMobile] = useState(false);
-  // Ref for the popup container
-  const popupRef = useRef<HTMLDivElement>(null);
-  // State to track if content needs scrolling
-  const [needsScroll, setNeedsScroll] = useState(false);
   
   // Check viewport size on mount and when window resizes
   useEffect(() => {
@@ -63,111 +58,216 @@ const HexagonPopup: React.FC<HexagonPopupProps> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
   
-  // Calculate dynamic width based on device
-  const popupWidth = isMobile ? 320 : 400;
+  // Adjust popup dimensions based on device
+  const POPUP_WIDTH = isMobile ? Math.min(viewBox.width * 0.9, 450) : 400;
   
-  // Check if content needs scrolling
-  useEffect(() => {
-    const checkScrollNeeded = () => {
-      if (popupRef.current) {
-        const viewportHeight = window.innerHeight;
-        const popupHeight = popupRef.current.getBoundingClientRect().height;
-        
-        // Add some padding to account for positioning
-        setNeedsScroll(popupHeight + 40 > viewportHeight);
-      }
-    };
-    
-    // Check on mount and when data changes
-    checkScrollNeeded();
-    
-    // Also check when window is resized
-    window.addEventListener('resize', checkScrollNeeded);
-    
-    return () => window.removeEventListener('resize', checkScrollNeeded);
-  }, [popupData]);
+  // Calculate dynamic height based on team count with a minimum
+  const BASE_HEIGHT = 230; // Increased for larger text
+  const TEAM_ROW_HEIGHT = isMobile ? 60 : 50; // Increased for larger text
+  const POPUP_HEIGHT = BASE_HEIGHT + (popupData.teams.length * TEAM_ROW_HEIGHT);
   
-  // Handler for outside clicks
-  const handleOutsideClick = (e: React.MouseEvent) => {
-    // Only close if clicking directly on the overlay
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  // Use createPortal to render the popup outside the SVG for proper z-index handling
-  return ReactDOM.createPortal(
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-start justify-end p-2"
-      onClick={handleOutsideClick}
-    >
-      <div 
-        className="pointer-events-auto max-h-screen flex flex-col"
-        style={{ width: popupWidth + 'px' }}
-        ref={popupRef}
+  // Position popup in extreme top right corner with minimal margin
+  const MARGIN = 10;
+  const POPUP_X = viewBox.width - POPUP_WIDTH - MARGIN;
+  const POPUP_Y = MARGIN;
+  
+  const BORDER_RADIUS = 10; // Slightly increased
+  
+  // Get the color for the header - use blue matching the screenshot instead of team color
+  const headerColor = "#0052A5"; // Royal blue color matching the screenshot
+  
+  // Calculate bar widths - set a reasonable max to prevent overflow
+  const maxBarWidth = POPUP_WIDTH - 80; // Adjusted for positioning
+  
+  // Increase font sizes further
+  const titleFontSize = isMobile ? 26 : 22;
+  const subtitleFontSize = isMobile ? 18 : 16;
+  const textFontSize = isMobile ? 20 : 18;
+  const teamNameFontSize = isMobile ? 18 : 16;
+  
+  return (
+    <g pointerEvents="all">
+      
+      {/* Popup container with shadow */}
+      <rect
+        x={POPUP_X + 4}
+        y={POPUP_Y + 4}
+        width={POPUP_WIDTH}
+        height={POPUP_HEIGHT}
+        rx={BORDER_RADIUS}
+        ry={BORDER_RADIUS}
+        fill="rgba(0, 0, 0, 0.2)"
+      />
+      
+      {/* Main popup background */}
+      <rect
+        x={POPUP_X}
+        y={POPUP_Y}
+        width={POPUP_WIDTH}
+        height={POPUP_HEIGHT}
+        rx={BORDER_RADIUS}
+        ry={BORDER_RADIUS}
+        fill="white"
+        stroke="#e0e0e0"
+        strokeWidth="1"
+      />
+      
+      {/* Header with gradient-like effect */}
+      <rect
+        x={POPUP_X}
+        y={POPUP_Y}
+        width={POPUP_WIDTH}
+        height={isMobile ? 70 : 60}
+        rx={BORDER_RADIUS}
+        ry={BORDER_RADIUS}
+        fill={headerColor}
+      />
+      
+      {/* Overlay to create gradient effect */}
+      <rect
+        x={POPUP_X}
+        y={POPUP_Y + (isMobile ? 35 : 30)}
+        width={POPUP_WIDTH}
+        height={isMobile ? 35 : 30}
+        fill={headerColor}
+      />
+      
+      {/* Title */}
+      <text
+        x={POPUP_X + (POPUP_WIDTH / 2)}
+        y={POPUP_Y + (isMobile ? 35 : 30)}
+        fontSize={titleFontSize}
+        fontWeight="bold"
+        textAnchor="middle"
+        fill="white"
       >
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden flex flex-col max-h-full">
-          {/* Header - fixed position */}
-          <div className="bg-blue-700 px-6 py-4 relative">
-            <h2 className="text-center text-white font-bold text-x md:text-xl">
-              Region {popupData.home_hexagon}
-            </h2>
+        Region {popupData.home_hexagon}
+      </text>
+      
+      {/* Subtitle */}
+      <text
+        x={POPUP_X + (POPUP_WIDTH / 2)}
+        y={POPUP_Y + (isMobile ? 60 : 52)}
+        fontSize={subtitleFontSize}
+        textAnchor="middle"
+        fill="white"
+        opacity="0.9"
+      >
+        Fan Distribution Analysis
+      </text>
+      
+      {/* Total Fans - with bold label */}
+      <text
+        x={POPUP_X + 25}
+        y={POPUP_Y + (isMobile ? 110 : 95)}
+        fontSize={textFontSize}
+        fontWeight="bold"
+        fill="#333"
+      >
+        Total Fans:
+      </text>
+      
+      <text
+        x={POPUP_X + POPUP_WIDTH - 25}
+        y={POPUP_Y + (isMobile ? 110 : 95)}
+        fontSize={textFontSize}
+        fontWeight="bold"
+        textAnchor="end"
+        fill="#333"
+      >
+        {popupData.total_fans.toLocaleString()}
+      </text>
+      
+      {/* Section divider */}
+      <line
+        x1={POPUP_X + 25}
+        y1={POPUP_Y + (isMobile ? 130 : 115)}
+        x2={POPUP_X + POPUP_WIDTH - 25}
+        y2={POPUP_Y + (isMobile ? 130 : 115)}
+        stroke="#e0e0e0"
+        strokeWidth="1.5"
+      />
+      
+      {/* Team breakdown title */}
+      <text
+        x={POPUP_X + 25}
+        y={POPUP_Y + (isMobile ? 160 : 145)}
+        fontSize={textFontSize}
+        fontWeight="bold"
+        fill="#333"
+      >
+        Team Breakdown:
+      </text>
+      
+      {/* Team breakdown with name and bar stacked vertically */}
+      {popupData.teams.map((team, index) => {
+        const barWidth = (team.percentage / 100) * maxBarWidth;
+        const yOffset = isMobile ? 190 : 175;
+        
+        return (
+          <g key={`team-${index}`}>
+            {/* Team indicator and name */}
+            <circle
+              cx={POPUP_X + 30}
+              cy={POPUP_Y + yOffset + (index * TEAM_ROW_HEIGHT)}
+              r={isMobile ? 10 : 8}
+              fill={teamColors[team.team] || "#cccccc"}
+            />
             
-            {/* Close button */}
-            <button 
-              onClick={onClose}
-              className="absolute top-2 right-2 bg-white bg-opacity-30 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-40 transition-colors"
+            <text
+              x={POPUP_X + (isMobile ? 48 : 45)}
+              y={POPUP_Y + (yOffset + 5) + (index * TEAM_ROW_HEIGHT)}
+              fontSize={teamNameFontSize}
+              fill="#333"
             >
-              <span className="text-2xl font-bold leading-none">&times;</span>
-            </button>
-          </div>
-          
-          {/* Content - scrollable area */}
-          <div className={`p-6 ${needsScroll ? 'overflow-y-auto' : ''}`} style={{ maxHeight: needsScroll ? 'calc(100vh - 120px)' : 'none' }}>
-            {/* Total Fans */}
-            <div className="flex justify-between items-center">
-              <span className="font-bold text-gray-800 text-x md:text-x">Total Fans:</span>
-              <span className="font-bold text-gray-800 text-x md:text-x">
-                {popupData.total_fans.toLocaleString()}
-              </span>
-            </div>
+              {team.team} - {team.count.toLocaleString()} ({team.percentage.toFixed(1)}%)
+            </text>
             
-            {/* Divider */}
-            <hr className="my-4 border-gray-200" />
-           
-            {/* Team breakdown with name and bar stacked vertically */}
-            <div className="space-y-6">
-              {popupData.teams.map((team, index) => (
-                <div key={`team-${index}`} className="space-y-1">
-                  <div className="flex items-center">
-                    <div 
-                      className="w-4 h-4 md:w-5 md:h-5 rounded-full mr-2"
-                      style={{ backgroundColor: teamColors[team.team] || "#cccccc" }}
-                    ></div>
-                    <span className="text-sm md:text-base text-gray-800">
-                      {team.team} - {team.count.toLocaleString()} ({team.percentage.toFixed(1)}%)
-                    </span>
-                  </div>
-                  
-                  {/* Progress bar */}
-                  <div className="w-full bg-gray-100 rounded-full h-2 md:h-2.5">
-                    <div 
-                      className="h-2 md:h-2.5 rounded-full" 
-                      style={{ 
-                        width: `${team.percentage}%`,
-                        backgroundColor: teamColors[team.team] || "#cccccc", 
-                        minWidth: '4px'
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body
+            {/* Bar background below the name */}
+            <rect
+              x={POPUP_X + (isMobile ? 48 : 45)}
+              y={POPUP_Y + (yOffset + 12) + (index * TEAM_ROW_HEIGHT)}
+              width={maxBarWidth}
+              height={isMobile ? 10 : 8}
+              rx="4"
+              ry="4"
+              fill="#f0f0f0"
+            />
+            
+            {/* Progress bar */}
+            <rect
+              x={POPUP_X + (isMobile ? 48 : 45)}
+              y={POPUP_Y + (yOffset + 12) + (index * TEAM_ROW_HEIGHT)}
+              width={Math.max(4, barWidth)}
+              height={isMobile ? 10 : 8}
+              rx="4"
+              ry="4"
+              fill={teamColors[team.team] || "#cccccc"}
+            />
+          </g>
+        );
+      })}
+      
+      {/* Close button */}
+      <g onClick={onClose} style={{ cursor: 'pointer' }} pointerEvents="all">
+        <circle
+          cx={POPUP_X + POPUP_WIDTH - (isMobile ? 25 : 20)}
+          cy={POPUP_Y + (isMobile ? 25 : 20)}
+          r={isMobile ? 18 : 15}
+          fill="rgba(255,255,255,0.3)"
+        />
+        <text
+          x={POPUP_X + POPUP_WIDTH - (isMobile ? 25 : 20)}
+          y={POPUP_Y + (isMobile ? 31 : 25)}
+          fontSize={isMobile ? 26 : 22}
+          fontWeight="bold"
+          textAnchor="middle"
+          fill="white"
+        >
+          ×
+        </text>
+      </g>
+    </g>
   );
 };
 
