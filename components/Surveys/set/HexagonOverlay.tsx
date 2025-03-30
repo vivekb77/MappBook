@@ -85,26 +85,7 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
     };
   };
 
-  // Calculate map center for positioning the overlay text
-  const getMapCenter = () => {
-    if (hexagons.length === 0) return { x: 0, y: 0 };
-    
-    // Find average of all hexagon centers
-    const sum = hexagons.reduce(
-      (acc, hexagon) => ({
-        x: acc.x + hexagon.centerX,
-        y: acc.y + hexagon.centerY
-      }),
-      { x: 0, y: 0 }
-    );
-    
-    return {
-      x: sum.x / hexagons.length,
-      y: sum.y / hexagons.length
-    };
-  };
-
-  const mapCenter = getMapCenter();
+  // Show instruction overlay only when no hexagon is selected
   const showOverlay = !selectedHexagon && !userHomeHexagon;
 
   return (
@@ -141,13 +122,13 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
         );
       })}
 
-      {/* Overlay guidance text when no hexagon is selected */}
+      {/* Moved instruction overlay outside the map */}
       {showOverlay && (
-        <g>
-          {/* Semi-transparent background for better readability */}
+        <g className="region-selection-instruction" data-testid="region-instruction">
+          {/* Position this outside the map - adjust these values based on your layout */}
           <rect
-            x={mapCenter.x - 100}
-            y={mapCenter.y - 25}
+            x="10"  
+            y="10"
             width="200"
             height="50"
             rx="10"
@@ -157,8 +138,8 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
             strokeWidth="2"
           />
           <text
-            x={mapCenter.x}
-            y={mapCenter.y + 5}
+            x="110"  
+            y="40"
             fontSize="15"
             fontWeight="bold"
             textAnchor="middle"

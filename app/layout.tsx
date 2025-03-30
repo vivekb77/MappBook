@@ -49,7 +49,17 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <head>
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1519931816826082"
-          crossOrigin="anonymous"></script>
+          crossOrigin="anonymous">
+        </script>
+
+        <Script id="twitter-pixel" strategy="afterInteractive">
+          {`
+            !function(e,t,n,s,u,a){e.twq||(s=e.twq=function(){s.exe?s.exe.apply(s,arguments):s.queue.push(arguments);
+            },s.version='1.1',s.queue=[],u=t.createElement(n),u.async=!0,u.src='https://static.ads-twitter.com/uwt.js',
+            a=t.getElementsByTagName(n)[0],a.parentNode.insertBefore(u,a))}(window,document,'script');
+            twq('config','osor3');
+          `}
+        </Script>
 
         {/* Google Tag Manager Script - Strategy: afterInteractive ensures it loads after page interaction */}
         <Script
