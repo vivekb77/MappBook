@@ -1,5 +1,5 @@
 // components/MapContainer.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { FaPlus, FaMinus, FaSyncAlt, FaShareAlt } from 'react-icons/fa';
 import Link from 'next/link';
@@ -73,6 +73,16 @@ const MapContainer: React.FC = () => {
 
   // State for share URL notification
   const [showShareNotification, setShowShareNotification] = useState<boolean>(false);
+  
+  // Refs for drag and touch interactions - moved from BaseMap
+  const mapRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef<boolean>(false);
+  const lastPosition = useRef({ x: 0, y: 0 });
+  const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [lastX, setLastX] = useState<number>(0);
+  const [lastY, setLastY] = useState<number>(0);
+  const animationRef = useRef<number | null>(null);
 
   // Generate or retrieve a user ID on component mount
   useEffect(() => {
@@ -388,6 +398,170 @@ const MapContainer: React.FC = () => {
     }
   };
 
+  // ===== EVENT HANDLERS MOVED FROM BASEMAP =====
+  
+  // Helper function to adjust sensitivity based on zoom level
+  const getZoomAdaptiveSensitivity = (currentScale: number, isTouch: boolean = false): number => {
+    // Base sensitivity higher for touch interactions
+    const baseSensitivity = isTouch ? 1.2 : 1.0;
+    
+    // Scale sensitivity with zoom level
+    if (currentScale > 2) {
+      return baseSensitivity * 1.5;
+    } else if (currentScale > 1) {
+      return baseSensitivity * (1 + (currentScale - 1) * 0.5);
+    }
+    return baseSensitivity;
+  };
+  
+  // Constrain translation to prevent map from going too far off-screen
+  const constrainTranslation = (x: number, y: number): [number, number] => {
+    // Calculate maximum pan distance based on current zoom and map dimensions
+    const maxPanDistance = Math.max(viewBox.width, viewBox.height) * 0.7 * scale;
+    
+    return [
+      Math.max(Math.min(x, maxPanDistance), -maxPanDistance),
+      Math.max(Math.min(y, maxPanDistance), -maxPanDistance)
+    ];
+  };
+  
+  // Handle mouse wheel zoom
+  const handleWheel = (e: WheelEvent) => {
+    e.preventDefault();
+    const scaleChange = e.deltaY * -0.01;
+    const newScale = Math.max(0.5, Math.min(5, scale + scaleChange));
+    setScale(newScale);
+  };
+
+  // Handle mouse drag for panning
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return; // Only left mouse button
+    
+    isDraggingRef.current = true;
+    lastPosition.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    
+    const dx = e.clientX - lastPosition.current.x;
+    const dy = e.clientY - lastPosition.current.y;
+    
+    // Get mouse sensitivity adjusted for current zoom level
+    const adaptiveMouseSensitivity = getZoomAdaptiveSensitivity(scale);
+    
+    // Calculate new position with adaptive sensitivity
+    const newTranslateX = translateX + (dx / scale) * adaptiveMouseSensitivity;
+    const newTranslateY = translateY + (dy / scale) * adaptiveMouseSensitivity;
+    
+    const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
+    
+    setTranslateX(constrainedX);
+    setTranslateY(constrainedY);
+    
+    lastPosition.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+  };
+
+  // Enhanced touch movement handler with adaptive sensitivity
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      setLastX(e.touches[0].clientX);
+      setLastY(e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || e.touches.length !== 1) return;
+
+    // Calculate movement deltas
+    const dx = e.touches[0].clientX - lastX;
+    const dy = e.touches[0].clientY - lastY;
+
+    // Get touch sensitivity adjusted for current zoom level
+    const adaptiveTouchSensitivity = getZoomAdaptiveSensitivity(scale, true);
+
+    // Calculate new position with adaptive sensitivity
+    const newTranslateX = translateX + (dx / scale) * adaptiveTouchSensitivity;
+    const newTranslateY = translateY + (dy / scale) * adaptiveTouchSensitivity;
+
+    const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
+
+    // Cancel any existing animation frame
+    if (animationRef.current !== null) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    // Use requestAnimationFrame for smoother updates
+    animationRef.current = requestAnimationFrame(() => {
+      setTranslateX(constrainedX);
+      setTranslateY(constrainedY);
+      animationRef.current = null;
+    });
+
+    setLastX(e.touches[0].clientX);
+    setLastY(e.touches[0].clientY);
+  };
+
+  // Touch zoom handler
+  const handleTouchZoom = (e: React.TouchEvent) => {
+    if (e.touches.length !== 2) return;
+    
+    // Get distance between two touches for pinch zoom
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    const currentDistance = Math.hypot(
+      touch2.clientX - touch1.clientX,
+      touch2.clientY - touch1.clientY
+    );
+    
+    // If we don't have a previous distance yet, store this one
+    if (lastTouchDistance === null) {
+      setLastTouchDistance(currentDistance);
+      return;
+    }
+    
+    // Calculate zoom factor
+    const factor = 0.01; // Adjust sensitivity here
+    const delta = (currentDistance - lastTouchDistance) * factor;
+    const newScale = Math.max(0.5, Math.min(5, scale + delta));
+    
+    setScale(newScale);
+    setLastTouchDistance(currentDistance);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    setLastTouchDistance(null);
+  };
+
+  // Add event listeners for mouse events
+  useEffect(() => {
+    const mapElement = mapRef.current;
+    if (mapElement) {
+      // Add wheel event for zooming
+      mapElement.addEventListener('wheel', handleWheel, { passive: false });
+      
+      // Add global mouse events for dragging
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      // Add touch-action: none to element style directly
+      mapElement.style.touchAction = 'none';
+      
+      return () => {
+        // Remove all listeners on cleanup
+        mapElement.removeEventListener('wheel', handleWheel);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [scale, translateX, translateY]);
+
   // Add window resize handler
   useEffect(() => {
     const handleResize = () => {
@@ -438,8 +612,7 @@ const MapContainer: React.FC = () => {
   }
 
   return (
-    // <div className="relative flex flex-col h-screen w-full bg-gray-100 overflow-hidden">
-      <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
+    <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
       {/* Header to display hexagon and team selection */}
       <div 
         className="w-full shadow-md z-10"
@@ -487,23 +660,37 @@ const MapContainer: React.FC = () => {
       </div>
 
       <div className="flex-1 relative w-full h-full bg-white flex items-center justify-center">
-        <BaseMap
-          geoJsonData={geoJsonData}
-          viewBox={viewBox}
-          scale={scale}
-          translateX={translateX}
-          translateY={translateY}
-          setScale={setScale}
-          setTranslateX={setTranslateX}
-          setTranslateY={setTranslateY}
+        {/* Map container now has the ref and mouse events */}
+        <div 
+          ref={mapRef}
+          className="flex-1 h-full mx-2.5 mb-2.5 rounded-lg overflow-hidden bg-white shadow-md cursor-grab relative select-none"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+          onTouchMove={(e) => {
+            handleTouchMove(e);
+            handleTouchZoom(e);
+          }}
+          onTouchEnd={handleTouchEnd}
+          style={{ touchAction: 'none' }}
         >
-          <HexagonDrawing
-            hexagons={hexagons}
-            selectedHexagon={selectedHexagon}
-            userHomeHexagon={userHomeHexagon}
-            onHexagonClick={handleHexagonClick}
-          />
-        </BaseMap>
+          <BaseMap
+            geoJsonData={geoJsonData}
+            viewBox={viewBox}
+            scale={scale}
+            translateX={translateX}
+            translateY={translateY}
+            setScale={setScale}
+            setTranslateX={setTranslateX}
+            setTranslateY={setTranslateY}
+          >
+            <HexagonDrawing
+              hexagons={hexagons}
+              selectedHexagon={selectedHexagon}
+              userHomeHexagon={userHomeHexagon}
+              onHexagonClick={handleHexagonClick}
+            />
+          </BaseMap>
+        </div>
 
         {/* Overlay Zoom Control Buttons */}
         <div className="absolute right-5 bottom-16 bg-white bg-opacity-90 rounded-lg overflow-hidden shadow-md z-10">
