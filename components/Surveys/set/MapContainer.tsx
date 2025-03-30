@@ -55,13 +55,13 @@ const MapContainer: React.FC = () => {
   const [hexagons, setHexagons] = useState<Hexagon[]>([]);
   const [selectedHexagon, setSelectedHexagon] = useState<Hexagon | null>(null);
   const [isPanelVisible, setIsPanelVisible] = useState<boolean>(false);
-  const [viewBox, setViewBox] = useState<ViewBox>({ 
-    width: 900, 
-    height: 800, 
+  const [viewBox, setViewBox] = useState<ViewBox>({
+    width: 900,
+    height: 800,
     minLon: 68, // Use approximate India bounding box values
-    maxLon: 97, 
-    minLat: 8, 
-    maxLat: 37 
+    maxLon: 97,
+    minLat: 8,
+    maxLat: 37
   });
 
   // User ID state to identify specific browser/user
@@ -73,7 +73,7 @@ const MapContainer: React.FC = () => {
 
   // State for share URL notification
   const [showShareNotification, setShowShareNotification] = useState<boolean>(false);
-  
+
   // Refs for drag and touch interactions - moved from BaseMap
   const mapRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef<boolean>(false);
@@ -89,7 +89,7 @@ const MapContainer: React.FC = () => {
     const getOrCreateUserId = () => {
       if (typeof window !== 'undefined') {
         const storedId = localStorage.getItem('userId');
-        
+
         if (storedId) {
           setUserId(storedId);
         } else {
@@ -99,7 +99,7 @@ const MapContainer: React.FC = () => {
         }
       }
     };
-    
+
     getOrCreateUserId();
   }, []);
 
@@ -117,60 +117,60 @@ const MapContainer: React.FC = () => {
     try {
       // Convert 120km to pixels based on map scale
       // For this, we need to know the real-world dimensions of India in the map
-      
+
       // Approximate width of India in degrees of longitude (68°E to 97°E)
       const indiaLongSpan = viewBox.maxLon - viewBox.minLon; // in degrees
       // Approximate height of India in degrees of latitude (8°N to 37°N)
       const indiaLatSpan = viewBox.maxLat - viewBox.minLat; // in degrees
-      
+
       // Approximate width of India (around 3,000 km)
       const indiaWidthKm = 3000;
       // Approximate height of India (around 3,200 km)
       const indiaHeightKm = 3200;
-      
+
       // Calculate scales
       const kmPerLongDegree = indiaWidthKm / indiaLongSpan;
       const kmPerLatDegree = indiaHeightKm / indiaLatSpan;
-      
+
       // Calculate pixel per km
       const pixelsPerKmLong = viewBox.width / indiaWidthKm;
       const pixelsPerKmLat = viewBox.height / indiaHeightKm;
-      
+
       // 120km in pixels (approximation)
       const hexSidePixels = 100.7 * ((pixelsPerKmLong + pixelsPerKmLat) / 2);
-      
+
       // Size of hexagons
       const hexRadius = hexSidePixels;
       const horizontalSpacing = hexRadius * Math.sqrt(3);
       const verticalSpacing = hexRadius * 1.5;
-      
+
       // Calculate how many hexagons we need to cover the map
       const cols = Math.ceil(viewBox.width / horizontalSpacing) + 2; // Add extra columns for offset rows
       const rows = Math.ceil(viewBox.height / verticalSpacing) + 2; // Add a bit of margin
-      
+
       // Calculate the starting point for the hexagon grid
       // Start outside the viewport to ensure coverage
       const startX = -horizontalSpacing;
       const startY = -verticalSpacing;
-      
+
       const hexList: Hexagon[] = [];
       let hexNumber = 1;
-      
+
       // Create a grid of hexagons
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
           const offsetX = (row % 2) * (horizontalSpacing / 2);
           const x = startX + (col * horizontalSpacing) + offsetX;
           const y = startY + (row * verticalSpacing);
-          
+
           // Convert pixel coordinates back to lat/lon
           const lon = ((x / viewBox.width) * (viewBox.maxLon - viewBox.minLon)) + viewBox.minLon;
           const lat = viewBox.maxLat - ((y / viewBox.height) * (viewBox.maxLat - viewBox.minLat));
-          
+
           // Check if the hexagon's center is likely inside India using the point-in-polygon algorithm
           if (isPointInsideIndia(lon, lat, geoJsonData)) {
             const points = calculateHexagonPoints(x, y, hexRadius);
-            
+
             hexList.push({
               id: `hex-${row}-${col}`,
               number: hexNumber++,
@@ -181,7 +181,7 @@ const MapContainer: React.FC = () => {
           }
         }
       }
-      
+
       setHexagons(hexList);
     } catch (error) {
       console.error('Error generating hexagons:', error);
@@ -193,7 +193,7 @@ const MapContainer: React.FC = () => {
   // Function to check if a point is inside India using point-in-polygon algorithm
   const isPointInsideIndia = (lon: number, lat: number, geoJson: GeoJSON): boolean => {
     if (!geoJson || !geoJson.features) return false;
-    
+
     try {
       for (const feature of geoJson.features) {
         if (feature.geometry.type === 'Polygon') {
@@ -211,25 +211,25 @@ const MapContainer: React.FC = () => {
     } catch (error) {
       console.error('Error in point-in-polygon check:', error);
     }
-    
+
     return false;
   };
 
   // Ray casting algorithm for point in polygon
   const isPointInPolygon = (lon: number, lat: number, polygon: number[][]): boolean => {
     if (!polygon || !Array.isArray(polygon)) return false;
-    
+
     try {
       let inside = false;
       for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
         const xi = polygon[i][0], yi = polygon[i][1];
         const xj = polygon[j][0], yj = polygon[j][1];
-        
+
         // Skip invalid coordinates
         if (xi === undefined || yi === undefined || xj === undefined || yj === undefined) {
           continue;
         }
-        
+
         const intersect = ((yi > lat) !== (yj > lat)) &&
           (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
@@ -245,7 +245,7 @@ const MapContainer: React.FC = () => {
   const calculateHexagonPoints = (centerX: number, centerY: number, radius: number): string => {
     try {
       const points: string[] = [];
-      
+
       for (let i = 0; i < 6; i++) {
         const angleDeg = 60 * i - 30;
         const angleRad = (Math.PI / 180) * angleDeg;
@@ -253,7 +253,7 @@ const MapContainer: React.FC = () => {
         const y = centerY + radius * Math.sin(angleRad);
         points.push(`${x},${y}`);
       }
-      
+
       return points.join(' ');
     } catch (error) {
       console.error('Error calculating hexagon points:', error);
@@ -265,7 +265,7 @@ const MapContainer: React.FC = () => {
   const handleHexagonClick = (hexagon: Hexagon) => {
     // Update the selectedHexagon state with the clicked hexagon
     setSelectedHexagon(hexagon);
-    
+
     // Show the panel if it's not already visible
     if (!isPanelVisible) {
       setIsPanelVisible(true);
@@ -289,13 +289,13 @@ const MapContainer: React.FC = () => {
       // Create a URL with relevant parameters
       const baseURL = window.location.origin + window.location.pathname;
       const params = new URLSearchParams();
-      
+
       if (userHomeHexagon) params.append('hexagon', userHomeHexagon);
       if (userTeam) params.append('team', userTeam);
       if (userId) params.append('id', userId);
-      
+
       const shareURL = baseURL;
-      
+
       // Copy to clipboard
       navigator.clipboard.writeText(shareURL)
         .then(() => {
@@ -321,13 +321,13 @@ const MapContainer: React.FC = () => {
       let maxLon = 97;  // Approximate eastern boundary of India
       let minLat = 8;   // Approximate southern boundary of India
       let maxLat = 37;  // Approximate northern boundary of India
-      
+
       // Only update if we find valid coordinates that are more extreme
       geoJson.features.forEach(feature => {
         if (feature.geometry.type === 'Polygon') {
           feature.geometry.coordinates[0].forEach((point: string | any[]) => {
-            if (Array.isArray(point) && point.length >= 2 && 
-                isFinite(point[0]) && isFinite(point[1])) {
+            if (Array.isArray(point) && point.length >= 2 &&
+              isFinite(point[0]) && isFinite(point[1])) {
               minLon = Math.min(minLon, point[0]);
               maxLon = Math.max(maxLon, point[0]);
               minLat = Math.min(minLat, point[1]);
@@ -337,8 +337,8 @@ const MapContainer: React.FC = () => {
         } else if (feature.geometry.type === 'MultiPolygon') {
           feature.geometry.coordinates.forEach(polygon => {
             polygon[0].forEach((point: string | any[]) => {
-              if (Array.isArray(point) && point.length >= 2 && 
-                  isFinite(point[0]) && isFinite(point[1])) {
+              if (Array.isArray(point) && point.length >= 2 &&
+                isFinite(point[0]) && isFinite(point[1])) {
                 minLon = Math.min(minLon, point[0]);
                 maxLon = Math.max(maxLon, point[0]);
                 minLat = Math.min(minLat, point[1]);
@@ -355,12 +355,12 @@ const MapContainer: React.FC = () => {
 
       // Calculate aspect ratio and adjust for screen size
       let mapWidth = 900;
-      
+
       // Make the width responsive to screen size
       if (typeof window !== 'undefined') {
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
-        
+
         // Adjust based on screen orientation and size
         if (screenWidth < 768) {
           mapWidth = screenWidth * 0.95;
@@ -370,7 +370,7 @@ const MapContainer: React.FC = () => {
           mapWidth = Math.min(screenWidth * 0.85, 1400);
         }
       }
-      
+
       // Calculate height based on the geographical aspect ratio
       const geoAspectRatio = (maxLat - minLat) / (maxLon - minLon);
       const mapHeight = mapWidth * geoAspectRatio;
@@ -380,12 +380,12 @@ const MapContainer: React.FC = () => {
         maxLon: maxLon + lonPadding,
         minLat: minLat - latPadding,
         maxLat: maxLat + latPadding,
-        width: mapWidth, 
+        width: mapWidth,
         height: mapHeight
       };
     } catch (error) {
       console.error('Error calculating viewbox:', error);
-      
+
       // Fallback to default values if calculation fails
       return {
         minLon: 68,
@@ -399,12 +399,12 @@ const MapContainer: React.FC = () => {
   };
 
   // ===== EVENT HANDLERS MOVED FROM BASEMAP =====
-  
+
   // Helper function to adjust sensitivity based on zoom level
   const getZoomAdaptiveSensitivity = (currentScale: number, isTouch: boolean = false): number => {
     // Base sensitivity higher for touch interactions
     const baseSensitivity = isTouch ? 1.2 : 1.0;
-    
+
     // Scale sensitivity with zoom level
     if (currentScale > 2) {
       return baseSensitivity * 1.5;
@@ -413,18 +413,18 @@ const MapContainer: React.FC = () => {
     }
     return baseSensitivity;
   };
-  
+
   // Constrain translation to prevent map from going too far off-screen
   const constrainTranslation = (x: number, y: number): [number, number] => {
     // Calculate maximum pan distance based on current zoom and map dimensions
     const maxPanDistance = Math.max(viewBox.width, viewBox.height) * 0.7 * scale;
-    
+
     return [
       Math.max(Math.min(x, maxPanDistance), -maxPanDistance),
       Math.max(Math.min(y, maxPanDistance), -maxPanDistance)
     ];
   };
-  
+
   // Handle mouse wheel zoom
   const handleWheel = (e: WheelEvent) => {
     e.preventDefault();
@@ -436,29 +436,29 @@ const MapContainer: React.FC = () => {
   // Handle mouse drag for panning
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return; // Only left mouse button
-    
+
     isDraggingRef.current = true;
     lastPosition.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDraggingRef.current) return;
-    
+
     const dx = e.clientX - lastPosition.current.x;
     const dy = e.clientY - lastPosition.current.y;
-    
+
     // Get mouse sensitivity adjusted for current zoom level
     const adaptiveMouseSensitivity = getZoomAdaptiveSensitivity(scale);
-    
+
     // Calculate new position with adaptive sensitivity
     const newTranslateX = translateX + (dx / scale) * adaptiveMouseSensitivity;
     const newTranslateY = translateY + (dy / scale) * adaptiveMouseSensitivity;
-    
+
     const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
-    
+
     setTranslateX(constrainedX);
     setTranslateY(constrainedY);
-    
+
     lastPosition.current = { x: e.clientX, y: e.clientY };
   };
 
@@ -510,7 +510,7 @@ const MapContainer: React.FC = () => {
   // Touch zoom handler
   const handleTouchZoom = (e: React.TouchEvent) => {
     if (e.touches.length !== 2) return;
-    
+
     // Get distance between two touches for pinch zoom
     const touch1 = e.touches[0];
     const touch2 = e.touches[1];
@@ -518,18 +518,18 @@ const MapContainer: React.FC = () => {
       touch2.clientX - touch1.clientX,
       touch2.clientY - touch1.clientY
     );
-    
+
     // If we don't have a previous distance yet, store this one
     if (lastTouchDistance === null) {
       setLastTouchDistance(currentDistance);
       return;
     }
-    
+
     // Calculate zoom factor
     const factor = 0.01; // Adjust sensitivity here
     const delta = (currentDistance - lastTouchDistance) * factor;
     const newScale = Math.max(0.5, Math.min(5, scale + delta));
-    
+
     setScale(newScale);
     setLastTouchDistance(currentDistance);
   };
@@ -545,14 +545,14 @@ const MapContainer: React.FC = () => {
     if (mapElement) {
       // Add wheel event for zooming
       mapElement.addEventListener('wheel', handleWheel, { passive: false });
-      
+
       // Add global mouse events for dragging
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      
+
       // Add touch-action: none to element style directly
       mapElement.style.touchAction = 'none';
-      
+
       return () => {
         // Remove all listeners on cleanup
         mapElement.removeEventListener('wheel', handleWheel);
@@ -598,7 +598,7 @@ const MapContainer: React.FC = () => {
       'Royal Challengers Bengaluru': '#1F1F1F',
       'Sunrisers Hyderabad': '#FF5700'
     };
-    
+
     return teamColors[teamName] || '#1A5D1A'; // Default to cricket green if team not found
   };
 
@@ -614,42 +614,39 @@ const MapContainer: React.FC = () => {
   return (
     <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
       {/* Header to display hexagon and team selection */}
-      <div 
+      <div
         className="w-full shadow-md z-10"
-        style={userTeam ? {backgroundColor: getTeamColor(userTeam)} : {backgroundColor: '#1A5D1A'}}
+        style={userTeam ? { backgroundColor: getTeamColor(userTeam) } : { backgroundColor: '#1A5D1A' }}
       >
-        <div className="flex justify-between items-center flex-wrap max-w-7xl mx-auto w-full px-4 py-3">
-          <div className="flex flex-wrap items-center">
+        <div className="flex justify-between items-center max-w-7xl mx-auto w-full px-3 py-2">
+          <div className="flex items-center space-x-4">
             {userHomeHexagon && (
-              <div className="flex items-center mr-5 my-1">
-                <span className="text-white font-semibold text-sm md:text-base mr-1">Your Region:</span>
-                <span className="text-white text-base md:text-lg font-bold">{userHomeHexagon}</span>
+              <div className="flex items-center">
+                <span className="text-white font-semibold text-xs md:text-sm mr-1">Your Region:</span>
+                <span className="text-white text-sm md:text-base font-bold">{userHomeHexagon}</span>
               </div>
             )}
             {userTeam && (
-              <div className="flex items-center my-1">
-                <span className="text-white font-semibold text-sm md:text-base mr-1">Fan of:</span>
-                <span className="text-white text-base md:text-lg font-bold">{userTeam}</span>
+              <div className="flex items-center">
+                <span className="text-white font-semibold text-xs md:text-sm mr-1">Fan of:</span>
+                <span className="text-white text-sm md:text-base font-bold">{userTeam}</span>
               </div>
             )}
           </div>
-          
-          {/* Add the See Results button to the top right */}
+
           <div className="flex items-center space-x-2">
-            {/* Share URL Button */}
-            <button 
+            <button
               onClick={copyShareURL}
-              className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+              className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1 rounded shadow-sm border-none flex items-center font-semibold text-xs cursor-pointer"
               aria-label="Share URL"
             >
-              <FaShareAlt className="mr-1" />
+              <FaShareAlt className="mr-1 text-xs" />
               <span>Share</span>
             </button>
-            
-            {/* See Results Button */}
+
             <Link href="/ipl-fandom-map" passHref>
-              <button 
-                className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg shadow-sm border-none flex items-center font-semibold text-xs md:text-sm cursor-pointer"
+              <button
+                className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1 rounded shadow-sm border-none flex items-center font-semibold text-xs cursor-pointer"
                 aria-label="See fandom map results"
               >
                 <span>See Results</span>
@@ -661,7 +658,7 @@ const MapContainer: React.FC = () => {
 
       <div className="flex-1 relative w-full h-full bg-white flex items-center justify-center">
         {/* Map container now has the ref and mouse events */}
-        <div 
+        <div
           ref={mapRef}
           className="flex-1 h-full mx-2.5 mb-2.5 rounded-lg overflow-hidden bg-white shadow-md cursor-grab relative select-none"
           onMouseDown={handleMouseDown}
@@ -693,22 +690,22 @@ const MapContainer: React.FC = () => {
         </div>
 
         {/* Overlay Zoom Control Buttons */}
-        <div className="absolute right-5 bottom-16 bg-white bg-opacity-90 rounded-lg overflow-hidden shadow-md z-10">
-          <button 
+        <div className="absolute right-2 bottom-10 bg-white bg-opacity-90 rounded-lg overflow-hidden shadow-md z-10">
+          <button
             className="w-10 h-10 md:w-10 md:h-10 flex justify-center items-center border-none bg-transparent text-green-800 cursor-pointer text-base border-b border-gray-200 hover:bg-gray-100"
             onClick={zoomIn}
             aria-label="Zoom in"
           >
             <FaPlus />
           </button>
-          <button 
+          <button
             className="w-10 h-10 md:w-10 md:h-10 flex justify-center items-center border-none bg-transparent text-green-800 cursor-pointer text-base border-b border-gray-200 hover:bg-gray-100"
             onClick={zoomOut}
             aria-label="Zoom out"
           >
             <FaMinus />
           </button>
-          <button 
+          <button
             className="w-10 h-10 md:w-10 md:h-10 flex justify-center items-center border-none bg-transparent text-green-800 cursor-pointer text-base hover:bg-gray-100"
             onClick={resetView}
             aria-label="Reset view"
@@ -724,19 +721,19 @@ const MapContainer: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       {/* Hexagon Info Panel */}
-      <SetFandomPopup 
+      <SetFandomPopup
         selectedHexagon={selectedHexagon}
         isVisible={isPanelVisible}
         onToggleVisibility={togglePanelVisibility}
         userId={userId}
         onTeamSelect={handleTeamSelection}
       />
-      
+
       {/* Toggle button for panel - fixed position at bottom-left */}
-      <button 
-        className="fixed bottom-5 left-5 bg-green-800 px-3 py-2 md:px-4 md:py-2.5 rounded-lg z-10 shadow-md border-none flex items-center text-white font-semibold text-xs md:text-sm cursor-pointer"
+      <button
+        className="fixed bottom-4 left-4 bg-green-800 px-3 py-2 md:px-4 md:py-2.5 rounded-lg z-10 shadow-md border-none flex items-center text-white font-semibold text-xs md:text-sm cursor-pointer"
         onClick={togglePanelVisibility}
         aria-label="Toggle team selection panel"
       >
