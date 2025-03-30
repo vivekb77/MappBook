@@ -20,14 +20,14 @@ interface HexagonColors {
   textUserHome: string;
 }
 
-interface HexagonDrawingProps {
+interface HexagonOverlayProps {
   hexagons: Hexagon[];
   selectedHexagon: Hexagon | null;
   userHomeHexagon: string | null;
   onHexagonClick: (hexagon: Hexagon) => void;
 }
 
-const HexagonDrawing: React.FC<HexagonDrawingProps> = ({ 
+const HexagonOverlay: React.FC<HexagonOverlayProps> = ({ 
   hexagons, 
   selectedHexagon, 
   userHomeHexagon,
@@ -173,4 +173,4 @@ const HexagonDrawing: React.FC<HexagonDrawingProps> = ({
   );
 };
 
-export default HexagonDrawing;
+export default HexagonOverlay;
