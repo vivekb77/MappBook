@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiMapPin, FiSave, FiAlertCircle } from 'react-icons/fi';
 import Link from 'next/link';
-import SuccessNotification from './SaveTeam';
+import SuccessNotification from './SaveTeamNotification';
 
 // TypeScript interfaces
 interface Hexagon {

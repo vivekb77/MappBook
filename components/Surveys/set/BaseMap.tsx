@@ -82,67 +82,67 @@ const BaseMap: React.FC<BaseMapProps> = ({
     isDragging.current = false;
   };
 
-  // Touch handlers for mobile devices
-  const handleTouchStart = (e: TouchEvent) => {
-    if (e.touches.length === 2) {
-      // Get distance between two touches for pinch zoom
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      lastDistance.current = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY
-      );
-    } else if (e.touches.length === 1) {
-      isDragging.current = true;
-      lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }
-  };
+// Touch handlers for mobile devices
+const handleTouchStart = (e: TouchEvent) => {
+  if (e.touches.length === 2) {
+    // Get distance between two touches for pinch zoom
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    lastDistance.current = Math.hypot(
+      touch2.clientX - touch1.clientX,
+      touch2.clientY - touch1.clientY
+    );
+  } else if (e.touches.length === 1) {
+    isDragging.current = true;
+    lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+};
 
-  const handleTouchMove = (e: TouchEvent) => {
+const handleTouchMove = (e: TouchEvent) => {
+  // Only prevent default for one-finger drag to allow native pinch zooming
+  if (e.touches.length === 1 && isDragging.current) {
     e.preventDefault();
     
-    // Handle pinch zoom
-    if (e.touches.length === 2) {
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const currentDistance = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY
-      );
-      
-      if (lastDistance.current > 0) {
-        const newScale = scale * (currentDistance / lastDistance.current);
-        if (newScale >= 0.5 && newScale <= 5) {
-          setScale(newScale);
-        }
+    const dx = e.touches[0].clientX - lastPosition.current.x;
+    const dy = e.touches[0].clientY - lastPosition.current.y;
+    
+    // Calculate new positions with boundaries
+    const newTranslateX = translateX + dx / scale;
+    const newTranslateY = translateY + dy / scale;
+    
+    // Limit panning to prevent going too far from the map
+    const maxPanDistance = Math.max(viewBox.width, viewBox.height) * 0.5;
+    
+    setTranslateX(Math.max(Math.min(newTranslateX, maxPanDistance), -maxPanDistance));
+    setTranslateY(Math.max(Math.min(newTranslateY, maxPanDistance), -maxPanDistance));
+    
+    lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+  // Handle pinch zoom - let the browser handle the gesture naturally
+  else if (e.touches.length === 2) {
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    const currentDistance = Math.hypot(
+      touch2.clientX - touch1.clientX,
+      touch2.clientY - touch1.clientY
+    );
+    
+    if (lastDistance.current > 0) {
+      const scaleFactor = currentDistance / lastDistance.current;
+      const newScale = scale * scaleFactor;
+      if (newScale >= 0.5 && newScale <= 5) {
+        setScale(newScale);
       }
-      
-      lastDistance.current = currentDistance;
-    } 
-    // Handle single touch drag
-    else if (e.touches.length === 1 && isDragging.current) {
-      const dx = e.touches[0].clientX - lastPosition.current.x;
-      const dy = e.touches[0].clientY - lastPosition.current.y;
-      
-      // Calculate new positions with boundaries
-      const newTranslateX = translateX + dx / scale;
-      const newTranslateY = translateY + dy / scale;
-      
-      // Limit panning to prevent going too far from the map
-      // Using the same boundary logic as in mouse movement
-      const maxPanDistance = Math.max(viewBox.width, viewBox.height) * 0.5;
-      
-      setTranslateX(Math.max(Math.min(newTranslateX, maxPanDistance), -maxPanDistance));
-      setTranslateY(Math.max(Math.min(newTranslateY, maxPanDistance), -maxPanDistance));
-      
-      lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
-  };
+    
+    lastDistance.current = currentDistance;
+  }
+};
 
-  const handleTouchEnd = () => {
-    isDragging.current = false;
-    lastDistance.current = 0;
-  };
+const handleTouchEnd = () => {
+  isDragging.current = false;
+  lastDistance.current = 0;
+};
 
   // Add event listeners
   useEffect(() => {
@@ -151,10 +151,10 @@ const BaseMap: React.FC<BaseMapProps> = ({
       // Add wheel event for zooming
       svg.addEventListener('wheel', handleWheel, { passive: false });
       
-      // Add touch events for mobile
-      svg.addEventListener('touchstart', handleTouchStart, { passive: true });
-      svg.addEventListener('touchmove', handleTouchMove, { passive: false });
-      svg.addEventListener('touchend', handleTouchEnd, { passive: true });
+    // Add touch events for mobile
+svg.addEventListener('touchstart', handleTouchStart, { passive: true });
+svg.addEventListener('touchmove', handleTouchMove, { passive: true });
+svg.addEventListener('touchend', handleTouchEnd, { passive: true });
       
       // Add global mouse events for dragging
       document.addEventListener('mousemove', handleMouseMove);
