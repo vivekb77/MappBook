@@ -1,5 +1,5 @@
 // components/BaseMap.tsx
-import React, { useRef, useEffect, ReactNode } from 'react';
+import React, { useRef, useEffect, ReactNode, useState } from 'react';
 import { FaTrophy, FaBaseballBall } from 'react-icons/fa';
 
 interface ViewBox {
@@ -48,7 +48,7 @@ const BaseMap: React.FC<BaseMapProps> = ({
   const svgRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef<boolean>(false);
   const lastPosition = useRef({ x: 0, y: 0 });
-  const lastDistance = useRef<number>(0);
+  const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
 
   // Handle mouse wheel zoom
   const handleWheel = (e: WheelEvent) => {
@@ -84,17 +84,18 @@ const BaseMap: React.FC<BaseMapProps> = ({
 
   // Touch handlers for mobile devices
   const handleTouchStart = (e: TouchEvent) => {
+    e.preventDefault(); // Important to prevent page scrolling/zooming
+    
     if (e.touches.length === 2) {
-      // Prevent default for pinch gestures to avoid page zoom
-      e.preventDefault();
-      
       // Get distance between two touches for pinch zoom
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
-      lastDistance.current = Math.hypot(
+      const distance = Math.hypot(
         touch2.clientX - touch1.clientX,
         touch2.clientY - touch1.clientY
       );
+      
+      setLastTouchDistance(distance);
     } else if (e.touches.length === 1) {
       isDragging.current = true;
       lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -102,11 +103,10 @@ const BaseMap: React.FC<BaseMapProps> = ({
   };
 
   const handleTouchMove = (e: TouchEvent) => {
-    // Always prevent default for touch events on the map
-    e.preventDefault();
+    e.preventDefault(); // Important to prevent default browser behavior
     
-    if (e.touches.length === 2) {
-      // Handle pinch zoom
+    // Handle pinch zoom
+    if (e.touches.length === 2 && lastTouchDistance !== null) {
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
       const currentDistance = Math.hypot(
@@ -114,27 +114,28 @@ const BaseMap: React.FC<BaseMapProps> = ({
         touch2.clientY - touch1.clientY
       );
       
-      if (lastDistance.current > 0) {
-        const scaleFactor = currentDistance / lastDistance.current;
-        const newScale = scale * scaleFactor;
-        if (newScale >= 0.5 && newScale <= 5) {
-          setScale(newScale);
-        }
-      }
+      // Calculate zoom factor
+      const factor = 0.01; // Adjust sensitivity here
+      const delta = (currentDistance - lastTouchDistance) * factor;
+      const newScale = Math.max(0.5, Math.min(5, scale + delta));
       
-      lastDistance.current = currentDistance;
-    } 
+      setScale(newScale);
+      setLastTouchDistance(currentDistance);
+    }
+    // Handle single touch drag
     else if (e.touches.length === 1 && isDragging.current) {
-      // Handle single touch drag
       const dx = e.touches[0].clientX - lastPosition.current.x;
       const dy = e.touches[0].clientY - lastPosition.current.y;
       
-      // Calculate new positions with boundaries
-      const newTranslateX = translateX + dx / scale;
-      const newTranslateY = translateY + dy / scale;
+      // Apply sensitivity based on current zoom
+      const sensitivity = scale > 1 ? 1.0 + (scale - 1) * 0.5 : 1.0;
       
-      // Limit panning to prevent going too far from the map
-      const maxPanDistance = Math.max(viewBox.width, viewBox.height) * 0.5;
+      // Calculate new positions with boundaries
+      const newTranslateX = translateX + (dx / scale) * sensitivity;
+      const newTranslateY = translateY + (dy / scale) * sensitivity;
+      
+      // Limit panning based on zoom level
+      const maxPanDistance = Math.max(viewBox.width, viewBox.height) * 0.5 * scale;
       
       setTranslateX(Math.max(Math.min(newTranslateX, maxPanDistance), -maxPanDistance));
       setTranslateY(Math.max(Math.min(newTranslateY, maxPanDistance), -maxPanDistance));
@@ -145,7 +146,7 @@ const BaseMap: React.FC<BaseMapProps> = ({
 
   const handleTouchEnd = () => {
     isDragging.current = false;
-    lastDistance.current = 0;
+    setLastTouchDistance(null);
   };
 
   // Add event listeners
@@ -163,6 +164,9 @@ const BaseMap: React.FC<BaseMapProps> = ({
       // Add global mouse events for dragging
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      
+      // Add touch-action: none to element style directly
+      svg.style.touchAction = 'none';
       
       return () => {
         // Remove all listeners on cleanup
@@ -230,6 +234,7 @@ const BaseMap: React.FC<BaseMapProps> = ({
         className="flex-1 h-full mx-2.5 mb-2.5 rounded-lg overflow-hidden bg-white shadow-md cursor-grab relative select-none"
         ref={svgRef}
         onMouseDown={handleMouseDown}
+        style={{ touchAction: 'none' }}
       >
         <svg 
           width="100%" 
