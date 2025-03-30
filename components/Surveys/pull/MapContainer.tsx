@@ -555,7 +555,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       </div>
 
       {/* Bottom Right Control Group */}
-      <div className="fixed right-6 bottom-6 flex flex-col gap-4 items-end">
+      <div className="fixed right-6 bottom-4 flex flex-col gap-2 items-end">
         {/* Filter Button - Top */}
         {/* Filter Button */}
         <div className="bg-green-700 rounded-full shadow-md">
@@ -621,7 +621,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       </div>
 
       {/* Bottom Left Control Group - Vertically stacked */}
-      <div className="fixed bottom-6 left-6 flex flex-col gap-3">
+      <div className="fixed bottom-4 left-6 flex flex-col gap-2">
         {/* Today's Match Support Button - NEW */}
         <button
           onClick={() => {
@@ -646,20 +646,20 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           </button>
         </Link>
 
-        {/* Share message */}
-        <div className="text-sm font-medium text-green-800 bg-white px-3 py-2 rounded-lg shadow-sm">
-          Help your team conquer more regions!
-          {/* <strong>Apni team ke liye kshetra jeeto!</strong> */}
-        </div>
-
-        {/* Share Button */}
+        {/* Combined Share Button */}
         <button
           onClick={copyShareURL}
-          className="bg-white text-green-800 hover:bg-gray-100 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-full"
+          className="bg-white text-green-800 hover:bg-gray-100 px-3 py-2 rounded-lg shadow-sm border-none flex flex-col items-center justify-center font-semibold text-sm cursor-pointer w-full"
           aria-label="Share URL"
         >
-          <FaShareAlt className="mr-2" />
-          <span>Copy link to Share</span>
+          <div className="text-sm font-medium mb-2">
+            Help your team conquer more regions!
+            {/* <strong>Apni team ke liye kshetra jeeto!</strong> */}
+          </div>
+          <div className="flex items-center">
+            <FaShareAlt className="mr-2" />
+            <span>Copy link to Share</span>
+          </div>
         </button>
       </div>
 
