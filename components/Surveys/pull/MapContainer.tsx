@@ -12,6 +12,22 @@ const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
   ssr: false,
 });
 
+const todaysMatchTeams = {
+  team1: 'Delhi Capitals',
+  team2: 'Sunrisers Hyderabad'
+};
+
+// Chennai Super Kings
+// Gujarat Titans
+// Kolkata Knight Riders
+// Punjab Kings
+// Rajasthan Royals
+// Royal Challengers Bengaluru
+// Sunrisers Hyderabad
+// Lucknow Super Giants
+// Mumbai Indians
+// Delhi Capitals   
+
 // Types
 interface Hexagon {
   id: string;
@@ -146,14 +162,14 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const getZoomAdaptiveSensitivity = (currentScale: number, isTouch: boolean = false) => {
     // Base sensitivity values
     const baseSensitivity = isTouch ? 2.0 : 1.5;
-    
+
     // Higher zoom levels (scale > 1) need increased sensitivity
     if (currentScale > 1) {
       // This progressively increases sensitivity as zoom increases
       // At scale 5, sensitivity will be ~7.5x higher than at scale 1
       return baseSensitivity * (1 + (currentScale - 1) * 1.5);
     }
-    
+
     return baseSensitivity;
   };
 
@@ -162,7 +178,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
     // Allow greater panning range at higher zoom levels
     const adjustedMaxPanX = MAX_PAN_X * Math.max(1, scale);
     const adjustedMaxPanY = MAX_PAN_Y * Math.max(1, scale);
-    
+
     return [
       Math.max(-adjustedMaxPanX, Math.min(adjustedMaxPanX, x)),
       Math.max(-adjustedMaxPanY, Math.min(adjustedMaxPanY, y))
@@ -179,32 +195,32 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    
+
     // Calculate movement deltas
     const dx = e.clientX - lastX;
     const dy = e.clientY - lastY;
-    
+
     // Get sensitivity adjusted for current zoom level
     const adaptiveSensitivity = getZoomAdaptiveSensitivity(scale);
-    
+
     // Calculate new position with adaptive sensitivity
     const newTranslateX = translateX + (dx / scale) * adaptiveSensitivity;
     const newTranslateY = translateY + (dy / scale) * adaptiveSensitivity;
-    
+
     const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
-    
+
     // Cancel any existing animation frame
     if (animationRef.current !== null) {
       cancelAnimationFrame(animationRef.current);
     }
-    
+
     // Use requestAnimationFrame for smoother updates
     animationRef.current = requestAnimationFrame(() => {
       setTranslateX(constrainedX);
       setTranslateY(constrainedY);
       animationRef.current = null;
     });
-    
+
     setLastX(e.clientX);
     setLastY(e.clientY);
   };
@@ -224,32 +240,32 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || e.touches.length !== 1) return;
-    
+
     // Calculate movement deltas
     const dx = e.touches[0].clientX - lastX;
     const dy = e.touches[0].clientY - lastY;
-    
+
     // Get touch sensitivity adjusted for current zoom level
     const adaptiveTouchSensitivity = getZoomAdaptiveSensitivity(scale, true);
-    
+
     // Calculate new position with adaptive sensitivity
     const newTranslateX = translateX + (dx / scale) * adaptiveTouchSensitivity;
     const newTranslateY = translateY + (dy / scale) * adaptiveTouchSensitivity;
-    
+
     const [constrainedX, constrainedY] = constrainTranslation(newTranslateX, newTranslateY);
-    
+
     // Cancel any existing animation frame
     if (animationRef.current !== null) {
       cancelAnimationFrame(animationRef.current);
     }
-    
+
     // Use requestAnimationFrame for smoother updates
     animationRef.current = requestAnimationFrame(() => {
       setTranslateX(constrainedX);
       setTranslateY(constrainedY);
       animationRef.current = null;
     });
-    
+
     setLastX(e.touches[0].clientX);
     setLastY(e.touches[0].clientY);
   };
@@ -262,7 +278,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const handleZoom = (delta: number) => {
     // Calculate new scale with constraints
     const newScale = Math.max(0.5, Math.min(5, scale + delta));
-    
+
     // Update scale without changing the center point
     setScale(newScale);
   };
@@ -286,13 +302,13 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         touch2.clientX - touch1.clientX,
         touch2.clientY - touch1.clientY
       );
-      
+
       // If we have a previous distance, calculate the zoom
       if (lastDistance !== null) {
         const delta = (distance - lastDistance) * 0.01;
         handleZoom(delta);
       }
-      
+
       setLastDistance(distance);
     } else {
       setLastDistance(null);
@@ -606,6 +622,20 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
       {/* Bottom Left Control Group - Vertically stacked */}
       <div className="fixed bottom-6 left-6 flex flex-col gap-3">
+        {/* Today's Match Support Button - NEW */}
+        <button
+          onClick={() => {
+            // Set selected teams to today's match teams
+            setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2]);
+            // Open the filter modal to show the selection
+            setShowTeamFilter(true);
+          }}
+          className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-full"
+          aria-label="Filter for today's match"
+        >
+          <span>Today's Match Support</span>
+        </button>
+
         {/* Choose IPL Team Button */}
         <Link href="/" passHref>
           <button
@@ -615,6 +645,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
             <span>Choose your favourite IPL team</span>
           </button>
         </Link>
+
         {/* Share message */}
         <div className="text-sm font-medium text-green-800 bg-white px-3 py-2 rounded-lg shadow-sm">
           Help your team conquer more regions!
