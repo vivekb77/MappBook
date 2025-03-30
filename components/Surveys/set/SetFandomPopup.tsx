@@ -298,7 +298,7 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
         {isLoading ? (
           <div className="flex flex-col items-center justify-center p-6">
             <div className="w-8 h-8 border-3 border-green-800/30 border-t-green-800 rounded-full animate-spin"></div>
-            <p className="mt-3 text-green-800 text-base font-medium">Loading your preferences...</p>
+            <p className="mt-3 text-green-800 text-base font-medium">Loading your preferences</p>
           </div>
         ) : (
           <>
@@ -418,10 +418,10 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
 
       {/* Success Notification */}
       <SuccessNotification
-        message="Success! Your team preferences have been saved!"
+        message="Saved!"
         isVisible={showSuccessNotification}
         onClose={handleNotificationClose}
-        duration={3000}
+        duration={2000}
       />
     </>
   );

@@ -28,7 +28,7 @@ const SuccessNotification: React.FC<SuccessNotificationProps> = ({
   if (!isVisible) return null;
   
   return (
-    <div className="fixed top-4 right-4 left-4 md:left-auto max-w-md z-50 animate-fade-in">
+    <div className="fixed top-20 right-4 left-4 md:left-auto max-w-md z-50 animate-fade-in">
       <div className="bg-green-100 border-l-4 border-green-500 rounded-lg shadow-md p-4 flex items-center">
         <FiCheckCircle className="text-green-600 text-xl md:text-2xl mr-3 flex-shrink-0" />
         <div className="text-green-800 text-sm md:text-base font-medium">{message}</div>
