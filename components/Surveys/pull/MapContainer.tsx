@@ -482,7 +482,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   return (
     <div className="relative flex flex-col h-screen-dynamic w-full bg-gray-100 overflow-hidden">
       {/* Metadata Display */}
-      <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow mx-4 mt-4 mb-2">
+      <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow mx-2 mt-2 mb-2">
         <div className="flex items-center">
           {mapData && (
             <span className="text-gray-700">
@@ -555,7 +555,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       </div>
 
       {/* Bottom Right Control Group */}
-      <div className="fixed right-6 bottom-4 flex flex-col gap-2 items-end">
+      <div className="fixed right-2 bottom-2 flex flex-col gap-2 items-end">
         {/* Filter Button - Top */}
         {/* Filter Button */}
         <div className="bg-green-700 rounded-full shadow-md">
@@ -621,7 +621,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       </div>
 
       {/* Bottom Left Control Group - Vertically stacked */}
-      <div className="fixed bottom-4 left-6 flex flex-col gap-2">
+      <div className="fixed bottom-2 left-2 flex flex-col gap-2">
         {/* Today's Match Support Button - NEW */}
         <button
           onClick={() => {
