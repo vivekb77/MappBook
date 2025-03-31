@@ -686,7 +686,7 @@ const MapContainer: React.FC = () => {
                 className="bg-white text-green-800 hover:bg-gray-100 px-2 py-1 rounded shadow-sm border-none flex items-center font-semibold text-xs cursor-pointer"
                 aria-label="See fandom map results"
               >
-                <span>See Results</span>
+                <span>Results</span>
               </button>
             </Link>
           </div>
@@ -754,7 +754,7 @@ const MapContainer: React.FC = () => {
         {/* URL Share notification */}
         {showShareNotification && (
           <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-red-800 text-white px-4 py-2 rounded-lg shadow-lg z-20 transition-opacity duration-300">
-            URL copied!
+            Link to share copied!
           </div>
         )}
       </div>

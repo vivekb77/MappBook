@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { FaShareAlt, FaFilter } from 'react-icons/fa';
 import TeamDistributionModal from './GlobalPopup';
 import FilterByTeams from './FilterByTeam';
-import { Instagram, Twitter } from 'lucide-react';
+import { Instagram, Twitter, Share2, MessageCircle } from 'lucide-react';
 
 // Dynamically import the HexagonPopup component to prevent SSR issues
 const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
@@ -633,7 +633,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-full"
           aria-label="Filter for today's match"
         >
-          <span>Today's Match Support</span>
+          <span>Filter: Today's Match</span>
         </button>
 
         {/* Choose IPL Team Button */}
@@ -646,27 +646,51 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           </button>
         </Link>
 
-        {/* Combined Share Button */}
-        <button
-          onClick={copyShareURL}
-          className="bg-white text-green-800 hover:bg-gray-100 px-3 py-2 rounded-lg shadow-sm border-none flex flex-col items-center justify-center font-semibold text-sm cursor-pointer w-full"
-          aria-label="Share URL"
-        >
-          <div className="text-sm font-medium mb-2">
-            Help your team conquer more regions!
-            {/* <strong>Apni team ke liye kshetra jeeto!</strong> */}
+        {/* Enhanced Share Button with Social Options */}
+        <div className="bg-white rounded-lg shadow-sm w-full overflow-hidden">
+          {/* Main Share Button */}
+          <button
+            onClick={copyShareURL}
+            className="w-full px-3 py-2 flex flex-col items-center justify-center text-green-800 hover:bg-gray-50"
+            aria-label="Share URL"
+          >
+            <div className="text-sm font-medium mb-1">
+              Help your team conquer more regions!
+            </div>
+            <div className="flex items-center">
+              <Share2 className="mr-2 h-4 w-4" />
+              <span className="font-semibold">Share with friends</span>
+            </div>
+          </button>
+
+          {/* Social Share Options */}
+          <div className="flex border-t border-gray-200">
+            <button
+              onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent('Join my IPL team battle and help us conquer more regions! ' + window.location.href)}`, '_blank')}
+              className="flex-1 py-2 text-center text-white bg-green-500 hover:bg-green-600 flex items-center justify-center"
+              aria-label="Share on WhatsApp"
+            >
+              <MessageCircle className="mr-1 h-4 w-4" />
+              <span className="text-xs font-medium">WhatsApp</span>
+            </button>
+
+            <button
+              onClick={() => window.open(`https://x.com/intent/tweet?text=${encodeURIComponent('Join my IPL team battle and help us conquer more regions! ' + window.location.href)}`, '_blank')}
+              className="flex-1 py-2 text-center text-white bg-blue-400 hover:bg-blue-500 flex items-center justify-center"
+              aria-label="Share on Twitter/X"
+            >
+              <Twitter className="mr-1 h-4 w-4" />
+              <span className="text-xs font-medium">Twitter/X</span>
+            </button>
           </div>
-          <div className="flex items-center">
-            <FaShareAlt className="mr-2" />
-            <span>Copy link to Share</span>
-          </div>
-        </button>
+        </div>
       </div>
+
 
       {/* URL Share notification */}
       {showShareNotification && (
         <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-red-800 text-white px-4 py-2 rounded-lg shadow-lg z-20 transition-opacity duration-300">
-          URL copied!
+          Link to share copied!
         </div>
       )}
 
