@@ -43,10 +43,10 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
   }>;
 }
 
-const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
-  showModal,
+const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({ 
+  showModal, 
   onClose,
-  mapData
+  mapData 
 }) => {
   if (!showModal) return null;
 
@@ -63,7 +63,7 @@ const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
     'Mumbai Indians': '#00305a',          // Deep blue with light blue accent
     'Delhi Capitals': '#0033A0',          // Red with navy blue accent
   };
-
+  
   // Team abbreviations for mobile view
   const teamAbbreviations: { [key: string]: string } = {
     'Chennai Super Kings': 'CSK',
@@ -78,13 +78,15 @@ const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
     'Delhi Capitals': 'DC',
   };
 
-  // Format data for pie chart
-  const chartData = mapData?.data.global_team_distribution.map(item => ({
-    name: item.team,
-    value: item.percentage,
-    count: item.count,
-    color: teamColors[item.team] || '#cccccc'
-  })) || [];
+  // Format data for pie chart and sort by percentage (descending)
+  const chartData = (mapData?.data.global_team_distribution
+    .map(item => ({
+      name: item.team,
+      value: item.percentage,
+      count: item.count,
+      color: teamColors[item.team] || '#cccccc'
+    }))
+    .sort((a, b) => b.value - a.value)) || [];
 
   const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     if (active && payload && payload.length > 0) {
@@ -98,27 +100,28 @@ const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
     return null;
   };
 
+  // Render outer labels
   const renderCustomizedLabel = (props: any) => {
     const { cx, cy, midAngle, innerRadius, outerRadius, name, value } = props;
-
+    
     // Only show labels for segments with percentage > 5% on smaller screens
     const smallScreen = window.innerWidth < 768;
     if (smallScreen && value < 5) return null;
-
+    
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 1.1;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
+    
     // Use abbreviated team names on mobile
     const displayName = smallScreen ? teamAbbreviations[name] || name : name.split(' ').slice(0, 2).join(' ');
-
+    
     return (
-      <text
-        x={x}
-        y={y}
-        fill="#333333"
-        textAnchor={x > cx ? 'start' : 'end'}
+      <text 
+        x={x} 
+        y={y} 
+        fill="#333333" 
+        textAnchor={x > cx ? 'start' : 'end'} 
         dominantBaseline="central"
         className="text-xs md:text-sm"
         style={{ fontWeight: 500 }}
@@ -140,7 +143,7 @@ const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
               </svg>
               <h2 className="text-lg sm:text-xl font-bold">IPL 2025 Fan Leaderboard</h2>
             </div>
-            <button
+            <button 
               className="text-white hover:text-gray-200 p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition-colors duration-200"
               onClick={onClose}
               aria-label="Close modal"
@@ -151,7 +154,7 @@ const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
             </button>
           </div>
         </div>
-
+        
         <div className="p-4 sm:p-6">
           {mapData ? (
             <div>
@@ -168,12 +171,15 @@ const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
                       dataKey="value"
                       labelLine={window.innerWidth >= 640}
                       label={renderCustomizedLabel}
+                      startAngle={90}
+                      endAngle={-270}
+                      isAnimationActive={false}
                     >
                       {chartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.color}
-                          stroke="#ffffff"
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color} 
+                          stroke="#ffffff" 
                           strokeWidth={1}
                         />
                       ))}
@@ -189,21 +195,17 @@ const TeamDistributionModal: React.FC<TeamDistributionModalProps> = ({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-
+              
               <div className="mt-6 flex flex-col space-y-2">
                 <div className="text-sm md:text-base text-gray-700 text-center font-medium">
                   Total Fans: <span className="font-bold text-indigo-700">{mapData.data.metadata.total_fans.toLocaleString()}</span>
                 </div>
-
-
-
-
               </div>
             </div>
           ) : (
             <div className="flex justify-center items-center h-64">
               <div className="flex flex-col items-center space-y-3">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
+                <div className="rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
                 <p className="text-gray-600">Loading team data...</p>
               </div>
             </div>

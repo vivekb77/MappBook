@@ -13,8 +13,8 @@ const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
 });
 
 const todaysMatchTeams = {
-  team1: 'Delhi Capitals',
-  team2: 'Sunrisers Hyderabad'
+  team1: 'Mumbai Indians',
+  team2: 'Kolkata Knight Riders'
 };
 
 // Chennai Super Kings
