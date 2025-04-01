@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Head from 'next/head';
-import MapContainer from '../../components/Surveys/set/MapContainer';
+import MapContainer from '../../components/IPL/set/MapContainer';
 
 export default function Home() {
   return (
