@@ -20,17 +20,6 @@ const todaysMatchTeams = {
   team3: 'Chennai Super Kings'
 };
 
-// Chennai Super Kings
-// Gujarat Titans
-// Kolkata Knight Riders
-// Punjab Kings
-// Rajasthan Royals
-// Royal Challengers Bengaluru
-// Sunrisers Hyderabad
-// Lucknow Super Giants
-// Mumbai Indians
-// Delhi Capitals   
-
 // Types
 interface Hexagon {
   id: string;
@@ -133,7 +122,6 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [showShareNotification, setShowShareNotification] = useState<boolean>(false);
   const animationRef = useRef<number | null>(null);
-  const { selectedTeam, isTeamSelected } = useTeam();
 
   // Team colors for the IPL teams
   const teamColors = {
@@ -337,31 +325,6 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
     setSelectedTeams([]);
   };
 
-  // Function to copy current URL to clipboard
-  const copyShareURL = () => {
-    if (typeof window !== 'undefined') {
-      // Create a URL with relevant parameters
-      const baseURL = window.location.origin + window.location.pathname;
-
-      const shareURL = baseURL;
-
-      // Copy to clipboard
-      navigator.clipboard.writeText(shareURL)
-        .then(() => {
-          // Show notification
-          setShowShareNotification(true);
-          // Hide notification after 3 seconds
-          setTimeout(() => {
-            setShowShareNotification(false);
-          }, 3000);
-        })
-        .catch(err => {
-          console.error('Error copying text: ', err);
-          alert('Failed to copy URL to clipboard.');
-        });
-    }
-  };
-
   useEffect(() => {
     // Function to prevent default touch actions that cause unwanted zooming
     const preventZoom = (e: TouchEvent) => {
@@ -526,11 +489,9 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onTouchStart={(e: React.TouchEvent<HTMLDivElement>) => {
-          // e.preventDefault(); // Prevent default behavior
           handleTouchStart(e);
         }}
         onTouchMove={(e: React.TouchEvent<HTMLDivElement>) => {
-          e.preventDefault(); // Prevent default behavior
           handleTouchMove(e);
           handleTouchZoom(e);
         }}
@@ -540,7 +501,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         <svg
           width="100%"
           height="100%"
-          viewBox={`0 0 ${viewBox.width} ${viewBox.height}`}
+          viewBox={`0 100 ${viewBox.width} ${viewBox.height}`}
           style={{ background: "#f5f5f5" }}
         >
           <g transform={svgTransform}>
@@ -579,8 +540,6 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
       {/* Bottom Right Control Group */}
       <div className="fixed right-2 bottom-2 flex flex-col gap-2 items-end">
-        {/* Trophy Icon Button Only - Using Lucide React */}
-
         {/* Trophy Icon Button */}
         <button
           onClick={() => {
@@ -593,15 +552,6 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           aria-label="Filter for today's match"
         >
           <Trophy size={20} />
-        </button>
-
-        {/* Filter Button */}
-        <button
-          className="bg-green-700 text-white hover:bg-green-800 w-12 h-12 rounded-full shadow-md flex items-center justify-center cursor-pointer transition-colors"
-          onClick={() => setShowTeamFilter(true)}
-          aria-label="Filter teams"
-        >
-          <FaFilter className="text-white" size={20} />
         </button>
 
         {/* Zoom Control Buttons - Middle */}
