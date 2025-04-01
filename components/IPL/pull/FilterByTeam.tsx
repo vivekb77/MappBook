@@ -1,5 +1,5 @@
 // components/FilterByTeams.tsx
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface FilterByTeamsProps {
   showModal: boolean;
@@ -12,24 +12,32 @@ interface FilterByTeamsProps {
 const FilterByTeams: React.FC<FilterByTeamsProps> = ({
   showModal,
   onClose,
-  selectedTeams,
+  selectedTeams: initialSelectedTeams,
   onSelectTeam,
   onResetFilters
 }) => {
   if (!showModal) return null;
 
+  // Maintain internal state for selected teams
+  const [localSelectedTeams, setLocalSelectedTeams] = useState<string[]>([...initialSelectedTeams]);
+
+  // Update local state when props change
+  useEffect(() => {
+    setLocalSelectedTeams([...initialSelectedTeams]);
+  }, [initialSelectedTeams]);
+
   // Team colors for the IPL teams
   const teamColors = {
-   'Chennai Super Kings': '#FFDC00',     // Yellow
-    'Gujarat Titans': '#39B6FF',          // Light Blue
-    'Kolkata Knight Riders': '#552583',   // Purple
-    'Punjab Kings': '#ED1B24',            // Red
-    'Rajasthan Royals': '#FF69B4',        // Pink
-    'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
-    'Sunrisers Hyderabad': '#FF6500',     // Orange,
-    'Lucknow Super Giants': '#3496ff',    // Blue with yellow/gold accent
+    'Chennai Super Kings': '#FFDC00',     // Yellow
     'Mumbai Indians': '#00305a',         // Deep blue with light blue accent
+    'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
+    'Kolkata Knight Riders': '#552583',   // Purple
     'Delhi Capitals': '#0033A0',         // Red with navy blue accent
+    'Punjab Kings': '#ED1B24',            // Red
+    'Sunrisers Hyderabad': '#FF6500',     // Orange,
+    'Rajasthan Royals': '#FF69B4',        // Pink
+    'Gujarat Titans': '#39B6FF',          // Light Blue
+    'Lucknow Super Giants': '#3496ff',    // Blue with yellow/gold accent
   };
 
   // Get all team names
@@ -37,35 +45,35 @@ const FilterByTeams: React.FC<FilterByTeamsProps> = ({
 
   const handleTeamSelection = (team: string) => {
     // If team is already selected, remove it
-    if (selectedTeams.includes(team)) {
-      onSelectTeam(team); // This will call the parent's handler to remove the team
+    if (localSelectedTeams.includes(team)) {
+      setLocalSelectedTeams(localSelectedTeams.filter(t => t !== team));
       return;
     }
     
-    // If less than 2 teams are selected, add this team
-    if (selectedTeams.length < 2) {
-      onSelectTeam(team); // This will call the parent's handler to add the team
-      return;
-    }
-    
-    // If 2 teams are already selected, replace the oldest selection with the new one
-    // (Remove the first team in the array and add the new one)
-    const updatedTeams = [...selectedTeams];
-    updatedTeams.shift(); // Remove the first (oldest) team
-    
-    // First remove the shifted team
-    onSelectTeam(selectedTeams[0]);
-    
-    // Then add the new team
-    onSelectTeam(team);
+    // Otherwise, add the team (with no limit)
+    setLocalSelectedTeams([...localSelectedTeams, team]);
   };
 
-  // Disable apply button if not exactly 2 teams are selected
-  const canApply = selectedTeams.length === 2;
+  // Enable apply button if at least 1 team is selected
+  const canApply = localSelectedTeams.length >= 1;
 
   // Custom reset to ensure we start with 0 teams
   const handleReset = () => {
+    setLocalSelectedTeams([]);
     onResetFilters();
+  };
+
+  // Apply the filters
+  const handleApply = () => {
+    // First, remove any teams that were deselected
+    const teamsToRemove = initialSelectedTeams.filter(team => !localSelectedTeams.includes(team));
+    teamsToRemove.forEach(team => onSelectTeam(team));
+    
+    // Then, add any teams that were newly selected
+    const teamsToAdd = localSelectedTeams.filter(team => !initialSelectedTeams.includes(team));
+    teamsToAdd.forEach(team => onSelectTeam(team));
+    
+    onClose();
   };
 
   return (
@@ -73,7 +81,7 @@ const FilterByTeams: React.FC<FilterByTeamsProps> = ({
       <div className="bg-white rounded-xl shadow-xl p-6 mx-4 max-w-md w-full">
         {/* Header */}
         <div className="flex justify-between items-center mb-5">
-          <h2 className="text-xl font-bold text-gray-900">Select 2 Teams to Compare</h2>
+          <h2 className="text-xl font-bold text-gray-900">Select Teams to Compare</h2>
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -88,7 +96,7 @@ const FilterByTeams: React.FC<FilterByTeamsProps> = ({
         {/* Team list */}
         <div className="overflow-y-auto max-h-80 mb-6">
           {teamNames.map((team) => {
-            const isSelected = selectedTeams.includes(team);
+            const isSelected = localSelectedTeams.includes(team);
             const teamColor = teamColors[team as keyof typeof teamColors];
             
             return (
@@ -118,9 +126,9 @@ const FilterByTeams: React.FC<FilterByTeamsProps> = ({
 
         {/* Current selection */}
         <div className="text-sm font-medium text-gray-700 mb-4">
-          Selected: {selectedTeams.length === 0 ? "No teams selected" : selectedTeams.join(" vs ")}
-          {selectedTeams.length !== 2 && (
-            <p className="text-red-500 mt-1">Please select 2 teams</p>
+          Selected: {localSelectedTeams.length === 0 ? "No teams selected" : localSelectedTeams.join(" vs ")}
+          {localSelectedTeams.length === 0 && (
+            <p className="text-red-500 mt-1">Please select at least 1 team</p>
           )}
         </div>
 
@@ -133,7 +141,7 @@ const FilterByTeams: React.FC<FilterByTeamsProps> = ({
             Reset
           </button>
           <button
-            onClick={onClose}
+            onClick={handleApply}
             disabled={!canApply}
             className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
               canApply 

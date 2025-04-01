@@ -14,7 +14,8 @@ const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
 
 const todaysMatchTeams = {
   team1: 'Mumbai Indians',
-  team2: 'Kolkata Knight Riders'
+  team2: 'Royal Challengers Bengaluru',
+  team3: 'Chennai Super Kings'
 };
 
 // Chennai Super Kings
@@ -317,21 +318,16 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
   // Handle team selection
   const handleTeamSelect = (team: string) => {
-    setSelectedTeams(prev => {
-      // If already selected, remove it
-      if (prev.includes(team)) {
-        return prev.filter(t => t !== team);
-      }
+  setSelectedTeams(prev => {
+    // If already selected, remove it
+    if (prev.includes(team)) {
+      return prev.filter(t => t !== team);
+    }
 
-      // If we already have 2 teams, replace the oldest one
-      if (prev.length >= 2) {
-        return [prev[1], team];
-      }
-
-      // Otherwise, add it to the selection
-      return [...prev, team];
-    });
-  };
+    // No limit on team selection - just add it
+    return [...prev, team];
+  });
+};
 
   // Reset filters
   const resetFilters = () => {
@@ -626,14 +622,14 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         <button
           onClick={() => {
             // Set selected teams to today's match teams
-            setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2]);
+            setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2,todaysMatchTeams.team3]);
             // Open the filter modal to show the selection
             setShowTeamFilter(true);
           }}
           className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-full"
           aria-label="Filter for today's match"
         >
-          <span>Filter: Today's Match</span>
+          <span>Filter by Top Teams</span>
         </button>
 
         {/* Choose IPL Team Button */}

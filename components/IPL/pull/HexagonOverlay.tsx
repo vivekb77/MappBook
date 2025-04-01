@@ -106,19 +106,14 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
     if (selectedTeams.length === 0) {
       // If no teams selected, show all data
       setFilteredHexagonData(hexagonData);
-    } else if (selectedTeams.length === 1) {
-      // If one team selected, filter hexagons where this team appears
+    } else {
+      // Filter hexagons where any of the selected teams appear
       setFilteredHexagonData(
         hexagonData.filter(data =>
-          data.teams.some(team => team.team === selectedTeams[0])
-        )
-      );
-    } else if (selectedTeams.length === 2) {
-      // If two teams selected, filter hexagons where both teams appear
-      setFilteredHexagonData(
-        hexagonData.filter(data =>
-          data.teams.some(team => team.team === selectedTeams[0]) &&
-          data.teams.some(team => team.team === selectedTeams[1])
+          // Check if ANY of the selected teams exist in this hexagon
+          selectedTeams.some(selectedTeam =>
+            data.teams.some(team => team.team === selectedTeam)
+          )
         )
       );
     }
@@ -309,31 +304,38 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
       return "#e8e8e8"; // Lighter color for hexagons without data
     }
 
-    // Special handling for when two teams are selected
-    if (selectedTeams.length === 2) {
-      // Find the percentage for each of the selected teams
-      const team1Data = data.teams.find(team => team.team === selectedTeams[0]);
-      const team2Data = data.teams.find(team => team.team === selectedTeams[1]);
+    // If specific teams are selected
+    if (selectedTeams.length > 0) {
+      // Find the selected team with highest percentage in this hexagon
+      let highestPercentageTeam = selectedTeams[0];
+      let highestPercentage = 0;
 
-      // Get the percentages (default to 0 if team not found)
-      const team1Percentage = team1Data ? team1Data.percentage : 0;
-      const team2Percentage = team2Data ? team2Data.percentage : 0;
+      // Find team with highest percentage among selected teams
+      selectedTeams.forEach(teamName => {
+        const teamData = data.teams.find(team => team.team === teamName);
+        if (teamData && teamData.percentage > highestPercentage) {
+          highestPercentage = teamData.percentage;
+          highestPercentageTeam = teamName;
+        }
+      });
 
-      // Determine which team has higher percentage
-      if (team1Percentage > team2Percentage) {
-        const baseColor = teamColors[selectedTeams[0] as keyof typeof teamColors] || "#cccccc";
-        // Adjust intensity based on the difference between teams
-        const dominanceRatio = team1Percentage / (team1Percentage + team2Percentage) * 100;
-        return getColorByDominance(baseColor, dominanceRatio);
-      } else {
-        const baseColor = teamColors[selectedTeams[1] as keyof typeof teamColors] || "#cccccc";
-        // Adjust intensity based on the difference between teams
-        const dominanceRatio = team2Percentage / (team1Percentage + team2Percentage) * 100;
-        return getColorByDominance(baseColor, dominanceRatio);
-      }
+      // Get the color of the team with highest percentage
+      const baseColor = teamColors[highestPercentageTeam as keyof typeof teamColors] || "#cccccc";
+
+      // Calculate dominance percentage relative to other selected teams
+      const totalPercentageOfSelected = selectedTeams.reduce((total, teamName) => {
+        const teamData = data.teams.find(team => team.team === teamName);
+        return total + (teamData ? teamData.percentage : 0);
+      }, 0);
+
+      const dominanceRatio = totalPercentageOfSelected > 0
+        ? (highestPercentage / totalPercentageOfSelected) * 100
+        : 0;
+
+      return getColorByDominance(baseColor, dominanceRatio);
     }
 
-    // Default behavior for single team or all teams view
+    // Default behavior for all teams view
     const team = data.dominant_team;
     const baseColor = teamColors[team as keyof typeof teamColors] || "#cccccc";
 
@@ -471,8 +473,8 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
               style={{ cursor: hasData ? 'pointer' : 'default' }}
               aria-label={hasData ? `Hexagon region ${hexagon.number}` : undefined}
             />
-           {/* Display hexagon number with selection prevention */}
-           <text
+            {/* Display hexagon number with selection prevention */}
+            <text
               x={hexagon.centerX}
               y={hexagon.centerY}
               fontSize="12"
@@ -494,8 +496,8 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
           <rect
             x="0"
             y="0"
-            width="320"
-            height="50"
+            width="220"
+            height={50 + (selectedTeams.length - 1) * 20} // Dynamically adjust height based on team count
             rx="6"
             fill="white"
             fillOpacity="0.9"
@@ -511,14 +513,18 @@ const HexagonOverlay: React.FC<HexagonOverlayProps> = ({
           >
             Filtered by:
           </text>
-          <text
-            x="10"
-            y="38"
-            fontSize="12"
-            fill="#111827"
-          >
-            {selectedTeams.join(" vs ")}
-          </text>
+          {/* Render each team on its own line */}
+          {selectedTeams.map((team, index) => (
+            <text
+              key={team}
+              x="10"
+              y={38 + index * 20} // Position each team 20px below the previous one
+              fontSize="12"
+              fill="#111827"
+            >
+              {team}
+            </text>
+          ))}
         </g>
       )}
     </>
