@@ -1,6 +1,7 @@
 import UserCheck from '@/components/User/UserCheck';
 import { UserProvider } from '@/context/UserContext';
 import { ClerkProvider } from '@clerk/nextjs';
+import { TeamProvider } from '../../components/IPL/TeamContext';
 
 export default function AuthLayout({
   children,
@@ -13,7 +14,9 @@ export default function AuthLayout({
       <ClerkProvider>
         <UserProvider>
           <UserCheck>
+          <TeamProvider>
             {children}
+            </TeamProvider>
           </UserCheck>
         </UserProvider>
         </ClerkProvider>

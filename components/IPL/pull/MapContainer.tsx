@@ -6,6 +6,8 @@ import { FaShareAlt, FaFilter } from 'react-icons/fa';
 import TeamDistributionModal from './GlobalPopup';
 import FilterByTeams from './FilterByTeam';
 import { Instagram, Twitter, Share2, MessageCircle } from 'lucide-react';
+import ShareComponent from './ShareComponent';
+import { useTeam } from '../../IPL/TeamContext';
 
 // Dynamically import the HexagonPopup component to prevent SSR issues
 const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
@@ -131,6 +133,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [showShareNotification, setShowShareNotification] = useState<boolean>(false);
   const animationRef = useRef<number | null>(null);
+  const { selectedTeam, isTeamSelected } = useTeam();
 
   // Team colors for the IPL teams
   const teamColors = {
@@ -318,16 +321,16 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
   // Handle team selection
   const handleTeamSelect = (team: string) => {
-  setSelectedTeams(prev => {
-    // If already selected, remove it
-    if (prev.includes(team)) {
-      return prev.filter(t => t !== team);
-    }
+    setSelectedTeams(prev => {
+      // If already selected, remove it
+      if (prev.includes(team)) {
+        return prev.filter(t => t !== team);
+      }
 
-    // No limit on team selection - just add it
-    return [...prev, team];
-  });
-};
+      // No limit on team selection - just add it
+      return [...prev, team];
+    });
+  };
 
   // Reset filters
   const resetFilters = () => {
@@ -617,12 +620,12 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       </div>
 
       {/* Bottom Left Control Group - Vertically stacked */}
-      <div className="fixed bottom-2 left-2 flex flex-col gap-2">
-        {/* Today's Match Support Button - NEW */}
+      <div className="fixed bottom-2 left-2 flex flex-col gap-2 w-auto max-w-[320px] sm:max-w-[300px]">
+        {/* Today's Match Support Button */}
         <button
           onClick={() => {
             // Set selected teams to today's match teams
-            setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2,todaysMatchTeams.team3]);
+            setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2, todaysMatchTeams.team3]);
             // Open the filter modal to show the selection
             setShowTeamFilter(true);
           }}
@@ -642,44 +645,13 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
           </button>
         </Link>
 
-        {/* Enhanced Share Button with Social Options */}
-        <div className="bg-white rounded-lg shadow-sm w-full overflow-hidden">
-          {/* Main Share Button */}
-          <button
-            onClick={copyShareURL}
-            className="w-full px-3 py-2 flex flex-col items-center justify-center text-green-800 hover:bg-gray-50"
-            aria-label="Share URL"
-          >
-            <div className="text-sm font-medium mb-1">
-              Help your team conquer more regions!
-            </div>
-            <div className="flex items-center">
-              <Share2 className="mr-2 h-4 w-4" />
-              <span className="font-semibold">Share with friends</span>
-            </div>
-          </button>
-
-          {/* Social Share Options */}
-          <div className="flex border-t border-gray-200">
-            <button
-              onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent('Join my IPL team battle and help us conquer more regions! ' + window.location.href)}`, '_blank')}
-              className="flex-1 py-2 text-center text-white bg-green-500 hover:bg-green-600 flex items-center justify-center"
-              aria-label="Share on WhatsApp"
-            >
-              <MessageCircle className="mr-1 h-4 w-4" />
-              <span className="text-xs font-medium">WhatsApp</span>
-            </button>
-
-            <button
-              onClick={() => window.open(`https://x.com/intent/tweet?text=${encodeURIComponent('Join my IPL team battle and help us conquer more regions! ' + window.location.href)}`, '_blank')}
-              className="flex-1 py-2 text-center text-white bg-blue-400 hover:bg-blue-500 flex items-center justify-center"
-              aria-label="Share on Twitter/X"
-            >
-              <Twitter className="mr-1 h-4 w-4" />
-              <span className="text-xs font-medium">Twitter/X</span>
-            </button>
-          </div>
-        </div>
+        <ShareComponent 
+          customUrl="https://mappbook.com"
+          onShareClick={() => {
+            // You can trigger analytics or other events when sharing
+            // console.log("User shared");
+          }} 
+        />
       </div>
 
 

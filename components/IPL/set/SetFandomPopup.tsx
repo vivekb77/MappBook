@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FiMapPin, FiSave, FiAlertCircle } from 'react-icons/fi';
 import Link from 'next/link';
 import SuccessNotification from './SaveTeamNotification';
+import { useTeam } from '../../IPL/TeamContext'; // Import the team context hook
 
 // TypeScript interfaces
 interface Hexagon {
@@ -45,15 +46,15 @@ const IPL_TEAMS = [
 // Team colors for the IPL teams
 const TEAM_COLORS: Record<string, string> = {
   'Chennai Super Kings': '#FFDC00',     // Yellow
-    'Gujarat Titans': '#39B6FF',          // Light Blue
-    'Kolkata Knight Riders': '#552583',   // Purple
-    'Punjab Kings': '#ED1B24',            // Red
-    'Rajasthan Royals': '#FF69B4',        // Pink
-    'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
-    'Sunrisers Hyderabad': '#FF6500',     // Orange,
-    'Lucknow Super Giants': '#3496ff',    // Blue with yellow/gold accent
-    'Mumbai Indians': '#00305a',         // Deep blue with light blue accent
-    'Delhi Capitals': '#0033A0',         // Red with navy blue accen
+  'Gujarat Titans': '#39B6FF',          // Light Blue
+  'Kolkata Knight Riders': '#552583',   // Purple
+  'Punjab Kings': '#ED1B24',            // Red
+  'Rajasthan Royals': '#FF69B4',        // Pink
+  'Royal Challengers Bengaluru': '#2B2A29', // Black/Dark gray
+  'Sunrisers Hyderabad': '#FF6500',     // Orange,
+  'Lucknow Super Giants': '#3496ff',    // Blue with yellow/gold accent
+  'Mumbai Indians': '#00305a',         // Deep blue with light blue accent
+  'Delhi Capitals': '#0033A0',         // Red with navy blue accen
 };
 
 // Storage constants
@@ -67,6 +68,9 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
   userId,
   onTeamSelect
 }) => {
+  // Get the team context
+  const { setTeamData } = useTeam();
+  
   const [selectedTeam, setSelectedTeam] = useState<string>('');
   const [homeHexagon, setHomeHexagon] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -121,6 +125,10 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
             // Only call the parent callback if we have valid data and the callback exists
             if (isValidHexagon && isValidTeam && onTeamSelectRef.current) {
               onTeamSelectRef.current(prefs.homeHexagon.toString(), prefs.team);
+              
+              // Update the global context with team data
+              setTeamData(prefs.team, prefs.homeHexagon);
+              
               setIsSaved(true);
             }
           }
@@ -139,7 +147,7 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
     };
 
     loadSavedPreferences();
-  }, []);
+  }, [setTeamData]);
 
   // When a hexagon is selected, update the home hexagon
   useEffect(() => {
@@ -258,6 +266,9 @@ const SetFandomPopup: React.FC<SetFandomPopupProps> = ({
       // Mark as saved and no longer changed
       setIsSaved(true);
       setIsDataChanged(false);
+      
+      // Update the global context with the selected team and hexagon
+      setTeamData(selectedTeam, hexagonToSave);
 
       // Show success notification instead of alert
       setShowSuccessNotification(true);
