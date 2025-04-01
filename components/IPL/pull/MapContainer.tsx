@@ -526,7 +526,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onTouchStart={(e: React.TouchEvent<HTMLDivElement>) => {
-          e.preventDefault(); // Prevent default behavior
+          // e.preventDefault(); // Prevent default behavior
           handleTouchStart(e);
         }}
         onTouchMove={(e: React.TouchEvent<HTMLDivElement>) => {
@@ -579,17 +579,30 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
       {/* Bottom Right Control Group */}
       <div className="fixed right-2 bottom-2 flex flex-col gap-2 items-end">
-        {/* Filter Button - Top */}
+        {/* Trophy Icon Button Only - Using Lucide React */}
+
+        {/* Trophy Icon Button */}
+        <button
+          onClick={() => {
+            // Set selected teams to today's match teams
+            setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2, todaysMatchTeams.team3]);
+            // Open the filter modal to show the selection
+            setShowTeamFilter(true);
+          }}
+          className="bg-red-600 text-white hover:bg-red-700 w-12 h-12 rounded-full shadow-md flex items-center justify-center cursor-pointer transition-colors"
+          aria-label="Filter for today's match"
+        >
+          <Trophy size={20} />
+        </button>
+
         {/* Filter Button */}
-        <div className="bg-green-700 rounded-full shadow-md">
-          <button
-            className="w-12 h-12 flex items-center justify-center hover:bg-green-800 rounded-full transition-colors"
-            onClick={() => setShowTeamFilter(true)}
-            aria-label="Filter teams"
-          >
-            <FaFilter className="text-white" />
-          </button>
-        </div>
+        <button
+          className="bg-green-700 text-white hover:bg-green-800 w-12 h-12 rounded-full shadow-md flex items-center justify-center cursor-pointer transition-colors"
+          onClick={() => setShowTeamFilter(true)}
+          aria-label="Filter teams"
+        >
+          <FaFilter className="text-white" size={20} />
+        </button>
 
         {/* Zoom Control Buttons - Middle */}
         <div className="bg-white rounded-lg overflow-hidden shadow-md">
@@ -646,19 +659,6 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
 
       {/* Bottom Left Control Group - Vertically stacked */}
       <div className="fixed bottom-2 left-2 flex flex-col gap-2 w-auto max-w-[320px] sm:max-w-[300px]">
-        {/* Trophy Icon Button Only - Using Lucide React */}
-        <button
-          onClick={() => {
-            // Set selected teams to today's match teams
-            setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2, todaysMatchTeams.team3]);
-            // Open the filter modal to show the selection
-            setShowTeamFilter(true);
-          }}
-          className="bg-red-600 text-white hover:bg-red-700 p-2 rounded-lg shadow-sm border-none flex items-center justify-center cursor-pointer w-10 h-10"
-          aria-label="Filter for today's match"
-        >
-          <Trophy size={20} />
-        </button>
 
         {/* Choose IPL Team Button */}
         <Link href="/" passHref>

@@ -86,7 +86,7 @@ export default function RootLayout({
 
       </head>
       {/* <body className="min-h-screen-dynamic"> */}
-      <body className="min-h-screen-dynamic overflow-x-hidden">
+      <body className="min-h-screen-dynamic overflow-x-hidden select-none">
         <CSPostHogProvider>
           <ViewportHandler />
           {children}
