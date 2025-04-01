@@ -153,7 +153,7 @@ const EnhancedShareComponent: React.FC<EnhancedShareComponentProps> = ({ onShare
         {/* Main Share Button with Team Context */}
         <button
           onClick={() => copyShareURL(customUrl)}
-          className="w-full px-3 py-3 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors animate-shine"
+          className="w-full px-2 py-2 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors animate-shine"
           style={{ 
             color: teamColor,
             borderLeft: isTeamSelected ? `4px solid ${teamColor}` : 'none'
@@ -162,7 +162,7 @@ const EnhancedShareComponent: React.FC<EnhancedShareComponentProps> = ({ onShare
         >
           <div className="text-sm font-medium mb-1">
             {isTeamSelected ? (
-              <span className="animate-pulse">Help {selectedTeam} conquer more regions!</span>
+              <span className="animate-pulse">2x points for {selectedTeam}, Region {homeHexagon} when you share!</span>
             ) : (
               <span>Help your team conquer more regions!</span>
             )}
@@ -179,10 +179,10 @@ const EnhancedShareComponent: React.FC<EnhancedShareComponentProps> = ({ onShare
             </div>
           )}
           
-          <div className={`flex items-center ${showAnimation ? 'animate-bounce' : ''}`}>
+          {/* <div className={`flex items-center ${showAnimation ? 'animate-bounce' : ''}`}>
             <Share2 className="mr-2 h-4 w-4" />
             <span className="font-semibold">Share with friends</span>
-          </div>
+          </div> */}
         </button>
 
         {/* Social Share Options with Team Branding */}
