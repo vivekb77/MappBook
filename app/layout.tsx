@@ -38,6 +38,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  maximumScale: 1, // Prevents zooming
+  userScalable: false, // Disables user scaling
 };
 
 export default function RootLayout({
