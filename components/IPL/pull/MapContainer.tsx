@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { FaShareAlt, FaFilter } from 'react-icons/fa';
 import TeamDistributionModal from './GlobalPopup';
 import FilterByTeams from './FilterByTeam';
-import { Instagram, Twitter, Share2, MessageCircle } from 'lucide-react';
+import { Instagram, Twitter, Share2, MessageCircle,Trophy } from 'lucide-react';
 import ShareComponent from './ShareComponent';
 import { useTeam } from '../../IPL/TeamContext';
 
@@ -619,40 +619,41 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         </div>
       </div>
 
-      {/* Bottom Left Control Group - Vertically stacked */}
-      <div className="fixed bottom-2 left-2 flex flex-col gap-2 w-auto max-w-[320px] sm:max-w-[300px]">
-        {/* Today's Match Support Button */}
-        <button
-          onClick={() => {
-            // Set selected teams to today's match teams
-            setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2, todaysMatchTeams.team3]);
-            // Open the filter modal to show the selection
-            setShowTeamFilter(true);
-          }}
-          className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-full"
-          aria-label="Filter for today's match"
-        >
-          <span>Filter by Top Teams</span>
-        </button>
 
-        {/* Choose IPL Team Button */}
-        <Link href="/" passHref>
-          <button
-            className="bg-blue-600 text-white hover:bg-blue-700 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-full"
-            aria-label="See fandom map results"
-          >
-            <span>Choose your favourite IPL team</span>
-          </button>
-        </Link>
+{/* Bottom Left Control Group - Vertically stacked */}
+<div className="fixed bottom-2 left-2 flex flex-col gap-2 w-auto max-w-[320px] sm:max-w-[300px]">
+  {/* Trophy Icon Button Only - Using Lucide React */}
+  <button
+    onClick={() => {
+      // Set selected teams to today's match teams
+      setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2, todaysMatchTeams.team3]);
+      // Open the filter modal to show the selection
+      setShowTeamFilter(true);
+    }}
+    className="bg-red-600 text-white hover:bg-red-700 p-2 rounded-lg shadow-sm border-none flex items-center justify-center cursor-pointer w-10 h-10"
+    aria-label="Filter for today's match"
+  >
+    <Trophy size={20} />
+  </button>
 
-        <ShareComponent 
-          customUrl="https://mappbook.com"
-          onShareClick={() => {
-            // You can trigger analytics or other events when sharing
-            // console.log("User shared");
-          }} 
-        />
-      </div>
+  {/* Choose IPL Team Button */}
+  <Link href="/" passHref>
+    <button
+      className="bg-blue-600 text-white hover:bg-blue-700 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-full"
+      aria-label="See fandom map results"
+    >
+      <span>Choose your favourite IPL team</span>
+    </button>
+  </Link>
+
+  <ShareComponent 
+    customUrl="https://mappbook.com"
+    onShareClick={() => {
+      // You can trigger analytics or other events when sharing
+      // console.log("User shared");
+    }} 
+  />
+</div>
 
 
       {/* URL Share notification */}
