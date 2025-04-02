@@ -31,18 +31,65 @@ const TEAM_TAGLINES: Record<string, string> = {
   'Delhi Capitals': 'Roar Macha! 🦁',
 };
 
+// Team rivals - adding primary rivals for each team for competitive messaging
+const TEAM_RIVALS: Record<string, string[]> = {
+  'Chennai Super Kings': ['Mumbai Indians', 'Royal Challengers Bengaluru'],
+  'Gujarat Titans': ['Rajasthan Royals', 'Lucknow Super Giants'],
+  'Kolkata Knight Riders': ['Mumbai Indians', 'Sunrisers Hyderabad'],
+  'Punjab Kings': ['Delhi Capitals', 'Royal Challengers Bengaluru'],
+  'Rajasthan Royals': ['Gujarat Titans', 'Mumbai Indians'],
+  'Royal Challengers Bengaluru': ['Chennai Super Kings', 'Mumbai Indians'],
+  'Sunrisers Hyderabad': ['Kolkata Knight Riders', 'Chennai Super Kings'],
+  'Lucknow Super Giants': ['Gujarat Titans', 'Delhi Capitals'],
+  'Mumbai Indians': ['Chennai Super Kings', 'Royal Challengers Bengaluru'],
+  'Delhi Capitals': ['Punjab Kings', 'Lucknow Super Giants'],
+};
+
 interface EnhancedShareComponentProps {
   onShareClick?: () => void;
   customUrl?: string;
 }
+
+// Generate a rival message based on a team and its rival
+const generateRivalMessage = (teamName: string): string => {
+  if (!teamName || !TEAM_RIVALS[teamName] || TEAM_RIVALS[teamName].length === 0) {
+    return '';
+  }
+  
+  const teamRivals = TEAM_RIVALS[teamName];
+  const rival = teamRivals[Math.floor(Math.random() * teamRivals.length)];
+  
+  const messages = [
+    `${rival} fans are gaining ground! Defend your territory!`,
+    `Outshine ${rival} fans! Share now!`,
+    `${rival} is challenging us! Recruit more fans!`
+  ];
+  
+  return messages[Math.floor(Math.random() * messages.length)];
+};
 
 const EnhancedShareComponent: React.FC<EnhancedShareComponentProps> = ({ onShareClick, customUrl }) => {
   const { selectedTeam, isTeamSelected, homeHexagon } = useTeam();
   const [showShareNotification, setShowShareNotification] = useState<boolean>(false);
   const [showAnimation, setShowAnimation] = useState<boolean>(false);
   const [pulseBorder, setPulseBorder] = useState<boolean>(false);
+  const [rivalStatusMessage, setRivalStatusMessage] = useState<string>('');
+
+  // Get the appropriate team color for styling
+  const teamColor = isTeamSelected && selectedTeam ? TEAM_COLORS[selectedTeam] : '#1A5D1A';
+  const tagline = isTeamSelected && selectedTeam ? TEAM_TAGLINES[selectedTeam] : '';
+
+  // Initialize rival message when team changes
+  useEffect(() => {
+    if (isTeamSelected && selectedTeam) {
+      const message = generateRivalMessage(selectedTeam);
+      setRivalStatusMessage(message);
+    } else {
+      setRivalStatusMessage('');
+    }
+  }, [isTeamSelected, selectedTeam]);
   
-  // Occasionally pulse the border to attract attention
+  // Pulse animation effect
   useEffect(() => {
     const interval = setInterval(() => {
       setPulseBorder(true);
@@ -52,21 +99,21 @@ const EnhancedShareComponent: React.FC<EnhancedShareComponentProps> = ({ onShare
     return () => clearInterval(interval);
   }, []);
 
-  // Get the appropriate team color for styling
-  const teamColor = isTeamSelected && selectedTeam ? TEAM_COLORS[selectedTeam] : '#1A5D1A';
-  const tagline = isTeamSelected && selectedTeam ? TEAM_TAGLINES[selectedTeam] : '';
+  // Function to get a random rival team for a given team
+  const getRandomRival = (teamName: string): string => {
+    if (!teamName || !TEAM_RIVALS[teamName] || TEAM_RIVALS[teamName].length === 0) {
+      return '';
+    }
+    
+    const teamRivals = TEAM_RIVALS[teamName];
+    return teamRivals[Math.floor(Math.random() * teamRivals.length)];
+  };
 
   // Function to copy URL to clipboard with team context
   const copyShareURL = (customUrl?: string) => {
     if (typeof window !== 'undefined') {
       // Use custom URL if provided, otherwise use current URL
       const shareURL = customUrl || window.location.href;
-
-      // Generate team-specific share text
-      let shareText = 'Join the IPL Fan Battle and help us conquer more regions!';
-      if (isTeamSelected && selectedTeam) {
-        shareText = `I support ${selectedTeam}! ${tagline} Join me and help us conquer more regions on the IPL Fan Map!`;
-      }
 
       // Copy to clipboard
       navigator.clipboard.writeText(shareURL)
@@ -97,15 +144,20 @@ const EnhancedShareComponent: React.FC<EnhancedShareComponentProps> = ({ onShare
     }
   };
 
-  // Generate dynamic, compelling share text based on team selection
+  // Generate dynamic, compelling share text based on team selection and rivals
   const getShareText = () => {
     if (isTeamSelected && selectedTeam) {
+      const rival = getRandomRival(selectedTeam);
+      const rivalContext = rival ? ` Don't let ${rival} fans take over!` : '';
+      
       const messages = [
-        `I'm proudly supporting ${selectedTeam}! ${tagline} Join my team and let's dominate the IPL Fan Map together!`,
-        `${selectedTeam} needs YOUR support! ${tagline} Join me on the IPL Fan Map and help us claim more territory!`,
-        `Are you a real ${selectedTeam} fan? Prove it! ${tagline} Join me on the IPL Fan Map and let's show our power!`,
-        `The battle for cricket supremacy is ON! I've claimed my spot for ${selectedTeam}. ${tagline} Join me now!`,
-        `${selectedTeam} forever! ${tagline} Our team needs more fans on the IPL Fan Map. Join the movement!`
+        `I'm proudly supporting ${selectedTeam}! ${tagline} Join my team and let's dominate the IPL Fan Map together!${rivalContext}`,
+        `${selectedTeam} needs YOUR support! ${tagline} Join me on the IPL Fan Map and help us claim more territory from ${rival}!`,
+        `Are you a real ${selectedTeam} fan? Prove it! ${tagline} Join me on the IPL Fan Map and let's show our power against ${rival}!`,
+        `The battle for cricket supremacy is ON! I've claimed my spot for ${selectedTeam} against ${rival}. ${tagline} Join me now!`,
+        `${selectedTeam} forever! ${tagline} Our team needs more fans to outshine ${rival} on the IPL Fan Map. Join the movement!`,
+        `${rival} fans are gaining ground! As a proud ${selectedTeam} supporter, I need your help to defend our territory! ${tagline}`,
+        `Show ${rival} who's boss! Join me in supporting ${selectedTeam} on the IPL Fan Map and let's conquer more regions! ${tagline}`
       ];
       
       // Select a random message for variety
@@ -160,13 +212,19 @@ const EnhancedShareComponent: React.FC<EnhancedShareComponentProps> = ({ onShare
           }}
           aria-label="Share URL"
         >
-          <div className="text-sm font-medium mb-1">
-            {isTeamSelected ? (
-              <span className="animate-pulse">2x points for {selectedTeam}, Region {homeHexagon} when you share!</span>
-            ) : (
-              <span>Help your team conquer more regions!</span>
-            )}
-          </div>
+          
+          {/* Rival status message - only show if team is selected and we have a message */}
+          {isTeamSelected && rivalStatusMessage && (
+            <div className="text-xs mb-1 p-1 px-2 rounded-full animate-flash" 
+              style={{ 
+                backgroundColor: `${teamColor}15`, 
+                color: "#FF4136",
+                fontWeight: "bold"
+              }}
+            >
+              {rivalStatusMessage}
+            </div>
+          )}
           
           {isTeamSelected && tagline && (
             <div className="text-xs font-bold mb-2 p-1 px-2 rounded-full animate-flash" 
@@ -179,10 +237,9 @@ const EnhancedShareComponent: React.FC<EnhancedShareComponentProps> = ({ onShare
             </div>
           )}
           
-          {/* <div className={`flex items-center ${showAnimation ? 'animate-bounce' : ''}`}>
-            <Share2 className="mr-2 h-4 w-4" />
-            <span className="font-semibold">Share with friends</span>
-          </div> */}
+          <div className={`flex items-center ${showAnimation ? 'animate-bounce' : ''}`}>
+            <span className="font-semibold text-xs">Share with your Army!</span>
+          </div>
         </button>
 
         {/* Social Share Options with Team Branding */}
