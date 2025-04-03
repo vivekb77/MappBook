@@ -8,6 +8,7 @@ import FilterByTeams from './FilterByTeam';
 import { Instagram, Twitter, Share2, MessageCircle, Trophy } from 'lucide-react';
 import ShareComponent from './ShareComponent';
 import { useTeam } from '../../IPL/TeamContext';
+import DynamicFanCounter from './DynamicFanCounter';
 
 // Dynamically import the HexagonPopup component to prevent SSR issues
 const HexagonPopup = dynamic(() => import('./HexagonPopup'), {
@@ -467,9 +468,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
       <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow mx-2 mt-2 mb-2">
         <div className="flex items-center">
           {mapData && (
-            <span className="text-gray-700">
-              Total Fans: <span className="font-bold text-green-700">{mapData.data.metadata.total_fans.toLocaleString()}</span>
-            </span>
+              <DynamicFanCounter initialCount={mapData.data.metadata.total_fans} />
           )}
         </div>
         <button
@@ -538,96 +537,96 @@ const MapContainer: React.FC<MapContainerProps> = ({ geoJsonData }) => {
         </svg>
       </div>
 
-{/* Bottom Right Control Group */}
-<div className="fixed right-2 bottom-2 flex flex-col gap-2 items-end">
-  {/* Trophy Icon Button */}
-  <button
-    onClick={() => {
-      // Set selected teams to today's match teams
-      setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2, todaysMatchTeams.team3]);
-      // Open the filter modal to show the selection
-      setShowTeamFilter(true);
-    }}
-    className="bg-red-600 text-white hover:bg-red-700 w-12 h-12 rounded-full shadow-md flex items-center justify-center cursor-pointer transition-colors"
-    aria-label="Filter for today's match"
-  >
-    <Trophy size={20} />
-  </button>
+      {/* Bottom Right Control Group */}
+      <div className="fixed right-2 bottom-2 flex flex-col gap-2 items-end">
+        {/* Trophy Icon Button */}
+        <button
+          onClick={() => {
+            // Set selected teams to today's match teams
+            setSelectedTeams([todaysMatchTeams.team1, todaysMatchTeams.team2, todaysMatchTeams.team3]);
+            // Open the filter modal to show the selection
+            setShowTeamFilter(true);
+          }}
+          className="bg-red-600 text-white hover:bg-red-700 w-12 h-12 rounded-full shadow-md flex items-center justify-center cursor-pointer transition-colors"
+          aria-label="Filter for today's match"
+        >
+          <Trophy size={20} />
+        </button>
 
-  {/* Zoom Control Buttons - Middle */}
-  <div className="bg-white rounded-lg overflow-hidden shadow-md">
-    <button
-      className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
-      onClick={() => handleZoom(0.2)}
-      aria-label="Zoom in"
-    >
-      <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-    </button>
-    <button
-      className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
-      onClick={() => handleZoom(-0.2)}
-      aria-label="Zoom out"
-    >
-      <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
-      </svg>
-    </button>
-    <button
-      className="w-10 h-10 flex items-center justify-center hover:bg-gray-100"
-      onClick={() => {
-        setScale(1);
-        setTranslateX(0);
-        setTranslateY(0);
-      }}
-      aria-label="Reset view"
-    >
-      <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-      </svg>
-    </button>
-  </div>
+        {/* Zoom Control Buttons - Middle */}
+        <div className="bg-white rounded-lg overflow-hidden shadow-md">
+          <button
+            className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
+            onClick={() => handleZoom(0.2)}
+            aria-label="Zoom in"
+          >
+            <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+          <button
+            className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
+            onClick={() => handleZoom(-0.2)}
+            aria-label="Zoom out"
+          >
+            <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
+            </svg>
+          </button>
+          <button
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100"
+            onClick={() => {
+              setScale(1);
+              setTranslateX(0);
+              setTranslateY(0);
+            }}
+            aria-label="Reset view"
+          >
+            <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
 
-  {/* Social Media Buttons - Bottom */}
-  <div className="flex gap-2">
-    <Link href="https://x.com/mappbook" passHref>
-      <button
-        className="bg-white text-green-800 hover:bg-gray-100 p-2 rounded-lg shadow-sm border-none flex items-center justify-center cursor-pointer"
-        aria-label="follow us on X"
-        onClick={(e) => {
-          e.preventDefault();
-          window.open("https://x.com/mappbook", "_blank");
-        }}
-      >
-        <Twitter size={20} />
-      </button>
-    </Link>
-  </div>
-</div>
+        {/* Social Media Buttons - Bottom */}
+        <div className="flex gap-2">
+          <Link href="https://x.com/mappbook" passHref>
+            <button
+              className="bg-white text-green-800 hover:bg-gray-100 p-2 rounded-lg shadow-sm border-none flex items-center justify-center cursor-pointer"
+              aria-label="follow us on X"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open("https://x.com/mappbook", "_blank");
+              }}
+            >
+              <Twitter size={20} />
+            </button>
+          </Link>
+        </div>
+      </div>
 
 
-{/* Bottom Left Control Group - Vertically stacked */}
-<div className="fixed bottom-2 left-2 flex flex-col gap-2 w-auto max-w-[300px] sm:max-w-[240px] xs:max-w-[45%]">
+      {/* Bottom Left Control Group - Vertically stacked */}
+      <div className="fixed bottom-2 left-2 flex flex-col gap-2 w-auto max-w-[300px] sm:max-w-[240px] xs:max-w-[45%]">
 
-  {/* Choose IPL Team Button */}
-  <Link href="/" passHref>
-    <button
-      className="bg-blue-600 text-white hover:bg-blue-700 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-auto"
-      aria-label="See fandom map results"
-    >
-      <span>Pick your Team</span>
-    </button>
-  </Link>
+        {/* Choose IPL Team Button */}
+        <Link href="/" passHref>
+          <button
+            className="bg-blue-600 text-white hover:bg-blue-700 px-3 py-2 rounded-lg shadow-sm border-none flex items-center justify-center font-semibold text-sm cursor-pointer w-auto"
+            aria-label="See fandom map results"
+          >
+            <span>Pick your Team</span>
+          </button>
+        </Link>
 
-  <ShareComponent
-    customUrl="https://mappbook.com"
-    onShareClick={() => {
-      // You can trigger analytics or other events when sharing
-      // console.log("User shared");
-    }}
-  />
-</div>
+        <ShareComponent
+          customUrl="https://mappbook.com"
+          onShareClick={() => {
+            // You can trigger analytics or other events when sharing
+            // console.log("User shared");
+          }}
+        />
+      </div>
 
       {/* URL Share notification */}
       {showShareNotification && (
