@@ -2,12 +2,8 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 export type MappBookUser = {
   mappbook_user_id: string;
-    is_premium_user?: boolean;
-    total_map_views: number;
-    map_views_left: number;
     display_name : string;
-    country_fill_color : string;
-    drone_footage_credits: number
+    poll_credits: number
   };
 
 interface UserContextType {
