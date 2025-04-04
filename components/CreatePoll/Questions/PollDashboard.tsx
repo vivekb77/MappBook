@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import PollCreatorPopup from './PollCreatorPopup';
 import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
-import LoadingIndicator from '../LoadingIndicator';
+import LoadingIndicator from '../PageLoadingAnimation';
 
 // Define types for better type safety
 interface PollQuestion {

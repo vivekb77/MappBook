@@ -7,7 +7,7 @@ import PollCreator from '@/components/CreatePoll/Questions/PollDashboard';
 import { useMappbookUser } from '@/context/UserContext';
 import { SignedIn, useClerk, useUser } from '@clerk/nextjs';
 import UserProfile from '@/components/CreatePoll/UserProfile';
-import LoadingIndicator from '@/components/CreatePoll/LoadingIndicator';
+import PageLoadingAnimation from '@/components/CreatePoll/PageLoadingAnimation';
 
 const MappBookPage = () => {
   const [isLoaded, setIsLoaded] = React.useState(false);
@@ -22,11 +22,12 @@ const MappBookPage = () => {
   }, []);
 
   if (!isLoaded) {
-    return <LoadingIndicator />;
+    return <PageLoadingAnimation />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
+    // Changed from min-h-screen to h-screen and added flex flex-col
+    <div className="h-screen flex flex-col bg-gray-900">
       {/* Header */}
       <header className="bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -48,15 +49,15 @@ const MappBookPage = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-grow w-full px-2 sm:px-3 md:px-4 py-6">
+      {/* Main Content - Added flex-grow to push footer down */}
+      <main className="flex-grow w-full px-2 sm:px-3 md:px-4 py-6 overflow-y-auto">
         <div className="w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] mx-auto bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 min-h-[500px]">
           <PollCreator />
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 py-4">
+      {/* Footer - Now will always stick to bottom */}
+      <footer className="bg-gray-800 py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-center md:justify-between items-center">
             <div className="text-gray-400 text-sm mb-4 md:mb-0">

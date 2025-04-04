@@ -1,13 +1,13 @@
 import React from 'react';
 
-const LoadingIndicator = () => {
+const PageLoadingAnimation = () => {
   // Size will adjust based on container but maintain proportions
   const size = 70;
   const dotSize = 8;
   const hexPoints = calculateHexagonPoints(size);
   
   return (
-    <div className="h-screen bg-gray-900 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
       <div className="relative h-[15vh] w-[15vh] min-h-24 min-w-24 max-h-40 max-w-40 flex items-center justify-center">
         {/* Static Hexagon Border */}
         <svg className="absolute" width={size * 2} height={size * 2} viewBox={`0 0 ${size * 2} ${size * 2}`}>
@@ -75,4 +75,4 @@ function calculateHexagonPoints(size: number) {
   return points.join(' ');
 }
 
-export default LoadingIndicator;
+export default PageLoadingAnimation;
