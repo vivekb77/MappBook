@@ -160,16 +160,6 @@ const PollDashboard: React.FC = () => {
                       <p className="text-gray-400 text-sm">Created by: {poll.author}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          copyPollUrl(poll.url || '');
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded"
-                      >
-                        Copy URL
-                      </button>
                       <span>{expandedPollIndex === index ? '▼' : '►'}</span>
                     </div>
                   </div>
@@ -183,19 +173,9 @@ const PollDashboard: React.FC = () => {
                             <p className="text-gray-300 mt-2"><span className="font-medium">Description:</span> {poll.description}</p>
                           )}
                         </div>
-                        {poll.url && (
                           <div>
-                            <p className="text-gray-300 font-medium mb-1">Share URL:</p>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                value={poll.url}
-                                readOnly
-                                className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-200 text-sm"
-                              />
-                            </div>
+                            <p className="text-gray-300"><span className="font-medium">Expires:</span> {poll.expires_at}</p>
                           </div>
-                        )}
                       </div>
 
                       <div>
