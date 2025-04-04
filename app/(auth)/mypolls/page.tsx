@@ -1,33 +1,42 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PollCreator from '@/components/MyPolls/CreatePoll/PollDashboard';
 import UserProfile from '@/components/MyPolls/UserProfile';
-import PageLoadingAnimation from '@/components/MyPolls/PageLoadingAnimation';
 
 const MappBookPage = () => {
-  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [viewportHeight, setViewportHeight] = useState('100vh');
+  // Handle viewport height for mobile browsers
+  useEffect(() => {
+    // Function to update viewport height
+    const updateViewportHeight = () => {
+      // Use window.innerHeight for accurate mobile viewport height
+      setViewportHeight(`${window.innerHeight}px`);
+    };
 
-  // Simulate loading - in a real app, you'd check for actual data loading states
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 1500);
+    // Set initial height
+    updateViewportHeight();
 
-    return () => clearTimeout(timer);
+    // Update height on resize and orientation change
+    window.addEventListener('resize', updateViewportHeight);
+    window.addEventListener('orientationchange', updateViewportHeight);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener('resize', updateViewportHeight);
+      window.removeEventListener('orientationchange', updateViewportHeight);
+    };
   }, []);
 
-  if (!isLoaded) {
-    return <PageLoadingAnimation />;
-  }
-
   return (
-    // Changed from min-h-screen to h-screen and added flex flex-col
-    <div className="h-screen flex flex-col bg-gray-900">
+    <div
+      className="flex flex-col bg-gray-900"
+      style={{ height: viewportHeight }}
+    >
       {/* Header */}
-      <header className="bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="bg-gray-800 shadow-sm flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
           <div className="flex justify-between items-center">
             <div className="flex flex-col">
               <div className="flex items-center">
@@ -46,18 +55,17 @@ const MappBookPage = () => {
         </div>
       </header>
 
-      {/* Main Content - Added flex-grow to push footer down */}
-      <main className="flex-grow w-full px-2 sm:px-3 md:px-4 py-6 overflow-y-auto">
-        <div className="w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] mx-auto bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 min-h-[500px]">
+      <main className="flex-grow w-full flex items-center justify-center overflow-hidden">
+        <div className="w-[98%] sm:w-[98%] md:w-[98%] lg:w-[80%] h-[99%] bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 overflow-y-auto">
           <PollCreator />
         </div>
       </main>
 
-      {/* Footer - Now will always stick to bottom */}
-      <footer className="bg-gray-800 py-4 mt-auto">
+      {/* Footer */}
+      <footer className="bg-gray-800 py-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-center md:justify-between items-center">
-            <div className="text-gray-400 text-sm mb-4 md:mb-0">
+            <div className="hidden md:block text-gray-400 text-sm">
               © 2025 MappBook. All rights reserved.
             </div>
             <div className="flex space-x-6">

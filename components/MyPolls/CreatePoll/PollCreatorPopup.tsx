@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
 import { PollData, PollQuestion, ValidationErrors, CharCounts } from './PollCreatorPopup/poll-types';
 import { validatePollDetails, validatePollQuestions } from './PollCreatorPopup/poll-validation';
+import { ToastMessage } from '../ToastMessage';
 
 import StepIndicator from './PollCreatorPopup/StepIndicator';
 import PollDetailsStep from './PollCreatorPopup/PollDetailsStep';
@@ -37,6 +38,13 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Toast notification state
+  const [toast, setToast] = useState({ 
+    visible: false, 
+    message: '', 
+    type: 'success' as 'success' | 'error' 
+  });
 
   // Character count states
   const [charCounts, setCharCounts] = useState<CharCounts>({
@@ -62,6 +70,16 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
     };
     setCharCounts(newCharCounts);
   }, [formData]);
+
+  // Show toast message
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ visible: true, message, type });
+  };
+
+  // Hide toast message
+  const hideToast = () => {
+    setToast({ visible: false, message: '', type: 'success' });
+  };
 
   // Form field handlers
   const handleInputChange = (field: keyof PollData, value: string) => {
@@ -142,13 +160,13 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
     try {
       // Validate the form data first
       if (!validateStep2()) {
-        alert('Please check your form for errors before saving.');
+        showToast('Please check your form for errors before saving.', 'error');
         return;
       }
       
       // Make sure we have the mappbook_user_id
       if (!mappbookUser?.mappbook_user_id) {
-        alert('User profile not loaded. Please try again in a moment.');
+        showToast('User profile not loaded. Please try again in a moment.', 'error');
         return;
       }
       
@@ -173,19 +191,21 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
       const result = await response.json();
       
       if (response.ok && result.success) {
-        try {
-          // Call the parent component's onSave function
-          onSave(dataToSubmit, true);
-        } catch (clipboardError) {
-          onSave(dataToSubmit, true);
-        }
+        showToast('Poll created successfully!', 'success');
+        setTimeout(() => {
+          try {
+            onSave(dataToSubmit, true);
+          } catch (error) {
+            console.error('Error in onSave callback:', error);
+            onSave(dataToSubmit, true);
+          }
+        }, 2000); // Give 1 second for the toast to be visible before closing
       } else {
         throw new Error(result.error || 'Failed to create poll');
       }
     } catch (error) {
       console.error('Error saving poll:', error);
-      alert(`There was an error saving your poll: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
+      showToast(`There was an error saving your poll: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
       setIsSubmitting(false);
     }
   };
@@ -271,7 +291,7 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
   
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-gray-800 rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto relative">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-gray-100">
             {currentStep === 1 ? 'Create New Poll' :
@@ -295,6 +315,18 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
 
         {renderNavigation()}
       </div>
+      
+      {toast.visible && (
+        <div className="z-[100]">
+          <ToastMessage
+            message={toast.message}
+            isVisible={toast.visible}
+            onClose={hideToast}
+            duration={2000}
+            type={toast.type}
+          />
+        </div>
+      )}
     </div>
   );
 };
