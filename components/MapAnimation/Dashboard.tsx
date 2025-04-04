@@ -78,7 +78,7 @@ const DashboardContainer = () => {
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 rounded-full border border-gray-700">
                   <Coins className="w-4 h-4 text-yellow-400" />
                   <span className="text-sm font-medium text-gray-200">
-                    {mappbookUser.drone_footage_credits || 0} credits
+                    {/* {mappbookUser.drone_footage_credits || 0} credits */}
                   </span>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-blue-500 

@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import MapMarkers from './MarkPoints';
 import AltitudeTimeline from './AltitudeTimeline';
 import FlightAnimation from './FlightAnimation';
-import ExportButton from "./Export";
+// import ExportButton from "./Export";
 import { Compass, Loader2 } from "lucide-react";
 import InfoPopUp from "./InfoPopUp";
 import { nanoid } from 'nanoid';
@@ -551,7 +551,7 @@ const MapboxMap: React.FC = () => {
       </div>
 
       {/* Export Buttons */}
-      <ExportButton points={points} totalDistance={totalDistance} />
+      {/* <ExportButton points={points} totalDistance={totalDistance} /> */}
 
       {/* Main map component */}
       <Map
