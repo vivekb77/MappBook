@@ -30,12 +30,11 @@ const MappBookPage = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        <div className="bg-gray-800 rounded-lg shadow-sm p-6 sm:p-8 min-h-[500px]">
+      <main className="flex-grow w-full px-2 sm:px-3 md:px-4 py-6">
+        <div className="w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] mx-auto bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 min-h-[500px]">
           <PollCreator />
         </div>
       </main>
-
       {/* Footer */}
       <footer className="bg-gray-800 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

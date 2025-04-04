@@ -78,13 +78,7 @@ const UserProfile = () => {
         >
           <div className="p-4 border-b border-gray-700">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center text-white overflow-hidden">
-                {user.imageUrl ? (
-                  <img src={user.imageUrl} alt={user.fullName || 'User'} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-lg">{(mappbookUser?.display_name || user.fullName || 'User')[0].toUpperCase()}</span>
-                )}
-              </div>
+             
               <div>
                 <h3 className="text-white font-medium">{mappbookUser?.display_name || user.fullName || 'User'}</h3>
                 <p className="text-gray-400 text-sm">{user.primaryEmailAddress?.emailAddress}</p>
@@ -93,10 +87,6 @@ const UserProfile = () => {
           </div>
           
           <div className="p-4 space-y-3">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-400">User ID:</span>
-              <span className="text-gray-300 truncate max-w-[160px]">{mappbookUser?.mappbook_user_id?.substring(0, 8) || '-'}</span>
-            </div>
             
             <div className="flex justify-between items-center text-sm">
               <span className="text-gray-400">Poll Credits:</span>

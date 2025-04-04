@@ -37,30 +37,28 @@ const PollDashboard: React.FC = () => {
   
   // Get the mappbook user
   const { mappbookUser } = useMappbookUser();
-  
-  // Fetch user's polls when component mounts or user changes
-  useEffect(() => {
-    const fetchPolls = async () => {
-      if (!mappbookUser?.mappbook_user_id) return;
-      
-      setIsLoading(true);
-      try {
-        const response = await fetch(`/api/pull-polls?mappbook_user_id=${mappbookUser.mappbook_user_id}`);
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && Array.isArray(result.data)) {
-            setMyPolls(result.data);
-          }
-        } else {
-          console.error('Failed to fetch polls:', await response.text());
-        }
-      } catch (error) {
-        console.error('Error fetching polls:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchPolls = async () => {
+    if (!mappbookUser?.mappbook_user_id) return;
     
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/pull-polls?mappbook_user_id=${mappbookUser.mappbook_user_id}`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && Array.isArray(result.data)) {
+          setMyPolls(result.data);
+        }
+      } else {
+        console.error('Failed to fetch polls:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error fetching polls:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPolls();
   }, [mappbookUser]);
 
@@ -77,31 +75,15 @@ const PollDashboard: React.FC = () => {
   };
 
   const handleSavePoll = async (newData: PollData, generateUrl: boolean) => {
+    // Close the popup first
+    setShowPopup(false);
+    
     if (generateUrl) {
-      // Close the popup first
-      setShowPopup(false);
+      // Expand the My Polls section
+      setIsMyPollsExpanded(true);
       
       // Refresh the polls list
-      if (mappbookUser?.mappbook_user_id) {
-        setIsLoading(true);
-        try {
-          const response = await fetch(`/api/polls?mappbook_user_id=${mappbookUser.mappbook_user_id}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success && Array.isArray(result.data)) {
-              setMyPolls(result.data);
-              // Expand the My Polls section
-              setIsMyPollsExpanded(true);
-            }
-          }
-        } catch (error) {
-          console.error('Error refreshing polls:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    } else {
-      setShowPopup(false);
+      await fetchPolls();
     }
   };
 
@@ -120,7 +102,7 @@ const PollDashboard: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow-sm p-6 sm:p-8">
+    <div className="w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] mx-auto bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6">
       <div className="flex justify-between items-center mb-6">
         <button
           type="button"
