@@ -4,6 +4,7 @@ import PollCreatorPopup from './PollCreatorPopup';
 import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
 import LoadingIndicator from '../PageLoadingAnimation';
+import { ToastMessage } from '../ToastMessage';
 
 // Define types for better type safety
 interface PollQuestion {
@@ -31,9 +32,12 @@ interface SavedPoll extends PollData {
 const PollDashboard: React.FC = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [expandedPollIndex, setExpandedPollIndex] = useState<number | null>(null);
-  const [isMyPollsExpanded, setIsMyPollsExpanded] = useState(false);
+  const [isMyPollsExpanded, setIsMyPollsExpanded] = useState(true);
   const [myPolls, setMyPolls] = useState<SavedPoll[]>([]);
   const [isDataLoading, setIsdataLoading] = useState(false);
+  const [showAnalyticsPopup, setShowAnalyticsPopup] = useState(false);
+  const [currentPollId, setCurrentPollId] = useState<string | null>(null);
+  const [toast, setToast] = useState({ visible: false, message: '' });
   const { isLoaded, isSignedIn, user } = useUser();
 
   // Get the mappbook user
@@ -91,15 +95,65 @@ const PollDashboard: React.FC = () => {
   const copyPollUrl = (url: string) => {
     navigator.clipboard.writeText(url)
       .then(() => {
-        alert('Poll URL copied to clipboard!');
+        showToast('Poll URL copied to clipboard!');
       })
       .catch((err) => {
         console.error('Could not copy URL: ', err);
+        showToast('Failed to copy URL to clipboard');
       });
   };
 
   const togglePollDetails = (index: number) => {
     setExpandedPollIndex(expandedPollIndex === index ? null : index);
+  };
+
+  const handleToggleActive = async (pollId: string, newActiveState: boolean) => {
+    try {
+      const response = await fetch('/api/pull-polls', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          poll_id: pollId,
+          is_active: newActiveState,
+        }),
+      });
+
+      if (response.ok) {
+        // Update the local state to reflect the change immediately
+        setMyPolls(prevPolls => 
+          prevPolls.map(poll => 
+            poll.poll_id === pollId ? { ...poll, is_active: newActiveState } : poll
+          )
+        );
+        showToast(`Poll ${newActiveState ? 'activated' : 'deactivated'} successfully`);
+      } else {
+        console.error('Failed to update poll status');
+        showToast('Failed to update poll status. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating poll status:', error);
+      showToast('An error occurred while updating poll status.');
+    }
+  };
+
+  const handleViewAnalytics = (pollId: string) => {
+    setCurrentPollId(pollId);
+    setShowAnalyticsPopup(true);
+  };
+
+  const handleCloseAnalytics = () => {
+    setShowAnalyticsPopup(false);
+    setCurrentPollId(null);
+  };
+
+  const showToast = (message: string) => {
+    setToast({ visible: true, message });
+  };
+
+  const hideToast = () => {
+    setToast({ visible: false, message: '' });
   };
 
   // Global loading indicator
@@ -166,6 +220,39 @@ const PollDashboard: React.FC = () => {
 
                   {expandedPollIndex === index && (
                     <div className="border-t border-gray-600 p-4 bg-gray-800">
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <button
+                          type="button"
+                          className={`px-3 py-1.5 rounded text-sm font-medium ${poll.is_active ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleActive(poll.poll_id, !poll.is_active);
+                          }}
+                        >
+                          {poll.is_active ? 'Set Inactive' : 'Set Active'}
+                        </button>
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 rounded text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyPollUrl(poll.url || `${window.location.origin}/polls/${poll.poll_id}`);
+                          }}
+                        >
+                          Copy URL
+                        </button>
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 rounded text-sm font-medium bg-purple-600 hover:bg-purple-700 text-white"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewAnalytics(poll.poll_id);
+                          }}
+                        >
+                          View Analytics
+                        </button>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                           <p className="text-gray-300"><span className="font-medium">Poll Duration:</span> {poll.pollLength} days</p>
@@ -173,9 +260,26 @@ const PollDashboard: React.FC = () => {
                             <p className="text-gray-300 mt-2"><span className="font-medium">Description:</span> {poll.description}</p>
                           )}
                         </div>
-                          <div>
-                            <p className="text-gray-300"><span className="font-medium">Expires:</span> {poll.expires_at}</p>
-                          </div>
+                        <div>
+                          <p className="text-gray-300"><span className="font-medium">Created:</span> {new Date(poll.created_at).toLocaleString(undefined, {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            timeZoneName: 'short'
+                          })}</p>
+                          <p className="text-gray-300 mt-2"><span className="font-medium">Expires:</span> {new Date(poll.expires_at).toLocaleString(undefined, {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            timeZoneName: 'short'
+                          })}</p>
+                        </div>
                       </div>
 
                       <div>
@@ -212,6 +316,38 @@ const PollDashboard: React.FC = () => {
           onSave={handleSavePoll}
         />
       )}
+
+      {/* Analytics Popup */}
+      {showAnalyticsPopup && currentPollId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-gray-800 rounded-lg w-[90%] max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-4 border-b border-gray-700">
+              <h2 className="text-xl font-bold text-white">Poll Analytics</h2>
+              <button
+                type="button"
+                className="text-gray-400 hover:text-white"
+                onClick={handleCloseAnalytics}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-300 text-center">Analytics feature coming soon!</p>
+              {/* Analytics content will be added here later */}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      <ToastMessage
+        message={toast.message}
+        isVisible={toast.visible}
+        onClose={hideToast}
+        duration={2000}
+      />
     </div>
   );
 };
