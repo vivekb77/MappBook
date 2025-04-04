@@ -181,7 +181,7 @@ const PollDashboard: React.FC = () => {
   }
 
   return (
-    <div className="w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] mx-auto bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6">
+    <div className="w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] mx-auto bg-gray-800 rounded-lg shadow-sm p-0 sm:p-0">
       <div className="flex justify-between items-center mb-6">
         <button
           type="button"
