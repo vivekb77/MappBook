@@ -1,7 +1,7 @@
-'use client';
-
-import React, { useState } from 'react';
+// Updated PollCreator component with mappbook_user_id integration
+import React, { useState, useEffect } from 'react';
 import PollEditorPopup from './PollEditorPopup';
+import { useMappbookUser } from '@/context/UserContext';
 
 // Define types for better type safety
 interface PollQuestion {
@@ -10,24 +10,63 @@ interface PollQuestion {
 }
 
 interface PollData {
-  name: string;
+  title: string;
   description: string;
   author: string;
   pollLength: string;
   questions: PollQuestion[];
+  mappbook_user_id?: string;
   url?: string;
+}
+
+interface SavedPoll extends PollData {
+  poll_id: string;
+  created_at: string;
+  expires_at: string;
+  is_active: boolean;
 }
 
 const PollCreator: React.FC = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [expandedPollIndex, setExpandedPollIndex] = useState<number | null>(null);
   const [isMyPollsExpanded, setIsMyPollsExpanded] = useState(false);
+  const [myPolls, setMyPolls] = useState<SavedPoll[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   
-  // In a real implementation, these would come from a Supabase query
-  // This is just placeholder data for the UI layout
-  const myPolls: PollData[] = [];
+  // Get the mappbook user
+  const { mappbookUser } = useMappbookUser();
   
+  // Fetch user's polls when component mounts or user changes
+  useEffect(() => {
+    const fetchPolls = async () => {
+      if (!mappbookUser?.mappbook_user_id) return;
+      
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/pull-polls?mappbook_user_id=${mappbookUser.mappbook_user_id}`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && Array.isArray(result.data)) {
+            setMyPolls(result.data);
+          }
+        } else {
+          console.error('Failed to fetch polls:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error fetching polls:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPolls();
+  }, [mappbookUser]);
+
   const handleCreatePoll = () => {
+    if (!mappbookUser?.mappbook_user_id) {
+      alert('Please sign in to create a poll');
+      return;
+    }
     setShowPopup(true);
   };
 
@@ -37,53 +76,31 @@ const PollCreator: React.FC = () => {
 
   const handleSavePoll = async (newData: PollData, generateUrl: boolean) => {
     if (generateUrl) {
-      try {
-        // This would be replaced with a real Supabase API call
-        // Example (to implement later):
-        // const { data, error } = await supabaseClient
-        //   .from('polls')
-        //   .insert([{
-        //     name: newData.name,
-        //     description: newData.description,
-        //     author: newData.author,
-        //     pollLength: newData.pollLength,
-        //     questions: newData.questions,
-        //     userId: auth.user.id // The current user's ID
-        //   }])
-        //   .select()
-        
-        // After saving to Supabase, we would get back the record with its ID
-        // Then we could construct and copy the URL
-        // const pollUrl = `https://mappbook.com/polls/${data[0].id}`;
-        
-        // For now, just simulate success:
-        const pollId = Math.random().toString(36).substring(2, 15);
-        const pollUrl = `https://mappbook.com/polls/${pollId}`;
-        
-        // Copy the URL to clipboard
-        navigator.clipboard.writeText(pollUrl)
-          .then(() => {
-            alert('Poll created successfully! URL copied to clipboard.');
-          })
-          .catch((err) => {
-            console.error('Could not copy URL: ', err);
-            alert('Poll created successfully! You can find it in My Polls.');
-          });
-        
-        // In a real app, you would reload polls from Supabase here
-        // Example: fetchUserPolls();
-        
-        // Open the My Polls section
-        setIsMyPollsExpanded(true);
-        
-      } catch (error) {
-        console.error('Error saving poll:', error);
-        alert('There was an error saving your poll. Please try again.');
-        return;
+      // Close the popup first
+      setShowPopup(false);
+      
+      // Refresh the polls list
+      if (mappbookUser?.mappbook_user_id) {
+        setIsLoading(true);
+        try {
+          const response = await fetch(`/api/polls?mappbook_user_id=${mappbookUser.mappbook_user_id}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.success && Array.isArray(result.data)) {
+              setMyPolls(result.data);
+              // Expand the My Polls section
+              setIsMyPollsExpanded(true);
+            }
+          }
+        } catch (error) {
+          console.error('Error refreshing polls:', error);
+        } finally {
+          setIsLoading(false);
+        }
       }
+    } else {
+      setShowPopup(false);
     }
-    
-    setShowPopup(false);
   };
 
   const copyPollUrl = (url: string) => {
@@ -105,13 +122,21 @@ const PollCreator: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <button
           type="button"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg"
+          className={`bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg
+            ${!mappbookUser?.mappbook_user_id ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={handleCreatePoll}
+          disabled={!mappbookUser?.mappbook_user_id}
         >
           Create New Poll
         </button>
-        <h2 className="text-2xl font-bold text-gray-100">Poll Dashboard</h2>
       </div>
+      
+      {!mappbookUser?.mappbook_user_id && (
+        <div className="bg-yellow-800 text-yellow-200 p-4 rounded-lg mb-6">
+          <p className="font-medium">Sign in required</p>
+          <p>You need to sign in to create and manage polls.</p>
+        </div>
+      )}
       
       {/* My Polls Section */}
       <div className="mt-8">
@@ -126,17 +151,22 @@ const PollCreator: React.FC = () => {
         
         {isMyPollsExpanded && (
           <div className="mt-4 space-y-3">
-            {myPolls.length === 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="w-6 h-6 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
+                <span className="ml-2 text-gray-300">Loading polls...</span>
+              </div>
+            ) : myPolls.length === 0 ? (
               <p className="text-gray-400 text-center py-4">No polls created yet</p>
             ) : (
               myPolls.map((poll, index) => (
-                <div key={index} className="bg-gray-700 rounded-lg overflow-hidden">
+                <div key={poll.poll_id} className="bg-gray-700 rounded-lg overflow-hidden">
                   <div 
                     className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-600"
                     onClick={() => togglePollDetails(index)}
                   >
                     <div>
-                      <h3 className="text-gray-100 font-medium">{poll.name}</h3>
+                      <h3 className="text-gray-100 font-medium">{poll.title}</h3>
                       <p className="text-gray-400 text-sm">Created by: {poll.author}</p>
                     </div>
                     <div className="flex items-center gap-3">
