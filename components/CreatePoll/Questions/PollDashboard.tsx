@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import PollCreatorPopup from './PollCreatorPopup';
 import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
+import LoadingIndicator from '../LoadingIndicator';
 
 // Define types for better type safety
 interface PollQuestion {
@@ -32,15 +33,15 @@ const PollDashboard: React.FC = () => {
   const [expandedPollIndex, setExpandedPollIndex] = useState<number | null>(null);
   const [isMyPollsExpanded, setIsMyPollsExpanded] = useState(false);
   const [myPolls, setMyPolls] = useState<SavedPoll[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isDataLoading, setIsdataLoading] = useState(false);
   const { isLoaded, isSignedIn, user } = useUser();
-  
+
   // Get the mappbook user
   const { mappbookUser } = useMappbookUser();
   const fetchPolls = async () => {
     if (!mappbookUser?.mappbook_user_id) return;
-    
-    setIsLoading(true);
+
+    setIsdataLoading(true);
     try {
       const response = await fetch(`/api/pull-polls?mappbook_user_id=${mappbookUser.mappbook_user_id}`);
       if (response.ok) {
@@ -54,7 +55,7 @@ const PollDashboard: React.FC = () => {
     } catch (error) {
       console.error('Error fetching polls:', error);
     } finally {
-      setIsLoading(false);
+      setIsdataLoading(false);
     }
   };
 
@@ -77,11 +78,11 @@ const PollDashboard: React.FC = () => {
   const handleSavePoll = async (newData: PollData, generateUrl: boolean) => {
     // Close the popup first
     setShowPopup(false);
-    
+
     if (generateUrl) {
       // Expand the My Polls section
       setIsMyPollsExpanded(true);
-      
+
       // Refresh the polls list
       await fetchPolls();
     }
@@ -101,6 +102,11 @@ const PollDashboard: React.FC = () => {
     setExpandedPollIndex(expandedPollIndex === index ? null : index);
   };
 
+  // Global loading indicator
+  if (!isLoaded) {
+    return <LoadingIndicator />
+  }
+
   return (
     <div className="w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] mx-auto bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6">
       <div className="flex justify-between items-center mb-6">
@@ -114,14 +120,14 @@ const PollDashboard: React.FC = () => {
           Create New Poll
         </button>
       </div>
-      
+
       {isLoaded && !isSignedIn && !mappbookUser?.mappbook_user_id && (
         <div className="bg-yellow-800 text-yellow-200 p-4 rounded-lg mb-6">
           <p className="font-medium">Sign in required</p>
           <p>You need to sign in to create and manage polls.</p>
         </div>
       )}
-      
+
       {/* My Polls Section */}
       <div className="mt-8">
         <button
@@ -132,10 +138,10 @@ const PollDashboard: React.FC = () => {
           <span>My Polls ({myPolls.length})</span>
           <span>{isMyPollsExpanded ? '▼' : '►'}</span>
         </button>
-        
+
         {isMyPollsExpanded && (
           <div className="mt-4 space-y-3">
-            {isLoading ? (
+            {isDataLoading ? (
               <div className="flex justify-center items-center py-8">
                 <div className="w-6 h-6 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
                 <span className="ml-2 text-gray-300">Loading polls...</span>
@@ -145,7 +151,7 @@ const PollDashboard: React.FC = () => {
             ) : (
               myPolls.map((poll, index) => (
                 <div key={poll.poll_id} className="bg-gray-700 rounded-lg overflow-hidden">
-                  <div 
+                  <div
                     className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-600"
                     onClick={() => togglePollDetails(index)}
                   >
@@ -167,7 +173,7 @@ const PollDashboard: React.FC = () => {
                       <span>{expandedPollIndex === index ? '▼' : '►'}</span>
                     </div>
                   </div>
-                  
+
                   {expandedPollIndex === index && (
                     <div className="border-t border-gray-600 p-4 bg-gray-800">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -181,9 +187,9 @@ const PollDashboard: React.FC = () => {
                           <div>
                             <p className="text-gray-300 font-medium mb-1">Share URL:</p>
                             <div className="flex items-center gap-2">
-                              <input 
-                                type="text" 
-                                value={poll.url} 
+                              <input
+                                type="text"
+                                value={poll.url}
                                 readOnly
                                 className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-200 text-sm"
                               />
@@ -191,7 +197,7 @@ const PollDashboard: React.FC = () => {
                           </div>
                         )}
                       </div>
-                      
+
                       <div>
                         <h4 className="text-gray-200 font-medium mb-2">Questions:</h4>
                         <div className="space-y-2">

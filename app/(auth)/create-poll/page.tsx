@@ -7,8 +7,24 @@ import PollCreator from '@/components/CreatePoll/Questions/PollDashboard';
 import { useMappbookUser } from '@/context/UserContext';
 import { SignedIn, useClerk, useUser } from '@clerk/nextjs';
 import UserProfile from '@/components/CreatePoll/UserProfile';
+import LoadingIndicator from '@/components/CreatePoll/LoadingIndicator';
 
 const MappBookPage = () => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
+  // Simulate loading - in a real app, you'd check for actual data loading states
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isLoaded) {
+    return <LoadingIndicator />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
       {/* Header */}
@@ -16,15 +32,18 @@ const MappBookPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex flex-col">
-              <h1 className="text-2xl font-bold text-gray-100">MappBook</h1>
-              <p className="text-sm text-gray-400">Polls for you</p>
+              <div className="flex items-center">
+                <div className="bg-gray-800 px-3 py-1.5 rounded-lg shadow-md">
+                  <h1 className="text-2xl font-bold tracking-wide">
+                    <span className="text-gray-100">Mapp</span>
+                    <span className="text-blue-500">Book</span>
+                  </h1>
+                </div>
+              </div>
             </div>
-
-
             <div className="flex items-center">
               <UserProfile />
             </div>
-
           </div>
         </div>
       </header>
@@ -35,6 +54,7 @@ const MappBookPage = () => {
           <PollCreator />
         </div>
       </main>
+
       {/* Footer */}
       <footer className="bg-gray-800 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
