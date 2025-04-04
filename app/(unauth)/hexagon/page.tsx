@@ -10,7 +10,16 @@ const HexagonArticlePage: FC = () => {
       <header className="bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-100">Hexagons are the Bestagons</h1>
+            <div className="flex flex-col">
+              <div className="flex items-center">
+                <div className="bg-gray-800 px-3 py-1.5 rounded-lg shadow-md">
+                  <h1 className="text-2xl font-bold tracking-wide">
+                    <span className="text-gray-100">Mapp</span>
+                    <span className="text-blue-500">Book</span>
+                  </h1>
+                </div>
+              </div>
+            </div>
             <Link
               href="/"
               className="text-blue-500 hover:text-blue-400 font-medium"
@@ -61,7 +70,7 @@ const HexagonArticlePage: FC = () => {
             <h3 className="text-2xl font-semibold text-gray-100 mb-4">Key Mathematical Properties</h3>
             <div className="space-y-4 text-gray-300">
               <p>For a regular hexagon with side length <em>a</em>, we can calculate several important measurements:</p>
-              
+
               <div className="bg-gray-700 p-4 rounded-lg">
                 <h4 className="text-gray-100 font-medium mb-2">Essential Formulas for Regular Hexagons</h4>
                 <ul className="list-disc pl-6 space-y-2">
@@ -75,7 +84,7 @@ const HexagonArticlePage: FC = () => {
                   <li><strong>Short Diagonal:</strong> √3 × side length</li>
                 </ul>
               </div>
-              
+
               <p className="mt-4">
                 The regular hexagon has 9 diagonals in total - three long diagonals that pass through the center point, and six shorter diagonals. These properties make the hexagon particularly suited for efficient designs in nature and engineering.
               </p>
@@ -140,7 +149,7 @@ const HexagonArticlePage: FC = () => {
               </ul>
             </div>
           </section>
-          
+
           {/* Hexagons in Our App */}
           <section className="mb-12">
             <h3 className="text-2xl font-semibold text-gray-100 mb-4">Hexagons: Reimagining Borders for the Modern Age</h3>

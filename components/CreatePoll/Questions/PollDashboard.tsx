@@ -1,4 +1,3 @@
-//PollDashboard.tsx
 import React, { useState, useEffect } from 'react';
 import PollCreatorPopup from './PollCreatorPopup';
 import { useMappbookUser } from '@/context/UserContext';
@@ -37,7 +36,7 @@ const PollDashboard: React.FC = () => {
   const [isDataLoading, setIsdataLoading] = useState(false);
   const [showAnalyticsPopup, setShowAnalyticsPopup] = useState(false);
   const [currentPollId, setCurrentPollId] = useState<string | null>(null);
-  const [toast, setToast] = useState({ visible: false, message: '' });
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' });
   const { isLoaded, isSignedIn, user } = useUser();
 
   // Get the mappbook user
@@ -95,11 +94,11 @@ const PollDashboard: React.FC = () => {
   const copyPollUrl = (url: string) => {
     navigator.clipboard.writeText(url)
       .then(() => {
-        showToast('Poll URL copied to clipboard!');
+        showToast('Poll URL copied!', 'success');
       })
       .catch((err) => {
         console.error('Could not copy URL: ', err);
-        showToast('Failed to copy URL to clipboard');
+        showToast('Failed to copy URL', 'error');
       });
   };
 
@@ -127,14 +126,14 @@ const PollDashboard: React.FC = () => {
             poll.poll_id === pollId ? { ...poll, is_active: newActiveState } : poll
           )
         );
-        showToast(`Poll ${newActiveState ? 'activated' : 'deactivated'} successfully`);
+        showToast(`Poll ${newActiveState ? 'activated' : 'deactivated'} successfully`, 'success');
       } else {
         console.error('Failed to update poll status');
-        showToast('Failed to update poll status. Please try again.');
+        showToast('Failed to update poll status. Please try again.', 'error');
       }
     } catch (error) {
       console.error('Error updating poll status:', error);
-      showToast('An error occurred while updating poll status.');
+      showToast('An error occurred while updating poll status.', 'error');
     }
   };
 
@@ -148,12 +147,32 @@ const PollDashboard: React.FC = () => {
     setCurrentPollId(null);
   };
 
-  const showToast = (message: string) => {
-    setToast({ visible: true, message });
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ visible: true, message, type });
   };
 
   const hideToast = () => {
-    setToast({ visible: false, message: '' });
+    setToast({ visible: false, message: '', type: 'success' });
+  };
+
+  // Function to format dates in a user-friendly way with AM/PM
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString(undefined, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+  
+  // Function to correctly display singular or plural for days
+  const formatDuration = (duration: string) => {
+    const days = parseInt(duration, 10);
+    return days === 1 ? '1 day' : `${days} days`;
   };
 
   // Global loading indicator
@@ -198,7 +217,7 @@ const PollDashboard: React.FC = () => {
             {isDataLoading ? (
               <div className="flex justify-center items-center py-8">
                 <div className="w-6 h-6 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
-                <span className="ml-2 text-gray-300">Loading polls...</span>
+                <span className="ml-2 text-gray-300">Loading polls</span>
               </div>
             ) : myPolls.length === 0 ? (
               <p className="text-gray-400 text-center py-4">No polls created yet</p>
@@ -255,30 +274,14 @@ const PollDashboard: React.FC = () => {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                          <p className="text-gray-300"><span className="font-medium">Poll Duration:</span> {poll.pollLength} days</p>
+                          <p className="text-gray-300"><span className="font-medium">Poll Duration:</span> {formatDuration(poll.pollLength)}</p>
                           {poll.description && (
                             <p className="text-gray-300 mt-2"><span className="font-medium">Description:</span> {poll.description}</p>
                           )}
                         </div>
                         <div>
-                          <p className="text-gray-300"><span className="font-medium">Created:</span> {new Date(poll.created_at).toLocaleString(undefined, {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            timeZoneName: 'short'
-                          })}</p>
-                          <p className="text-gray-300 mt-2"><span className="font-medium">Expires:</span> {new Date(poll.expires_at).toLocaleString(undefined, {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            timeZoneName: 'short'
-                          })}</p>
+                          <p className="text-gray-300"><span className="font-medium">Created:</span> {formatDate(poll.created_at)}</p>
+                          <p className="text-gray-300 mt-2"><span className="font-medium">Expires:</span> {formatDate(poll.expires_at)}</p>
                         </div>
                       </div>
 
@@ -341,12 +344,12 @@ const PollDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Toast notification */}
       <ToastMessage
         message={toast.message}
         isVisible={toast.visible}
         onClose={hideToast}
         duration={2000}
+        type={toast.type}
       />
     </div>
   );
