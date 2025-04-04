@@ -1,7 +1,8 @@
-// Updated PollCreator component with mappbook_user_id integration
+//PollDashboard.tsx
 import React, { useState, useEffect } from 'react';
-import PollEditorPopup from './PollEditorPopup';
+import PollCreatorPopup from './PollCreatorPopup';
 import { useMappbookUser } from '@/context/UserContext';
+import { useUser } from '@clerk/nextjs';
 
 // Define types for better type safety
 interface PollQuestion {
@@ -26,12 +27,13 @@ interface SavedPoll extends PollData {
   is_active: boolean;
 }
 
-const PollCreator: React.FC = () => {
+const PollDashboard: React.FC = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [expandedPollIndex, setExpandedPollIndex] = useState<number | null>(null);
   const [isMyPollsExpanded, setIsMyPollsExpanded] = useState(false);
   const [myPolls, setMyPolls] = useState<SavedPoll[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { isLoaded, isSignedIn, user } = useUser();
   
   // Get the mappbook user
   const { mappbookUser } = useMappbookUser();
@@ -125,13 +127,13 @@ const PollCreator: React.FC = () => {
           className={`bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg
             ${!mappbookUser?.mappbook_user_id ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={handleCreatePoll}
-          disabled={!mappbookUser?.mappbook_user_id}
+          disabled={!mappbookUser?.mappbook_user_id && !isSignedIn}
         >
           Create New Poll
         </button>
       </div>
       
-      {!mappbookUser?.mappbook_user_id && (
+      {isLoaded && !isSignedIn && !mappbookUser?.mappbook_user_id && (
         <div className="bg-yellow-800 text-yellow-200 p-4 rounded-lg mb-6">
           <p className="font-medium">Sign in required</p>
           <p>You need to sign in to create and manage polls.</p>
@@ -237,7 +239,7 @@ const PollCreator: React.FC = () => {
       </div>
 
       {showPopup && (
-        <PollEditorPopup
+        <PollCreatorPopup
           onClose={handleClosePopup}
           onSave={handleSavePoll}
         />
@@ -246,4 +248,4 @@ const PollCreator: React.FC = () => {
   );
 };
 
-export default PollCreator;
+export default PollDashboard;

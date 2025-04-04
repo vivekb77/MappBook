@@ -1,3 +1,4 @@
+//PollCreatorPopup.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -21,12 +22,12 @@ interface PollData {
   url?: string;
 }
 
-interface PollEditorPopupProps {
+interface PollCreatorPopupProps {
     onClose: () => void;
     onSave: (data: PollData, generateUrl: boolean) => void;
 }
 
-const PollEditorPopup: React.FC<PollEditorPopupProps> = ({
+const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
     onClose,
     onSave
 }) => {
@@ -600,4 +601,4 @@ const PollEditorPopup: React.FC<PollEditorPopupProps> = ({
     );
 };
 
-export default PollEditorPopup;
+export default PollCreatorPopup;

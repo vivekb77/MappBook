@@ -53,7 +53,7 @@ const UserProfile = () => {
   }
 
   if (!isSignedIn) {
-    return <SignInButton redirectUrl="/studio" />;
+    return <SignInButton redirectUrl="/create-poll" />;
   }
 
   return (
