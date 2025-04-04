@@ -2,12 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import PollCreator from '@/components/CreatePoll/Questions/PollDashboard';
-import { useMappbookUser } from '@/context/UserContext';
-import { SignedIn, useClerk, useUser } from '@clerk/nextjs';
-import UserProfile from '@/components/CreatePoll/UserProfile';
-import PageLoadingAnimation from '@/components/CreatePoll/PageLoadingAnimation';
+import PollCreator from '@/components/MyPolls/CreatePoll/PollDashboard';
+import UserProfile from '@/components/MyPolls/UserProfile';
+import PageLoadingAnimation from '@/components/MyPolls/PageLoadingAnimation';
 
 const MappBookPage = () => {
   const [isLoaded, setIsLoaded] = React.useState(false);

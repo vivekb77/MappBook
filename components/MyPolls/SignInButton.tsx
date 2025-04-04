@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-const SignInButton = ({ redirectUrl = '/create-poll' }) => {
+const SignInButton = ({ redirectUrl = '/mypolls' }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {

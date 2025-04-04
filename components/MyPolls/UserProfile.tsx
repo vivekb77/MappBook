@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
 import { SignedIn, useClerk, useUser } from '@clerk/nextjs';
-import SignInButton from '@/components/CreatePoll/SignInButton';
+import SignInButton from '@/components/MyPolls/SignInButton';
 import { logout } from '../utils/auth';
 import { track } from '@vercel/analytics';
 
@@ -9,12 +9,12 @@ const UserProfile = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { mappbookUser } = useMappbookUser();
   const [showPopup, setShowPopup] = useState(false);
-  const popupRef = useRef(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   // Close popup when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: { target: any; }) => {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
         setShowPopup(false);
       }
     };
@@ -53,7 +53,7 @@ const UserProfile = () => {
   }
 
   if (!isSignedIn) {
-    return <SignInButton redirectUrl="/create-poll" />;
+    return <SignInButton redirectUrl="/mypolls" />;
   }
 
   return (
