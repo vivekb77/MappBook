@@ -4,6 +4,7 @@ import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
 import LoadingIndicator from '../PageLoadingAnimation';
 import { ToastMessage } from '../ToastMessage';
+import { PlusCircle, Copy, BarChart3, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 
 // Define types for better type safety
 interface PollQuestion {
@@ -28,7 +29,11 @@ interface SavedPoll extends PollData {
   is_active: boolean;
 }
 
-const PollDashboard: React.FC = () => {
+interface PollDashboardProps {
+  isDarkMode: boolean;
+}
+
+const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [expandedPollIndex, setExpandedPollIndex] = useState<number | null>(null);
   const [isMyPollsExpanded, setIsMyPollsExpanded] = useState(true);
@@ -68,7 +73,7 @@ const PollDashboard: React.FC = () => {
 
   const handleCreatePoll = () => {
     if (!mappbookUser?.mappbook_user_id) {
-      alert('Please sign in to create a poll');
+      showToast('Please sign in to create a poll', 'error');
       return;
     }
     setShowPopup(true);
@@ -177,73 +182,106 @@ const PollDashboard: React.FC = () => {
 
   // Global loading indicator
   if (!isLoaded) {
-    return <LoadingIndicator />
+    return <LoadingIndicator isDarkMode={isDarkMode} />
   }
 
   return (
-    <div className="w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] mx-auto bg-gray-800 rounded-lg shadow-sm p-0 sm:p-0">
+    <div className="w-full">
       <div className="flex justify-between items-center mb-6">
         <button
           type="button"
-          className={`bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg
+          className={`flex items-center gap-2 transition-all duration-300 rounded-lg shadow-sm
+            ${isDarkMode 
+              ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-700/20' 
+              : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-indigo-500/20'
+            }
+            font-medium py-2.5 px-4
             ${!mappbookUser?.mappbook_user_id ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={handleCreatePoll}
           disabled={!mappbookUser?.mappbook_user_id && !isSignedIn}
         >
-          Create New Poll
+          <PlusCircle size={18} />
+          <span>Create New Poll</span>
         </button>
       </div>
 
       {isLoaded && !isSignedIn && !mappbookUser?.mappbook_user_id && (
-        <div className="bg-yellow-800 text-yellow-200 p-4 rounded-lg mb-6">
-          <p className="font-medium">Sign in required</p>
-          <p>You need to sign in to create and manage polls.</p>
+        <div className={`p-4 rounded-lg mb-6 flex items-start gap-3
+          ${isDarkMode ? 'bg-amber-900/30 text-amber-200' : 'bg-amber-50 text-amber-800'}`}>
+          <AlertTriangle size={20} className={isDarkMode ? 'text-amber-400' : 'text-amber-500'} />
+          <div>
+            <p className="font-medium">Sign in required</p>
+            <p className={isDarkMode ? 'text-amber-300' : 'text-amber-700'}>You need to sign in to create and manage polls.</p>
+          </div>
         </div>
       )}
 
       {/* My Polls Section */}
-      <div className="mt-8">
+      <div className="mt-6">
         <button
           type="button"
-          className="flex justify-between items-center w-full bg-gray-700 hover:bg-gray-600 text-left text-gray-100 font-semibold py-3 px-4 rounded-lg"
+          className={`flex justify-between items-center w-full text-left font-semibold py-3 px-4 rounded-lg transition-colors
+            ${isDarkMode 
+              ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+              : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
           onClick={() => setIsMyPollsExpanded(!isMyPollsExpanded)}
         >
           <span>My Polls ({myPolls.length})</span>
-          <span>{isMyPollsExpanded ? '▼' : '►'}</span>
+          <span>{isMyPollsExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}</span>
         </button>
 
         {isMyPollsExpanded && (
           <div className="mt-4 space-y-3">
             {isDataLoading ? (
               <div className="flex justify-center items-center py-8">
-                <div className="w-6 h-6 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
-                <span className="ml-2 text-gray-300">Loading polls</span>
+                <div className={`w-6 h-6 border-2 rounded-full animate-spin
+                  ${isDarkMode ? 'border-slate-600 border-t-indigo-400' : 'border-gray-300 border-t-indigo-600'}`}></div>
+                <span className={`ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Loading polls</span>
               </div>
             ) : myPolls.length === 0 ? (
-              <p className="text-gray-400 text-center py-4">No polls created yet</p>
+              <p className={`text-center py-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                No polls created yet. Create your first poll to get started!
+              </p>
             ) : (
               myPolls.map((poll, index) => (
-                <div key={poll.poll_id} className="bg-gray-700 rounded-lg overflow-hidden">
+                <div key={poll.poll_id} 
+                  className={`rounded-lg overflow-hidden shadow-sm transition-shadow duration-300
+                    ${isDarkMode 
+                      ? 'bg-slate-800 hover:shadow-md hover:shadow-indigo-900/10' 
+                      : 'bg-white hover:shadow-md hover:shadow-gray-200'}`}
+                >
                   <div
-                    className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-600"
+                    className={`flex justify-between items-center p-4 cursor-pointer transition-colors
+                      ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-50'}`}
                     onClick={() => togglePollDetails(index)}
                   >
                     <div>
-                      <h3 className="text-gray-100 font-medium">{poll.title}</h3>
-                      <p className="text-gray-400 text-sm">Created by: {poll.author}</p>
+                      <h3 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{poll.title}</h3>
+                      <p className={isDarkMode ? 'text-gray-400' : 'text-gray-500'} style={{fontSize: '0.875rem'}}>
+                        Created by: {poll.author}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span>{expandedPollIndex === index ? '▼' : '►'}</span>
+                    <div className="flex items-center">
+                      <span className={`flex items-center justify-center w-6 h-6 rounded-full
+                        ${isDarkMode 
+                          ? 'bg-slate-700 text-gray-300' 
+                          : 'bg-gray-100 text-gray-600'}`}>
+                        {expandedPollIndex === index ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                      </span>
                     </div>
                   </div>
 
                   {expandedPollIndex === index && (
-                    <div className="border-t border-gray-600 p-4 bg-gray-800">
+                    <div className={`p-4 ${isDarkMode ? 'border-t border-slate-700 bg-slate-800' : 'border-t border-gray-100'}`}>
                       {/* Action Buttons */}
                       <div className="flex flex-wrap gap-2 mb-4">
                         <button
                           type="button"
-                          className={`px-3 py-1.5 rounded text-sm font-medium ${poll.is_active ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
+                          className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5
+                            ${poll.is_active 
+                              ? (isDarkMode ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600')
+                              : (isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600')} 
+                            text-white`}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleToggleActive(poll.poll_id, !poll.is_active);
@@ -253,49 +291,66 @@ const PollDashboard: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          className="px-3 py-1.5 rounded text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white"
+                          className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5
+                            ${isDarkMode 
+                              ? 'bg-slate-700 hover:bg-slate-600 text-white' 
+                              : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             copyPollUrl(poll.url || `${window.location.origin}/polls/${poll.poll_id}`);
                           }}
                         >
-                          Copy URL
+                          <Copy size={14} />
+                          <span>Copy URL</span>
                         </button>
                         <button
                           type="button"
-                          className="px-3 py-1.5 rounded text-sm font-medium bg-purple-600 hover:bg-purple-700 text-white"
+                          className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5
+                            ${isDarkMode 
+                              ? 'bg-indigo-600 hover:bg-indigo-700 text-white' 
+                              : 'bg-indigo-500 hover:bg-indigo-600 text-white'}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleViewAnalytics(poll.poll_id);
                           }}
                         >
-                          View Analytics
+                          <BarChart3 size={14} />
+                          <span>View Analytics</span>
                         </button>
                       </div>
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                          <p className="text-gray-300"><span className="font-medium">Poll Duration:</span> {formatDuration(poll.pollLength)}</p>
+                          <p className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
+                            <span className="font-medium">Poll Duration:</span> {formatDuration(poll.pollLength)}
+                          </p>
                           {poll.description && (
-                            <p className="text-gray-300 mt-2"><span className="font-medium">Description:</span> {poll.description}</p>
+                            <p className={`mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                              <span className="font-medium">Description:</span> {poll.description}
+                            </p>
                           )}
                         </div>
                         <div>
-                          <p className="text-gray-300"><span className="font-medium">Created:</span> {formatDate(poll.created_at)}</p>
-                          <p className="text-gray-300 mt-2"><span className="font-medium">Expires:</span> {formatDate(poll.expires_at)}</p>
+                          <p className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
+                            <span className="font-medium">Created:</span> {formatDate(poll.created_at)}
+                          </p>
+                          <p className={`mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <span className="font-medium">Expires:</span> {formatDate(poll.expires_at)}
+                          </p>
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="text-gray-200 font-medium mb-2">Questions:</h4>
+                        <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Questions:</h4>
                         <div className="space-y-2">
                           {poll.questions.map((question, qIndex) => (
-                            <div key={qIndex} className="bg-gray-700 p-3 rounded">
-                              <p className="text-gray-300 mb-1">
+                            <div key={qIndex} className={`p-3 rounded ${isDarkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
+                              <p className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                 <span className="font-medium">Q{qIndex + 1}:</span> {question.text}
                               </p>
                               <div className="pl-4">
                                 {question.options.filter(opt => opt.trim()).map((option, oIndex) => (
-                                  <p key={oIndex} className="text-gray-400 text-sm">
+                                  <p key={oIndex} className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                                     {oIndex + 1}. {option}
                                   </p>
                                 ))}
@@ -317,27 +372,34 @@ const PollDashboard: React.FC = () => {
         <PollCreatorPopup
           onClose={handleClosePopup}
           onSave={handleSavePoll}
+          isDarkMode={isDarkMode}
         />
       )}
 
       {/* Analytics Popup */}
       {showAnalyticsPopup && currentPollId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-gray-800 rounded-lg w-[90%] max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-4 border-b border-gray-700">
-              <h2 className="text-xl font-bold text-white">Poll Analytics</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm">
+          <div className={`rounded-lg w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto
+            ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
+            <div className={`flex justify-between items-center p-4 border-b
+              ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+              <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Poll Analytics</h2>
               <button
                 type="button"
-                className="text-gray-400 hover:text-white"
+                className={`rounded-full p-2 ${isDarkMode 
+                  ? 'text-gray-400 hover:text-white hover:bg-slate-800' 
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
                 onClick={handleCloseAnalytics}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
             </div>
             <div className="p-6">
-              <p className="text-gray-300 text-center">Analytics feature coming soon!</p>
+              <p className={`text-center py-8 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                Analytics feature coming soon!
+              </p>
               {/* Analytics content will be added here later */}
             </div>
           </div>

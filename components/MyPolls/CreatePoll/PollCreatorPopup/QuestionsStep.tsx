@@ -3,19 +3,22 @@ import React from 'react';
 import { PollData, PollQuestion, ValidationErrors, CharCounts } from './poll-types';
 import { VALIDATION_CONSTRAINTS, safeRemoveHTML } from './validation-utils';
 import CharacterCounter from './CharacterCounter';
+import { Plus, Trash, X } from 'lucide-react';
 
 interface QuestionsStepProps {
   formData: PollData;
   errors: ValidationErrors;
   charCounts: CharCounts;
   updateQuestions: (questions: PollQuestion[]) => void;
+  isDarkMode: boolean;
 }
 
 const QuestionsStep: React.FC<QuestionsStepProps> = ({
   formData,
   errors,
   charCounts,
-  updateQuestions
+  updateQuestions,
+  isDarkMode
 }) => {
   // Handle question changes with sanitization
   const handleQuestionTextChange = (index: number, value: string) => {
@@ -86,29 +89,41 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold text-gray-100">Poll Questions</h3>
+        <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+          Poll Questions
+        </h3>
         {formData.questions.length < VALIDATION_CONSTRAINTS.MAX_QUESTIONS && (
           <button
             type="button"
             onClick={addQuestion}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium px-3 py-1 rounded-lg text-sm"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+              ${isDarkMode 
+                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                : 'bg-green-500 hover:bg-green-600 text-white'}`}
           >
+            <Plus size={16} />
             Add Question
           </button>
         )}
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {formData.questions.map((question, qIndex) => (
-          <div key={qIndex} className="bg-gray-700 p-4 rounded-lg">
+          <div key={qIndex} className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
             <div className="flex justify-between items-center mb-3">
-              <h4 className="text-lg font-medium text-gray-200">Question {qIndex + 1}</h4>
+              <h4 className={`text-lg font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                Question {qIndex + 1}
+              </h4>
               {formData.questions.length > VALIDATION_CONSTRAINTS.MIN_QUESTIONS && (
                 <button
                   type="button"
                   onClick={() => removeQuestion(qIndex)}
-                  className="bg-red-600 hover:bg-red-700 text-white font-medium px-3 py-1 rounded-lg text-sm"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+                    ${isDarkMode 
+                      ? 'bg-red-600 hover:bg-red-700 text-white' 
+                      : 'bg-red-500 hover:bg-red-600 text-white'}`}
                 >
+                  <Trash size={14} />
                   Remove
                 </button>
               )}
@@ -116,10 +131,13 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
 
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
-                <label htmlFor={`question-${qIndex}`} className="block text-gray-300">Question Text</label>
+                <label htmlFor={`question-${qIndex}`} className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Question Text
+                </label>
                 <CharacterCounter 
                   current={charCounts.questions[qIndex]?.text || 0} 
-                  max={VALIDATION_CONSTRAINTS.QUESTION.MAX_LENGTH} 
+                  max={VALIDATION_CONSTRAINTS.QUESTION.MAX_LENGTH}
+                  // isDarkMode={isDarkMode}
                 />
               </div>
               <input
@@ -127,8 +145,14 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
                 id={`question-${qIndex}`}
                 value={question.text}
                 onChange={(e) => handleQuestionTextChange(qIndex, e.target.value)}
-                className={`w-full bg-gray-800 border ${errors.questions && errors.questions[qIndex] ? 'border-red-500' : 'border-gray-600'} rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                placeholder={`Enter your question`}
+                className={`w-full rounded-lg px-4 py-2.5 transition-colors focus:outline-none focus:ring-2
+                  ${isDarkMode 
+                    ? 'bg-slate-700 border-slate-600 text-gray-200 focus:ring-indigo-500 placeholder-gray-500' 
+                    : 'bg-white border-gray-200 text-gray-800 focus:ring-indigo-400 placeholder-gray-400'}
+                  ${errors.questions && errors.questions[qIndex] 
+                    ? (isDarkMode ? 'border border-red-500' : 'border border-red-400') 
+                    : (isDarkMode ? 'border border-slate-600' : 'border border-gray-200')}`}
+                placeholder="Enter your question"
                 maxLength={VALIDATION_CONSTRAINTS.QUESTION.MAX_LENGTH}
               />
               {errors.questions && errors.questions[qIndex] && (
@@ -138,13 +162,17 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
 
             <div className="mb-3">
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-gray-300">Options</label>
+                <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Options</label>
                 {Array.isArray(question.options) && question.options.length < VALIDATION_CONSTRAINTS.MAX_OPTIONS && (
                   <button
                     type="button"
                     onClick={() => addOption(qIndex)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1 rounded-lg text-sm"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+                      ${isDarkMode 
+                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white' 
+                        : 'bg-indigo-500 hover:bg-indigo-600 text-white'}`}
                   >
+                    <Plus size={14} />
                     Add Option
                   </button>
                 )}
@@ -158,14 +186,18 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
                         type="text"
                         value={option || ''}
                         onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
-                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-16"
+                        className={`w-full rounded-lg px-4 py-2.5 pr-16 transition-colors focus:outline-none focus:ring-2
+                          ${isDarkMode 
+                            ? 'bg-slate-700 border border-slate-600 text-gray-200 focus:ring-indigo-500 placeholder-gray-500' 
+                            : 'bg-white border border-gray-200 text-gray-800 focus:ring-indigo-400 placeholder-gray-400'}`}
                         placeholder={`Option ${oIndex + 1}`}
                         maxLength={VALIDATION_CONSTRAINTS.OPTION.MAX_LENGTH}
                       />
-                      <div className="absolute right-2 top-2">
+                      <div className="absolute right-3 top-2.5">
                         <CharacterCounter 
                           current={charCounts.questions[qIndex]?.options[oIndex] || 0} 
-                          max={VALIDATION_CONSTRAINTS.OPTION.MAX_LENGTH} 
+                          max={VALIDATION_CONSTRAINTS.OPTION.MAX_LENGTH}
+                          // isDarkMode={isDarkMode}
                         />
                       </div>
                     </div>
@@ -173,9 +205,13 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
                       <button
                         type="button"
                         onClick={() => removeOption(qIndex, oIndex)}
-                        className="ml-2 bg-gray-600 hover:bg-gray-500 text-white px-3 py-2 rounded-lg"
+                        className={`ml-2 rounded-lg p-2 transition-colors
+                          ${isDarkMode 
+                            ? 'bg-slate-700 hover:bg-slate-600 text-gray-300' 
+                            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+                        aria-label="Remove option"
                       >
-                        ✕
+                        <X size={16} />
                       </button>
                     )}
                   </div>
@@ -183,7 +219,7 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
               </div>
             </div>
 
-            <div className="text-gray-400 text-sm">
+            <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               Options 1 and 2 are required, additional options are optional (max {VALIDATION_CONSTRAINTS.MAX_OPTIONS}).
             </div>
           </div>

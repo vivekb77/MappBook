@@ -4,8 +4,13 @@ import { SignedIn, useClerk, useUser } from '@clerk/nextjs';
 import SignInButton from '@/components/MyPolls/SignInButton';
 import { logout } from '../utils/auth';
 import { track } from '@vercel/analytics';
+import { LogOut, User } from 'lucide-react';
 
-const UserProfile = () => {
+interface UserProfileProps {
+  isDarkMode: boolean;
+}
+
+const UserProfile: React.FC<UserProfileProps> = ({ isDarkMode }) => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { mappbookUser } = useMappbookUser();
   const [showPopup, setShowPopup] = useState(false);
@@ -46,14 +51,16 @@ const UserProfile = () => {
 
   if (!isLoaded) {
     return (
-      <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white">
+      <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+        isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-gray-200 text-gray-600'
+      }`}>
         <span className="animate-pulse">...</span>
       </div>
     );
   }
 
   if (!isSignedIn) {
-    return <SignInButton redirectUrl="/mypolls" />;
+    return <SignInButton redirectUrl="/mypolls" isDarkMode={false} />;
   }
 
   return (
@@ -61,12 +68,25 @@ const UserProfile = () => {
       {/* Avatar button to open popup */}
       <button 
         onClick={() => setShowPopup(!showPopup)}
-        className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-white overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all"
+        className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden transition-all
+          ${isDarkMode
+            ? 'bg-slate-800 text-white hover:ring-2 hover:ring-indigo-500'
+            : 'bg-gray-100 text-gray-900 hover:ring-2 hover:ring-indigo-400'}
+        `}
+        aria-label="User profile"
       >
         {user.imageUrl ? (
           <img src={user.imageUrl} alt={user.fullName || 'User'} className="w-full h-full object-cover" />
         ) : (
-          <span>{(mappbookUser?.display_name || user.fullName || 'User')[0].toUpperCase()}</span>
+          <div className={`flex items-center justify-center w-full h-full ${
+            isDarkMode 
+              ? 'bg-gradient-to-br from-indigo-600 to-purple-700' 
+              : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+          }`}>
+            <span className="text-white font-medium">
+              {(mappbookUser?.display_name || user.fullName || 'User')[0].toUpperCase()}
+            </span>
+          </div>
         )}
       </button>
 
@@ -74,36 +94,65 @@ const UserProfile = () => {
       {showPopup && (
         <div 
           ref={popupRef}
-          className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg z-50 overflow-hidden border border-gray-700"
+          className={`absolute right-0 mt-2 w-64 rounded-lg shadow-lg z-50 overflow-hidden
+            ${isDarkMode 
+              ? 'bg-slate-900 border border-slate-700 shadow-xl shadow-black/20' 
+              : 'bg-white border border-gray-200 shadow-xl shadow-gray-200/50'}
+          `}
         >
-          <div className="p-4 border-b border-gray-700">
+          <div className={`p-4 ${isDarkMode ? 'border-b border-slate-700' : 'border-b border-gray-100'}`}>
             <div className="flex items-center space-x-3">
-             
+              <div className="flex-shrink-0">
+                {user.imageUrl ? (
+                  <div className="w-10 h-10 rounded-full overflow-hidden">
+                    <img src={user.imageUrl} alt={user.fullName || 'User'} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    isDarkMode 
+                      ? 'bg-gradient-to-br from-indigo-600 to-purple-700' 
+                      : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                  }`}>
+                    <span className="text-white font-medium">
+                      {(mappbookUser?.display_name || user.fullName || 'User')[0].toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
               <div>
-                <h3 className="text-white font-medium">{mappbookUser?.display_name || user.fullName || 'User'}</h3>
-                <p className="text-gray-400 text-sm">{user.primaryEmailAddress?.emailAddress}</p>
+                <h3 className={isDarkMode ? 'text-white font-medium' : 'text-gray-900 font-medium'}>
+                  {mappbookUser?.display_name || user.fullName || 'User'}
+                </h3>
+                <p className={isDarkMode ? 'text-gray-400 text-sm' : 'text-gray-500 text-sm'}>
+                  {user.primaryEmailAddress?.emailAddress}
+                </p>
               </div>
             </div>
           </div>
           
           <div className="p-4 space-y-3">
-            
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-400">Poll Credits:</span>
-              <span className="text-white font-medium bg-blue-600 px-2 py-1 rounded-full text-xs">
+              <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Poll Credits:</span>
+              <span className={`font-medium px-2 py-1 rounded-full text-xs ${
+                isDarkMode 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'bg-indigo-500 text-white'
+              }`}>
                 {mappbookUser?.poll_credits || 0} credits
               </span>
             </div>
           </div>
           
-          <div className="p-3 border-t border-gray-700">
+          <div className={`p-3 ${isDarkMode ? 'border-t border-slate-700' : 'border-t border-gray-100'}`}>
             <button
               onClick={handleLogout}
-              className="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors flex items-center justify-center"
+              className={`w-full py-2 px-4 text-sm font-medium rounded-md transition-all flex items-center justify-center ${
+                isDarkMode 
+                  ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+              }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
+              <LogOut size={16} className="mr-2" />
               Log Out
             </button>
           </div>

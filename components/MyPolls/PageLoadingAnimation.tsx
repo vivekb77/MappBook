@@ -1,20 +1,26 @@
 import React from 'react';
 
-const PageLoadingAnimation = () => {
+interface PageLoadingAnimationProps {
+  isDarkMode: boolean;
+}
+
+const PageLoadingAnimation: React.FC<PageLoadingAnimationProps> = ({ isDarkMode }) => {
   // Size will adjust based on container but maintain proportions
   const size = 70;
   const dotSize = 8;
   const hexPoints = calculateHexagonPoints(size);
   
   return (
-    <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
+    <div className={`fixed inset-0 flex items-center justify-center ${
+      isDarkMode ? 'bg-slate-950' : 'bg-gray-50'
+    }`}>
       <div className="relative h-[15vh] w-[15vh] min-h-24 min-w-24 max-h-40 max-w-40 flex items-center justify-center">
         {/* Static Hexagon Border */}
         <svg className="absolute" width={size * 2} height={size * 2} viewBox={`0 0 ${size * 2} ${size * 2}`}>
           <polygon 
             points={hexPoints} 
             fill="none" 
-            stroke="#4B5563" // gray-600 for subtle border
+            stroke={isDarkMode ? "#4B5563" : "#D1D5DB"} // gray-600 for dark, gray-300 for light
             strokeWidth="6" 
             className="origin-center"
           />
@@ -24,7 +30,7 @@ const PageLoadingAnimation = () => {
         <svg className="absolute" width={size * 2} height={size * 2} viewBox={`0 0 ${size * 2} ${size * 2}`}>
           <polygon 
             points={hexPoints} 
-            fill="#374151" // gray-700 for subtle inner fill
+            fill={isDarkMode ? "#374151" : "#F3F4F6"} // gray-700 for dark, gray-100 for light
             stroke="none"
             className="origin-center"
             transform={`scale(0.85)`}
@@ -44,15 +50,17 @@ const PageLoadingAnimation = () => {
             cx={size * 2 - dotSize - 5} 
             cy={size} 
             r={dotSize} 
-            fill="#3B82F6" // blue-500 for accent color
+            fill={isDarkMode ? "#6366F1" : "#4F46E5"} // indigo-500 for dark, indigo-600 for light
             className="origin-center drop-shadow-lg"
           />
         </svg>
         
         {/* MappBook logo text */}
-        <div className="absolute mt-2 text-gray-300 font-semibold text-[min(2vh,1.125rem)] tracking-wider">
+        <div className={`absolute mt-2 font-semibold text-[min(2vh,1.125rem)] tracking-wider ${
+          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+        }`}>
           Mapp
-          <span className="text-blue-500">Book</span>
+          <span className={isDarkMode ? 'text-indigo-500' : 'text-indigo-600'}>Book</span>
         </div>
       </div>
     </div>

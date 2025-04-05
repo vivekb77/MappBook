@@ -6,6 +6,7 @@ import { useMappbookUser } from '@/context/UserContext';
 import { PollData, PollQuestion, ValidationErrors, CharCounts } from './PollCreatorPopup/poll-types';
 import { validatePollDetails, validatePollQuestions } from './PollCreatorPopup/poll-validation';
 import { ToastMessage } from '../ToastMessage';
+import { X, ArrowLeft, Check, Loader2 } from 'lucide-react';
 
 import StepIndicator from './PollCreatorPopup/StepIndicator';
 import PollDetailsStep from './PollCreatorPopup/PollDetailsStep';
@@ -15,11 +16,13 @@ import SummaryStep from './PollCreatorPopup/SummaryStep';
 interface PollCreatorPopupProps {
   onClose: () => void;
   onSave: (data: PollData, generateUrl: boolean) => void;
+  isDarkMode: boolean;
 }
 
 const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
   onClose,
-  onSave
+  onSave,
+  isDarkMode
 }) => {
   const { mappbookUser } = useMappbookUser();
   
@@ -199,7 +202,7 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
             console.error('Error in onSave callback:', error);
             onSave(dataToSubmit, true);
           }
-        }, 2000); // Give 1 second for the toast to be visible before closing
+        }, 2000); // Give 2 seconds for the toast to be visible before closing
       } else {
         throw new Error(result.error || 'Failed to create poll');
       }
@@ -220,6 +223,7 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
             errors={errors}
             charCounts={charCounts}
             onInputChange={handleInputChange}
+            isDarkMode={isDarkMode}
           />
         );
       case 2:
@@ -229,10 +233,11 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
             errors={errors}
             charCounts={charCounts}
             updateQuestions={updateQuestions}
+            isDarkMode={isDarkMode}
           />
         );
       case 3:
-        return <SummaryStep formData={formData} />;
+        return <SummaryStep formData={formData} isDarkMode={isDarkMode} />;
       default:
         return null;
     }
@@ -246,15 +251,22 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
           <button
             type="button"
             onClick={handleBack}
-            className="bg-gray-700 hover:bg-gray-600 text-white font-medium px-6 py-2 rounded-lg"
+            className={`flex items-center gap-2 transition-all duration-300 font-medium px-5 py-2.5 rounded-lg
+              ${isDarkMode 
+                ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
           >
+            <ArrowLeft size={18} />
             Back
           </button>
         ) : (
           <button
             type="button"
             onClick={onClose}
-            className="bg-gray-700 hover:bg-gray-600 text-white font-medium px-6 py-2 rounded-lg"
+            className={`transition-all duration-300 font-medium px-5 py-2.5 rounded-lg
+              ${isDarkMode 
+                ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
           >
             Cancel
           </button>
@@ -264,7 +276,10 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
           <button
             type="button"
             onClick={handleNext}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg"
+            className={`transition-all duration-300 font-medium px-6 py-2.5 rounded-lg
+              ${isDarkMode 
+                ? 'bg-indigo-600 hover:bg-indigo-700 text-white' 
+                : 'bg-indigo-500 hover:bg-indigo-600 text-white'}`}
           >
             Next
           </button>
@@ -273,15 +288,21 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
             type="button"
             onClick={handleSaveAndGenerate}
             disabled={isSubmitting}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2 rounded-lg flex items-center justify-center"
+            className={`flex items-center justify-center gap-2 transition-all duration-300 font-medium px-6 py-2.5 rounded-lg
+              ${isDarkMode 
+                ? 'bg-green-600 hover:bg-green-700 text-white disabled:bg-green-800 disabled:opacity-60' 
+                : 'bg-green-500 hover:bg-green-600 text-white disabled:bg-green-300 disabled:opacity-60'}`}
           >
             {isSubmitting ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                <Loader2 size={18} className="animate-spin" />
                 <span>Saving...</span>
               </>
             ) : (
-              'Save & Generate URL'
+              <>
+                <Check size={18} />
+                <span>Save & Generate URL</span>
+              </>
             )}
           </button>
         )}
@@ -290,30 +311,40 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
   };
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto relative">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-100">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className={`w-11/12 max-w-2xl mx-auto rounded-xl shadow-2xl overflow-hidden
+        ${isDarkMode 
+          ? 'bg-slate-900 border border-slate-700 shadow-indigo-900/10' 
+          : 'bg-white border border-gray-200 shadow-gray-300/20'}`}>
+        <div className={`p-4 flex justify-between items-center
+          ${isDarkMode ? 'border-b border-slate-700' : 'border-b border-gray-200'}`}>
+          <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
             {currentStep === 1 ? 'Create New Poll' :
-              currentStep === 2 ? 'Add Questions' :
-                'Finalize Your Poll'}
+             currentStep === 2 ? 'Add Questions' :
+             'Finalize Your Poll'}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-200 text-xl"
+            className={`rounded-full p-1.5 transition-colors
+              ${isDarkMode 
+                ? 'hover:bg-slate-800 text-gray-400 hover:text-gray-200' 
+                : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}
+            aria-label="Close"
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
 
-        <StepIndicator currentStep={currentStep} />
+        <div className="p-6">
+          <StepIndicator currentStep={currentStep} isDarkMode={isDarkMode} />
 
-        <div className="mb-6">
-          {renderCurrentStep()}
+          <div className="my-6 max-h-[60vh] overflow-y-auto px-1">
+            {renderCurrentStep()}
+          </div>
+
+          {renderNavigation()}
         </div>
-
-        {renderNavigation()}
       </div>
       
       {toast.visible && (

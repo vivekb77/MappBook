@@ -8,7 +8,15 @@ declare global {
   }
 }
 
-const SignInButton = ({ redirectUrl = '/mypolls' }) => {
+interface SignInButtonProps {
+  redirectUrl?: string;
+  isDarkMode: boolean;
+}
+
+const SignInButton: React.FC<SignInButtonProps> = ({ 
+  redirectUrl = '/mypolls',
+  isDarkMode 
+}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
@@ -30,14 +38,13 @@ const SignInButton = ({ redirectUrl = '/mypolls' }) => {
     <button
       onClick={handleSignIn}
       disabled={isLoading}
-      className="w-full h-12 px-4 rounded-md
-      bg-white text-gray-700 font-roboto font-medium
-      border border-gray-200 
-      hover:bg-gray-50 hover:shadow-md
-                    transform transition-all duration-300
-                    flex items-center justify-center gap-3
-                    disabled:opacity-70 disabled:cursor-not-allowed"
-
+      className={`w-full h-12 px-4 rounded-lg font-medium
+                 transform transition-all duration-300
+                 flex items-center justify-center gap-3
+                 disabled:opacity-70 disabled:cursor-not-allowed
+                 ${isDarkMode 
+                   ? 'bg-slate-800 text-white border border-slate-700 hover:bg-slate-700' 
+                   : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:shadow-md'}`}
     >
       {isLoading ? (
         <>

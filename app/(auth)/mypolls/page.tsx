@@ -42,7 +42,7 @@ const MyPollsPage = () => {
               </button>
               
               {/* User profile - always visible */}
-              <UserProfile />
+              <UserProfile isDarkMode={isDarkMode} />
             </div>
           </div>
         </div>
