@@ -58,10 +58,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'This poll has expired' }, { status: 400 });
     }
 
-    // Get client IP if not provided
-    const clientIp = answers[0].ip_address || 
-      req.headers.get('x-forwarded-for') || 
-      req.headers.get('x-real-ip') ||
+    // Get client IP from request headers as backup
+    const clientIp = 
+      req.headers.get('x-forwarded-for')?.split(',')[0] || 
+      req.headers.get('x-real-ip') || 
+      req.headers.get('cf-connecting-ip') ||
+      req.headers.get('true-client-ip') ||
       'unknown';
 
     // Insert all answers
@@ -69,6 +71,7 @@ export async function POST(req: NextRequest) {
       .from('Poll_Answers')
       .insert(answers.map(answer => ({
         ...answer,
+        // Use provided IP (client fingerprint) or fall back to server-detected IP
         ip_address: answer.ip_address || clientIp
       })));
 

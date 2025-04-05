@@ -1,4 +1,3 @@
-// /Container.tsx
 import React, { useState, useEffect } from 'react';
 import DrawMap from './Map/DrawMap';
 import DrawHexagon from './Map/DrawHexagon';
@@ -41,8 +40,6 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
     maxLat: 37
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-
   // View transformation state
   const [scale, setScale] = useState<number>(1);
   const [translateX, setTranslateX] = useState<number>(0);
@@ -56,6 +53,8 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isResultsOpen, setIsResultsOpen] = useState(false);
   const [pollAnswers, setPollAnswers] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasAlreadyAnswered, setHasAlreadyAnswered] = useState(false);
 
   // Initialize viewbox and hexagons when geoJSON data is available
   useEffect(() => {
@@ -68,6 +67,38 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
       setHexagons(generatedHexagons);
     }
   }, [geoJsonData]);
+
+  // Check if user has already answered this poll
+  useEffect(() => {
+    const pollKey = `poll_${pollData.poll_id}`;
+    const previousSubmission = localStorage.getItem(pollKey);
+
+    if (previousSubmission) {
+      // User has already answered this poll
+      setHasAlreadyAnswered(true);
+
+      // Try to get their previous answers
+      try {
+        const storedData = JSON.parse(previousSubmission);
+        if (storedData.answers) {
+          setPollAnswers(storedData.answers);
+        }
+      } catch (e) {
+        console.error("Error parsing previous answers:", e);
+      }
+    }
+  }, [pollData.poll_id]);
+
+  // Store poll submission to localStorage
+  const storePollSubmission = (answers: Record<string, string>) => {
+    const pollKey = `poll_${pollData.poll_id}`;
+    localStorage.setItem(pollKey, JSON.stringify({
+      submitted: true,
+      timestamp: new Date().toISOString(),
+      answersSubmitted: Object.keys(answers).length,
+      answers: answers // Store the actual answers
+    }));
+  };
 
   // Handler for updating both translation coordinates
   const handleTranslateChange = (x: number, y: number) => {
@@ -87,6 +118,7 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
     setSelectedHexagon(hexagon);
   };
 
+  // Handle poll submission
   const handlePollSubmit = async (answers: Record<string, string>) => {
     try {
       // Check if a hexagon is selected
@@ -98,27 +130,22 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
       // Start loading
       setIsLoading(true);
 
-      // Get IP address for analytics
-      let ipAddress = 'unknown';
-      try {
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        if (ipResponse.ok) {
-          const ipData = await ipResponse.json();
-          ipAddress = ipData.ip;
-        }
-      } catch (error) {
-        console.error('Error fetching IP:', error);
-        // Continue with unknown IP address
-      }
+      // Get a unique identifier for this user's browser
+      const userAgent = navigator.userAgent;
+      const language = navigator.language;
+      const screenWidth = window.screen.width;
+      const screenHeight = window.screen.height;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      const hexagonRegion = selectedHexagon.number; // Use the numeric property
+      // Create a simple hash of these values
+      const uniqueIdentifier = btoa(`${userAgent}-${language}-${screenWidth}x${screenHeight}-${timezone}`);
 
       // Map answers to the format expected by the API
       const answerPayloads = Object.entries(answers).map(([questionId, optionId]) => ({
         poll_id: pollData.poll_id,
         poll_id_to_share: pollData.poll_id_to_share,
-        ip_address: ipAddress,
-        hexagon_region: hexagonRegion,
+        ip_address: uniqueIdentifier,
+        hexagon_region: selectedHexagon.number, // Use the numeric property
         question_id: questionId,
         answer_option_id: optionId
       }));
@@ -140,8 +167,12 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
         throw new Error(errorData.error || 'Failed to submit poll');
       }
 
-      // Store answers locally for display in results
+      // Store answers in localStorage
+      storePollSubmission(answers);
+
+      // Update state
       setPollAnswers(answers);
+      setHasAlreadyAnswered(true);
 
       // Close the questions popup
       setIsPopupOpen(false);
@@ -224,30 +255,33 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
               selectedHexagon={selectedHexagon}
               userHomeHexagon={null}
               onHexagonClick={handleHexagonClick}
-              openPopup={() => setIsPopupOpen(true)} // Pass function to open popup
+              openPopup={() => hasAlreadyAnswered ? setIsResultsOpen(true) : setIsPopupOpen(true)}
             />
           </DrawMap>
         </MapInteraction>
       </div>
-      {/* Floating Answer Poll Button */}
+
+      {/* Floating Action Button */}
       <div className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-none z-10">
         <button
-          onClick={() => setIsPopupOpen(true)}
+          onClick={() => hasAlreadyAnswered ? setIsResultsOpen(true) : setIsPopupOpen(true)}
           className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center pointer-events-auto"
         >
-          Answer Poll Questions
+          {hasAlreadyAnswered ? "View Your Answers" : "Answer Poll Questions"}
         </button>
       </div>
 
-      {/* Poll Questions Popup */}
-      <PollQuestionPopup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        questions={pollData.questions}
-        onSubmit={handlePollSubmit}
-        selectedHexagon={selectedHexagon}
-        isLoading={isLoading} // Add this line
-      />
+      {/* Poll Questions Popup - only show if not already answered */}
+      {!hasAlreadyAnswered && (
+        <PollQuestionPopup
+          isOpen={isPopupOpen}
+          onClose={() => setIsPopupOpen(false)}
+          questions={pollData.questions}
+          onSubmit={handlePollSubmit}
+          selectedHexagon={selectedHexagon}
+          isLoading={isLoading}
+        />
+      )}
 
       {/* Poll Results Popup */}
       <PollResults
@@ -255,6 +289,7 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
         onClose={() => setIsResultsOpen(false)}
         questions={pollData.questions}
         answers={pollAnswers}
+        hasAlreadyAnswered={hasAlreadyAnswered}
       />
     </div>
   );
