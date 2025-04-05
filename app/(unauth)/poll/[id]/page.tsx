@@ -70,6 +70,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 }
 
 // Server Component that renders the Client Component
-export default function PollPage() {
+export default function PollPage({ params }: { params: { id: string } }) {
   return <PollPageClient />;
 }
