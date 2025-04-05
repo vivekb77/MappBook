@@ -3,8 +3,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
-import { PollData, PollQuestion, ValidationErrors, CharCounts } from './PollCreatorPopup/poll-types';
+import { PollData, PollQuestion, PollOption, ValidationErrors, CharCounts } from './PollCreatorPopup/poll-types';
 import { validatePollDetails, validatePollQuestions } from './PollCreatorPopup/poll-validation';
+
 import { ToastMessage } from '../ToastMessage';
 import { X, ArrowLeft, Check, Loader2 } from 'lucide-react';
 
@@ -29,13 +30,31 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
   // Current step in the form flow
   const [currentStep, setCurrentStep] = useState<number>(1);
 
+  const generateShortId = (length: number = 8): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    return result;
+  };
+  
   // Local form data
   const [formData, setFormData] = useState<PollData>({
     title: '',
     description: '',
     author: '',
     pollLength: '3',
-    questions: [{ text: '', options: ['', ''] }],
+    questions: [{ 
+      id: generateShortId(),
+      text: '', 
+      options: [
+        { id: generateShortId(), text: '' },
+        { id: generateShortId(), text: '' }
+      ] 
+    }],
     mappbook_user_id: mappbookUser?.mappbook_user_id || '',
     url: ''
   });
@@ -69,7 +88,7 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
       author: formData.author.length,
       questions: formData.questions.map(q => ({
         text: q.text.length,
-        options: q.options.map(o => o.length)
+        options: q.options.map(o => o.text.length)
       }))
     };
     setCharCounts(newCharCounts);
@@ -137,7 +156,7 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
       ...prev,
       questions: questions.map(q => ({
         text: q.text.length,
-        options: q.options.map(o => o.length)
+        options: q.options.map(o => o.text.length)
       }))
     }));
     
@@ -394,18 +413,5 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
     </div>
   );
 };
-
-// Add a style tag for additional CSS
-const style = document.createElement('style');
-style.innerHTML = `
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-`;
-document.head.appendChild(style);
 
 export default PollCreatorPopup;

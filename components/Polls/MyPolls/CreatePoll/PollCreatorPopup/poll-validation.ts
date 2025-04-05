@@ -1,4 +1,4 @@
-//poll-validation.ts
+// poll-validation.ts
 import { PollData, ValidationErrors } from './poll-types';
 import { VALIDATION_CONSTRAINTS } from './validation-utils';
 
@@ -46,7 +46,7 @@ export const validatePollQuestions = (formData: PollData): ValidationErrors => {
     }
 
     // Check if at least 2 options have values
-    const filledOptions = question.options.filter(opt => opt.trim().length > 0);
+    const filledOptions = question.options.filter(opt => opt.text.trim().length > 0);
     
     if (filledOptions.length < VALIDATION_CONSTRAINTS.MIN_OPTIONS) {
       if (!errors.questions) errors.questions = [];
@@ -55,9 +55,9 @@ export const validatePollQuestions = (formData: PollData): ValidationErrors => {
     } else {
       // Validate option lengths
       const invalidOptions = question.options.filter(
-        opt => opt.trim().length > 0 && 
-        (opt.length > VALIDATION_CONSTRAINTS.OPTION.MAX_LENGTH ||
-         opt.length < VALIDATION_CONSTRAINTS.OPTION.MIN_LENGTH)
+        opt => opt.text.trim().length > 0 && 
+        (opt.text.length > VALIDATION_CONSTRAINTS.OPTION.MAX_LENGTH ||
+         opt.text.length < VALIDATION_CONSTRAINTS.OPTION.MIN_LENGTH)
       );
       
       if (invalidOptions.length > 0) {

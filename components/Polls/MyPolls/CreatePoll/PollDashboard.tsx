@@ -4,23 +4,8 @@ import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
 import LoadingIndicator from '../PageLoadingAnimation';
 import { ToastMessage } from '../ToastMessage';
+import { PollData, PollQuestion, PollOption } from './PollCreatorPopup/poll-types';
 import { PlusCircle, Copy, BarChart3, AlertTriangle, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
-
-// Define types for better type safety
-interface PollQuestion {
-  text: string;
-  options: string[];
-}
-
-interface PollData {
-  title: string;
-  description: string;
-  author: string;
-  pollLength: string;
-  questions: PollQuestion[];
-  mappbook_user_id?: string;
-  url?: string;
-}
 
 interface SavedPoll extends PollData {
   poll_id: string;
@@ -28,7 +13,6 @@ interface SavedPoll extends PollData {
   expires_at: string;
   is_active: boolean;
 }
-
 interface PollDashboardProps {
   isDarkMode: boolean;
 }
@@ -367,14 +351,14 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
                         <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Questions:</h4>
                         <div className="space-y-2">
                           {poll.questions.map((question, qIndex) => (
-                            <div key={qIndex} className={`p-3 rounded ${isDarkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
+                            <div key={question.id} className={`p-3 rounded ${isDarkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
                               <p className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                 <span className="font-medium">Q{qIndex + 1}:</span> {question.text}
                               </p>
                               <div className="pl-4">
-                                {question.options.filter(opt => opt.trim()).map((option, oIndex) => (
-                                  <p key={oIndex} className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                    {oIndex + 1}. {option}
+                                {question.options.filter(opt => opt.text && opt.text.trim()).map((option, oIndex) => (
+                                  <p key={option.id} className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {oIndex + 1}. {option.text}
                                   </p>
                                 ))}
                               </div>

@@ -49,7 +49,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const validOptions = question.options.filter((opt: { trim: () => { (): any; new(): any; length: number; }; }) => opt.trim().length > 0);
+      if (!Array.isArray(question.options)) {
+        return NextResponse.json(
+          { error: 'Question options must be an array' },
+          { status: 400 }
+        );
+      }
+
+      const validOptions = question.options.filter((opt: { text: { trim: () => { (): any; new(): any; length: number; }; }; }) => opt.text && opt.text.trim().length > 0);
       if (validOptions.length < 2) {
         return NextResponse.json(
           { error: 'Each question must have at least 2 options' },
@@ -58,16 +65,21 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Clean up questions data to remove empty options
-    const cleanedQuestions = pollData.questions.map((question: { text: any; options: any[]; }) => ({
+    // Clean up questions data to remove empty options while preserving IDs
+    const cleanedQuestions = pollData.questions.map((question: { id: any; text: any; options: any[]; }) => ({
+      id: question.id,
       text: question.text,
-      options: question.options.filter(opt => opt.trim().length > 0)
+      options: question.options
+        .filter(opt => opt.text && opt.text.trim().length > 0)
+        .map(opt => ({
+          id: opt.id,
+          text: opt.text.trim()
+        }))
     }));
 
     // Calculate expiration date
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + parseInt(pollData.pollLength));
-
 
     // Get the user's Supabase ID mapping from Clerk ID
     const { data: userMapping } = await supabase

@@ -42,14 +42,14 @@ const SummaryStep: React.FC<SummaryStepProps> = ({ formData, isDarkMode }) => {
           </h4>
           <div className="space-y-3">
             {formData.questions.map((question, qIndex) => (
-              <div key={qIndex} className={`p-3 rounded-lg ${isDarkMode ? 'bg-slate-700' : 'bg-white border border-gray-200'}`}>
+              <div key={question.id} className={`p-3 rounded-lg ${isDarkMode ? 'bg-slate-700' : 'bg-white border border-gray-200'}`}>
                 <p className={`mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   <span className="font-medium">Q{qIndex + 1}:</span> {question.text}
                 </p>
                 <div className="pl-4">
-                  {question.options.filter(opt => opt.trim()).map((option, oIndex) => (
-                    <p key={oIndex} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-                      {oIndex + 1}. {option}
+                  {question.options.filter(opt => opt.text.trim()).map((option, oIndex) => (
+                    <p key={option.id} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+                      {oIndex + 1}. {option.text}
                     </p>
                   ))}
                 </div>

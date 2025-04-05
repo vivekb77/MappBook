@@ -37,6 +37,17 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
     }
   };
 
+  const generateShortId = (length: number = 8): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    return result;
+  };
+  
   const handleOptionChange = (qIndex: number, oIndex: number, value: string) => {
     // Only remove HTML tags, preserve ALL spaces
     const sanitizedValue = safeRemoveHTML(value);
@@ -48,7 +59,7 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
       
     const updatedQuestions = [...formData.questions];
     if (updatedQuestions[qIndex] && Array.isArray(updatedQuestions[qIndex].options)) {
-      updatedQuestions[qIndex].options[oIndex] = finalValue;
+      updatedQuestions[qIndex].options[oIndex].text = finalValue;
       updateQuestions(updatedQuestions);
     }
   };
@@ -57,7 +68,10 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
     const updatedQuestions = [...formData.questions];
     if (updatedQuestions[qIndex] && Array.isArray(updatedQuestions[qIndex].options) &&
       updatedQuestions[qIndex].options.length < VALIDATION_CONSTRAINTS.MAX_OPTIONS) {
-      updatedQuestions[qIndex].options.push('');
+      updatedQuestions[qIndex].options.push({ 
+        id: generateShortId(),
+        text: '' 
+      });
       updateQuestions(updatedQuestions);
     }
   };
@@ -73,7 +87,17 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
 
   const addQuestion = () => {
     if (formData.questions.length < VALIDATION_CONSTRAINTS.MAX_QUESTIONS) {
-      const updatedQuestions = [...formData.questions, { text: '', options: ['', ''] }];
+      const updatedQuestions = [
+        ...formData.questions, 
+        { 
+          id: generateShortId(),
+          text: '', 
+          options: [
+            { id: generateShortId(), text: '' },
+            { id: generateShortId(), text: '' }
+          ] 
+        }
+      ];
       updateQuestions(updatedQuestions);
     }
   };
@@ -109,7 +133,7 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
 
       <div className="space-y-4">
         {formData.questions.map((question, qIndex) => (
-          <div key={qIndex} className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
+          <div key={question.id} className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
             <div className="flex justify-between items-center mb-3">
               <h4 className={`text-lg font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                 Question {qIndex + 1}
@@ -180,11 +204,11 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
 
               <div className="space-y-2">
                 {Array.isArray(question.options) && question.options.map((option, oIndex) => (
-                  <div key={oIndex} className="flex items-center">
+                  <div key={option.id} className="flex items-center">
                     <div className="flex-1 relative">
                       <input
                         type="text"
-                        value={option || ''}
+                        value={option.text || ''}
                         onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
                         className={`w-full rounded-lg px-4 py-2.5 pr-16 transition-colors focus:outline-none focus:ring-2
                           ${isDarkMode 
