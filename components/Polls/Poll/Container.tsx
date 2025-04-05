@@ -1,8 +1,11 @@
+// /Container.tsx
 import React, { useState, useEffect } from 'react';
 import DrawMap from './DrawMap';
 import DrawHexagon from './DrawHexagon';
 import MapInteraction from './MapInteraction';
 import PollHeader from '../Poll/PollDetails/PollHeader';
+import PollQuestionPopup from '../Poll/AnswerPoll/PollQuestionPopup';
+import PollResults from '../Poll/AnswerPoll/PollResults';
 import { ViewBox, GeoJSON, Hexagon, calculateViewBox } from './utils/MapLogic';
 import { generateHexagons } from './utils/HexagonLogic';
 
@@ -48,12 +51,17 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
   const [hexagons, setHexagons] = useState<Hexagon[]>([]);
   const [selectedHexagon, setSelectedHexagon] = useState<Hexagon | null>(null);
 
+  // Poll popup state
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isResultsOpen, setIsResultsOpen] = useState(false);
+  const [pollAnswers, setPollAnswers] = useState<Record<string, string>>({});
+
   // Initialize viewbox and hexagons when geoJSON data is available
   useEffect(() => {
     if (geoJsonData) {
       const calculatedViewBox = calculateViewBox(geoJsonData);
       setViewBox(calculatedViewBox);
-      
+
       // Generate hexagons based on the calculated viewbox
       const generatedHexagons = generateHexagons(calculatedViewBox, geoJsonData);
       setHexagons(generatedHexagons);
@@ -76,6 +84,27 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
   // Handle hexagon selection
   const handleHexagonClick = (hexagon: Hexagon) => {
     setSelectedHexagon(hexagon);
+  };
+
+  // Handle poll submission
+  const handlePollSubmit = (answers: Record<string, string>) => {
+    console.log('Poll submitted with answers:', answers);
+    // Save the answers
+    setPollAnswers(answers);
+    // Close the questions popup
+    setIsPopupOpen(false);
+    // Show the results popup
+    setIsResultsOpen(true);
+
+    // Here you would typically send the answers to your API
+    // API call example:
+    // submitPollAnswers(pollData.poll_id, answers)
+    //   .then(() => {
+    //     setIsResultsOpen(true);
+    //   })
+    //   .catch(error => {
+    //     console.error('Error submitting poll:', error);
+    //   });
   };
 
   // Handle window resize
@@ -101,7 +130,7 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-100 p-4">
+    <div className="flex flex-col h-full bg-gray-100 p-4 relative">
       {/* Logo */}
       <div className="relative group mb-4 self-start">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-70 transition duration-500"></div>
@@ -112,9 +141,9 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
           </h1>
         </div>
       </div>
-      
+
       {/* Poll Header */}
-      <PollHeader 
+      <PollHeader
         title={pollData.title}
         author={pollData.author}
         description={pollData.description}
@@ -122,7 +151,7 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
         isActive={pollData.is_active}
         isExpired={pollData.isExpired}
       />
-      
+
       {/* Map Container */}
       <div className="flex-grow">
         <MapInteraction
@@ -149,6 +178,32 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
           </DrawMap>
         </MapInteraction>
       </div>
+
+      {/* Floating Answer Poll Button */}
+      <div className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-none z-10">
+        <button
+          onClick={() => setIsPopupOpen(true)}
+          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center pointer-events-auto"
+        >
+          Answer Poll Questions
+        </button>
+      </div>
+
+      {/* Poll Questions Popup */}
+      <PollQuestionPopup
+        isOpen={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+        questions={pollData.questions}
+        onSubmit={handlePollSubmit}
+      />
+
+      {/* Poll Results Popup */}
+      <PollResults
+        isOpen={isResultsOpen}
+        onClose={() => setIsResultsOpen(false)}
+        questions={pollData.questions}
+        answers={pollAnswers}
+      />
     </div>
   );
 };
