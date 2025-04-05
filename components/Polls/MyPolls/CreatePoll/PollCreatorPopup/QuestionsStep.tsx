@@ -137,7 +137,7 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
                 <CharacterCounter 
                   current={charCounts.questions[qIndex]?.text || 0} 
                   max={VALIDATION_CONSTRAINTS.QUESTION.MAX_LENGTH}
-                  // isDarkMode={isDarkMode}
+                  isDarkMode={isDarkMode}
                 />
               </div>
               <input
@@ -197,7 +197,7 @@ const QuestionsStep: React.FC<QuestionsStepProps> = ({
                         <CharacterCounter 
                           current={charCounts.questions[qIndex]?.options[oIndex] || 0} 
                           max={VALIDATION_CONSTRAINTS.OPTION.MAX_LENGTH}
-                          // isDarkMode={isDarkMode}
+                          isDarkMode={isDarkMode}
                         />
                       </div>
                     </div>

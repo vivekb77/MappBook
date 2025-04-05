@@ -50,6 +50,7 @@ const PollDetailsStep: React.FC<PollDetailsStepProps> = ({
           <CharacterCounter 
             current={charCounts.title} 
             max={VALIDATION_CONSTRAINTS.TITLE.MAX_LENGTH}
+            isDarkMode={isDarkMode}
           />
         </div>
         <input
@@ -78,6 +79,7 @@ const PollDetailsStep: React.FC<PollDetailsStepProps> = ({
           <CharacterCounter 
             current={charCounts.author} 
             max={VALIDATION_CONSTRAINTS.AUTHOR.MAX_LENGTH} 
+            isDarkMode={isDarkMode}
           />
         </div>
         <input
@@ -128,6 +130,7 @@ const PollDetailsStep: React.FC<PollDetailsStepProps> = ({
           <CharacterCounter 
             current={charCounts.description} 
             max={VALIDATION_CONSTRAINTS.DESCRIPTION.MAX_LENGTH} 
+            isDarkMode={isDarkMode}
           />
         </div>
         <textarea
