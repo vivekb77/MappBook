@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { Hexagon } from '../utils/MapLogic';
+import { Hexagon } from '../Map/utils/MapLogic';
 
 interface Option {
   id: string;

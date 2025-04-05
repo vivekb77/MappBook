@@ -1,13 +1,13 @@
 // /Container.tsx
 import React, { useState, useEffect } from 'react';
-import DrawMap from './DrawMap';
-import DrawHexagon from './DrawHexagon';
-import MapInteraction from './MapInteraction';
+import DrawMap from './Map/DrawMap';
+import DrawHexagon from './Map/DrawHexagon';
+import MapInteraction from './Map/MapInteraction';
 import PollHeader from '../Poll/PollDetails/PollHeader';
 import PollQuestionPopup from '../Poll/AnswerPoll/PollQuestionPopup';
 import PollResults from '../Poll/AnswerPoll/PollResults';
-import { ViewBox, GeoJSON, Hexagon, calculateViewBox } from './utils/MapLogic';
-import { generateHexagons } from './utils/HexagonLogic';
+import { ViewBox, GeoJSON, Hexagon, calculateViewBox } from './Map/utils/MapLogic';
+import { generateHexagons } from './Map/utils/HexagonLogic';
 
 import indiaStatesGeoJson from '../../../public/india-states.json';
 
