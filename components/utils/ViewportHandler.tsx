@@ -22,7 +22,7 @@ export function ViewportHandler() {
         viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0');
       }
 
-      // Additional fix for iOS Safari
+      // Set the --vh CSS variable to 1% of the viewport height
       document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
     };
 
@@ -49,8 +49,13 @@ export function ViewportHandler() {
       :root {
         --vh: 1vh;
       }
-      .min-h-full {
-        min-height: calc(var(--vh) * 100);
+      .min-h-screen-dynamic {
+        min-height: 100vh; /* Fallback */
+        min-height: calc(var(--vh, 1vh) * 100);
+      }
+      .h-screen-dynamic {
+        height: 100vh; /* Fallback */
+        height: calc(var(--vh, 1vh) * 100);
       }
     `;
     document.head.appendChild(style);

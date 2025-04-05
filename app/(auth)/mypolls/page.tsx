@@ -5,35 +5,10 @@ import Link from 'next/link';
 import PollCreator from '@/components/MyPolls/CreatePoll/PollDashboard';
 import UserProfile from '@/components/MyPolls/UserProfile';
 
-const MappBookPage = () => {
-  const [viewportHeight, setViewportHeight] = useState('100vh');
-  // Handle viewport height for mobile browsers
-  useEffect(() => {
-    // Function to update viewport height
-    const updateViewportHeight = () => {
-      // Use window.innerHeight for accurate mobile viewport height
-      setViewportHeight(`${window.innerHeight}px`);
-    };
-
-    // Set initial height
-    updateViewportHeight();
-
-    // Update height on resize and orientation change
-    window.addEventListener('resize', updateViewportHeight);
-    window.addEventListener('orientationchange', updateViewportHeight);
-
-    // Cleanup event listeners
-    return () => {
-      window.removeEventListener('resize', updateViewportHeight);
-      window.removeEventListener('orientationchange', updateViewportHeight);
-    };
-  }, []);
+const MyPollsage = () => {
 
   return (
-    <div
-      className="flex flex-col bg-gradient-to-b from-gray-900 to-gray-800"
-      style={{ height: viewportHeight }}
-    >
+    <div className="flex flex-col bg-gradient-to-b from-gray-900 to-gray-800 h-screen-dynamic">
       {/* Header */}
       <header className="bg-gray-800 backdrop-filter backdrop-blur-lg bg-opacity-80 shadow-lg flex-shrink-0 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -55,19 +30,19 @@ const MappBookPage = () => {
         </div>
       </header>
 
-    {/* Main Content */}
-    <main className="flex-grow w-full flex items-center justify-center p-4 overflow-hidden">
+      {/* Main Content */}
+      <main className="flex-grow w-full flex items-center justify-center p-4 overflow-hidden">
         <div className="w-full max-w-7xl h-full bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden">
           <div className="h-full flex flex-col">
             {/* Content Header */}
             <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-6 py-4 border-b border-gray-700">
               {/* <h2 className="text-xl font-semibold text-white">Create Your Poll</h2> */}
               <p className="text-gray-400 text-sm mt-1">
-Need help?
-                <a 
-                  href="https://mappbook.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                Need help?
+                <a
+                  href="https://mappbook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="ml-2 text-blue-400 hover:text-blue-300 transition-colors duration-200 inline-flex items-center"
                 >
                   Learn
@@ -77,7 +52,7 @@ Need help?
                 </a>
               </p>
             </div>
-            
+
             {/* Poll Creator Component */}
             <div className="flex-grow overflow-y-auto p-5">
               <PollCreator />
@@ -111,4 +86,4 @@ Need help?
   );
 };
 
-export default MappBookPage;
+export default MyPollsage;
