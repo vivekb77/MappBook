@@ -41,6 +41,8 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
     maxLat: 37
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   // View transformation state
   const [scale, setScale] = useState<number>(1);
   const [translateX, setTranslateX] = useState<number>(0);
@@ -85,25 +87,74 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
     setSelectedHexagon(hexagon);
   };
 
-  // Handle poll submission
-  const handlePollSubmit = (answers: Record<string, string>) => {
-    console.log('Poll submitted with answers:', answers);
-    // Save the answers
-    setPollAnswers(answers);
-    // Close the questions popup
-    setIsPopupOpen(false);
-    // Show the results popup
-    setIsResultsOpen(true);
+  const handlePollSubmit = async (answers: Record<string, string>) => {
+    try {
+      // Check if a hexagon is selected
+      if (!selectedHexagon) {
+        alert('Please select a region on the map before submitting');
+        return;
+      }
 
-    // Here you would typically send the answers to your API
-    // API call example:
-    // submitPollAnswers(pollData.poll_id, answers)
-    //   .then(() => {
-    //     setIsResultsOpen(true);
-    //   })
-    //   .catch(error => {
-    //     console.error('Error submitting poll:', error);
-    //   });
+      // Start loading
+      setIsLoading(true);
+
+      // Get IP address for analytics
+      let ipAddress = 'unknown';
+      try {
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        if (ipResponse.ok) {
+          const ipData = await ipResponse.json();
+          ipAddress = ipData.ip;
+        }
+      } catch (error) {
+        console.error('Error fetching IP:', error);
+        // Continue with unknown IP address
+      }
+
+      const hexagonRegion = selectedHexagon.number; // Use the numeric property
+
+      // Map answers to the format expected by the API
+      const answerPayloads = Object.entries(answers).map(([questionId, optionId]) => ({
+        poll_id: pollData.poll_id,
+        poll_id_to_share: pollData.poll_id_to_share,
+        ip_address: ipAddress,
+        hexagon_region: hexagonRegion,
+        question_id: questionId,
+        answer_option_id: optionId
+      }));
+
+      // Submit all answers
+      const response = await fetch('/api/polls/answer-poll', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          answers: answerPayloads
+        }),
+      });
+
+      // Check response
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit poll');
+      }
+
+      // Store answers locally for display in results
+      setPollAnswers(answers);
+
+      // Close the questions popup
+      setIsPopupOpen(false);
+
+      // Show the results popup
+      setIsResultsOpen(true);
+    } catch (error) {
+      console.error('Error submitting poll:', error);
+      alert('Failed to submit your answers. Please try again.');
+    } finally {
+      // End loading state
+      setIsLoading(false);
+    }
   };
 
   // Handle window resize
@@ -194,7 +245,8 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
         onClose={() => setIsPopupOpen(false)}
         questions={pollData.questions}
         onSubmit={handlePollSubmit}
-        selectedHexagon={selectedHexagon} // Pass the selectedHexagon to the popup
+        selectedHexagon={selectedHexagon}
+        isLoading={isLoading} // Add this line
       />
 
       {/* Poll Results Popup */}

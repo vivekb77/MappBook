@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { Hexagon } from '../Map/utils/MapLogic';
 
 interface Option {
@@ -18,7 +18,8 @@ interface PollQuestionPopupProps {
   onClose: () => void;
   questions: Question[];
   onSubmit: (answers: Record<string, string>) => void;
-  selectedHexagon: Hexagon | null; // Add the selectedHexagon prop
+  selectedHexagon: Hexagon | null;
+  isLoading?: boolean; // Add loading state prop
 }
 
 const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
@@ -26,7 +27,8 @@ const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
   onClose,
   questions,
   onSubmit,
-  selectedHexagon
+  selectedHexagon,
+  isLoading = false // Default to false if not provided
 }) => {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(0);
@@ -41,8 +43,10 @@ const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
   };
 
   const handleSubmit = () => {
+    // Call the onSubmit function with all selected answers
     onSubmit(selectedOptions);
-    onClose();
+    // Don't close immediately - let the parent component decide when to close
+    // based on the API response. onClose will be called in the parent component.
   };
 
   const isLastQuestion = currentStep === questions.length - 1;
@@ -58,15 +62,16 @@ const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
             <h2 className="text-xl font-bold">Answer Poll Questions</h2>
             {/* Region information */}
             <div className={`text-sm mt-1 ${selectedHexagon ? 'text-green-600 font-medium' : 'text-red-500'}`}>
-              {selectedHexagon 
+              {selectedHexagon
                 ? `Selected Region: ${selectedHexagon.number}`
                 : "Please select your region hexagon on the map first"
               }
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-gray-200 transition-colors"
+            disabled={isLoading}
+            className={`p-1 rounded-full transition-colors ${isLoading ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-200'}`}
           >
             <X size={24} />
           </button>
@@ -81,8 +86,8 @@ const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
               <span>{Math.round(((currentStep + 1) / questions.length) * 100)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-indigo-600 h-2 rounded-full transition-all duration-300" 
+              <div
+                className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}
               ></div>
             </div>
@@ -95,19 +100,17 @@ const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
               {questions[currentStep]?.options.map((option) => (
                 <div
                   key={option.id}
-                  className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                    selectedOptions[questions[currentStep]?.id] === option.id
+                  className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedOptions[questions[currentStep]?.id] === option.id
                       ? 'border-indigo-600 bg-indigo-50 shadow-sm'
                       : 'border-gray-300 hover:border-indigo-300'
-                  }`}
-                  onClick={() => handleOptionSelect(questions[currentStep]?.id, option.id)}
+                    } ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  onClick={() => !isLoading && handleOptionSelect(questions[currentStep]?.id, option.id)}
                 >
                   <div className="flex items-center">
-                    <div className={`w-5 h-5 rounded-full border flex-shrink-0 mr-3 flex items-center justify-center ${
-                      selectedOptions[questions[currentStep]?.id] === option.id
+                    <div className={`w-5 h-5 rounded-full border flex-shrink-0 mr-3 flex items-center justify-center ${selectedOptions[questions[currentStep]?.id] === option.id
                         ? 'border-indigo-600 bg-indigo-600'
                         : 'border-gray-400'
-                    }`}>
+                      }`}>
                       {selectedOptions[questions[currentStep]?.id] === option.id && (
                         <div className="w-2 h-2 rounded-full bg-white"></div>
                       )}
@@ -124,40 +127,44 @@ const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
         <div className="flex justify-between items-center p-4 border-t bg-gray-50">
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-            disabled={currentStep === 0}
-            className={`px-4 py-2 rounded ${
-              currentStep === 0
+            disabled={currentStep === 0 || isLoading}
+            className={`px-4 py-2 rounded ${currentStep === 0 || isLoading
                 ? 'text-gray-400 cursor-not-allowed'
                 : 'text-gray-700 hover:bg-gray-200'
-            }`}
+              }`}
           >
             Previous
           </button>
-          
+
           <div className="flex gap-2">
             {!isLastQuestion ? (
               <button
                 onClick={() => setCurrentStep(currentStep + 1)}
-                disabled={!canProceed || !selectedHexagon} // Disable if no region selected
-                className={`px-4 py-2 rounded ${
-                  !canProceed || !selectedHexagon
+                disabled={!canProceed || !selectedHexagon || isLoading}
+                className={`px-4 py-2 rounded ${!canProceed || !selectedHexagon || isLoading
                     ? 'bg-indigo-300 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                }`}
+                  }`}
               >
                 Next
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
-                disabled={!allQuestionsAnswered || !selectedHexagon} // Disable if no region selected
-                className={`px-4 py-2 rounded ${
-                  !allQuestionsAnswered || !selectedHexagon
+                disabled={!allQuestionsAnswered || !selectedHexagon || isLoading}
+                className={`px-4 py-2 rounded flex items-center justify-center ${!allQuestionsAnswered || !selectedHexagon || isLoading
                     ? 'bg-indigo-300 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                }`}
+                  }`}
               >
-                Submit
+                {isLoading ? (
+                  <>
+                    <Loader2 size={18} className="mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  'Submit'
+                )}
               </button>
             )}
           </div>
