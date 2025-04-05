@@ -183,7 +183,7 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
       setIsSubmitting(true);
       
       // Send data to the API
-      const response = await fetch('/api/create-polls', {
+      const response = await fetch('/api/polls/create-poll', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

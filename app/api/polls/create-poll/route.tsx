@@ -1,4 +1,4 @@
-// app/api/create-poll/route.ts
+// /api/polls/create-poll/route.ts
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 

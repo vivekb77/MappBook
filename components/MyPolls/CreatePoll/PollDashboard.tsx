@@ -51,7 +51,7 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
 
     setIsdataLoading(true);
     try {
-      const response = await fetch(`/api/pull-polls?mappbook_user_id=${mappbookUser.mappbook_user_id}`);
+      const response = await fetch(`/api/polls/get-polls?mappbook_user_id=${mappbookUser.mappbook_user_id}`);
       if (response.ok) {
         const result = await response.json();
         if (result.success && Array.isArray(result.data)) {
@@ -113,7 +113,7 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
 
   const handleToggleActive = async (pollId: string, newActiveState: boolean) => {
     try {
-      const response = await fetch('/api/pull-polls', {
+      const response = await fetch('/api/polls/update-poll', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
