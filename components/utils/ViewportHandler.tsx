@@ -65,5 +65,44 @@ export function ViewportHandler() {
     };
   }, []);
 
+  // Add pull-to-refresh prevention
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Prevent touchmove when starting from the top of the page
+    const handleTouchStart = (e: TouchEvent) => {
+      const touchY = e.touches[0].clientY;
+      const isAtTop = window.scrollY <= 0;
+      
+      if (isAtTop) {
+        const handleTouchMove = (moveEvent: TouchEvent) => {
+          const currentTouchY = moveEvent.touches[0].clientY;
+          if (currentTouchY > touchY) {
+            moveEvent.preventDefault();
+          }
+        };
+        
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        
+        const cleanup = () => {
+          document.removeEventListener('touchmove', handleTouchMove);
+          document.removeEventListener('touchend', cleanup);
+          document.removeEventListener('touchcancel', cleanup);
+        };
+        
+        document.addEventListener('touchend', cleanup, { once: true });
+        document.addEventListener('touchcancel', cleanup, { once: true });
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.body.style.overscrollBehavior = 'none';
+    
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.body.style.overscrollBehavior = '';
+    };
+  }, []);
+
   return null;
 }
