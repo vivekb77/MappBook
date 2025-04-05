@@ -13,16 +13,24 @@ interface DrawHexagonProps {
   selectedHexagon: Hexagon | null;
   userHomeHexagon: string | null;
   onHexagonClick: (hexagon: Hexagon) => void;
+  openPopup: () => void;
 }
 
 const DrawHexagon: React.FC<DrawHexagonProps> = ({ 
   hexagons, 
   selectedHexagon, 
   userHomeHexagon,
-  onHexagonClick 
+  onHexagonClick,
+  openPopup
 }) => {
   // Show instruction overlay only when no hexagon is selected
   const showOverlay = !selectedHexagon && !userHomeHexagon;
+  
+  // Combined function to handle both selecting hexagon and opening popup
+  const handleHexagonClick = (hexagon: Hexagon) => {
+    onHexagonClick(hexagon);
+    openPopup(); // Open the popup after selecting the hexagon
+  };
   
   return (
     <>
@@ -39,7 +47,7 @@ const DrawHexagon: React.FC<DrawHexagonProps> = ({
               stroke={strokeProps.stroke}
               strokeWidth={strokeProps.strokeWidth}
               fillOpacity="0.85"
-              onClick={() => onHexagonClick(hexagon)}
+              onClick={() => handleHexagonClick(hexagon)}
               aria-label={`Hexagon region ${hexagon.number}${isUserHome ? ', your home region' : ''}`}
             />
             <text

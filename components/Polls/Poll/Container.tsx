@@ -9,7 +9,6 @@ import PollResults from '../Poll/AnswerPoll/PollResults';
 import { ViewBox, GeoJSON, Hexagon, calculateViewBox } from './utils/MapLogic';
 import { generateHexagons } from './utils/HexagonLogic';
 
-// Import GeoJSON directly (adjust the path as needed)
 import indiaStatesGeoJson from '../../../public/india-states.json';
 
 interface PollData {
@@ -174,11 +173,11 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
               selectedHexagon={selectedHexagon}
               userHomeHexagon={null}
               onHexagonClick={handleHexagonClick}
+              openPopup={() => setIsPopupOpen(true)} // Pass function to open popup
             />
           </DrawMap>
         </MapInteraction>
       </div>
-
       {/* Floating Answer Poll Button */}
       <div className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-none z-10">
         <button
@@ -195,6 +194,7 @@ const Container: React.FC<ContainerProps> = ({ pollData }) => {
         onClose={() => setIsPopupOpen(false)}
         questions={pollData.questions}
         onSubmit={handlePollSubmit}
+        selectedHexagon={selectedHexagon} // Pass the selectedHexagon to the popup
       />
 
       {/* Poll Results Popup */}

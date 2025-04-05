@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { Hexagon } from '../utils/MapLogic';
 
 interface Option {
   id: string;
@@ -17,13 +18,15 @@ interface PollQuestionPopupProps {
   onClose: () => void;
   questions: Question[];
   onSubmit: (answers: Record<string, string>) => void;
+  selectedHexagon: Hexagon | null; // Add the selectedHexagon prop
 }
 
 const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
   isOpen,
   onClose,
   questions,
-  onSubmit
+  onSubmit,
+  selectedHexagon
 }) => {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(0);
@@ -51,7 +54,16 @@ const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold">Answer Poll Questions</h2>
+          <div>
+            <h2 className="text-xl font-bold">Answer Poll Questions</h2>
+            {/* Region information */}
+            <div className={`text-sm mt-1 ${selectedHexagon ? 'text-green-600 font-medium' : 'text-red-500'}`}>
+              {selectedHexagon 
+                ? `Selected Region: ${selectedHexagon.number}`
+                : "Please select your region hexagon on the map first"
+              }
+            </div>
+          </div>
           <button 
             onClick={onClose}
             className="p-1 rounded-full hover:bg-gray-200 transition-colors"
@@ -126,9 +138,9 @@ const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
             {!isLastQuestion ? (
               <button
                 onClick={() => setCurrentStep(currentStep + 1)}
-                disabled={!canProceed}
+                disabled={!canProceed || !selectedHexagon} // Disable if no region selected
                 className={`px-4 py-2 rounded ${
-                  !canProceed
+                  !canProceed || !selectedHexagon
                     ? 'bg-indigo-300 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
                 }`}
@@ -138,9 +150,9 @@ const PollQuestionPopup: React.FC<PollQuestionPopupProps> = ({
             ) : (
               <button
                 onClick={handleSubmit}
-                disabled={!allQuestionsAnswered}
+                disabled={!allQuestionsAnswered || !selectedHexagon} // Disable if no region selected
                 className={`px-4 py-2 rounded ${
-                  !allQuestionsAnswered
+                  !allQuestionsAnswered || !selectedHexagon
                     ? 'bg-indigo-300 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
                 }`}
