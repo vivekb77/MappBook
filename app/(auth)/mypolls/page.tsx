@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import PollCreator from '@/components/MyPolls/CreatePoll/PollDashboard';
-import UserProfile from '@/components/MyPolls/UserProfile';
+import PollCreator from '@/components/Polls/MyPolls/CreatePoll/PollDashboard';
+import UserProfile from '@/components/Polls/MyPolls/UserProfile';
 import { Menu, X, HelpCircle, ExternalLink, Moon, Sun } from 'lucide-react';
 
 const MyPollsPage = () => {

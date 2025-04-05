@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMappbookUser } from '@/context/UserContext';
 import { SignedIn, useClerk, useUser } from '@clerk/nextjs';
-import SignInButton from '@/components/MyPolls/SignInButton';
-import { logout } from '../utils/auth';
+import SignInButton from '@/components/Polls/MyPolls/SignInButton';
+import { logout } from '../../utils/auth';
 import { track } from '@vercel/analytics';
 import { LogOut, User } from 'lucide-react';
 
