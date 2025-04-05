@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     
     // Update the poll status
     const { data, error } = await supabase
-      .from('polls')
+      .from('Poll_Questions')
       .update({ is_active })
       .eq('poll_id', poll_id)
       .select();

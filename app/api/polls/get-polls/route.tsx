@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     
     // Get all polls for this Mappbook user
     const { data: polls, error } = await supabase
-      .from('polls')
+      .from('Poll_Questions')
       .select('*')
       .eq('mappbook_user_id', mappbookUserId)
       .order('created_at', { ascending: false });
@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
     // Transform poll_length from number to string to match the frontend model
     const transformedPolls = polls.map(poll => ({
       poll_id: poll.poll_id,
+      poll_id_to_share: poll.poll_id_to_share,
       title: poll.title,
       description: poll.description,
       author: poll.author,
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
       is_active: poll.is_active,
       mappbook_user_id: poll.mappbook_user_id,
       // Add URL for each poll
-      url: `https://mappbook.com/poll/${poll.poll_id}`
+      url: `https://mappbook.com/poll/${poll.poll_id_to_share}`
     }));
     
     // Create the response

@@ -1,27 +1,30 @@
 // /api/polls/create-poll/route.ts
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuth } from '@clerk/nextjs/server';
 
 export async function POST(req: NextRequest) {
   try {
-    // Initialize Supabase client with environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    // Validate environment variables
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return NextResponse.json(
-        { error: 'Missing Supabase configuration' }, 
-        { status: 500 }
-      );
+    // Get authenticated user from Clerk
+    const { userId } = getAuth(req);
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
-    // Create Supabase client with service role key for admin access
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Get poll data from request
+
+    // Initialize Supabase client with anon key
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL;
+    const supabaseAnonKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json({ error: 'Missing Supabase configuration' }, { status: 500 });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    // Get poll data
     const pollData = await req.json();
-    
+
     // Validate poll data
     if (!pollData.title || !pollData.author || !pollData.pollLength || !pollData.mappbook_user_id) {
       return NextResponse.json(
@@ -29,14 +32,14 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     if (!Array.isArray(pollData.questions) || pollData.questions.length === 0) {
       return NextResponse.json(
         { error: 'At least one question is required' },
         { status: 400 }
       );
     }
-    
+
     // Validate each question has at least 2 options
     for (const question of pollData.questions) {
       if (!question.text) {
@@ -45,7 +48,7 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-      
+
       const validOptions = question.options.filter((opt: { trim: () => { (): any; new(): any; length: number; }; }) => opt.trim().length > 0);
       if (validOptions.length < 2) {
         return NextResponse.json(
@@ -54,20 +57,37 @@ export async function POST(req: NextRequest) {
         );
       }
     }
-    
+
     // Clean up questions data to remove empty options
     const cleanedQuestions = pollData.questions.map((question: { text: any; options: any[]; }) => ({
       text: question.text,
       options: question.options.filter(opt => opt.trim().length > 0)
     }));
-    
+
     // Calculate expiration date
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + parseInt(pollData.pollLength));
-    
-    // Insert the poll with questions as JSONB
+
+
+    // Get the user's Supabase ID mapping from Clerk ID
+    const { data: userMapping } = await supabase
+      .from('MappBook_Users')
+      .select('mappbook_user_id')
+      .eq('clerk_user_id', userId)
+      .single();
+
+    if (!userMapping) {
+      return NextResponse.json({ error: 'User mapping not found' }, { status: 404 });
+    }
+
+    // Ensure the mappbook_user_id in request matches the authenticated user
+    if (pollData.mappbook_user_id !== userMapping.mappbook_user_id) {
+      pollData.mappbook_user_id = userMapping.mappbook_user_id; // Force correct ID
+    }
+
+    // Improved error handling in /api/polls/create-poll/route.ts
     const { data: poll, error: pollError } = await supabase
-      .from('polls')
+      .from('Poll_Questions')
       .insert({
         title: pollData.title,
         description: pollData.description || '',
@@ -75,37 +95,29 @@ export async function POST(req: NextRequest) {
         poll_length: parseInt(pollData.pollLength),
         questions: cleanedQuestions,
         expires_at: expiresAt.toISOString(),
-        mappbook_user_id: pollData.mappbook_user_id,
+        mappbook_user_id: userMapping.mappbook_user_id,
         is_active: true
       })
-      .select('poll_id')
+      .select('poll_id, poll_id_to_share')
       .single();
-    
+
     if (pollError) {
-      console.error('Error creating poll:', pollError);
-      return NextResponse.json(
-        { error: 'Failed to create poll' },
-        { status: 500 }
-      );
+      console.error('Error creating poll:', JSON.stringify(pollError, null, 2));
+      return NextResponse.json({
+        error: 'Failed to create poll',
+        details: pollError.message,
+        code: pollError.code
+      }, { status: 500 });
     }
-    
-    // Create and return the response
-    const response = NextResponse.json({
+
+    return NextResponse.json({
       success: true,
       poll_id: poll.poll_id,
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/polls/${poll.poll_id}`
+      share_id: poll.poll_id_to_share,
+      url: `https://www.mappbook.com/poll/${poll.poll_id_to_share}`
     });
-    
-    // Add cache control headers
-    response.headers.set('Cache-Control', 'no-store, max-age=0');
-    
-    return response;
-    
   } catch (error) {
     console.error('Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
