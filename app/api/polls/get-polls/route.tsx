@@ -69,8 +69,8 @@ export async function GET(req: NextRequest) {
       timestamp: new Date().toISOString()
     });
     
-    // Add cache control headers (5 minutes = 300 seconds)
-    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=3600');
+    // Set cache control header to prevent caching
+    response.headers.set('Cache-Control', 'no-store, max-age=0');
     
     return response;
     

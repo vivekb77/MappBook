@@ -1,4 +1,3 @@
-//PollCreatorPopup.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -41,6 +40,7 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [popupHeight, setPopupHeight] = useState<number | null>(null);
   
   // Toast notification state
   const [toast, setToast] = useState({ 
@@ -73,6 +73,29 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
     };
     setCharCounts(newCharCounts);
   }, [formData]);
+
+  // Update popup height when window resizes
+  useEffect(() => {
+    const updateHeight = () => {
+      // Use the CSS variable for viewport height set by ViewportHandler
+      const vh = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--vh')) || window.innerHeight * 0.01;
+      setPopupHeight(vh * 100 * 0.95); // 95% of viewport height to maximize content space
+    };
+
+    // Initial update
+    updateHeight();
+
+    // Update on resize
+    window.addEventListener('resize', updateHeight);
+    
+    // Prevent body scrolling when popup is open
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   // Show toast message
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -246,24 +269,24 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
   // Render navigation buttons
   const renderNavigation = () => {
     return (
-      <div className="flex justify-between mt-6">
+      <div className="flex justify-between mt-3 mb-1">
         {currentStep > 1 ? (
           <button
             type="button"
             onClick={handleBack}
-            className={`flex items-center gap-2 transition-all duration-300 font-medium px-5 py-2.5 rounded-lg
+            className={`flex items-center gap-1.5 transition-all duration-300 font-medium px-4 py-2 rounded-lg text-sm
               ${isDarkMode 
                 ? 'bg-slate-800 hover:bg-slate-700 text-white' 
                 : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={16} />
             Back
           </button>
         ) : (
           <button
             type="button"
             onClick={onClose}
-            className={`transition-all duration-300 font-medium px-5 py-2.5 rounded-lg
+            className={`transition-all duration-300 font-medium px-4 py-2 rounded-lg text-sm
               ${isDarkMode 
                 ? 'bg-slate-800 hover:bg-slate-700 text-white' 
                 : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
@@ -276,7 +299,7 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
           <button
             type="button"
             onClick={handleNext}
-            className={`transition-all duration-300 font-medium px-6 py-2.5 rounded-lg
+            className={`transition-all duration-300 font-medium px-4 py-2 rounded-lg text-sm
               ${isDarkMode 
                 ? 'bg-indigo-600 hover:bg-indigo-700 text-white' 
                 : 'bg-indigo-500 hover:bg-indigo-600 text-white'}`}
@@ -288,19 +311,19 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
             type="button"
             onClick={handleSaveAndGenerate}
             disabled={isSubmitting}
-            className={`flex items-center justify-center gap-2 transition-all duration-300 font-medium px-6 py-2.5 rounded-lg
+            className={`flex items-center justify-center gap-1.5 transition-all duration-300 font-medium px-4 py-2 rounded-lg text-sm
               ${isDarkMode 
                 ? 'bg-green-600 hover:bg-green-700 text-white disabled:bg-green-800 disabled:opacity-60' 
                 : 'bg-green-500 hover:bg-green-600 text-white disabled:bg-green-300 disabled:opacity-60'}`}
           >
             {isSubmitting ? (
               <>
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" />
                 <span>Saving...</span>
               </>
             ) : (
               <>
-                <Check size={18} />
+                <Check size={16} />
                 <span>Save & Generate URL</span>
               </>
             )}
@@ -312,13 +335,20 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
   
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className={`w-11/12 max-w-2xl mx-auto rounded-xl shadow-2xl overflow-hidden
-        ${isDarkMode 
-          ? 'bg-slate-900 border border-slate-700 shadow-indigo-900/10' 
-          : 'bg-white border border-gray-200 shadow-gray-300/20'}`}>
-        <div className={`p-4 flex justify-between items-center
+      <div 
+        className={`w-11/12 max-w-2xl mx-auto rounded-xl shadow-2xl overflow-hidden h-screen-dynamic max-h-screen-dynamic
+          ${isDarkMode 
+            ? 'bg-slate-900 border border-slate-700 shadow-indigo-900/10' 
+            : 'bg-white border border-gray-200 shadow-gray-300/20'}`}
+        style={{
+          maxHeight: popupHeight ? `${popupHeight}px` : '90vh',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <div className={`py-2 px-4 flex justify-between items-center
           ${isDarkMode ? 'border-b border-slate-700' : 'border-b border-gray-200'}`}>
-          <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+          <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
             {currentStep === 1 ? 'Create New Poll' :
              currentStep === 2 ? 'Add Questions' :
              'Finalize Your Poll'}
@@ -326,24 +356,26 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className={`rounded-full p-1.5 transition-colors
+            className={`rounded-full p-1 transition-colors
               ${isDarkMode 
                 ? 'hover:bg-slate-800 text-gray-400 hover:text-gray-200' 
                 : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}
             aria-label="Close"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="px-4 pt-2 pb-4 flex-1 flex flex-col overflow-hidden">
           <StepIndicator currentStep={currentStep} isDarkMode={isDarkMode} />
 
-          <div className="my-6 max-h-[60vh] overflow-y-auto px-1">
+          <div className="mt-3 mb-4 flex-1 overflow-y-auto px-1 no-scrollbar">
             {renderCurrentStep()}
           </div>
 
-          {renderNavigation()}
+          <div className="mt-auto">
+            {renderNavigation()}
+          </div>
         </div>
       </div>
       
@@ -361,5 +393,18 @@ const PollCreatorPopup: React.FC<PollCreatorPopupProps> = ({
     </div>
   );
 };
+
+// Add a style tag for additional CSS
+const style = document.createElement('style');
+style.innerHTML = `
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;
+document.head.appendChild(style);
 
 export default PollCreatorPopup;

@@ -4,7 +4,7 @@ import { useMappbookUser } from '@/context/UserContext';
 import { useUser } from '@clerk/nextjs';
 import LoadingIndicator from '../PageLoadingAnimation';
 import { ToastMessage } from '../ToastMessage';
-import { PlusCircle, Copy, BarChart3, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
+import { PlusCircle, Copy, BarChart3, AlertTriangle, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 
 // Define types for better type safety
 interface PollQuestion {
@@ -42,6 +42,7 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
   const [showAnalyticsPopup, setShowAnalyticsPopup] = useState(false);
   const [currentPollId, setCurrentPollId] = useState<string | null>(null);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' });
+  const [loadingPollId, setLoadingPollId] = useState<string | null>(null);
   const { isLoaded, isSignedIn, user } = useUser();
 
   // Get the mappbook user
@@ -112,6 +113,7 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
   };
 
   const handleToggleActive = async (pollId: string, newActiveState: boolean) => {
+    setLoadingPollId(pollId);
     try {
       const response = await fetch('/api/polls/update-poll', {
         method: 'POST',
@@ -139,12 +141,14 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
     } catch (error) {
       console.error('Error updating poll status:', error);
       showToast('An error occurred while updating poll status.', 'error');
+    } finally {
+      setLoadingPollId(null);
     }
   };
 
   const handleViewAnalytics = (pollId: string) => {
-    setCurrentPollId(pollId);
-    setShowAnalyticsPopup(true);
+    // Open the analytics link in a new tab
+    window.open(`https://mappbook.com/polltics/${pollId}`, '_blank');
   };
 
   const handleCloseAnalytics = () => {
@@ -247,12 +251,19 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
                 <div key={poll.poll_id} 
                   className={`rounded-lg overflow-hidden shadow-sm transition-shadow duration-300
                     ${isDarkMode 
-                      ? 'bg-slate-800 hover:shadow-md hover:shadow-indigo-900/10' 
-                      : 'bg-white hover:shadow-md hover:shadow-gray-200'}`}
+                      ? poll.is_active
+                          ? 'bg-gradient-to-r from-slate-800 to-slate-800/95 border-l-4 border-green-500 hover:shadow-md hover:shadow-green-900/10'
+                          : 'bg-gradient-to-r from-slate-800 to-slate-800/95 border-l-4 border-red-500 hover:shadow-md hover:shadow-red-900/10'
+                      : poll.is_active
+                          ? 'bg-gradient-to-r from-white to-green-50 border-l-4 border-green-500 hover:shadow-md hover:shadow-green-300/20'
+                          : 'bg-gradient-to-r from-white to-red-50 border-l-4 border-red-500 hover:shadow-md hover:shadow-red-300/20'
+                    }`}
                 >
                   <div
                     className={`flex justify-between items-center p-4 cursor-pointer transition-colors
-                      ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-50'}`}
+                      ${isDarkMode 
+                        ? poll.is_active ? 'hover:bg-slate-700/80' : 'hover:bg-slate-700/80' 
+                        : poll.is_active ? 'hover:bg-green-50/80' : 'hover:bg-red-50/80'}`}
                     onClick={() => togglePollDetails(index)}
                   >
                     <div>
@@ -272,7 +283,9 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
                   </div>
 
                   {expandedPollIndex === index && (
-                    <div className={`p-4 ${isDarkMode ? 'border-t border-slate-700 bg-slate-800' : 'border-t border-gray-100'}`}>
+                    <div className={`p-4 ${isDarkMode 
+                        ? 'border-t border-slate-700' 
+                        : poll.is_active ? 'border-t border-green-100' : 'border-t border-red-100'}`}>
                       {/* Action Buttons */}
                       <div className="flex flex-wrap gap-2 mb-4">
                         <button
@@ -284,10 +297,20 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
                             text-white`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleToggleActive(poll.poll_id, !poll.is_active);
+                            if (loadingPollId !== poll.poll_id) {
+                              handleToggleActive(poll.poll_id, !poll.is_active);
+                            }
                           }}
+                          disabled={loadingPollId === poll.poll_id}
                         >
-                          {poll.is_active ? 'Set Inactive' : 'Set Active'}
+                          {loadingPollId === poll.poll_id ? (
+                            <>
+                              <Loader2 size={14} className="animate-spin" />
+                              <span>Updating...</span>
+                            </>
+                          ) : (
+                            poll.is_active ? 'Set Inactive' : 'Set Active'
+                          )}
                         </button>
                         <button
                           type="button"
@@ -297,7 +320,7 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
                               : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            copyPollUrl(poll.url || `${window.location.origin}/polls/${poll.poll_id}`);
+                            copyPollUrl(poll.url || ``);
                           }}
                         >
                           <Copy size={14} />
@@ -374,36 +397,6 @@ const PollDashboard: React.FC<PollDashboardProps> = ({ isDarkMode }) => {
           onSave={handleSavePoll}
           isDarkMode={isDarkMode}
         />
-      )}
-
-      {/* Analytics Popup */}
-      {showAnalyticsPopup && currentPollId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm">
-          <div className={`rounded-lg w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto
-            ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-            <div className={`flex justify-between items-center p-4 border-b
-              ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-              <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Poll Analytics</h2>
-              <button
-                type="button"
-                className={`rounded-full p-2 ${isDarkMode 
-                  ? 'text-gray-400 hover:text-white hover:bg-slate-800' 
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-                onClick={handleCloseAnalytics}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
-            <div className="p-6">
-              <p className={`text-center py-8 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                Analytics feature coming soon!
-              </p>
-              {/* Analytics content will be added here later */}
-            </div>
-          </div>
-        </div>
       )}
 
       <ToastMessage

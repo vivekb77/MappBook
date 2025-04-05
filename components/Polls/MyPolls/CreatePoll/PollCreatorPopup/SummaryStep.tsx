@@ -72,8 +72,7 @@ const SummaryStep: React.FC<SummaryStepProps> = ({ formData, isDarkMode }) => {
       </div>
 
       <p className={`mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-        After saving, your poll will be saved and a unique URL will be generated for sharing.
-        You'll find your poll in the "My Polls" section.
+        All Polls are public and anyone with the Poll link can see the results.
       </p>
     </div>
   );

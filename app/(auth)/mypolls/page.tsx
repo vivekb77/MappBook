@@ -55,11 +55,11 @@ const MyPollsPage = () => {
           <div className="h-full flex flex-col">
             {/* Card Header */}
             <div className={`px-6 py-5 flex justify-between items-center border-b ${isDarkMode ? 'border-slate-800' : 'border-gray-100'}`}>
-              <h2 className="text-xl font-semibold">Create Polls</h2>
+              <h2 className="text-xl font-semibold">Dashboard</h2>
               
               {/* Help button styled as a pill */}
               <a
-                href="https://mappbook.com/help"
+                href="https://mappbook.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`inline-flex items-center px-4 py-1.5 text-sm rounded-full transition-all ${
