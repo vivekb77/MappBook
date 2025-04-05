@@ -1,18 +1,17 @@
-// /api/polls/get-polls/route.ts
+// app/api/polls/get-poll/route.ts
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
-
+// Get a single poll by ID from query parameter
 export async function GET(req: NextRequest) {
   try {
-    // Parse the URL to get query parameters
-    const url = new URL(req.url);
-    const mappbookUserId = url.searchParams.get('mappbook_user_id');
+    // Get poll_id from query parameter
+    const { searchParams } = new URL(req.url);
+    const poll_id_to_share = searchParams.get('poll_id');
     
-    // Check if we have a user ID
-    if (!mappbookUserId) {
+    if (!poll_id_to_share) {
       return NextResponse.json(
-        { error: 'Missing mappbook_user_id parameter' },
+        { error: 'Missing poll_id parameter' }, 
         { status: 400 }
       );
     }
@@ -28,26 +27,29 @@ export async function GET(req: NextRequest) {
       );
     }
     
-    // Create Supabase client with service role for admin access
+    // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Get all polls for this Mappbook user
-    const { data: polls, error } = await supabase
+    const { data: poll, error } = await supabase
       .from('Poll_Questions')
       .select('*')
-      .eq('mappbook_user_id', mappbookUserId)
-      .order('created_at', { ascending: false });
+      .eq('poll_id_to_share', poll_id_to_share)
+      .single();
     
     if (error) {
-      console.error('Error fetching polls:', error);
       return NextResponse.json(
-        { error: 'Failed to fetch polls' },
-        { status: 500 }
+        { error: 'Poll not found' },
+        { status: 404 }
       );
     }
     
-    // Transform poll_length from number to string to match the frontend model
-    const transformedPolls = polls.map(poll => ({
+    // Check if poll has expired
+    const now = new Date();
+    const expiresAt = new Date(poll.expires_at);
+    const isExpired = now > expiresAt || !poll.is_active;
+    
+    // Transform to frontend format
+    const transformedPoll = {
       poll_id: poll.poll_id,
       poll_id_to_share: poll.poll_id_to_share,
       title: poll.title,
@@ -58,20 +60,18 @@ export async function GET(req: NextRequest) {
       created_at: poll.created_at,
       expires_at: poll.expires_at,
       is_active: poll.is_active,
-      mappbook_user_id: poll.mappbook_user_id,
-      // Add URL for each poll
-      url: `https://mappbook.com/poll/${poll.poll_id_to_share}`
-    }));
-    
+      isExpired: isExpired
+    };
+
     // Create the response
     const response = NextResponse.json({
       success: true,
-      data: transformedPolls,
+      data: transformedPoll,
       timestamp: new Date().toISOString()
     });
     
-    // Set cache control header to prevent caching
-    response.headers.set('Cache-Control', 'no-store, max-age=0');
+    // Add cache control headers (5 minutes = 300 seconds)
+    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=3600');
     
     return response;
     
